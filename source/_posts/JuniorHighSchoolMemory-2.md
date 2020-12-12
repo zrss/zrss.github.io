@@ -3,7 +3,7 @@ title: 初中回忆(2)
 tags:
   - 成长
 categories: 笔记
-abbrlink: 3254221399
+abbrlink: c1f77a57
 date: 2007-08-13 00:00:00
 ---
 

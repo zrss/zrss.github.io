@@ -3,7 +3,7 @@ title: Cluster ID 和 Member ID 的生成规则
 tags:
   - etcd-v3
 categories: 笔记
-abbrlink: 781156232
+abbrlink: 2e8f7f88
 date: 2017-10-03 00:00:00
 ---
 

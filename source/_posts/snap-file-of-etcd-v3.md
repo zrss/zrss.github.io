@@ -3,7 +3,7 @@ title: ETCD V3 中的 .snap 文件
 tags:
   - etcd-v3
 categories: 笔记
-abbrlink: 13770945
+abbrlink: d220c1
 date: 2017-10-02 00:00:00
 ---
 

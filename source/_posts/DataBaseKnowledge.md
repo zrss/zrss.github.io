@@ -3,7 +3,7 @@ title: 数据库相关知识
 tags:
   - 学习
 categories: 笔记
-abbrlink: 2290527348
+abbrlink: 8886ac74
 date: 2017-01-12 00:00:01
 ---
 

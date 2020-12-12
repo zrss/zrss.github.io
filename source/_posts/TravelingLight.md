@@ -2,7 +2,7 @@
 title: 旅途之中
 tags: 生活
 categories: 笔记
-abbrlink: 1922967522
+abbrlink: 729e27e2
 date: 2009-07-14 00:00:00
 ---
 
