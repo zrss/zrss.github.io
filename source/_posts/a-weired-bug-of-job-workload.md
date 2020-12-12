@@ -1,9 +1,9 @@
 ---
 title: a weired bug of job workload
-abbrlink: 8e645281
-date: 2018-07-06 11:05:29
 tags:
-    - k8s
+  - k8s
+abbrlink: '8e645281'
+date: 2018-07-06 11:05:29
 ---
 
 又要开始分析一个疑难杂症了
