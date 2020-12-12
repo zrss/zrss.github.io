@@ -1463,7 +1463,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
+        <time title="修改时间：2020-12-12 07:33:48" itemprop="dateModified" datetime="2020-12-12T07:33:48Z">2020-12-12</time>
       </span>
 
   
@@ -1556,7 +1556,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ <span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$GOPATH</span>/src/github.com/brendangregg/FlameGraph</span><br><span class="line">bash-3.2$</span><br><span class="line">bash-3.2$ <span class="variable">$GOPATH</span>/bin/go-torch --file <span class="string">&quot;torch.svg&quot;</span> etcd-profile-10</span><br><span class="line">INFO[13:12:17] Run pprof <span class="built_in">command</span>: go tool pprof -raw -seconds 30 etcd-profile-10</span><br><span class="line">INFO[13:12:17] Writing svg to torch.svg</span><br></pre></td></tr></table></figure>
 
 <p>浏览器打开 torch.svg 即可</p>
-<p><img src="torch.svg" alt="torch"></p>
+<p><img src="/images/torch.svg" alt="torch"></p>
 <p>个人觉得 flame-graph 更为直观，横向为各个方法消耗占比，纵向为调用栈上的各个方法消耗占比，一目了然，对应分析消耗较大的方法即可</p>
 <h1 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h1><p>golang pprof <a target="_blank" rel="noopener" href="https://blog.golang.org/profiling-go-programs">https://blog.golang.org/profiling-go-programs</a></p>
 <p>pprof tools <a target="_blank" rel="noopener" href="http://colobu.com/2017/03/02/a-short-survey-of-golang-pprof/">http://colobu.com/2017/03/02/a-short-survey-of-golang-pprof/</a></p>
