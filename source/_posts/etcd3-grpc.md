@@ -36,7 +36,7 @@ rpc.pb.gw.go
 
 下图源自上述网址，清晰明了；无图言 x
 
-![grpc-rest-gateway](./uploads/grpc-rest-gateway.png)
+![grpc-rest-gateway](/images/grpc-rest-gateway.png)
 
 # The entry in etcd
 

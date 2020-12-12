@@ -139,7 +139,7 @@ type node struct {
 
 node 树状关系如图，直觉其中的 pgid 对应的是底层的 page，即 mmap db 文件出来的 byte[] array 中的一块
 
-![node-graph](./uploads/node-graph.jpeg)
+![node-graph](/images/node-graph.jpeg)
 
 node 的 inodes 数目存储在 page.count 中，下面的代码从 read 中摘出
 

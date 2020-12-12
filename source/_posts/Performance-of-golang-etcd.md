@@ -121,7 +121,7 @@ Entering interactive mode (type "help" for commands, "o" for options)
 
 即可在浏览器中显示 .svg 文件，浏览器中 Ctrl+s 保存到本地，即可传阅
 
-![web-pprof](./uploads/web-pprof.svg)
+![web-pprof](/images/web-pprof.svg)
 
 * go-torch
 

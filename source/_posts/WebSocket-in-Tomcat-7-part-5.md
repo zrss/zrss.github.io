@@ -44,11 +44,11 @@ wireshark
 
 单击 Connect 连接 Server WebSocket，连接建立后，发送 Rock it with HTML5 WebSocket 消息，如下图所示
 
-![echo WebSocket](./uploads/websocket-echo.png)
+![echo WebSocket](/images/websocket-echo.png)
 
 停止 Wireshark 捕获，display filter 中输入 http，寻找到 info 中有 101 Web Socket Protocol Handshake 字样的报文，右键 Follow 选中 SSL Stream 即可查看 WebSocket 的流量，如下图所示
 
-![websocket traffic](./uploads/websocket-link.png)
+![websocket traffic](/images/websocket-link.png)
 
 可见 WebSocket 为 TCP 之上与 HTTP 同层的应用层协议
 

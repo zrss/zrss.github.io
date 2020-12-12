@@ -15,7 +15,7 @@ etcdv3 中 backend 使用 boltdb 实现
 
 在 etcdv3.1.9 集成的 boltdb 版本中，仅在 freelist 中记录可释放的 page id (pending: [txid] -> page ids)，在 rw txn 中释放当前 txn 中最小 txid 之前的 pending pages[1]，因此如果有一个 read txn 运行时间过长，会导致部分 pages 无法及时回收使用，导致 db 大小增加。示意图如下
 
-![leak-of-pages](./uploads/leak-of-pages.jpeg)
+![leak-of-pages](/images/leak-of-pages.jpeg)
 
 ```go
 [1] func (db *DB) beginRWTx() (*Tx, error) {} // 在该方法中释放 pending pages
@@ -134,7 +134,7 @@ Read-only transactions and read-write transactions should not depend on one anot
 
 粗略过了一遍代码，总之之前是只能释放当前最小 txn 之前的 pending pages 对吧，现在不管你，能释放的我都释放掉不就行了？示意图如下
 
-![free-pages](./uploads/free-pages.jpeg)
+![free-pages](/images/free-pages.jpeg)
 
 为了实现这个方案，当然要增加一些记录值，修改一些实现，下面详细看一下这个 pr https://github.com/coreos/bbolt/pull/3/files
 

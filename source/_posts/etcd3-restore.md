@@ -132,7 +132,7 @@ func makeDB(snapdir, dbfile string, commit int) {
 
 具体查看 makeWALAndSnap 方法，无图言 x，makeWALAndSnap 生成的 .wal 和 .snap 文件内容如下
 
-![restore_wal](./uploads/restore_wal.jpeg)
+![restore_wal](/images/restore_wal.jpeg)
 
 代码注释如下
 

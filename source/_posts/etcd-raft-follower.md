@@ -62,7 +62,7 @@ commitTo(min(commited, lastnewi))
 
 raftlog 的逻辑图如下 (没写 snapshot 部分)
 
-![raftlog](./uploads/raftlog.jpeg)
+![raftlog](/images/raftlog.jpeg)
 
 # MsgHeartbeat
 

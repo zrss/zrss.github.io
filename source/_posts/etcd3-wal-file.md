@@ -88,7 +88,7 @@ return w, err
 
 初始写入 wal 内容示意如下
 
-![initial_wal](./uploads/initial_wal.jpg)
+![initial_wal](/images/initial_wal.jpg)
 
 # 预分配空间
 
@@ -314,7 +314,7 @@ func (w *WAL) cut() error {
 
 所以 cut 方法初始写入 wal 的内容示意如下
 
-![cut_wal](./uploads/cut_wal.jpeg)
+![cut_wal](/images/cut_wal.jpeg)
 
 # Sync 方法
 

@@ -39,7 +39,7 @@ Open 方法中，如果是新建的 db 文件，则调用 db.init() 写入 metad
 
 查看 db.init() 干了什么，直接上图吧，往 db 文件中写了四个 page （size 一般是 4096 字节） 的内容
 
-![initial_db](./uploads/initial_db.jpeg)
+![initial_db](/images/initial_db.jpeg)
 
 然后就是各种初始化了，初始化 pagePool，mmap the data file as a byte slice，初始化 freelist
 
@@ -264,7 +264,7 @@ type leafPageElement struct {
 
 如图所示
 
-![leafPageElement](./uploads/leafPageElement.jpeg)
+![leafPageElement](/images/leafPageElement.jpeg)
 
 即叶子节点中存储了 key 和 value
 
