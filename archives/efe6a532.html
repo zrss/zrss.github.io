@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="MXNet 分布式通信MXnet 使用了 dmlc&#x2F;ps-lite 实现其分布式通信机制 ps-lite van.h 父类，使用 Protocol buffer 定义了数据格式 zmq_van.h 继承 van.h，使用 zmq 做具体的数据传输 当前 MXnet 只能使用 IPoIB，不能直接使用 IB verbs 来通信；有个改动 ps-lite 也能直接使用 ib 来通信的 PR 挂了一年多">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mxnet-network-and-infiniband">
+<meta property="og:url" content="http://blog.zhesih.com/archives/efe6a532.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="MXNet 分布式通信MXnet 使用了 dmlc&#x2F;ps-lite 实现其分布式通信机制 ps-lite van.h 父类，使用 Protocol buffer 定义了数据格式 zmq_van.h 继承 van.h，使用 zmq 做具体的数据传输 当前 MXnet 只能使用 IPoIB，不能直接使用 IB verbs 来通信；有个改动 ps-lite 也能直接使用 ib 来通信的 PR 挂了一年多">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-01T10:46:35.000Z">
+<meta property="article:modified_time" content="2020-11-22T02:50:14.496Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="hpc">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.zhesih.com/archives/efe6a532.html">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mxnet-network-and-infiniband | 随风飘散的记忆</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MXNet-%E5%88%86%E5%B8%83%E5%BC%8F%E9%80%9A%E4%BF%A1"><span class="nav-number">1.</span> <span class="nav-text">MXNet 分布式通信</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDMA-in-kubernetes"><span class="nav-number">2.</span> <span class="nav-text">RDMA in kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HCA"><span class="nav-number">2.1.</span> <span class="nav-text">HCA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SR-IOV"><span class="nav-number">2.2.</span> <span class="nav-text">SR-IOV</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IP-over-Infiniband"><span class="nav-number">3.</span> <span class="nav-text">IP over Infiniband</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%82%E5%AE%B6"><span class="nav-number">4.</span> <span class="nav-text">厂家</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Azure"><span class="nav-number">4.1.</span> <span class="nav-text">Azure</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aliyun"><span class="nav-number">4.2.</span> <span class="nav-text">Aliyun</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS"><span class="nav-number">4.3.</span> <span class="nav-text">AWS</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zrss"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zrss" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zrss" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/efe6a532.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mxnet-network-and-infiniband
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-01 10:46:35" itemprop="dateCreated datePublished" datetime="2019-05-01T10:46:35Z">2019-05-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:50:14" itemprop="dateModified" datetime="2020-11-22T02:50:14Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="MXNet-分布式通信"><a href="#MXNet-分布式通信" class="headerlink" title="MXNet 分布式通信"></a>MXNet 分布式通信</h1><p>MXnet 使用了 dmlc/ps-lite 实现其分布式通信机制</p>
+<p>ps-lite</p>
+<p>van.h 父类，使用 Protocol buffer 定义了数据格式</p>
+<p>zmq_van.h 继承 van.h，使用 zmq 做具体的数据传输</p>
+<p>当前 MXnet 只能使用 IPoIB，不能直接使用 IB verbs 来通信；有个改动 ps-lite 也能直接使用 ib 来通信的 PR 挂了一年多了 …</p>
+<h1 id="RDMA-in-kubernetes"><a href="#RDMA-in-kubernetes" class="headerlink" title="RDMA in kubernetes"></a>RDMA in kubernetes</h1><p>IB 这东西嘛，看起来是没服务发现的能力的；就是使用之前，需要使用 IP 网络通信一次，然后知道对端的 IB 的地址后，才能直接基于 IB 来通信</p>
+<p>NCCL 就是这么干的</p>
+<p>当然参考阿里云的说法</p>
+<blockquote>
+<p>RDMA通讯建连过程普遍分为 TCP 和 RDMA_CM 两种实现，如果应用程序使用RDMA_CM 的建连的方式，vpc网络插件中分配的pod ip 无法作为RDMA_CM 地址， 容器需要设置HostNetwork。并将bond0 ip 设置为CM的通讯地址</p>
+</blockquote>
+<p>这得看下 mlx device plugin 的实现和容器网络的实现，比较好奇，看一下吧</p>
+<p>业界有两种实现 SR-IOV (single root io virtualization) 另一种就是直接共享设备 (HCA: host channel adapter)</p>
+<h2 id="HCA"><a href="#HCA" class="headerlink" title="HCA"></a>HCA</h2><p>HCA 就没啥好说的了，device plugin allocate 时，给 kubelet 返回设备路径，直接整个把 /dev/infiniband 挂载入容器中即可 … 这点会比较误导，相当于可以用所有的 HCA ?</p>
+<p>所以对于 HCA 来说，直接用原先的容器网络来初始化 IB 通信即可，即在容器网络上做 ib 设备地址的发现，随后再用 ib verbs api 来通信</p>
+<p>当然如果实现时，不是使用 tcp 的方式来初始化 IB，使用的是 rdma_cm，会有区别，容器的 ip 不能用于通信，只能用主机上的 bond0 ip 来通信 （主网卡）</p>
+<p>有点儿奇怪可能与 rdma_cm 的 api 有关 …</p>
+<p>另外最好加个这个，让单机多卡的训练可以 IPC 通信</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">securityContext:</span></span><br><span class="line">  <span class="attr">capabilities:</span></span><br><span class="line">    <span class="attr">add:</span> [ <span class="string">&quot;IPC_LOCK&quot;</span> ]</span><br></pre></td></tr></table></figure>
+
+<h2 id="SR-IOV"><a href="#SR-IOV" class="headerlink" title="SR-IOV"></a>SR-IOV</h2><p>PF -&gt; VF</p>
+<p>需要 SR-IOV CNI plugin 及 device plugin 配合</p>
+<p>device plugin 挂载 /dev/infiniband 到容器中</p>
+<p>SR-IOV CNI plugin 负责将 VF 绑定到容器的 network namespace 中</p>
+<p>假设 VF 事先创建好</p>
+<p>逻辑是通的，CNI 记录每个节点哪些 VF 已被分配，每个节点记录剩余几个 VF，当有新的 pod 被调度到当前节点时，CNI 即可分配未使用的 VF 与 pod</p>
+<h1 id="IP-over-Infiniband"><a href="#IP-over-Infiniband" class="headerlink" title="IP over Infiniband"></a>IP over Infiniband</h1><p>IPoIB 由 ipoib driver 实现，能像一般 NIC (ifconfig) 一样使用 ib 网络，当然性能差一些，在到达 NIC 之前，与 socket 通信的开销一致</p>
+<ul>
+<li>socket api</li>
+<li>ib verbs api</li>
+</ul>
+<p>socket api 走 os 调用栈，CPU 参与</p>
+<p>ib verbs 直接走 ib，相当于 bypass 了 os 与 CPU，硬件卸载</p>
+<p>不过有个地方比较疑惑，IPoIB，infiniband 底层的传输方式是 datagram 即不可靠传输，不过上层应用（zmp）都是 tcp，应有自己的重传机制；其次 ps-lite van.h 里也有开关控制重传功能，在未收到当前消息的 ACK 时，不会处理该请求，这里展开说下</p>
+<p>van.h 初始时，如果看到打开了重传开关，则初始化 resend.h</p>
+<p>启动了一个线程，周期性 (Timeout) 的重传 send_buf 中的消息</p>
+<p>van.h 在</p>
+<ul>
+<li>发送数据时，将数据加入 send_buf 中；</li>
+<li>接收到数据时<ul>
+<li>如果是 ACK，则从 send_buf 中移除该消息，并把数据交给上层处理</li>
+<li>若当前数据仍不是 ack 数据，则查看是否已发送过 ACK<ul>
+<li>是的话，则认为是重复消息，不交上层处理，并发送 ACK</li>
+<li>否则 交上层处理，记录到 ACK set 中，并发送 ACK</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>不过这个重传的场景比较神奇，话说 TCP 已经有 ACK 和重传机制了 … 不懂 ps-lite 是遇到了什么具体的场景，再做了一次重传的增强设计</p>
+<p>而且这个设计有个限制，收发数据越多，似乎内存消耗越大，因为记录是否收到过该消息的 ACK 的 set，并没有清理的机会，会一直增加</p>
+<p>所以一般也未见开启这个功能，env.md 里都没说明这两环境变量，姑且认为是个废弃特性吧 …</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS_RESEND&#x3D;1</span><br><span class="line">PS_RESEND_TIMEOUT&#x3D;1000 # ms</span><br></pre></td></tr></table></figure>
+
+<h1 id="厂家"><a href="#厂家" class="headerlink" title="厂家"></a>厂家</h1><h2 id="Azure"><a href="#Azure" class="headerlink" title="Azure"></a>Azure</h2><p>只支持 RDMA on IB 不支持 IP over IB</p>
+<p>In Azure, IP over IB is not supported. Only RDMA over IB is supported.</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/azure/virtual-machines/linux/sizes-hpc#rdma-capable-instances">https://docs.microsoft.com/zh-cn/azure/virtual-machines/linux/sizes-hpc#rdma-capable-instances</a></p>
+<h2 id="Aliyun"><a href="#Aliyun" class="headerlink" title="Aliyun"></a>Aliyun</h2><p>k8s 目前只看到 RDMA on IB，IP over IB 没看到，看起来是直接主机网络之后，用 ib0 ip 就行？</p>
+<h2 id="AWS"><a href="#AWS" class="headerlink" title="AWS"></a>AWS</h2><p>sagemaker 25Bbps/s 互联，看起来不像 IB or RoCE</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-ethernet-rdma-sr-iov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-ethernet-rdma-sr-iov-networking-with-connectx4-connectx5</a></p>
+<p>在 Kubernetes 上使用 RDMA</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/hpc/" rel="tag"># hpc</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/e57ea50b.html" rel="prev" title="welcome to hpc">
+                  <i class="fa fa-chevron-left"></i> welcome to hpc
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/9ca10b5e.html" rel="next" title="horovod-tf">
+                  horovod-tf <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 2007 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">214k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:15</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: true
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

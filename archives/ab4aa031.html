@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="Dream Of A Dream —— “人言南柯一梦，领略了繁华沧桑，谁人过往不相似”  etcd v3.1.9 boltdb pending pages 回收策略etcdv3 中 backend 使用 boltdb 实现 在 etcdv3.1.9 集成的 boltdb 版本中，仅在 freelist 中记录可释放的 page id (pending: [txid] -&gt; page id">
+<meta property="og:type" content="article">
+<meta property="og:title" content="boltdb 中的 page 回收策略及优化">
+<meta property="og:url" content="http://blog.zhesih.com/archives/ab4aa031.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="Dream Of A Dream —— “人言南柯一梦，领略了繁华沧桑，谁人过往不相似”  etcd v3.1.9 boltdb pending pages 回收策略etcdv3 中 backend 使用 boltdb 实现 在 etcdv3.1.9 集成的 boltdb 版本中，仅在 freelist 中记录可释放的 page id (pending: [txid] -&gt; page id">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.zhesih.com/archives/uploads/leak-of-pages.jpeg">
+<meta property="og:image" content="http://blog.zhesih.com/archives/uploads/free-pages.jpeg">
+<meta property="article:published_time" content="2017-10-21T15:35:21.000Z">
+<meta property="article:modified_time" content="2020-11-22T07:41:27.810Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="etcd-v3">
+<meta property="article:tag" content="boltdb">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.zhesih.com/archives/uploads/leak-of-pages.jpeg">
+
+
+<link rel="canonical" href="http://blog.zhesih.com/archives/ab4aa031.html">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>boltdb 中的 page 回收策略及优化 | 随风飘散的记忆</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#etcd-v3-1-9-boltdb-pending-pages-%E5%9B%9E%E6%94%B6%E7%AD%96%E7%95%A5"><span class="nav-number">1.</span> <span class="nav-text">etcd v3.1.9 boltdb pending pages 回收策略</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#bbolt-%E4%BC%98%E5%8C%96%E5%90%8E%E7%9A%84%E5%9B%9E%E6%94%B6%E7%AD%96%E7%95%A5"><span class="nav-number">2.</span> <span class="nav-text">bbolt 优化后的回收策略</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9B%B4%E5%A5%BD%E7%9A%84%E5%9B%9E%E6%94%B6%E7%AD%96%E7%95%A5%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">更好的回收策略？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zrss"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zrss" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zrss" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/ab4aa031.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          boltdb 中的 page 回收策略及优化
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-21 15:35:21" itemprop="dateCreated datePublished" datetime="2017-10-21T15:35:21Z">2017-10-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:41:27" itemprop="dateModified" datetime="2020-11-22T07:41:27Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p><a target="_blank" rel="noopener" href="http://music.163.com/#/m/song?id=28949431">Dream Of A Dream</a> —— “人言南柯一梦，领略了繁华沧桑，谁人过往不相似”</p>
+</blockquote>
+<h1 id="etcd-v3-1-9-boltdb-pending-pages-回收策略"><a href="#etcd-v3-1-9-boltdb-pending-pages-回收策略" class="headerlink" title="etcd v3.1.9 boltdb pending pages 回收策略"></a>etcd v3.1.9 boltdb pending pages 回收策略</h1><p>etcdv3 中 backend 使用 boltdb 实现</p>
+<p>在 etcdv3.1.9 集成的 boltdb 版本中，仅在 freelist 中记录可释放的 page id (pending: [txid] -&gt; page ids)，在 rw txn 中释放当前 txn 中最小 txid 之前的 pending pages[1]，因此如果有一个 read txn 运行时间过长，会导致部分 pages 无法及时回收使用，导致 db 大小增加。示意图如下</p>
+<p><img src="./uploads/leak-of-pages.jpeg" alt="leak-of-pages"></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">1</span>] <span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">beginRWTx</span><span class="params">()</span> <span class="params">(*Tx, error)</span></span> &#123;&#125; <span class="comment">// 在该方法中释放 pending pages</span></span><br></pre></td></tr></table></figure>
+
+<p>mock 代码也很好写，随手写了个示例 (为了效果更明显，在 tx 的 Commit 方法中输出了 freelist 的情况)</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(tx *Tx)</span> <span class="title">Commit</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	fmt.Printf(<span class="string">&quot;freelist pending_cnt: %d, freelist free_cnt: %d\n&quot;</span>, tx.db.freelist.pending_count(), tx.db.freelist.free_count())</span><br><span class="line">	p, err := tx.allocate((tx.db.freelist.size() / tx.db.pageSize) + <span class="number">1</span>)</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正式的 mock 代码: 在一个 read txn 中 “休息” 一会儿，同时不断的开启 rw txn 写数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/boltdb/bolt&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// Open the my.db data file in your current directory.</span></span><br><span class="line">	<span class="comment">// It will be created if it doesn&#x27;t exist.</span></span><br><span class="line">	db, err := bolt.Open(<span class="string">&quot;frag.db&quot;</span>, <span class="number">0600</span>, <span class="literal">nil</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> db.Close()</span><br><span class="line">	db.Update(<span class="function"><span class="keyword">func</span><span class="params">(tx *bolt.Tx)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		_, err := tx.CreateBucketIfNotExists([]<span class="keyword">byte</span>(<span class="string">&quot;MyBucket&quot;</span>))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		db.View(<span class="function"><span class="keyword">func</span><span class="params">(tx *bolt.Tx)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;start of long run read txn\n&quot;</span>)</span><br><span class="line">			fmt.Printf(<span class="string">&quot;read txn txid: %d\n&quot;</span>, tx.ID())</span><br><span class="line">			bucket := tx.Bucket([]<span class="keyword">byte</span>(<span class="string">&quot;MyBucket&quot;</span>))</span><br><span class="line">			bucket.Get([]<span class="keyword">byte</span>(<span class="string">&quot;answer&quot;</span>))</span><br><span class="line">			&lt;-time.After(<span class="number">10</span> * time.Second)</span><br><span class="line">			fmt.Printf(<span class="string">&quot;end of long run read txn\n&quot;</span>)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;()</span><br><span class="line">	mockValue := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">64</span>; i++ &#123;</span><br><span class="line">		db.Update(<span class="function"><span class="keyword">func</span><span class="params">(tx *bolt.Tx)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;rw txn txid: %d\n&quot;</span>, tx.ID())</span><br><span class="line">			b := tx.Bucket([]<span class="keyword">byte</span>(<span class="string">&quot;MyBucket&quot;</span>))</span><br><span class="line">			err = b.Put([]<span class="keyword">byte</span>(<span class="string">&quot;answer&quot;</span>), mockValue)</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(c, os.Interrupt, syscall.SIGTERM)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		&lt;-c</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行三次之后，效果明显 (见如下控制台输出) ，read txn 未退出时 pending_count 增加，退出之后，free_count 总量增加，然而此时 db 文件已经扩展增大了，即总的可用页数增加了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">freelist pending_cnt: 1, freelist free_cnt: 12</span><br><span class="line">rw txn txid: 133</span><br><span class="line">freelist pending_cnt: 3, freelist free_cnt: 10</span><br><span class="line">start of long run <span class="built_in">read</span> txn</span><br><span class="line"><span class="built_in">read</span> txn txid: 132</span><br><span class="line">rw txn txid: 134</span><br><span class="line">freelist pending_cnt: 6, freelist free_cnt: 7</span><br><span class="line">rw txn txid: 135</span><br><span class="line">freelist pending_cnt: 9, freelist free_cnt: 4</span><br><span class="line">rw txn txid: 136</span><br><span class="line">freelist pending_cnt: 12, freelist free_cnt: 1</span><br><span class="line">rw txn txid: 137</span><br><span class="line">freelist pending_cnt: 15, freelist free_cnt: 0</span><br><span class="line">rw txn txid: 138</span><br><span class="line">freelist pending_cnt: 18, freelist free_cnt: 0</span><br><span class="line">rw txn txid: 139</span><br><span class="line">freelist pending_cnt: 21, freelist free_cnt: 0</span><br><span class="line">rw txn txid: 140</span><br><span class="line">freelist pending_cnt: 24, freelist free_cnt: 0</span><br><span class="line">rw txn txid: 141</span><br><span class="line">end of long run <span class="built_in">read</span> txn</span><br><span class="line">freelist pending_cnt: 27, freelist free_cnt: 0</span><br><span class="line">rw txn txid: 142</span><br><span class="line">freelist pending_cnt: 3, freelist free_cnt: 25</span><br><span class="line">rw txn txid: 143</span><br><span class="line">freelist pending_cnt: 3, freelist free_cnt: 25</span><br></pre></td></tr></table></figure>
+
+<p>当然 long run read txn，会获取 mmap 读锁，因此当 rw txn 需要 mmap 写锁以扩大存储空间时，会阻塞</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Read-only transactions and read-write transactions should not depend on one another and generally shouldn’t be opened simultaneously in the same goroutine. This can cause a deadlock as the read-write transaction needs to periodically re-map the data file but it cannot do so while a read-only transaction is open. https:&#x2F;&#x2F;github.com&#x2F;boltdb&#x2F;bolt#transactions</span><br></pre></td></tr></table></figure>
+
+<p>为了优化这个点儿，当然也因为 boltdb 原作者不干了，coreos 的大佬们自己拉了一个库继续搞，就是 <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt%EF%BC%8C%E8%BF%99%E4%B8%AA%E6%96%B0%E5%BA%93%E5%9C%A8%E5%AE%83%E7%9A%84%E7%AC%AC%E4%BA%8C%E4%B8%AA%E5%90%88%E5%85%A5">https://github.com/coreos/bbolt，这个新库在它的第二个合入</a> pr <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/pull/3">https://github.com/coreos/bbolt/pull/3</a> 中尝试解决这个问题</p>
+<p>附赠一个删除 key 之后空间不会变小的解释，直觉来理解的话，boltdb 是 page 管理的空间，底层空间是连续的，boltdb 将这个空间逻辑上划分为一个个页</p>
+<h1 id="bbolt-优化后的回收策略"><a href="#bbolt-优化后的回收策略" class="headerlink" title="bbolt 优化后的回收策略"></a>bbolt 优化后的回收策略</h1><p>粗略过了一遍代码，总之之前是只能释放当前最小 txn 之前的 pending pages 对吧，现在不管你，能释放的我都释放掉不就行了？示意图如下</p>
+<p><img src="./uploads/free-pages.jpeg" alt="free-pages"></p>
+<p>为了实现这个方案，当然要增加一些记录值，修改一些实现，下面详细看一下这个 pr <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/pull/3/files">https://github.com/coreos/bbolt/pull/3/files</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// freePages releases any pages associated with closed read-only transactions.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">freePages</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// Free all pending pages prior to earliest open transaction.</span></span><br><span class="line">	<span class="comment">// txid 升序排序</span></span><br><span class="line">	sort.Sort(txsById(db.txs))</span><br><span class="line">	minid := txid(<span class="number">0xFFFFFFFFFFFFFFFF</span>)</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(db.txs) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		minid = db.txs[<span class="number">0</span>].meta.txid</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 释放最小 txid 之前的 pengding pages</span></span><br><span class="line">	<span class="keyword">if</span> minid &gt; <span class="number">0</span> &#123;</span><br><span class="line">		db.freelist.release(minid - <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// Release unused txid extents.</span></span><br><span class="line">	<span class="comment">// 释放 tx 之间的 pending pages</span></span><br><span class="line">	<span class="keyword">for</span> _, t := <span class="keyword">range</span> db.txs &#123;</span><br><span class="line">		db.freelist.releaseRange(minid, t.meta.txid<span class="number">-1</span>)</span><br><span class="line">		minid = t.meta.txid + <span class="number">1</span></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 释放当前最大 txid 之后的 pending pages</span></span><br><span class="line">	db.freelist.releaseRange(minid, txid(<span class="number">0xFFFFFFFFFFFFFFFF</span>))</span><br><span class="line">	<span class="comment">// Any page both allocated and freed in an extent is safe to release.</span></span><br><span class="line">	<span class="comment">// 假设在 rw txn 之间频繁的有 long run 的 read txn，这个优化很有效</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>原 freelist pending 为 [txid] -&gt; []pgid 的映射，现修改为 [txid] -&gt; txPending{} 的映射</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> txPending <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// []pgid 与 []txid 对应</span></span><br><span class="line">	<span class="comment">// 每 append 一个 pgid 则 append 一个 txid</span></span><br><span class="line">	<span class="comment">// 以记录该 pgid 是在哪个 tx 中被分配</span></span><br><span class="line">	ids              []pgid</span><br><span class="line">	alloctx          []txid <span class="comment">// txids allocating the ids</span></span><br><span class="line">	lastReleaseBegin txid   <span class="comment">// beginning txid of last matching releaseRange</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>freelist 增加一个记录 allocs: map[pgid] -&gt; txid</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// freelist represents a list of all pages that are available for allocation.</span></span><br><span class="line"><span class="comment">// It also tracks pages that have been freed but are still in use by open transactions.</span></span><br><span class="line"><span class="keyword">type</span> freelist <span class="keyword">struct</span> &#123;</span><br><span class="line">	ids     []pgid              <span class="comment">// all free and available free page ids.</span></span><br><span class="line">	<span class="comment">// 记录每次 allocate 返回的 page id 与 txid 的对应关系</span></span><br><span class="line">	<span class="comment">// allocate 返回的是连续分配的第一个 page id</span></span><br><span class="line">	allocs  <span class="keyword">map</span>[pgid]txid       <span class="comment">// mapping of txid that allocated a pgid.</span></span><br><span class="line">	pending <span class="keyword">map</span>[txid]*txPending <span class="comment">// mapping of soon-to-be free page ids by tx.</span></span><br><span class="line">	cache   <span class="keyword">map</span>[pgid]<span class="keyword">bool</span>       <span class="comment">// fast lookup of all free and pending page ids.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>freelist allocate 方法增加 txid 参数，用以记录 tx 分配的 page</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// allocate returns the starting page id of a contiguous list of pages of a given size.</span></span><br><span class="line"><span class="comment">// If a contiguous block cannot be found then 0 is returned.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">allocate</span><span class="params">(txid txid, n <span class="keyword">int</span>)</span> <span class="title">pgid</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">			<span class="comment">// 记录；仅记录分配的连续 page 的第一个 page id</span></span><br><span class="line">			f.allocs[initial] = txid</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改 freelist free 方法内部实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// free releases a page and its overflow for a given transaction id.</span></span><br><span class="line"><span class="comment">// If the page is already free then a panic will occur.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">free</span><span class="params">(txid txid, p *page)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> p.id &lt;= <span class="number">1</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;cannot free page 0 or 1: %d&quot;</span>, p.id))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Free page and all its overflow pages.</span></span><br><span class="line">	txp := f.pending[txid]</span><br><span class="line">	<span class="keyword">if</span> txp == <span class="literal">nil</span> &#123;</span><br><span class="line">		txp = &amp;txPending&#123;&#125;</span><br><span class="line">		f.pending[txid] = txp</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 获取是分配给哪个 tx 使用的</span></span><br><span class="line">	allocTxid, ok := f.allocs[p.id]</span><br><span class="line">	<span class="keyword">if</span> ok &#123;</span><br><span class="line">		<span class="comment">// 解除关联关系</span></span><br><span class="line">		<span class="built_in">delete</span>(f.allocs, p.id)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (p.flags &amp; (freelistPageFlag | metaPageFlag)) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="comment">// Safe to claim txid as allocating since these types are private to txid.</span></span><br><span class="line">		<span class="comment">// 这两种页类型没记录</span></span><br><span class="line">		allocTxid = txid</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 释放连续页</span></span><br><span class="line">	<span class="keyword">for</span> id := p.id; id &lt;= p.id+pgid(p.overflow); id++ &#123;</span><br><span class="line">		<span class="comment">// Verify that page is not already free.</span></span><br><span class="line">		<span class="keyword">if</span> f.cache[id] &#123;</span><br><span class="line">			<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;page %d already freed&quot;</span>, id))</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Add to the freelist and cache.</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">// ids 与 alloctx 对应</span></span><br><span class="line">		txp.ids = <span class="built_in">append</span>(txp.ids, id)</span><br><span class="line">		txp.alloctx = <span class="built_in">append</span>(txp.alloctx, allocTxid)</span><br><span class="line">		</span><br><span class="line">		f.cache[id] = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>freelist 增加 releaseRange 实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// releaseRange moves pending pages allocated within an extent [begin,end] to the free list.</span></span><br><span class="line"><span class="comment">// ps: [begin, end]</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">releaseRange</span><span class="params">(begin, end txid)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> begin &gt; end &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> m pgids</span><br><span class="line">	<span class="keyword">for</span> tid, txp := <span class="keyword">range</span> f.pending &#123;</span><br><span class="line">		<span class="keyword">if</span> tid &lt; begin || tid &gt; end &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Don&#x27;t recompute freed pages if ranges haven&#x27;t updated.</span></span><br><span class="line">		<span class="comment">// 已处理</span></span><br><span class="line">		<span class="keyword">if</span> txp.lastReleaseBegin == begin &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(txp.ids); i++ &#123;</span><br><span class="line">			<span class="keyword">if</span> atx := txp.alloctx[i]; atx &lt; begin || atx &gt; end &#123;</span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			&#125;</span><br><span class="line">			m = <span class="built_in">append</span>(m, txp.ids[i])</span><br><span class="line">			<span class="comment">// 这个实现是够省事儿的</span></span><br><span class="line">			<span class="comment">// 如果该 page 能释放，则直接移除</span></span><br><span class="line">			<span class="comment">// ids 和 alloctx 数组前移一位</span></span><br><span class="line">			<span class="comment">// i-- 以便下次循环保持</span></span><br><span class="line">			txp.ids[i] = txp.ids[<span class="built_in">len</span>(txp.ids)<span class="number">-1</span>]</span><br><span class="line">			txp.ids = txp.ids[:<span class="built_in">len</span>(txp.ids)<span class="number">-1</span>]</span><br><span class="line">			txp.alloctx[i] = txp.alloctx[<span class="built_in">len</span>(txp.alloctx)<span class="number">-1</span>]</span><br><span class="line">			txp.alloctx = txp.alloctx[:<span class="built_in">len</span>(txp.alloctx)<span class="number">-1</span>]</span><br><span class="line">			i--</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 该 txid 的 txp 在该 range 已处理</span></span><br><span class="line">		txp.lastReleaseBegin = begin</span><br><span class="line">		<span class="comment">// 如果均可以释放，则从 pending 中移除</span></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(txp.ids) == <span class="number">0</span> &#123;</span><br><span class="line">			<span class="built_in">delete</span>(f.pending, tid)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 排序</span></span><br><span class="line">	sort.Sort(m)</span><br><span class="line">	<span class="comment">// 归并排序合入可用 ids</span></span><br><span class="line">	f.ids = pgids(f.ids).merge(m)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>回过头来梳理 freelist 中的各种映射</p>
+<p>pending [txid] -&gt; txPending</p>
+<p>而 txPending 中又会存储 ids 和 alloctx，而看 releaseRange 中的实现，这个 alloctx 与 txid 不一定是一致的，那这个 txPending 是在哪儿修改的 ?</p>
+<p><strong>问题: txPending 在哪儿被修改</strong></p>
+<p>其实刚才我们已经看到了，其在 func (f *freelist) free(txid txid, p *page) 方法中被修改，那么 free 功能又是啥？</p>
+<ol>
+<li>free(txid txid, p *page)</li>
+<li>获取 txPending (txp := f.pending[txid])</li>
+<li>获取分配该 page 的 txid (allocTxid, ok := f.allocs[p.id]); 如果获取不到且 page 为 freelist or meta，将 allocTxid 设置为当前 txid</li>
+<li>将释放的连续页记录到 txPending 中: txp.ids = append(txp.ids, id); txp.alloctx = append(txp.alloctx, allocTxid))</li>
+</ol>
+<p><strong>是否与 allocate 对应 ?</strong></p>
+<ol>
+<li>allocate(txid txid, n int)</li>
+<li>分配连续的 n 个 pages，并返回第一个 page id (initial)</li>
+<li>记录该 page id 被 txid 分配 (freelist.allocs[initial] = txid)</li>
+</ol>
+<p>看起来 free 并不与 allocate 对应，即并不是 free 该 txid 的所分配的 pages 的语义，而是将连续页 (p *page) 加入到 txid 的 pending 记录中待释放；这么看来的话 pending [txid] -&gt; txPending 好理解，然而 txPending 中未必只存储 [txid] 的 pending pages，这么实现应该与上层调用 free 方法的语义有关</p>
+<p>最后看看 freelist 的 rollback 修改</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// rollback removes the pages from a given pending tx.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">rollback</span><span class="params">(txid txid)</span></span> &#123;</span><br><span class="line">	<span class="comment">// Remove page ids from cache.</span></span><br><span class="line">	txp := f.pending[txid]</span><br><span class="line">	<span class="keyword">if</span> txp == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> m pgids</span><br><span class="line">	<span class="keyword">for</span> i, pgid := <span class="keyword">range</span> txp.ids &#123;</span><br><span class="line">		<span class="built_in">delete</span>(f.cache, pgid)</span><br><span class="line">		tx := txp.alloctx[i]</span><br><span class="line">		<span class="comment">// tx == 0 ?!</span></span><br><span class="line">		<span class="keyword">if</span> tx == <span class="number">0</span> &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 非当前 rollback 的 tx 分配的 page</span></span><br><span class="line">		<span class="keyword">if</span> tx != txid &#123;</span><br><span class="line">			<span class="comment">// Pending free aborted; restore page back to alloc list.</span></span><br><span class="line">			f.allocs[pgid] = tx</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// Freed page was allocated by this txn; OK to throw away.</span></span><br><span class="line">			<span class="comment">// 归还 freelist ids</span></span><br><span class="line">			m = <span class="built_in">append</span>(m, pgid)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Remove pages from pending list and mark as free if allocated by txid.</span></span><br><span class="line">	<span class="built_in">delete</span>(f.pending, txid)</span><br><span class="line">	sort.Sort(m)</span><br><span class="line">	f.ids = pgids(f.ids).merge(m)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="更好的回收策略？"><a href="#更好的回收策略？" class="headerlink" title="更好的回收策略？"></a>更好的回收策略？</h1><p><a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/issues/14">https://github.com/coreos/bbolt/issues/14</a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总之这个 pr 目测能极大缓解 etcd v3.1.9 中偶尔会遇到的 mvcc: database space exceeded 的错误，但是总感觉有些 page 还是没有及时回收的样子，这种没彻底弄清楚的感觉，合入总有点儿不放心 … 随意一说</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/etcd-v3/" rel="tag"># etcd-v3</a>
+              <a href="/tags/boltdb/" rel="tag"># boltdb</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/c69c7a93.html" rel="prev" title="disk-io">
+                  <i class="fa fa-chevron-left"></i> disk-io
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/e6d66434.html" rel="next" title="deep-in-boltdb">
+                  deep-in-boltdb <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 2007 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">214k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:15</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: true
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

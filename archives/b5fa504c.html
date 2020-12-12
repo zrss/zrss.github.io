@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="kubelet 为运行在 node 上的主要组件 其一方面 list-watch kube-apiserver pod 资源的变化 另一方面调用 docker 接口获取当前实际存在的 container 来 SyncLoop (PLEG) 所以下面分两条路线来分析 kubelet 的一些细节 (仅关注 pod&#x2F;container，略去其他无关资源) overview Run start a gor">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubelet workflow">
+<meta property="og:url" content="http://blog.zhesih.com/archives/b5fa504c.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="kubelet 为运行在 node 上的主要组件 其一方面 list-watch kube-apiserver pod 资源的变化 另一方面调用 docker 接口获取当前实际存在的 container 来 SyncLoop (PLEG) 所以下面分两条路线来分析 kubelet 的一些细节 (仅关注 pod&#x2F;container，略去其他无关资源) overview Run start a gor">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-08-25T14:38:42.000Z">
+<meta property="article:modified_time" content="2020-11-22T06:47:12.815Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="kubelet">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.zhesih.com/archives/b5fa504c.html">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>kubelet workflow | 随风飘散的记忆</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#overview"><span class="nav-number">1.</span> <span class="nav-text">overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#configCh"><span class="nav-number">2.</span> <span class="nav-text">configCh</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#plegCh"><span class="nav-number">3.</span> <span class="nav-text">plegCh</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#syncPod"><span class="nav-number">4.</span> <span class="nav-text">syncPod</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#create-a-deployment-with-replica-1"><span class="nav-number">4.1.</span> <span class="nav-text">create a deployment with replica 1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#configCh-1"><span class="nav-number">4.1.1.</span> <span class="nav-text">configCh</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pleg"><span class="nav-number">5.</span> <span class="nav-text">pleg</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zrss"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zrss" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zrss" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b5fa504c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kubelet workflow
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-25 14:38:42" itemprop="dateCreated datePublished" datetime="2018-08-25T14:38:42Z">2018-08-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 06:47:12" itemprop="dateModified" datetime="2020-11-22T06:47:12Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>kubelet 为运行在 node 上的主要组件</p>
+<p>其一方面 list-watch kube-apiserver pod 资源的变化</p>
+<p>另一方面调用 docker 接口获取当前实际存在的 container 来 SyncLoop (PLEG)</p>
+<p>所以下面分两条路线来分析 kubelet 的一些细节 (仅关注 pod/container，略去其他无关资源)</p>
+<h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><ul>
+<li>Run<ul>
+<li>start a goroutine, one second trigger once podKiller method</li>
+<li>call kl.statusManager.Start()</li>
+<li>call kl.probeManager.Start()</li>
+<li>call kl.pleg.Start()<ul>
+<li>start a goroutine, one second trigger once relist method</li>
+</ul>
+</li>
+<li>call kubelet main loop kl.syncLoop(updates, kl)<ul>
+<li>syncLoopIteration</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>注意到 kubelet main loop 传递的 updates channel 为从 kube-apiserver list-watch 到的 pod 变化数据，当 kubelet 重启时，会收到当前 node 上的所有 pod 数据</p>
+<p>syncLoopIteration 是 kubelet 的 main loop，其主要处理</p>
+<ul>
+<li>configCh channel: pod info with ADD / Update / Delete …, this channel’s data comes from kube-apiserver</li>
+<li>plegCh channel: pod life cycle generator event, such as ContainerStart / ContainerDied …, this channel’s data comes from docker</li>
+<li>syncCh channel: a one-second period time ticker</li>
+<li>livenessManager.Updates() channel</li>
+<li>housekeepingCh channel: a two-second period time ticker</li>
+</ul>
+<p>当 kubelet 启动时指定 -v=2 的情况下</p>
+<p>kubelet 处理 configCh 数据时，会显示如下日志</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, api): podName_podNamespace(podUID),...</span><br><span class="line"></span><br><span class="line">or </span><br><span class="line"></span><br><span class="line">SyncLoop (UPDATE, api): podName_podNamespace(podUID),...</span><br><span class="line"></span><br><span class="line">and REMOVE &#x2F; RECONCILE &#x2F; DELETE &#x2F; RESTORE type</span><br></pre></td></tr></table></figure>
+
+<p>具体如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, &quot;api&quot;): &quot;nginx-deployment-6c54bd5869-wppm8_default(1336f9f0-a898-11e8-b01b-000d3a362518)&quot;</span><br></pre></td></tr></table></figure>
+
+<p>kubelet 处理 plegCh 数据时，会显示如下日志</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): podName_podNamespace(podUID),..., event:</span><br></pre></td></tr></table></figure>
+
+<p>具体如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): &quot;nginx-deployment-6c54bd5869-9jsp5_default(1336d6cf-a898-11e8-b01b-000d3a362518)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;1336d6cf-a898-11e8-b01b-000d3a362518&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;7e06e4ce8ab3a4a0b8bbb84f35ac8ac078bb5ec9db4ce765e35a235664cb3dd7&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Data 为 ContainerID 与 docker ps 看到的相同</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hzs@kubernetes:~&#x2F;work&#x2F;src&#x2F;k8s.io&#x2F;kubernetes$ docker ps | grep 7e06e4ce8ab3</span><br><span class="line">7e06e4ce8ab3        nginx                                      &quot;nginx -g &#39;daemon of…&quot;   3 minutes ago       Up 3 minutes                            k8s_nginx_nginx-deployment-6c54bd5869-9jsp5_default_1336d6cf-a898-11e8-b01b-000d3a362518_0</span><br></pre></td></tr></table></figure>
+
+<p>经过上述分析，大概对 kubelet 的工作原理及数据来源有了个基本认识，下面详细看一下 kubelet 对 configCh 及 plegCh 的数据处理</p>
+<h1 id="configCh"><a href="#configCh" class="headerlink" title="configCh"></a>configCh</h1><p>list-watch from kube-apiserver in a independant goroutine, once there is events about pods, then these pod data will be put into configCh</p>
+<p>syncLoopIteration -&gt; handle the pod data from list-watch from kube-apiserver pod resource -&gt; HandlePodAdditions/… -&gt; dispatchWork -&gt; podWorkers.UpdatePod</p>
+<p>UpdatePod</p>
+<ul>
+<li>如果之前未处理该 pod，则为该 pod 创建一个大小为 1 的 UpdatePodOptions channel，并启动一个协程调用 managePodLoop(podUpdates)</li>
+<li>如果处理过了，判断 isWorking<ul>
+<li>若 false，则置为 true，并将 *options 置入 UpdatePodOptions channel，以供 managePodLoop 处理</li>
+<li>若 true，则进一步判断 lastUndeliveredWorkUpdate 未被记录或者 UpdateType 不等于 kubetypes.SyncPodKill，则更新 lastUndeliveredWorkUpdate 为本次 UpdatePod *options</li>
+</ul>
+</li>
+</ul>
+<p>managePodLoop -&gt; syncPodFn -&gt; kubelet.syncPod</p>
+<h1 id="plegCh"><a href="#plegCh" class="headerlink" title="plegCh"></a>plegCh</h1><p>one second trigger once time relist -&gt; generate container event (Started/…) -&gt; put the event into eventChannel channel</p>
+<p>syncLoopIteration -&gt; handle the event from eventChannel -&gt; HandlePodSyncs -&gt; dispatchWork -&gt; podWorkers.UpdatePod</p>
+<p>看到这，简单总结一下，两条更新的路，最终得到统一，即来自于 kube-apiserver pod 更新，又亦或是来自于节点上 container status 的变化 (pleg)，最终均会调用 syncPod</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, &quot;api&quot;): &quot;nginx-deployment-6c54bd5869-wppm8_default(1336f9f0-a898-11e8-b01b-000d3a362518)&quot;</span><br><span class="line">SyncLoop (PLEG): &quot;nginx-deployment-6c54bd5869-9jsp5_default(1336d6cf-a898-11e8-b01b-000d3a362518)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;1336d6cf-a898-11e8-b01b-000d3a362518&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;7e06e4ce8ab3a4a0b8bbb84f35ac8ac078bb5ec9db4ce765e35a235664cb3dd7&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="syncPod"><a href="#syncPod" class="headerlink" title="syncPod"></a>syncPod</h1><p>举几个典型的例子吧</p>
+<h2 id="create-a-deployment-with-replica-1"><a href="#create-a-deployment-with-replica-1" class="headerlink" title="create a deployment with replica 1"></a>create a deployment with replica 1</h2><p>kubelet 的响应流程</p>
+<h3 id="configCh-1"><a href="#configCh-1" class="headerlink" title="configCh"></a>configCh</h3><ul>
+<li>SyncLoop (ADD, “api”): “podName_namespace(podUID)”</li>
+<li>HandlePodAdditions</li>
+</ul>
+<p>从 podManager 中获取已存在的 pod，并将新的 pod 添加至其中。从已存在的 pod 中过滤出 activePods，并判断新的 pod canAdmitPod。例如亲和性、反亲和性的判断</p>
+<ul>
+<li>dispatchWork</li>
+</ul>
+<p>调用 podWorkers.UpdatePod</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">kl.podWorkers.UpdatePod(&amp;UpdatePodOptions&#123;</span><br><span class="line">    Pod:        pod,</span><br><span class="line">    MirrorPod:  mirrorPod,</span><br><span class="line">    UpdateType: syncType, <span class="comment">// SyncPodCreate</span></span><br><span class="line">    OnCompleteFunc: <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            metrics.PodWorkerLatency.WithLabelValues(syncType.String()).Observe(metrics.SinceInMicroseconds(start))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>UpdatePod</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">初始化 podUID -&gt; UpdatePodOptions channel (<span class="number">1</span>)，并启动协程执行 p.managePodLoop(podUpdates)。p.isWorking[pod.UID] 为 <span class="literal">false</span>，随后设置其为 <span class="literal">true</span>，并将 *options 置入 UpdatePodOptions channel</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>managePodLoop</li>
+</ul>
+<p>循环处理 UpdatePodOptions channel</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This is a blocking call that would return only if the cache</span></span><br><span class="line"><span class="comment">// has an entry for the pod that is newer than minRuntimeCache</span></span><br><span class="line"><span class="comment">// Time. This ensures the worker doesn&#x27;t start syncing until</span></span><br><span class="line"><span class="comment">// after the cache is at least newer than the finished time of</span></span><br><span class="line"><span class="comment">// the previous sync.</span></span><br><span class="line">status, err := p.podCache.GetNewerThan(podUID, lastSyncTime)</span><br><span class="line">err = p.syncPodFn(syncPodOptions&#123;</span><br><span class="line">    mirrorPod:      update.MirrorPod,</span><br><span class="line">    pod:            update.Pod,</span><br><span class="line">    podStatus:      status,</span><br><span class="line">    killPodOptions: update.KillPodOptions,</span><br><span class="line">    updateType:     update.UpdateType,</span><br><span class="line">&#125;)</span><br><span class="line">lastSyncTime = time.Now()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>syncPodFn(kubelet.syncPod)</li>
+</ul>
+<p>mkdir dir</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;pods&#x2F;[podUID]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>volumeManager.WaitForAttachAndMount(pod)</li>
+</ul>
+<p>获取 imagePullSecrets</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fetch the pull secrets for the pod</span></span><br><span class="line">pullSecrets := kl.getPullSecretsForPod(pod)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>containerRuntime.SyncPod</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Call the container runtime&#39;s SyncPod callback</span><br><span class="line">result :&#x3D; kl.containerRuntime.SyncPod(pod, apiPodStatus, podStatus, pullSecrets, kl.backOff)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>createPodSandBox</li>
+</ul>
+<p>mkdir logs dir</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;var&#x2F;log&#x2F;pods&#x2F;[podUID]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>run init container</li>
+<li>run container</li>
+</ul>
+<h1 id="pleg"><a href="#pleg" class="headerlink" title="pleg"></a>pleg</h1><p>relist 的时候，先从 docker 获取一把全量的 pod 数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Get all the pods.</span><br><span class="line">podList, err :&#x3D; g.runtime.GetPods(true)</span><br></pre></td></tr></table></figure>
+
+<p>当前状态与之前的状态一比，生成每个 container 的 PLE (pod life cycle event)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): &quot;podName_Namespace(podUID)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;podUID&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;ContainerID&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是 ContainerDied 就是容器退出的意思</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">generateEvents</span><span class="params">(podID types.UID, cid <span class="keyword">string</span>, oldState, newState plegContainerState)</span> []*<span class="title">PodLifecycleEvent</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> newState == oldState &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;GenericPLEG: %v/%v: %v -&gt; %v&quot;</span>, podID, cid, oldState, newState)</span><br><span class="line">    <span class="keyword">switch</span> newState &#123;</span><br><span class="line">    <span class="keyword">case</span> plegContainerRunning:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerStarted, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerExited:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerDied, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerUnknown:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerChanged, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerNonExistent:</span><br><span class="line">        <span class="keyword">switch</span> oldState &#123;</span><br><span class="line">        <span class="keyword">case</span> plegContainerExited:</span><br><span class="line">            <span class="comment">// We already reported that the container died before.</span></span><br><span class="line">            <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerRemoved, Data: cid&#125;&#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerDied, Data: cid&#125;, &#123;ID: podID, Type: ContainerRemoved, Data: cid&#125;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;unrecognized container state: %v&quot;</span>, newState))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>plegCh</li>
+</ul>
+<p>plegCh 有数据后，调用 HandlePodSyncs 处理之</p>
+<ul>
+<li>UpdatePod</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if a request to kill a pod is pending, we do not let anything overwrite that request.</span></span><br><span class="line">update, found := p.lastUndeliveredWorkUpdate[pod.UID]</span><br><span class="line"><span class="keyword">if</span> !found || update.UpdateType != kubetypes.SyncPodKill &#123;</span><br><span class="line">    p.lastUndeliveredWorkUpdate[pod.UID] = *options</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即更新 lastUndeliveredWorkUpdate</p>
+<p>HandlePodSyncs 执行结束之后（同步）</p>
+<p>如果容器挂掉，则执行清理动作</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> e.Type == pleg.ContainerDied &#123;</span><br><span class="line">    <span class="keyword">if</span> containerID, ok := e.Data.(<span class="keyword">string</span>); ok &#123;</span><br><span class="line">        kl.cleanUpContainersInPod(e.ID, containerID)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认配置，只保留最新一个。若 pod 被 evicted，或者是 DeletionTimestamp != nil &amp;&amp; notRunning(apiPodStatus.ContainerStatuses)，那么它的所有容器将会被删除</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MaxPerPodContainerCount: 1</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+              <a href="/tags/kubelet/" rel="tag"># kubelet</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/bdc66cb7.html" rel="prev" title="Performance of golang (etcd)">
+                  <i class="fa fa-chevron-left"></i> Performance of golang (etcd)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/bed8f754.html" rel="next" title="knative startup">
+                  knative startup <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 2007 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">214k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:15</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: true
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="to be cont 先写部分吧  MsgPropFollower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送 MsgAppFollower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="etcd-raft-follower">
+<meta property="og:url" content="http://blog.zhesih.com/archives/5015bdda.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="to be cont 先写部分吧  MsgPropFollower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送 MsgAppFollower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionE">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.zhesih.com/archives/uploads/raftlog.jpeg">
+<meta property="article:published_time" content="2017-11-05T16:21:07.000Z">
+<meta property="article:modified_time" content="2020-11-22T08:24:11.580Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="tech">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.zhesih.com/archives/uploads/raftlog.jpeg">
+
+
+<link rel="canonical" href="http://blog.zhesih.com/archives/5015bdda.html">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>etcd-raft-follower | 随风飘散的记忆</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MsgProp"><span class="nav-number">1.</span> <span class="nav-text">MsgProp</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MsgApp"><span class="nav-number">2.</span> <span class="nav-text">MsgApp</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FAQ-unstable-%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BC%9A-stable%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">FAQ: unstable 什么时候会 stable？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MsgHeartbeat"><span class="nav-number">3.</span> <span class="nav-text">MsgHeartbeat</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MsgReadIndex"><span class="nav-number">4.</span> <span class="nav-text">MsgReadIndex</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FAQ-%E9%82%A3%E4%B9%88-msgs-%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BC%9A%E8%A2%AB%E5%8F%91%E9%80%81"><span class="nav-number">4.1.</span> <span class="nav-text">FAQ: 那么 msgs 什么时候会被发送</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zrss"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zrss" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zrss" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5015bdda.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          etcd-raft-follower
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-11-05 16:21:07" itemprop="dateCreated datePublished" datetime="2017-11-05T16:21:07Z">2017-11-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:24:11" itemprop="dateModified" datetime="2020-11-22T08:24:11Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>to be cont 先写部分吧</p>
+</blockquote>
+<h1 id="MsgProp"><a href="#MsgProp" class="headerlink" title="MsgProp"></a>MsgProp</h1><p>Follower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送</p>
+<h1 id="MsgApp"><a href="#MsgApp" class="headerlink" title="MsgApp"></a>MsgApp</h1><p>Follower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；调用 handleAppendEntries 方法处理 MsgApp 消息；handleAppendEntries 方法中向 m.From 发送 MsgAppResp 消息；消息中包含经过处理 MsgApp 后，当前节点的 Index；冲突时额外返回 Reject: true，RejectHint: lastIndex</p>
+<p>maybeAppend: handleAppendEntries 方法中使用到的 maybeAppend 方法分析</p>
+<p>(1)</p>
+<p>firstIndex 会尝试从 unstable 的 snapshot 中获取 snapshot meta Index，如果 snapshot 为 nil（maybeFirstIndex），则从 storage 中获取 ents[0].Index</p>
+<p>(2)</p>
+<p>lastIndex 会尝试从 unstable 的 ents 中获取最后一个 entry 的 index，如果 unstable 的 ents 为空，则获取 unstable 的 snapshot meta index（maybeLastIndex），如果仍然获取不到，则从 storage 中获取最后一个 entry 的 Index</p>
+<p>看明白最基础的方法 firstIndex 和 lastIndex 后，继续往下</p>
+<p>(3)</p>
+<p>term 尝试获取 index 为 i 的 entry 的 term，entries 的第一个 index 为 dummy index，即每次收到 MsgApp 消息时，m.Index 为 dummy entry (index)，后续为真正的 entries (m.Ents)；dummy index &lt;= i &lt;= lastIndex，如果 index i 不位于该范围中，显然无法找到对应的 term；maybeTerm 尝试在 unstable 中获取 index 为 i 的 entry 的 term，unstable 中无法找到的话，从 storage 中查找</p>
+<p>(4)</p>
+<p>matchTerm(i uint64, term Term) 的实现，首先尝试获取 index i 的 term，随后匹配是否等于 term</p>
+<p>(5)</p>
+<p>findConflict 的实现，对 ents 中的每个 entry 调用 matchTerm 方法，Index 升序遍历，遇到 unmatch的 (即遇到相同 Index 不同 Term 的 entry 认为 conflict)，如果这个 unmatch 的 entry 的 Index &lt;= lastIndex，则有 conflict，返回第一个 conflict entry 的 Index；如果这个 unmatch 的 entry 的 Index &gt; lastIndex，则认为是新的未包含的 entry，则返回第一个新的 entry 的 Index；如果均 match 则返回 0</p>
+<p>(6)</p>
+<p>maybeAppend(m.Index, m.LogTerm, m.Commit, m.Entries…) 的实现，内部会首先判断 matchTerm(m.Index, m.LogTerm)，过了之后，会对每个 entry findConflict，没有 confict 则没啥好添加的，有 conflict，可能是真 conlict 也可能是包含了新的 entries，统一调用 append 方法加入到 unstable 中；注意这是 Follower 的行为，Follower 会使用 Leader 发来的 MsgApp 改写自己本地的 entries；Leader 发来的 MsgApp 中包含了其已经 commited 的 Index 信息，Follower 使用 commited 和 MsgApp 中的最后 Index 中小的那个 Index 作为能 committed 的 index</p>
+<blockquote>
+<p>lastnewi = index + uint64(len(ents))</p>
+</blockquote>
+<p>commitTo(min(commited, lastnewi))</p>
+<p>如果 tocommit &gt; l.lastIndex() 会 panic</p>
+<p>(7)</p>
+<p>综上</p>
+<ul>
+<li>接收到 MsgHeartbeat 消息会更新 commited</li>
+<li>接收到 MsgApp 消息可能会更新 commited</li>
+</ul>
+<h2 id="FAQ-unstable-什么时候会-stable？"><a href="#FAQ-unstable-什么时候会-stable？" class="headerlink" title="FAQ: unstable 什么时候会 stable？"></a>FAQ: unstable 什么时候会 stable？</h2><p>在 node 的 main for loop 中，首先会从 raftlog 中获取 ready to apply 的 entries (即 unstable 和 nextEnts)，将其放入 readyc 通道后，等待 advancec 通道消息；当外部 apply 结束后，调用 node.Advance() 方法，node 获取到 advancec 通道中的消息，开始执行 raftlog 的 apply 更新 apply index 和 stable to 将 unstable 变为 stable</p>
+<p>raftlog 的逻辑图如下 (没写 snapshot 部分)</p>
+<p><img src="./uploads/raftlog.jpeg" alt="raftlog"></p>
+<h1 id="MsgHeartbeat"><a href="#MsgHeartbeat" class="headerlink" title="MsgHeartbeat"></a>MsgHeartbeat</h1><p>Follower 收到 MsgHeartbeat 消息时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；commitTo MsgHeartbeat 中的 commited index，并向 Leader 回复 MsgHeartbeatResp 消息</p>
+<h1 id="MsgReadIndex"><a href="#MsgReadIndex" class="headerlink" title="MsgReadIndex"></a>MsgReadIndex</h1><p>Follower 收到 MsgReadIndex 消息，将请求转发至 Leader；Leader 返回 MsgReadIndexResp 消息，有且仅有 1 Entry，返回已到达一致性的 Index (consistency=l)；线性 / 序列化，貌似是个术语待查</p>
+<p>Follower 收到 MsgReadIndexResp 消息，有且仅有 1 Entry，将其加入 readStates 中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.readStates = <span class="built_in">append</span>(r.readStates, ReadState&#123;Index: m.Index, RequestCtx: m.Entries[<span class="number">0</span>].Data&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="FAQ-那么-msgs-什么时候会被发送"><a href="#FAQ-那么-msgs-什么时候会被发送" class="headerlink" title="FAQ: 那么 msgs 什么时候会被发送"></a>FAQ: 那么 msgs 什么时候会被发送</h2><p>回到 node 的 main forloop，在 rd = newReady(r, prevSoftSt, prevHardSt) 方法中会读取 r.msgs，并设置 n.readyc 通道，后续将 rd 放入 readyc 通道中，等待外部消费；外部通过 node.Ready() 方法获得内部需 apply or 待发送的 Messages</p>
+<p>在 etcdserver/raft.go 的 main forloop 中获取 readyc 通道消息 rd := &lt;-r.Ready()，该 apply Messages 放入到 r.applyc 通道，该发送的 r.Messages，调用 r.sendMessages(rd.Messages) 发送，结束之后调用 r.Advance()</p>
+<p>另外在 etcdserver/server.go 的 main forloop 中获取 ap ap := &lt;-s.r.apply()，将这次 apply 放入 FIFO 中，FIFO 内部协程异步处理 apply job</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/d7e71fec.html" rel="prev" title="boltdb-cursor">
+                  <i class="fa fa-chevron-left"></i> boltdb-cursor
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/9bd3bd71.html" rel="next" title="angularjs and webpack">
+                  angularjs and webpack <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 2007 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">214k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:15</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: true
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

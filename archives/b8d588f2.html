@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="最近在着手实现 Console k8s workload upgrade 相关的任务，然而 mock 数据不直观，使用完整的集成环境，又存在不稳定性，经常与其他任务冲突（比如测试要开始搞破坏了）。遂重新开始折腾 k8s cluster setup 当然 k8s 发展到今天 local up 已经做的相对简单（可能对于自由的网络环境来说，不自由的就求爷爷告奶奶了） 这里 local up k8s c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s minikube setup">
+<meta property="og:url" content="http://blog.zhesih.com/archives/b8d588f2.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="最近在着手实现 Console k8s workload upgrade 相关的任务，然而 mock 数据不直观，使用完整的集成环境，又存在不稳定性，经常与其他任务冲突（比如测试要开始搞破坏了）。遂重新开始折腾 k8s cluster setup 当然 k8s 发展到今天 local up 已经做的相对简单（可能对于自由的网络环境来说，不自由的就求爷爷告奶奶了） 这里 local up k8s c">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-06-24T12:09:06.000Z">
+<meta property="article:modified_time" content="2020-12-06T04:17:12.664Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.zhesih.com/archives/b8d588f2.html">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>k8s minikube setup | 随风飘散的记忆</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Environment"><span class="nav-number">1.</span> <span class="nav-text">Environment</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Install"><span class="nav-number">2.</span> <span class="nav-text">Install</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Network"><span class="nav-number">3.</span> <span class="nav-text">Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Minikube-start"><span class="nav-number">4.</span> <span class="nav-text">Minikube start</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-proxy"><span class="nav-number">5.</span> <span class="nav-text">Docker proxy</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B-events"><span class="nav-number">5.1.</span> <span class="nav-text">查看 events</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B-kubelet-%E6%97%A5%E5%BF%97"><span class="nav-number">5.2.</span> <span class="nav-text">查看 kubelet 日志</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#how-does-minikube-start"><span class="nav-number">6.</span> <span class="nav-text">how does minikube start</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Back-to-Docker-proxy"><span class="nav-number">7.</span> <span class="nav-text">Back to Docker proxy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Another-method-for-Docker-proxy-recommended"><span class="nav-number">8.</span> <span class="nav-text">Another method for Docker proxy (recommended)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#minikube-logs-healthcheck-error"><span class="nav-number">9.</span> <span class="nav-text">minikube logs healthcheck error</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zrss"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zrss" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zrss" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b8d588f2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          k8s minikube setup
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-24 12:09:06" itemprop="dateCreated datePublished" datetime="2018-06-24T12:09:06Z">2018-06-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 04:17:12" itemprop="dateModified" datetime="2020-12-06T04:17:12Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近在着手实现 Console k8s workload upgrade 相关的任务，然而 mock 数据不直观，使用完整的集成环境，又存在不稳定性，经常与其他任务冲突（比如测试要开始搞破坏了）。遂重新开始折腾 k8s cluster setup</p>
+<p>当然 k8s 发展到今天 local up 已经做的相对简单（可能对于自由的网络环境来说，不自由的就求爷爷告奶奶了）</p>
+<p>这里 local up k8s cluster 使用的是 minikube 方案 <a target="_blank" rel="noopener" href="https://v1-9.docs.kubernetes.io/docs/getting-started-guides/minikube/">https://v1-9.docs.kubernetes.io/docs/getting-started-guides/minikube/</a></p>
+<p>此篇适用下述两条背景</p>
+<ul>
+<li>非阿里 minikube 版本</li>
+<li>解决 minikube docker proxy not work 问题</li>
+</ul>
+<h1 id="Environment"><a href="#Environment" class="headerlink" title="Environment"></a>Environment</h1><ul>
+<li>OS: macOS Sierra 10.12.6</li>
+<li>minikube: v0.25.0</li>
+<li>VM Driver: virtualbox</li>
+<li>ISO version: minikube-v0.25.1.iso</li>
+</ul>
+<h1 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h1><p>macOS 安装 minikube 可以说很简单了</p>
+<blockquote>
+<p>已安装 homebrew</p>
+</blockquote>
+<p>homebrew install minikube</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew cask install minikube</span><br></pre></td></tr></table></figure>
+
+<h1 id="Network"><a href="#Network" class="headerlink" title="Network"></a>Network</h1><p>国内的困难主要是这个</p>
+<p>我使用的方案是 Shadowsocks + privoxy，相关的资料非常多，不赘述了</p>
+<p>privoxy 的配置如下 cat /usr/local/etc/privoxy/config</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">listen-address 0.0.0.0:1081</span><br><span class="line">forward-socks5 &#x2F; 127.0.0.1:1080 .</span><br></pre></td></tr></table></figure>
+
+<p>1080 端口为 socks5 的监听端口（即 Shadowsocks），privoxy 监听 1081 端口，将 1081 端口的 http 请求转发至 1080 socks5 监听端口上，这样就能让 http 请求也经过 socks5 转发了</p>
+<p>测试一下 privoxy 是否正常工作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check process</span></span><br><span class="line">ps -ef | grep privoxy</span><br><span class="line"><span class="comment"># curl port</span></span><br><span class="line">curl http://127.0.0.0:1081</span><br><span class="line"><span class="comment"># netstat (recommended)</span></span><br><span class="line">netstat -an | grep 1081</span><br><span class="line"><span class="comment"># lsof</span></span><br><span class="line">lsof -i:1081</span><br></pre></td></tr></table></figure>
+
+<h1 id="Minikube-start"><a href="#Minikube-start" class="headerlink" title="Minikube start"></a>Minikube start</h1><p>使用上一步搭建好的 privoxy http 代理</p>
+<p>我使用的终端为 iTerm，理论上系统自带 Terminal 也 ok</p>
+<p>设置 http / https 代理</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> https_proxy=https://127.0.0.1:1081</span><br></pre></td></tr></table></figure>
+
+<p>启动 minikube</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start</span><br></pre></td></tr></table></figure>
+
+<h1 id="Docker-proxy"><a href="#Docker-proxy" class="headerlink" title="Docker proxy"></a>Docker proxy</h1><p>minikube 下载完成 iso 后，再 bootstrap k8s cluster，cluster 起来之后，会启动一些 system 组件，比如 kube-addon-manager-minikube/ dashboard / dns 等，然而不幸的是这些 pod 会一直处于 ContainerCreating 的状态</p>
+<h2 id="查看-events"><a href="#查看-events" class="headerlink" title="查看 events"></a>查看 events</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe po kube-addon-manager-minikube -nkube-system</span><br></pre></td></tr></table></figure>
+
+<p>None</p>
+<h2 id="查看-kubelet-日志"><a href="#查看-kubelet-日志" class="headerlink" title="查看 kubelet 日志"></a>查看 kubelet 日志</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube logs kubelet</span><br></pre></td></tr></table></figure>
+
+<p>发现端倪</p>
+<p>gcr.io/google_containers/pause-amd64:3.0，pause 容器无法 pull 下来</p>
+<p>继续搜索得知 minikube 可配置 docker proxy <a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md">https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md</a></p>
+<p>遂停止 minikube 并以新参数启动之</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://127.0.0.1:1081 --docker-env HTTPS_PROXY=https://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br></pre></td></tr></table></figure>
+
+<p>呃，然而事实证明并不 work，遂登陆 vm</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br></pre></td></tr></table></figure>
+
+<p>尝试 curl 该 1081 端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl http://127.0.0.1:1081</span><br><span class="line">&gt;&gt; curl: (7) Failed to connect to 127.0.0.1 port 1081: Connection refused</span><br></pre></td></tr></table></figure>
+
+<p>可见 vm 中该端口并不通</p>
+<p>稍加思索，解决的思路应为在 virtualbox vm 中如何 connect back to host，因为 privoxy 实际上监听的是 host 的 1081 端口。几番搜索后，发现在 virtualbox vm 中可通过 10.0.2.2 IP connect back to host <a target="_blank" rel="noopener" href="https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os%EF%BC%8C%E7%99%BB%E9%99%86">https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os，登陆</a> vm</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
+
+<p>果然能通了</p>
+<p>于是再次尝试修改 minikube 启动命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://10.0.2.2:1081 --docker-env HTTPS_PROXY=https://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
+
+<p>糟糕的是，仍然不 work …，所以问题集中到了 http_proxy 未生效上</p>
+<p>登陆 vm 查看 docker version / info，希望能获取到一些线索</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># version</span></span><br><span class="line">docker version</span><br><span class="line">Client:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:39:28 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line">Server:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32 (minimum version 1.12)</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:45:38 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line"> Experimental: <span class="literal">false</span></span><br><span class="line"><span class="comment"># info</span></span><br><span class="line">docker info</span><br><span class="line">Containers: 0</span><br><span class="line">Running: 0</span><br><span class="line">Paused: 0</span><br><span class="line">Stopped: 0</span><br><span class="line">Images: 0</span><br><span class="line">Server Version: 17.09.0-ce</span><br><span class="line">Storage Driver: overlay2</span><br><span class="line"> Backing Filesystem: extfs</span><br><span class="line"> Supports d_type: <span class="literal">true</span></span><br><span class="line"> Native Overlay Diff: <span class="literal">true</span></span><br><span class="line">Logging Driver: json-file</span><br><span class="line">Cgroup Driver: cgroupfs</span><br><span class="line">Plugins:</span><br><span class="line"> Volume: <span class="built_in">local</span></span><br><span class="line"> Network: bridge host macvlan null overlay</span><br><span class="line"> Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog</span><br><span class="line">Swarm: inactive</span><br><span class="line">Runtimes: runc</span><br><span class="line">Default Runtime: runc</span><br><span class="line">Init Binary: docker-init</span><br><span class="line">containerd version: 06b9cb35161009dcb7123345749fef02f7cea8e0</span><br><span class="line">runc version: 3f2f8b84a77f73d38244dd690525642a72156c64</span><br><span class="line">init version: N/A (expected: )</span><br><span class="line">Security Options:</span><br><span class="line"> seccomp</span><br><span class="line">  Profile: default</span><br><span class="line">Kernel Version: 4.9.64</span><br><span class="line">Operating System: Buildroot 2017.11</span><br><span class="line">OSType: linux</span><br><span class="line">Architecture: x86_64</span><br><span class="line">CPUs: 2</span><br><span class="line">Total Memory: 1.953GiB</span><br><span class="line">Name: minikube</span><br><span class="line">ID: 6RR3:WAF4:FIGA:TTEG:5UE6:V3RD:JNQV:WQQ4:ER3T:ETKJ:ZVP4:2Z7M</span><br><span class="line">Docker Root Dir: /var/lib/docker</span><br><span class="line">Debug Mode (client): <span class="literal">false</span></span><br><span class="line">Debug Mode (server): <span class="literal">false</span></span><br><span class="line">Registry: https://index.docker.io/v1/</span><br><span class="line">Labels:</span><br><span class="line"> provider=virtualbox</span><br><span class="line">Experimental: <span class="literal">false</span></span><br><span class="line">Insecure Registries:</span><br><span class="line"> 10.96.0.0/12</span><br><span class="line"> 127.0.0.0/8</span><br><span class="line">Live Restore Enabled: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>然而似乎和问题并没有什么关联，http_proxy 和 docker daemon 有关，和 docker 没啥关系，所以在 version / info 中都未见 http_proxy 相关配置 <a target="_blank" rel="noopener" href="https://github.com/docker/distribution/issues/2397#issuecomment-330079118">https://github.com/docker/distribution/issues/2397#issuecomment-330079118</a></p>
+<p>追溯到这里，只能看看 minikube 代码中是如何使用 docker-env 这个传入参数的了</p>
+<h1 id="how-does-minikube-start"><a href="#how-does-minikube-start" class="headerlink" title="how does minikube start"></a>how does minikube start</h1><p>overall</p>
+<ul>
+<li>startHost</li>
+<li>startK8S</li>
+</ul>
+<p>startHost</p>
+<ul>
+<li>create virtualbox driver with boot2docker iso</li>
+<li>waiting docker set up</li>
+</ul>
+<p>step by step 的过程省略，最后找到如下代码片段，显示 docker-env 实际上并不会生效</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157">https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">start := <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    host, err = cluster.StartHost(api, config)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        glog.Errorf(<span class="string">&quot;Error starting host: %s.\n\n Retrying.\n&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &amp;host.Host&#123;</span><br><span class="line">    ConfigVersion: version.ConfigVersion,</span><br><span class="line">    Name:          driver.GetMachineName(),</span><br><span class="line">    Driver:        driver,</span><br><span class="line">    DriverName:    driver.DriverName(),</span><br><span class="line">    HostOptions: &amp;host.Options&#123;</span><br><span class="line">        AuthOptions: &amp;auth.Options&#123;</span><br><span class="line">            CertDir:          api.certsDir,</span><br><span class="line">            CaCertPath:       filepath.Join(api.certsDir, <span class="string">&quot;ca.pem&quot;</span>),</span><br><span class="line">            CaPrivateKeyPath: filepath.Join(api.certsDir, <span class="string">&quot;ca-key.pem&quot;</span>),</span><br><span class="line">            ClientCertPath:   filepath.Join(api.certsDir, <span class="string">&quot;cert.pem&quot;</span>),</span><br><span class="line">            ClientKeyPath:    filepath.Join(api.certsDir, <span class="string">&quot;key.pem&quot;</span>),</span><br><span class="line">            ServerCertPath:   filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server.pem&quot;</span>),</span><br><span class="line">            ServerKeyPath:    filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server-key.pem&quot;</span>),</span><br><span class="line">        &#125;,</span><br><span class="line">        EngineOptions: &amp;engine.Options&#123;</span><br><span class="line">            StorageDriver: <span class="string">&quot;aufs&quot;</span>,</span><br><span class="line">            TLSVerify:     <span class="literal">true</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        SwarmOptions: &amp;swarm.Options&#123;&#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
+
+<p>可见默认 SwarmOptions 是个空对象，其中值得注意的是 IsSwarm 的值为 false</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h, err := api.NewHost(config.VMDriver, data)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, errors.Wrap(err, <span class="string">&quot;Error creating new host&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">h.HostOptions.AuthOptions.CertDir = constants.GetMinipath()</span><br><span class="line">h.HostOptions.AuthOptions.StorePath = constants.GetMinipath()</span><br><span class="line">h.HostOptions.EngineOptions = engineOptions(config)</span><br></pre></td></tr></table></figure>
+
+<p>将 docker-env 赋值与 h.HostOptions.EngineOptions.Env</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232">https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">provisioner.SwarmOptions = swarmOptions</span><br><span class="line">provisioner.AuthOptions = authOptions</span><br><span class="line">provisioner.EngineOptions = engineOptions</span><br><span class="line">swarmOptions.Env = engineOptions.Env</span><br></pre></td></tr></table></figure>
+
+<p>最后将 docker-env 传与 swarmOptions.Env，而我们又知道 IsSwarm 的值为 false，因此实际上该配置并不会生效 … 社区真是给处于不自由网络地区的童鞋埋了个大坑 …</p>
+<h1 id="Back-to-Docker-proxy"><a href="#Back-to-Docker-proxy" class="headerlink" title="Back to Docker proxy"></a>Back to Docker proxy</h1><p>回到如何在 minikube 中配置 Docker proxy 的问题，实际上可以参考 Docker 官方的文档配置，使用 systemd</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy">https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br><span class="line">sudo mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line">sudo vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure>
+
+<p>输入如下内容并保存退出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">&quot;HTTP_PROXY=http://10.0.2.2:1081&quot;</span> <span class="string">&quot;HTTPS_PROXY=https://10.0.2.2:1081&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>Flush changes &amp; Restart Docker</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<p>Verify that the configuration has been loaded</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show --property=Environment docker</span><br></pre></td></tr></table></figure>
+
+<p>执行结束之后，此时在 vm 中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
+
+<p>终于可以正常 pull image 了，system pod 也可以正常 running 起来了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                                    READY     STATUS    RESTARTS   AGE</span><br><span class="line">kube-addon-manager-minikube             1/1       Running   4          12h</span><br><span class="line">kube-dns-54cccfbdf8-wfnxm               3/3       Running   3          12h</span><br><span class="line">kubernetes-dashboard-77d8b98585-t59gj   1/1       Running   1          12h</span><br><span class="line">storage-provisioner                     1/1       Running   1          12h</span><br></pre></td></tr></table></figure>
+
+<p>不过因为该改动并未固化到 iso 中，因此 minikube stop 之后改动会丢失 … 另外一个折中的办法</p>
+<h1 id="Another-method-for-Docker-proxy-recommended"><a href="#Another-method-for-Docker-proxy-recommended" class="headerlink" title="Another method for Docker proxy (recommended)"></a>Another method for Docker proxy (recommended)</h1><blockquote>
+<p>workaround</p>
+</blockquote>
+<p>之前我们知道，在 terminal 中 export http_proxy 之后，minikube 即可使用 proxy 访问网络资源，而在 minikube –help 中发现 minikube 可以 cache image，所以我们可以 cache 需要使用的 image 资源，如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br><span class="line">minikube cache add gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
+
+<p>也可以解决问题，比如我目前 cache 的 image</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">minikube cache list</span><br><span class="line">gcr.io/google-containers/kube-addon-manager:v6.5</span><br><span class="line">gcr.io/google_containers/pause-amd64:3.0</span><br><span class="line">gcr.io/k8s-minikube/storage-provisioner:v1.8.1</span><br><span class="line">k8s.gcr.io/k8s-dns-dnsmasq-nanny-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-kube-dns-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-sidecar-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.1</span><br></pre></td></tr></table></figure>
+
+<p>cache 这些 image 之后，就可以使得 kube-system 下面的 pod 都 running 了</p>
+<h1 id="minikube-logs-healthcheck-error"><a href="#minikube-logs-healthcheck-error" class="headerlink" title="minikube logs healthcheck error"></a>minikube logs healthcheck error</h1><p>使用 minikube 过程中发现其 logs 中一直有如下错误日志</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jun 23 18:15:15 minikube localkube[3034]: E0623 18:15:15.392453    3034 healthcheck.go:317] Failed to start node healthz on 0: listen tcp: address 0: missing port <span class="keyword">in</span> address</span><br></pre></td></tr></table></figure>
+
+<p>查看了相关代码，似乎是正常现象，不过这个实现也是太奇怪了 … 可参考如下 issue，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288">https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/b40cf9b.html" rel="prev" title="k8s annotation of storage">
+                  <i class="fa fa-chevron-left"></i> k8s annotation of storage
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/8e645281.html" rel="next" title="a weired bug of job workload">
+                  a weired bug of job workload <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 2007 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">214k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:15</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: true
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

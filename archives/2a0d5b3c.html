@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="wal fsync delay warning对于 leader 来说，可以先行向 follower 发送 messages，再进行 wal 的写入等后续持久化操作，最后 n.advance 对于 follower 来说，必须进行 wal 的写入等持久化操作后，才能向其他成员发送 messages，最后 n.advance wal 的 fsync 调用 123456789mustSync :&#x3D; m">
+<meta property="og:type" content="article">
+<meta property="og:title" content="warning-log-about-etcd">
+<meta property="og:url" content="http://blog.zhesih.com/archives/2a0d5b3c.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="wal fsync delay warning对于 leader 来说，可以先行向 follower 发送 messages，再进行 wal 的写入等后续持久化操作，最后 n.advance 对于 follower 来说，必须进行 wal 的写入等持久化操作后，才能向其他成员发送 messages，最后 n.advance wal 的 fsync 调用 123456789mustSync :&#x3D; m">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-10-27T15:49:35.000Z">
+<meta property="article:modified_time" content="2020-11-22T07:53:52.977Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="etcd-v3">
+<meta property="article:tag" content="ops">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.zhesih.com/archives/2a0d5b3c.html">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>warning-log-about-etcd | 随风飘散的记忆</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#wal-fsync-delay-warning"><span class="nav-number">1.</span> <span class="nav-text">wal fsync delay warning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#boltdb-apply-delay-warning"><span class="nav-number">2.</span> <span class="nav-text">boltdb apply delay warning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#leader-send-out-heartbeat-delay-warning"><span class="nav-number">3.</span> <span class="nav-text">leader send out heartbeat delay warning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#the-clock-difference-againset-peer-is-too-high-warning"><span class="nav-number">4.</span> <span class="nav-text">the clock difference againset peer is too high warning</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zrss"
+      src="/images/avatar.jpeg">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zrss" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zrss" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2a0d5b3c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          warning-log-about-etcd
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-27 15:49:35" itemprop="dateCreated datePublished" datetime="2017-10-27T15:49:35Z">2017-10-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:53:52" itemprop="dateModified" datetime="2020-11-22T07:53:52Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="wal-fsync-delay-warning"><a href="#wal-fsync-delay-warning" class="headerlink" title="wal fsync delay warning"></a>wal fsync delay warning</h1><p>对于 leader 来说，可以先行向 follower 发送 messages，再进行 wal 的写入等后续持久化操作，最后 n.advance</p>
+<p>对于 follower 来说，必须进行 wal 的写入等持久化操作后，才能向其他成员发送 messages，最后 n.advance</p>
+<p>wal 的 fsync 调用</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mustSync := mustSync(st, w.state, <span class="built_in">len</span>(ents))</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mustSync</span><span class="params">(st, prevst raftpb.HardState, entsnum <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// Persistent state on all servers:</span></span><br><span class="line">	<span class="comment">// (Updated on stable storage before responding to RPCs)</span></span><br><span class="line">	<span class="comment">// currentTerm</span></span><br><span class="line">	<span class="comment">// votedFor</span></span><br><span class="line">	<span class="comment">// log entries[]</span></span><br><span class="line">	<span class="keyword">return</span> entsnum != <span class="number">0</span> || st.Vote != prevst.Vote || st.Term != prevst.Term</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看的出来 <strong>fsync 调用很频繁</strong>，每次写入都有 fsync 调用，毕竟每次写入时 entsnum 不为 0</p>
+<p>fsync 的对象为最新的 wal 文件</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">start := time.Now()</span><br><span class="line">err := fileutil.Fdatasync(w.tail().File)</span><br><span class="line">duration := time.Since(start)</span><br><span class="line"><span class="keyword">if</span> duration &gt; warnSyncDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;sync duration of %v, expected less than %v&quot;</span>, duration, warnSyncDuration)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>fsync 调用时间超过 1s 会告警</strong>，磁盘 IO 有波动了 or 不满足要求</p>
+<h1 id="boltdb-apply-delay-warning"><a href="#boltdb-apply-delay-warning" class="headerlink" title="boltdb apply delay warning"></a>boltdb apply delay warning</h1><p>wal 写完，raft 协议走通，可同步数据后 apply 数据到本地存储</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">s.applySnapshot(ep, apply)</span><br><span class="line">st := time.Now()</span><br><span class="line">s.applyEntries(ep, apply)</span><br><span class="line">d := time.Since(st)</span><br><span class="line">entriesNum := <span class="built_in">len</span>(apply.entries)</span><br><span class="line"><span class="keyword">if</span> entriesNum != <span class="number">0</span> &amp;&amp; d &gt; time.Duration(entriesNum)*warnApplyDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;apply entries took too long [%v for %d entries]&quot;</span>, d, <span class="built_in">len</span>(apply.entries))</span><br><span class="line">	plog.Warningf(<span class="string">&quot;avoid queries with large range/delete range!&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>平均 apply 一个 entry 耗时 100ms，*<em>如果 apply 总时间超过 n * 100ms 则告警*</em></p>
+<p>比如 put 请求，最后调到 kvstore.go 的 put 方法，kvindex (B tree) 中搜索一把，再用 boltdb tx 写入一把，kvindex 增加一把，有 lease 的加 lease</p>
+<p>当然上述的都是耗时，只不过 boltdb put 的耗时一般而言比其他的操作都大</p>
+<h1 id="leader-send-out-heartbeat-delay-warning"><a href="#leader-send-out-heartbeat-delay-warning" class="headerlink" title="leader send out heartbeat delay warning"></a>leader send out heartbeat delay warning</h1><p>在 r.sendMessages(rd.Messages) 方法中，也会打印延时告警日志</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a heartbeat message</span></span><br><span class="line"><span class="keyword">if</span> ms[i].Type == raftpb.MsgHeartbeat &#123;</span><br><span class="line">	<span class="comment">// exceed maxDuration time</span></span><br><span class="line">	ok, exceed := r.td.Observe(ms[i].To)</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> limit request rate.</span></span><br><span class="line">		plog.Warningf(<span class="string">&quot;failed to send out heartbeat on time (exceeded the %v timeout for %v)&quot;</span>, r.heartbeat, exceed)</span><br><span class="line">		plog.Warningf(<span class="string">&quot;server is likely overloaded&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个地方的算法，是超过 2*hearbeat 时间作为 exceed 时间</p>
+<p>leader 将这些 Message 先行发送给 followers，如果是心跳消息，则计算当前时间 - 上次记录的时间是否超过了 2*hearbeat，如果是，则打印超过的值；需注意该值如果接近或超过了 election timeout 时间，则会引发其他成员发起选举，导致集群不稳定</p>
+<p>一般这个告警，是由 wal fsync delay 诱发的，而 wal fsync delay 又与磁盘 IO 有关；另外 apply 不是也有 delay 的 warning ？为啥它的影响不大，答：因为 apply 会走 fifo 的调度，是异步的；当然也是有影响的，总会影响整体时延</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">	f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">    sched.Schedule(f)</span><br></pre></td></tr></table></figure>
+
+<p>放入队列就跑</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Schedule schedules a job that will be ran in FIFO order sequentially.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *fifo)</span> <span class="title">Schedule</span><span class="params">(j Job)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	f.pendings = <span class="built_in">append</span>(f.pendings, j)</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="the-clock-difference-againset-peer-is-too-high-warning"><a href="#the-clock-difference-againset-peer-is-too-high-warning" class="headerlink" title="the clock difference againset peer is too high warning"></a>the clock difference againset peer is too high warning</h1><p>peer 间计算时差大于 1s 告警，ps: 当前 peer 比对端 peer 时间大</p>
+<p>etcd 会将其每个 peer 加入到 probe 中，定时发起 get 请求，一方面可以探测 peer health 另一方面通过其返回值，计算 peer 之间的时间差；没发现该 warning 会对业务造成影响；还没过代码，和时间相关的实现也就 lease 了，暂且推测 lease 用的是逻辑时钟，所以没影响</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">monitorProbingStatus</span><span class="params">(s probing.Status, id <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">if</span> s.ClockDiff() &gt; time.Second &#123;</span><br><span class="line">		plog.Warningf(<span class="string">&quot;the clock difference against peer %s is too high [%v &gt; %v]&quot;</span>, id, s.ClockDiff(), time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	rtts.WithLabelValues(id).Observe(s.SRTT().Seconds())</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>probe (4s) 及 monit (30s) 周期</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proberInterval           = ConnReadTimeout - time.Second (<span class="number">5</span> - <span class="number">1</span>)</span><br><span class="line">statusMonitoringInterval = <span class="number">30</span> * time.Second</span><br></pre></td></tr></table></figure>
+
+<p>开始记录值，start 为本次开始 probe 的时间，hh.Now 为对端 peer 返回的时间</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">α = <span class="number">0.125</span></span><br><span class="line">s.record(time.Since(start), hh.Now)</span><br></pre></td></tr></table></figure>
+
+<p>时差计算方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// srtt init 0</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *status)</span> <span class="title">record</span><span class="params">(rtt time.Duration, when time.Time)</span></span> &#123;</span><br><span class="line">	s.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> s.mu.Unlock()</span><br><span class="line">	s.total += <span class="number">1</span></span><br><span class="line">	s.health = <span class="literal">true</span></span><br><span class="line">	s.srtt = time.Duration((<span class="number">1</span>-α)*<span class="keyword">float64</span>(s.srtt) + α*<span class="keyword">float64</span>(rtt))</span><br><span class="line">	s.clockdiff = time.Now().Sub(when) - s.srtt/<span class="number">2</span></span><br><span class="line">	s.err = <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大概来说就是 local time 减掉 peer time，再减修正时间</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/etcd-v3/" rel="tag"># etcd-v3</a>
+              <a href="/tags/ops/" rel="tag"># ops</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/e6d66434.html" rel="prev" title="deep-in-boltdb">
+                  <i class="fa fa-chevron-left"></i> deep-in-boltdb
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/d7e71fec.html" rel="next" title="boltdb-cursor">
+                  boltdb-cursor <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 2007 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">214k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">3:15</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: true
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
