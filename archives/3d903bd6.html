@@ -24,21 +24,21 @@
     var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="又要开始分析一个疑难杂症了 现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出 job-controller 的工作原理job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分 12345go job.NewJobController(    ctx">
+  <meta name="description" content="很久没写了，这次真的情绪很低落 自己明明那么认真，然而却事与愿违 不过想想也可以理解，毕竟每个人心中重要的事情不一样，接受吧 是呢，工作半年，“我变强了，也变秃了”，不再是小年轻的模样，已是满脸胡须 年轻真好呀，可以 跑到海角之南，只为追一首歌的回忆 天不怕地不怕的闯 藐视一切 可惜，又不可惜 梦醒的感觉而已 美好又遗憾 2017年10月13日21:59:32 杭州  三年后，此时的我，回去翻这些">
 <meta property="og:type" content="article">
-<meta property="og:title" content="a weired bug of job workload">
-<meta property="og:url" content="http://blog.zhesih.com/archives/Infinity.html">
+<meta property="og:title" content="岁月无可回头(11)">
+<meta property="og:url" content="http://blog.zhesih.com/archives/3d903bd6.html">
 <meta property="og:site_name" content="随风飘散的记忆">
-<meta property="og:description" content="又要开始分析一个疑难杂症了 现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出 job-controller 的工作原理job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分 12345go job.NewJobController(    ctx">
+<meta property="og:description" content="很久没写了，这次真的情绪很低落 自己明明那么认真，然而却事与愿违 不过想想也可以理解，毕竟每个人心中重要的事情不一样，接受吧 是呢，工作半年，“我变强了，也变秃了”，不再是小年轻的模样，已是满脸胡须 年轻真好呀，可以 跑到海角之南，只为追一首歌的回忆 天不怕地不怕的闯 藐视一切 可惜，又不可惜 梦醒的感觉而已 美好又遗憾 2017年10月13日21:59:32 杭州  三年后，此时的我，回去翻这些">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2018-07-06T11:05:29.000Z">
-<meta property="article:modified_time" content="2020-12-12T07:42:52.280Z">
+<meta property="article:published_time" content="2017-10-13T21:59:32.000Z">
+<meta property="article:modified_time" content="2020-12-12T07:45:52.110Z">
 <meta property="article:author" content="Zrss">
-<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="生活">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://blog.zhesih.com/archives/Infinity.html">
+<link rel="canonical" href="http://blog.zhesih.com/archives/3d903bd6.html">
 
 
 <script class="page-configurations">
@@ -51,7 +51,7 @@
   };
 </script>
 
-  <title>a weired bug of job workload | 随风飘散的记忆</title>
+  <title>岁月无可回头(11) | 随风飘散的记忆</title>
   
 
 
@@ -161,7 +161,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -174,7 +174,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#job-controller-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">job-controller 的工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kubelet"><span class="nav-number">2.</span> <span class="nav-text">kubelet</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -249,7 +248,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/Infinity.html">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/3d903bd6.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -262,7 +261,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          a weired bug of job workload
+          岁月无可回头(11)
         </h1>
 
         <div class="post-meta-container">
@@ -273,15 +272,24 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-07-06 11:05:29" itemprop="dateCreated datePublished" datetime="2018-07-06T11:05:29Z">2018-07-06</time>
+      <time title="创建时间：2017-10-13 21:59:32" itemprop="dateCreated datePublished" datetime="2017-10-13T21:59:32Z">2017-10-13</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:42:52" itemprop="dateModified" datetime="2020-12-12T07:42:52Z">2020-12-12</time>
+        <time title="修改时间：2020-12-12 07:45:52" itemprop="dateModified" datetime="2020-12-12T07:45:52Z">2020-12-12</time>
       </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
 
   
       </div>
@@ -291,14 +299,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.7k</span>
+      <span>254</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
+      <span>1 分钟</span>
     </span>
 </div>
 
@@ -309,48 +317,21 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>又要开始分析一个疑难杂症了</p>
-<p>现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出</p>
-<h1 id="job-controller-的工作原理"><a href="#job-controller-的工作原理" class="headerlink" title="job-controller 的工作原理"></a>job-controller 的工作原理</h1><p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> job.NewJobController(</span><br><span class="line">    ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">    ctx.InformerFactory.Batch().V1().Jobs(),</span><br><span class="line">    ctx.ClientBuilder.ClientOrDie(<span class="string">&quot;job-controller&quot;</span>),</span><br><span class="line">).Run(<span class="keyword">int</span>(ctx.Options.ConcurrentJobSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
-
-<p>从启动代码中可以看出 job-controller 关注 pod 与 job 这两种资源的变化情况</p>
-<ul>
-<li>ctx.InformerFactory.Core().V1().Pods()</li>
-<li>ctx.InformerFactory.Batch().V1().Jobs()</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentJobSyncs&#x3D;5</span><br></pre></td></tr></table></figure>
-
-<p>启动 5 个 worker goroutine</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(jm.worker, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 worker 协程中，1s 执行一次 worker 方法</p>
-<p>worker 方法，实现从 queue 中获取待处理的对象（key），并调用 syncJob 方法处理之</p>
-<ul>
-<li>syncJob 处理成功</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jobInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc: jm.enqueueController,</span><br><span class="line">    UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> job := cur.(*batch.Job); !IsJobFinished(job) &#123;</span><br><span class="line">            jm.enqueueController(job)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    DeleteFunc: jm.enqueueController,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc:    jm.addPod,</span><br><span class="line">    UpdateFunc: jm.updatePod,</span><br><span class="line">    DeleteFunc: jm.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<h1 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h1><p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
-<p>我们知道 kubelet 通过 PLEG 来感知节点上 container 的状态，另外 job pod 的 restart policy 目前仅支持两种 Never / onFailure，一般来说默认选择 onFailure 比较合适</p>
-<p>这样业务容器在正常退出后（exit 0），kubelet pleg 感知到后，再加上 onFailure 的策略，正常情况下会 killing pod，job-controller 感知到 pod 减少后，即完成数又增加了 1，即可成功结束</p>
-<p>看下 kubelet 的代码确认逻辑</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Get all the pods.</span></span><br><span class="line">podList, err := g.runtime.GetPods(<span class="literal">true</span>)</span><br><span class="line">ShouldContainerBeRestarted</span><br><span class="line"></span><br><span class="line"><span class="comment">// Check RestartPolicy for dead container</span></span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyNever &#123;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure &#123;</span><br><span class="line">    <span class="comment">// Check the exit code.</span></span><br><span class="line">    <span class="keyword">if</span> status.ExitCode == <span class="number">0</span> &#123;</span><br><span class="line">        glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already successfully ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
-<p>如此情况下需要 KillPod</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> keepCount == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(changes.ContainersToStart) == <span class="number">0</span> &#123;</span><br><span class="line">    changes.KillPod = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以正常情况下 job 控制的 pod，重启策略为 RestartPolicyOnFailure，如是正常退出的情况，则该 container 无需重启，而再加上述的判断，则当前 pod 需要被删除</p>
-<p>调用该 killPodWithSyncResult 方法</p>
-<p>经过如此分析，可能出现的问题原因及疑点</p>
-<ul>
-<li>2 个 pod 处于 running 状态，而对应的 container 却没有了，尝试从 relist: g.runtime.GetPods(true) 寻找可能原因</li>
-<li>使用命令行如何获取节点上的 container 容器，如果 container 正常获取，且 pod 对应的 container 已正常退出，那么为何未看到 SyncLoop(PLEG) ContainerDied 事件</li>
-<li>pod 状态也是持续 running，而我们知道在 syncPod 中会调用 statusManager 设置新的 pod status，如果能获取到正确的 container info，pod status 也会被正确的更新至 kube-apiserver</li>
-<li>正常情况下，至多为一个 pod 保留一个 container 记录，其余均会被 clean。为何当时 docker ps -a 无一相关的 container，全都被 clear 了？那意味着 node evicted，或者是 pod 被 delete 了。evicted 的可能性较小，而 pod 被 delete 的话，除了人为，job-controller activeDeadline 超了也会设置</li>
-</ul>
+        <p>很久没写了，这次真的情绪很低落</p>
+<p>自己明明那么认真，然而却事与愿违</p>
+<p>不过想想也可以理解，毕竟每个人心中重要的事情不一样，接受吧</p>
+<p>是呢，工作半年，“我变强了，也变秃了”，不再是小年轻的模样，已是满脸胡须</p>
+<p>年轻真好呀，可以</p>
+<p>跑到海角之南，只为追一首歌的回忆</p>
+<p>天不怕地不怕的闯</p>
+<p>藐视一切</p>
+<p>可惜，又不可惜</p>
+<p>梦醒的感觉而已</p>
+<p>美好又遗憾</p>
+<p>2017年10月13日21:59:32 杭州</p>
+<hr>
+<p>三年后，此时的我，回去翻这些文字（陆陆续续写了 11 篇），只能感叹 “没有岁月可回头” ~ 希望今后有更强大的内心，去面对更多挑战</p>
+<p>2020年08月01日00:47:47 杭州</p>
 
     </div>
 
@@ -360,20 +341,20 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/k8s/" rel="tag"># k8s</a>
+              <a href="/tags/%E7%94%9F%E6%B4%BB/" rel="tag"># 生活</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/archives/b8d588f2.html" rel="prev" title="k8s minikube setup">
-                  <i class="fa fa-chevron-left"></i> k8s minikube setup
+                <a href="/archives/77fa05dc.html" rel="prev" title="ETCD V3 中的 db 文件">
+                  <i class="fa fa-chevron-left"></i> ETCD V3 中的 db 文件
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/archives/5964173e.html" rel="next" title="WebSocket in Tomcat 7 (part 1)">
-                  WebSocket in Tomcat 7 (part 1) <i class="fa fa-chevron-right"></i>
+                <a href="/archives/89164994.html" rel="next" title="曾經我也想放棄治療">
+                  曾經我也想放棄治療 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
