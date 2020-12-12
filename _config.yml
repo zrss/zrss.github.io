@@ -107,7 +107,7 @@ theme: next
 deploy:
   type: 'git'
   repo: 
-    github: https://github.com/zrss/zrss.github.io.git
+    github: git@github.com:zrss/zrss.github.io.git
   branch: master
 
 symbols_count_time:
