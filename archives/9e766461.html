@@ -24,21 +24,21 @@
     var CONFIG = {"hostname":"blog.zhesih.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="刚得知预答辩没有抽中，微微有些高兴，不过毕竟毕设也是自己写的，洋洋洒洒的写了几万字，就算抽中也不至于太过惨烈吧。 不管怎么说，毕业进程就只剩三月份的答辩了。 哎，程序员我真是太呆了，自己完全没有生活经验的样子，每天对着冷冰冰的电脑，跑着不会回应你的代码，实现各种自动化逻辑。与人交流少，是不是可以提高下，勇敢一点，等下次勇敢的干了几件大事儿再来写了。 突然想起几个好朋友。 A 提醒，不要多想，别轻易">
+  <meta name="description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3  Main 检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan str">
 <meta property="og:type" content="article">
-<meta property="og:title" content="浮生日记">
-<meta property="og:url" content="http://blog.zhesih.com/archives/750227811.html">
+<meta property="og:title" content="ETCD V2 的启动过程">
+<meta property="og:url" content="http://blog.zhesih.com/archives/9e766461.html">
 <meta property="og:site_name" content="随风飘散的记忆">
-<meta property="og:description" content="刚得知预答辩没有抽中，微微有些高兴，不过毕竟毕设也是自己写的，洋洋洒洒的写了几万字，就算抽中也不至于太过惨烈吧。 不管怎么说，毕业进程就只剩三月份的答辩了。 哎，程序员我真是太呆了，自己完全没有生活经验的样子，每天对着冷冰冰的电脑，跑着不会回应你的代码，实现各种自动化逻辑。与人交流少，是不是可以提高下，勇敢一点，等下次勇敢的干了几件大事儿再来写了。 突然想起几个好朋友。 A 提醒，不要多想，别轻易">
+<meta property="og:description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3  Main 检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan str">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2017-01-11T00:00:00.000Z">
-<meta property="article:modified_time" content="2020-11-21T14:32:39.170Z">
+<meta property="article:published_time" content="2017-10-03T00:00:01.000Z">
+<meta property="article:modified_time" content="2020-12-12T07:39:23.577Z">
 <meta property="article:author" content="Zrss">
-<meta property="article:tag" content="生活">
+<meta property="article:tag" content="etcd-v3">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://blog.zhesih.com/archives/750227811.html">
+<link rel="canonical" href="http://blog.zhesih.com/archives/9e766461.html">
 
 
 <script class="page-configurations">
@@ -51,7 +51,7 @@
   };
 </script>
 
-  <title>浮生日记 | 随风飘散的记忆</title>
+  <title>ETCD V2 的启动过程 | 随风飘散的记忆</title>
   
 
 
@@ -161,7 +161,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -174,6 +174,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Main"><span class="nav-number">1.</span> <span class="nav-text">Main</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startEtcd"><span class="nav-number">2.</span> <span class="nav-text">startEtcd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserver-NewServer"><span class="nav-number">3.</span> <span class="nav-text">etcdserver.NewServer</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -248,7 +249,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/750227811.html">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/9e766461.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -261,7 +262,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          浮生日记
+          ETCD V2 的启动过程
         </h1>
 
         <div class="post-meta-container">
@@ -272,14 +273,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2017-01-11 00:00:00" itemprop="dateCreated datePublished" datetime="2017-01-11T00:00:00Z">2017-01-11</time>
+      <time title="创建时间：2017-10-03 00:00:01" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:01Z">2017-10-03</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
+        <time title="修改时间：2020-12-12 07:39:23" itemprop="dateModified" datetime="2020-12-12T07:39:23Z">2020-12-12</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -299,7 +300,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>272</span>
+      <span>1.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -317,12 +318,57 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>刚得知预答辩没有抽中，微微有些高兴，不过毕竟毕设也是自己写的，洋洋洒洒的写了几万字，就算抽中也不至于太过惨烈吧。</p>
-<p>不管怎么说，毕业进程就只剩三月份的答辩了。</p>
-<p>哎，程序员我真是太呆了，自己完全没有生活经验的样子，每天对着冷冰冰的电脑，跑着不会回应你的代码，实现各种自动化逻辑。与人交流少，是不是可以提高下，勇敢一点，等下次勇敢的干了几件大事儿再来写了。</p>
-<p>突然想起几个好朋友。</p>
-<p>A 提醒，不要多想，别轻易付出真心，也是很容易受伤的。<br>B 最近过还不错。<br>C 可能会晚一些毕业。<br>D 努力学习英语中，将来准备 transfer。<br>E 陷于两性关系中不能自拔（滑稽）。</p>
-<p>祝他们好运。</p>
+        <blockquote>
+<p>简单的源码阅读</p>
+<p>链接: <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd/tree/release-2.3">https://github.com/coreos/etcd/tree/release-2.3</a></p>
+</blockquote>
+<h1 id="Main"><a href="#Main" class="headerlink" title="Main"></a>Main</h1><ol>
+<li>检查运行 arch</li>
+<li>parse 启动配置参数</li>
+<li>设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志）</li>
+<li>声明停止通道 <code>var stopped &lt;-chan struct&#123;&#125;</code></li>
+<li>打印 etcd 版本 / GitSHA / 编译时的 Go VERSION / 运行架构信息</li>
+</ol>
+<p>检查数据目录是否存在，若存在日志提示 (<strong>只有 data-dir 存在</strong>，就会打印如下日志)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">the server is already initialized as member before, starting as etcd member...</span><br></pre></td></tr></table></figure>
+
+<p>不管数据目录存在与否，均如此启动</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stopped, err = startEtcd(cfg)</span><br></pre></td></tr></table></figure>
+
+<p>最后获取到停止信号停止</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// etcd process stpo</span></span><br><span class="line">&lt;-stoped</span><br></pre></td></tr></table></figure>
+
+<h1 id="startEtcd"><a href="#startEtcd" class="headerlink" title="startEtcd"></a>startEtcd</h1><p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
+<p>接下来使用 listen-client-url 新建 client listener，这块直接使用 net.Listen 方法，开启 tcp 服务；然后判断系统文件描述符限制，如果 &lt; 150，则 panic，然后限制 listener 的数量为 系统描述符限制 - 150</p>
+<p>初始化 net.Listen 的 keepAliveListener</p>
+<p>初始化 etcd server config</p>
+<p>初始化 etcdserver</p>
+<p>启动 etcdserver</p>
+<hr>
+<p>注册操作系统终止回调函数 osutil.RegisterInterruptHandler(s.Stop)</p>
+<hr>
+<p>使用 cors 初始化 clientHandler</p>
+<p>使用 etcdhttp 初始化 peerHandler</p>
+<p>goroutine 为每个 peer listener 开启 http 服务 处理请求，5 min read timeout</p>
+<p>goroutine 为每个 client listener 开启 http 服务 处理请求，0 min read timeout // 与 golang 的一个 bug 有关</p>
+<p>etcdhttp/peer.go</p>
+<p>etcdhttp/client.go</p>
+<p>其实是 http server，待阅读</p>
+<hr>
+<p>最后，返回停止通道及错误</p>
+<h1 id="etcdserver-NewServer"><a href="#etcdserver-NewServer" class="headerlink" title="etcdserver.NewServer"></a>etcdserver.NewServer</h1><p>初始化 etcdserver</p>
+<p>集群信息存在 /0</p>
+<p>key 信息存在 /1</p>
+<p>检查数据目录版本，并更新数据目录</p>
+<p>判断以何种方式启动</p>
+<p><strong>(1) !haveWAL &amp;&amp; !cfg.NewCluster</strong></p>
+<p>没有 wal 目录且 new-cluster == false，此时通过从启动参数 initial-token 及 initial-cluster 配置的集群信息来访问集群（会将自己的 peer url 排除），获取到当前存在的集群信息</p>
+<p>校验 启动参数中配置的集群信息与获取到存在的集群信息，并为 local member 设置 id</p>
+<p>此时成员信息从 remote peer 中获取，当前 server 的 cluster id 被设置为 remote peer 中获取到 cluster id</p>
+<p>打印启动参数 <code>cfg.Print()</code></p>
+<p>启动 raftnode</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id, n, s, w &#x3D; startNode(cfg, cl, nil)</span><br></pre></td></tr></table></figure>
+
 
     </div>
 
@@ -332,20 +378,20 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E7%94%9F%E6%B4%BB/" rel="tag"># 生活</a>
+              <a href="/tags/etcd-v3/" rel="tag"># etcd-v3</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/archives/1788612903.html" rel="prev" title="暑期印记(2)">
-                  <i class="fa fa-chevron-left"></i> 暑期印记(2)
+                <a href="/archives/9e766462.html" rel="prev" title="ETCD V2 的启动过程">
+                  <i class="fa fa-chevron-left"></i> ETCD V2 的启动过程
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/archives/3782241378.html" rel="next" title="男人帮">
-                  男人帮 <i class="fa fa-chevron-right"></i>
+                <a href="/archives/e9295e13.html" rel="next" title="ETCD V3 中的 gRPC">
+                  ETCD V3 中的 gRPC <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
