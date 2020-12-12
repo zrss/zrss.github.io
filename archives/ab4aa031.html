@@ -7,10 +7,8 @@
 <meta name="generator" content="Hexo 5.2.0">
 
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/Z.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/Z.png">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -33,15 +31,15 @@
 <meta property="og:site_name" content="随风飘散的记忆">
 <meta property="og:description" content="Dream Of A Dream —— “人言南柯一梦，领略了繁华沧桑，谁人过往不相似”  etcd v3.1.9 boltdb pending pages 回收策略etcdv3 中 backend 使用 boltdb 实现 在 etcdv3.1.9 集成的 boltdb 版本中，仅在 freelist 中记录可释放的 page id (pending: [txid] -&gt; page id">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://blog.zhesih.com/archives/uploads/leak-of-pages.jpeg">
-<meta property="og:image" content="http://blog.zhesih.com/archives/uploads/free-pages.jpeg">
+<meta property="og:image" content="http://blog.zhesih.com/images/leak-of-pages.jpeg">
+<meta property="og:image" content="http://blog.zhesih.com/images/free-pages.jpeg">
 <meta property="article:published_time" content="2017-10-21T15:35:21.000Z">
-<meta property="article:modified_time" content="2020-11-22T07:41:27.810Z">
+<meta property="article:modified_time" content="2020-12-12T07:12:41.689Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="etcd-v3">
 <meta property="article:tag" content="boltdb">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://blog.zhesih.com/archives/uploads/leak-of-pages.jpeg">
+<meta name="twitter:image" content="http://blog.zhesih.com/images/leak-of-pages.jpeg">
 
 
 <link rel="canonical" href="http://blog.zhesih.com/archives/ab4aa031.html">
@@ -286,7 +284,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 07:41:27" itemprop="dateModified" datetime="2020-11-22T07:41:27Z">2020-11-22</time>
+        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
       </span>
 
   
@@ -320,7 +318,7 @@
 </blockquote>
 <h1 id="etcd-v3-1-9-boltdb-pending-pages-回收策略"><a href="#etcd-v3-1-9-boltdb-pending-pages-回收策略" class="headerlink" title="etcd v3.1.9 boltdb pending pages 回收策略"></a>etcd v3.1.9 boltdb pending pages 回收策略</h1><p>etcdv3 中 backend 使用 boltdb 实现</p>
 <p>在 etcdv3.1.9 集成的 boltdb 版本中，仅在 freelist 中记录可释放的 page id (pending: [txid] -&gt; page ids)，在 rw txn 中释放当前 txn 中最小 txid 之前的 pending pages[1]，因此如果有一个 read txn 运行时间过长，会导致部分 pages 无法及时回收使用，导致 db 大小增加。示意图如下</p>
-<p><img src="./uploads/leak-of-pages.jpeg" alt="leak-of-pages"></p>
+<p><img src="/images/leak-of-pages.jpeg" alt="leak-of-pages"></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">1</span>] <span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">beginRWTx</span><span class="params">()</span> <span class="params">(*Tx, error)</span></span> &#123;&#125; <span class="comment">// 在该方法中释放 pending pages</span></span><br></pre></td></tr></table></figure>
 
 <p>mock 代码也很好写，随手写了个示例 (为了效果更明显，在 tx 的 Commit 方法中输出了 freelist 的情况)</p>
@@ -338,7 +336,7 @@
 <p>为了优化这个点儿，当然也因为 boltdb 原作者不干了，coreos 的大佬们自己拉了一个库继续搞，就是 <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt%EF%BC%8C%E8%BF%99%E4%B8%AA%E6%96%B0%E5%BA%93%E5%9C%A8%E5%AE%83%E7%9A%84%E7%AC%AC%E4%BA%8C%E4%B8%AA%E5%90%88%E5%85%A5">https://github.com/coreos/bbolt，这个新库在它的第二个合入</a> pr <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/pull/3">https://github.com/coreos/bbolt/pull/3</a> 中尝试解决这个问题</p>
 <p>附赠一个删除 key 之后空间不会变小的解释，直觉来理解的话，boltdb 是 page 管理的空间，底层空间是连续的，boltdb 将这个空间逻辑上划分为一个个页</p>
 <h1 id="bbolt-优化后的回收策略"><a href="#bbolt-优化后的回收策略" class="headerlink" title="bbolt 优化后的回收策略"></a>bbolt 优化后的回收策略</h1><p>粗略过了一遍代码，总之之前是只能释放当前最小 txn 之前的 pending pages 对吧，现在不管你，能释放的我都释放掉不就行了？示意图如下</p>
-<p><img src="./uploads/free-pages.jpeg" alt="free-pages"></p>
+<p><img src="/images/free-pages.jpeg" alt="free-pages"></p>
 <p>为了实现这个方案，当然要增加一些记录值，修改一些实现，下面详细看一下这个 pr <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/pull/3/files">https://github.com/coreos/bbolt/pull/3/files</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// freePages releases any pages associated with closed read-only transactions.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">freePages</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// Free all pending pages prior to earliest open transaction.</span></span><br><span class="line">	<span class="comment">// txid 升序排序</span></span><br><span class="line">	sort.Sort(txsById(db.txs))</span><br><span class="line">	minid := txid(<span class="number">0xFFFFFFFFFFFFFFFF</span>)</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(db.txs) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		minid = db.txs[<span class="number">0</span>].meta.txid</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 释放最小 txid 之前的 pengding pages</span></span><br><span class="line">	<span class="keyword">if</span> minid &gt; <span class="number">0</span> &#123;</span><br><span class="line">		db.freelist.release(minid - <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// Release unused txid extents.</span></span><br><span class="line">	<span class="comment">// 释放 tx 之间的 pending pages</span></span><br><span class="line">	<span class="keyword">for</span> _, t := <span class="keyword">range</span> db.txs &#123;</span><br><span class="line">		db.freelist.releaseRange(minid, t.meta.txid<span class="number">-1</span>)</span><br><span class="line">		minid = t.meta.txid + <span class="number">1</span></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 释放当前最大 txid 之后的 pending pages</span></span><br><span class="line">	db.freelist.releaseRange(minid, txid(<span class="number">0xFFFFFFFFFFFFFFFF</span>))</span><br><span class="line">	<span class="comment">// Any page both allocated and freed in an extent is safe to release.</span></span><br><span class="line">	<span class="comment">// 假设在 rw txn 之间频繁的有 long run 的 read txn，这个优化很有效</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
