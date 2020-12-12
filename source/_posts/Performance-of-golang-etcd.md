@@ -149,7 +149,7 @@ INFO[13:12:17] Writing svg to torch.svg
 
 浏览器打开 torch.svg 即可
 
-![torch](torch.svg)
+![torch](/images/torch.svg)
 
 个人觉得 flame-graph 更为直观，横向为各个方法消耗占比，纵向为调用栈上的各个方法消耗占比，一目了然，对应分析消耗较大的方法即可
 
