@@ -7,6 +7,8 @@ categories: 笔记
 abbrlink: ec17aa10
 ---
 
+> https://developer.nvidia.com/gpudirect
+
 # 环境信息
 
 * Kernel: 3.10.0-514.44.5.10.h254.x86_64 (`uname -r`)
@@ -44,6 +46,8 @@ curl -o NVIDIA-Linux-x86_64-440.33.01.run 'https://us.download.nvidia.com/tesla/
 ## nv\_peer\_memory
 
 > https://github.com/Mellanox/nv_peer_memory/tree/1.1-0
+>
+> https://www.mellanox.com/products/GPUDirect-RDMA
 
 ```
 curl -o nv_peer_memory-1.1-0.tar.gz 'https://github.com/Mellanox/nv_peer_memory/archive/1.1-0.tar.gz'
@@ -105,6 +109,6 @@ NCCL INFO Ring 00 : 3 -> 10 [send] via NET/IB/0/GDRDMA
 * 如下命令可显示 mod 对应的 ko 文件位置
 
 ```
-> /sbin/modinfo -F filename -k 3.10.0-514.44.5.10.h142.x86_64 nvidia
+$/sbin/modinfo -F filename -k 3.10.0-514.44.5.10.h142.x86_64 nvidia
 /lib/modules/3.10.0-514.44.5.10.h142.x86_64/kernel/drivers/video/nvidia.ko
 ```
