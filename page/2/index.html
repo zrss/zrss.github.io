@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-count">92</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,124 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/6722211e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/6722211e.html" class="post-title-link" itemprop="url">aws sagemaker</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-10-20 10:23:09" itemprop="dateCreated datePublished" datetime="2019-10-20T10:23:09Z">2019-10-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:42:19" itemprop="dateModified" datetime="2020-12-12T07:42:19Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>800</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>没实际玩儿过 … 家里一直登陆不上 … 以下全凭看文档与代码</p>
+<p>以 EC2 为基石设计，以镜像作为运行环境，完全面向镜像的设计</p>
+<p>支持的 EC2 实例类型</p>
+<p><a target="_blank" rel="noopener" href="https://amazonaws-china.com/sagemaker/pricing/instance-types/">https://amazonaws-china.com/sagemaker/pricing/instance-types/</a></p>
+<p>性能最好的实例类型当前为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ml.p3dn.24xlarge</span><br><span class="line">vCPU: 96  </span><br><span class="line">GPUs: 8xV100  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
+
+<p>EC2 对应的实例类型为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">p3dn.24xlarge   </span><br><span class="line">GPUs: 8   </span><br><span class="line">vCPU: 96  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">GPU P2P: NVLink  </span><br><span class="line">Storage(GB): 2 x 900 NVMe SSD    </span><br><span class="line">Dedicated EBS Bandwidth: 14 Gbps </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
+
+<p>100 Gigabit 由 AWS efa 提供，提供 OS-bypass 通信能力，应该就是 Infiniband 网络</p>
+<p>启动训练过程 (Script Mode)</p>
+<ul>
+<li>上传本地代码至 S3</li>
+<li>调用 Sagemaker 创建训练作业接口<ul>
+<li>创建 EC2 实例</li>
+<li>在 EC2 实例上启动 Sagemaker 系统进程</li>
+<li>下载数据集</li>
+<li>启动容器 (镜像)</li>
+<li>下载训练代码</li>
+<li>启动训练代码</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-containers">https://github.com/aws/sagemaker-containers</a></p>
+<p>下载</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-containers/blob/master/src/sagemaker_containers/_files.py#L112">https://github.com/aws/sagemaker-containers/blob/master/src/sagemaker_containers/_files.py#L112</a></p>
+<p>上传</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/fw_utils.py#L322">https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/fw_utils.py#L322</a></p>
+<p>因此完整流程</p>
+<p>创建作业/版本</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -1334,139 +1452,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/ac75c7e9.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/ac75c7e9.html" class="post-title-link" itemprop="url">docker network</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-12-02 11:31:11" itemprop="dateCreated datePublished" datetime="2018-12-02T11:31:11Z">2018-12-02</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 03:39:04" itemprop="dateModified" datetime="2020-11-22T03:39:04Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Docker-Network"><a href="#Docker-Network" class="headerlink" title="Docker Network"></a>Docker Network</h1><p>IBM 的几篇 Blog overall 的讲了一下</p>
-<p><strong>容器如何访问外部网络</strong></p>
-<p>通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip</p>
-<p><strong>外部网络如何访问容器</strong></p>
-<p>容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，指定映射到 host 的特定端口</p>
-<p>至于实现上也较为直接，若容器有 expose 端口，则 docker 会相应启动一个 docker-proxy 监听 host 上的 host 端口 (如上述例子中的 host-port)，外部流量到达 host-port 时，由 docker-proxy 转发至最终容器</p>
-<p>当然上述只是 docker network 的原生实现，docker 原生实现的不同 host 的 container 略去</p>
-<h1 id="Flannel"><a href="#Flannel" class="headerlink" title="Flannel"></a>Flannel</h1><p>如果在 k8s 生态中，docker container 跨 host 通信，早期版本多使用 Flannel 完成</p>
-<p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/30481.html">Flannel 原理</a></p>
-<p>Flannel 实现的是 overlay network，即基于已有的 underlay network，在其之上扩展报文字段，完成报文转发</p>
-<p>原理也比较好理解</p>
-<ul>
-<li>在 ETCD 中设置 Flannel 网段及子网范围</li>
-<li>多个 Host 上运行 Flannel daemon</li>
-<li>Flannel daemon 根据 ETCD 中记录的已分配子网，确定自己的子网，并注册至 ETCD 中</li>
-<li>Docker 根据 Flannel 划分的子网启动，docker0 地址从 Flannel 子网中分配得到，一般来说 Flannel0 地址为子网的第一个地址 (10.0.2.0)，docker0 地址为子网的第二个地址 (10.0.2.1)</li>
-</ul>
-<p>VM1 Container 1 至 VM2 Container 2 的报文转发过程</p>
-<p><a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">可参看该作者的一篇详细分析</a></p>
-<p>看上述链接吧，讲的非常好，图文并茂，下面我只是自我温习 😆 努力积累</p>
-<p><strong>VM1 Container 1</strong></p>
-<ul>
-<li>Container 1 报文中 src ip 为容器 ip，假设为 10.1.15.2/24，dst ip 为对端容器 ip，假设为 10.1.20.3/24</li>
-<li>报文从容器中的 veth0 发往 host 上的 veth pair (veth_XXX)</li>
-<li>kernel 根据 route 表将报文转发至 Flannel0 TUN</li>
-<li>Flannel0 接收到之后 overlay 的作用体现了，首先根据目的 ip 查询其所在 host 的 ip，封装一层 IP 报文，随后封装一层 UDP 报文，投递到对端 Flannel daemon 监听端口 8285。这个时候报文就能通过 underlay network 转发至对端 host 了</li>
-</ul>
-<p><strong>VM2 Container 2</strong></p>
-<ul>
-<li>报文到达当前 host 后，UDP 报文交由 Flannel daemon 处理</li>
-<li>Flannel daemon 交由 Flannel0 TUN 处理</li>
-<li>kernel 直接根据 route 表处理，转发至 docker0</li>
-<li>docker0 是网桥设备，所有 docker container 均连接在其之上，因此最后根据 container dst ip 转发至 dst container</li>
-</ul>
-<p>当然这是 Flannel 早期的版本，使用了 UDP 的报文封装，这样会有一些 packet 来回拷贝的开销</p>
-<p>Flannel 还支持 VxLan 的模式，看下它的原理，网络这块还是比较有意思</p>
-<p>这篇也很 nice <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-2-13fdc6c4e24c">An illustrated guide to Kubernetes Networking [Part 2]</a></p>
-<p>nice shot <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-1-d1ede3322727">An illustrated guide to Kubernetes Networking [Part 1]</a></p>
-<p>这篇非常详细 … 蛤蛤</p>
-<p>ARP 协议</p>
-<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/computer-network-arp-works/">ARP</a></p>
-<p>Flannel <a target="_blank" rel="noopener" href="https://www.slideshare.net/enakai/how-vxlan-works-on-linux">VxLan</a></p>
-<h1 id="Term"><a href="#Term" class="headerlink" title="Term"></a>Term</h1><p>ref <a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">Han’s blog</a></p>
-<ul>
-<li>TUN is a software interface implemented in linux kernel, it can pass raw ip packet between user program and the kernel</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1523,14 +1508,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">216k</span>
+    <span title="站点总字数">217k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:17</span>
+    <span title="站点阅读时长">3:18</span>
   </span>
 </div>
 

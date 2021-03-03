@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-count">92</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -245,6 +245,116 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/11c28430.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/11c28430.html" class="post-title-link" itemprop="url">Deep Learning Training Container Design</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-03-03 13:38:19 / 修改时间：16:26:07" itemprop="dateCreated datePublished" datetime="2021-03-03T13:38:19Z">2021-03-03</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="AWS-SageMaker"><a href="#AWS-SageMaker" class="headerlink" title="AWS SageMaker"></a>AWS SageMaker</h1><blockquote>
+<p>AWS SageMaker 训练容器镜像设计体验</p>
+</blockquote>
+<p>不是优点的优点: 看起来只支持同构资源，训练资源分配模型为单节点单容器，理解上简单</p>
+<h2 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h2><ul>
+<li>容器镜像功能层次丰富，每个层次都有文档描述如何实施，Level 0 对容器镜像约束最少，自定义程度最高<ul>
+<li>Level 0: 完全自定义容器镜像，容器镜像指定 Entrypoint，Entrypoint 命令能处理 train 参数即可 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-training-algo-dockerfile.html">link</a></li>
+<li>Level 1: 改造已有容器镜像，使得其可利用 SageMaker Toolkits 来进行训练与推理（即把已有镜像改造为 SageMaker 镜像）<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/sagemaker/latest/dg/adapt-training-container.html">link</a></li>
+<li>Level 2: 使用预置的 SageMaker 容器镜像</li>
+<li>Level 3: 使用扩展的预置 SageMaker 容器镜像（基于预置的容器镜像扩展功能）</li>
+</ul>
+</li>
+<li>训练启动脚本 (Training Toolkits) 开源，并且可通过 <code>pip install sagemaker-training</code> 直接安装，常用深度学习引擎有独立的 toolkits，均包含在 training toolkits 中 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/sagemaker/latest/dg/docker-containers-adapt-your-own.html">link</a></li>
+<li>可在 Notebook 中直接构建容器镜像</li>
+<li>可在 local machine 测试容器镜像基本功能（可能仅限单机训练？)</li>
+</ul>
+<h2 id="主打场景"><a href="#主打场景" class="headerlink" title="主打场景"></a>主打场景</h2><p>AI 开发者：文档详细且丰富（技术向），容器镜像可玩度高（约束少）</p>
+<h1 id="Azure-Machine-Learning"><a href="#Azure-Machine-Learning" class="headerlink" title="Azure Machine Learning"></a>Azure Machine Learning</h1><p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-with-custom-image">https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-with-custom-image</a></p>
+<p>Azure 与 <code>conda</code> 结合，有个 <code>Environment</code> 的概念，对容器镜像有如下约束</p>
+<ul>
+<li>Ubuntu 16.04 or greater.</li>
+<li>Conda 4.5.# or greater.</li>
+<li>Python 3.5+.</li>
+</ul>
+<p>当然如果不使用 <code>Environment</code>，也就无上述约束</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-tensorflow#distributed-training">https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-tensorflow#distributed-training</a></p>
+<p>资源分配模式看起来也是单节点单容器</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/ml-frameworks/tensorflow/distributed-tensorflow-with-horovod">https://github.com/Azure/MachineLearningNotebooks/tree/master/how-to-use-azureml/ml-frameworks/tensorflow/distributed-tensorflow-with-horovod</a></p>
+<p>TODO …</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/ec17aa10.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -269,10 +379,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-02-28 04:16:07 / 修改时间：07:22:59" itemprop="dateCreated datePublished" datetime="2021-02-28T04:16:07Z">2021-02-28</time>
+      <time title="创建时间：2021-02-28 04:16:07" itemprop="dateCreated datePublished" datetime="2021-02-28T04:16:07Z">2021-02-28</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-02 15:59:58" itemprop="dateModified" datetime="2021-03-02T15:59:58Z">2021-03-02</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -309,7 +425,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
+          <blockquote>
+<p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/gpudirect">https://developer.nvidia.com/gpudirect</a></p>
+</blockquote>
+<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
 <li>Kernel: 3.10.0-514.44.5.10.h254.x86_64 (<code>uname -r</code>)</li>
 <li>Nvidia Driver: 440.33.01 (<code>nvidia-smi</code>)</li>
 <li>MLNX OFED: 4.3-1.0.1.0 (<code>ofed_info</code>)</li>
@@ -327,6 +446,7 @@
 
 <h2 id="nv-peer-memory"><a href="#nv-peer-memory" class="headerlink" title="nv_peer_memory"></a>nv_peer_memory</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/nv_peer_memory/tree/1.1-0">https://github.com/Mellanox/nv_peer_memory/tree/1.1-0</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.mellanox.com/products/GPUDirect-RDMA">https://www.mellanox.com/products/GPUDirect-RDMA</a></p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -o nv_peer_memory-1.1-0.tar.gz &#39;https:&#x2F;&#x2F;github.com&#x2F;Mellanox&#x2F;nv_peer_memory&#x2F;archive&#x2F;1.1-0.tar.gz&#39;</span><br><span class="line">tar xzf nv_peer_memory-1.1-0.tar.gz</span><br></pre></td></tr></table></figure>
 
@@ -359,7 +479,7 @@
 <li><p>如下命令可显示 mod 对应的 ko 文件位置</p>
 </li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; &#x2F;sbin&#x2F;modinfo -F filename -k 3.10.0-514.44.5.10.h142.x86_64 nvidia</span><br><span class="line">&#x2F;lib&#x2F;modules&#x2F;3.10.0-514.44.5.10.h142.x86_64&#x2F;kernel&#x2F;drivers&#x2F;video&#x2F;nvidia.ko</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$&#x2F;sbin&#x2F;modinfo -F filename -k 3.10.0-514.44.5.10.h142.x86_64 nvidia</span><br><span class="line">&#x2F;lib&#x2F;modules&#x2F;3.10.0-514.44.5.10.h142.x86_64&#x2F;kernel&#x2F;drivers&#x2F;video&#x2F;nvidia.ko</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -1306,124 +1426,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/6722211e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/6722211e.html" class="post-title-link" itemprop="url">aws sagemaker</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-10-20 10:23:09" itemprop="dateCreated datePublished" datetime="2019-10-20T10:23:09Z">2019-10-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:42:19" itemprop="dateModified" datetime="2020-12-12T07:42:19Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>800</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>没实际玩儿过 … 家里一直登陆不上 … 以下全凭看文档与代码</p>
-<p>以 EC2 为基石设计，以镜像作为运行环境，完全面向镜像的设计</p>
-<p>支持的 EC2 实例类型</p>
-<p><a target="_blank" rel="noopener" href="https://amazonaws-china.com/sagemaker/pricing/instance-types/">https://amazonaws-china.com/sagemaker/pricing/instance-types/</a></p>
-<p>性能最好的实例类型当前为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ml.p3dn.24xlarge</span><br><span class="line">vCPU: 96  </span><br><span class="line">GPUs: 8xV100  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
-
-<p>EC2 对应的实例类型为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">p3dn.24xlarge   </span><br><span class="line">GPUs: 8   </span><br><span class="line">vCPU: 96  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">GPU P2P: NVLink  </span><br><span class="line">Storage(GB): 2 x 900 NVMe SSD    </span><br><span class="line">Dedicated EBS Bandwidth: 14 Gbps </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
-
-<p>100 Gigabit 由 AWS efa 提供，提供 OS-bypass 通信能力，应该就是 Infiniband 网络</p>
-<p>启动训练过程 (Script Mode)</p>
-<ul>
-<li>上传本地代码至 S3</li>
-<li>调用 Sagemaker 创建训练作业接口<ul>
-<li>创建 EC2 实例</li>
-<li>在 EC2 实例上启动 Sagemaker 系统进程</li>
-<li>下载数据集</li>
-<li>启动容器 (镜像)</li>
-<li>下载训练代码</li>
-<li>启动训练代码</li>
-</ul>
-</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-containers">https://github.com/aws/sagemaker-containers</a></p>
-<p>下载</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-containers/blob/master/src/sagemaker_containers/_files.py#L112">https://github.com/aws/sagemaker-containers/blob/master/src/sagemaker_containers/_files.py#L112</a></p>
-<p>上传</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/fw_utils.py#L322">https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/fw_utils.py#L322</a></p>
-<p>因此完整流程</p>
-<p>创建作业/版本</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1480,14 +1482,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">216k</span>
+    <span title="站点总字数">217k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:17</span>
+    <span title="站点阅读时长">3:18</span>
   </span>
 </div>
 

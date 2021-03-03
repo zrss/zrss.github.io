@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-count">92</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,134 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2a0d5b3c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/2a0d5b3c.html" class="post-title-link" itemprop="url">warning-log-about-etcd</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-27 15:49:35" itemprop="dateCreated datePublished" datetime="2017-10-27T15:49:35Z">2017-10-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:53:52" itemprop="dateModified" datetime="2020-11-22T07:53:52Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="wal-fsync-delay-warning"><a href="#wal-fsync-delay-warning" class="headerlink" title="wal fsync delay warning"></a>wal fsync delay warning</h1><p>对于 leader 来说，可以先行向 follower 发送 messages，再进行 wal 的写入等后续持久化操作，最后 n.advance</p>
+<p>对于 follower 来说，必须进行 wal 的写入等持久化操作后，才能向其他成员发送 messages，最后 n.advance</p>
+<p>wal 的 fsync 调用</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mustSync := mustSync(st, w.state, <span class="built_in">len</span>(ents))</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mustSync</span><span class="params">(st, prevst raftpb.HardState, entsnum <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// Persistent state on all servers:</span></span><br><span class="line">	<span class="comment">// (Updated on stable storage before responding to RPCs)</span></span><br><span class="line">	<span class="comment">// currentTerm</span></span><br><span class="line">	<span class="comment">// votedFor</span></span><br><span class="line">	<span class="comment">// log entries[]</span></span><br><span class="line">	<span class="keyword">return</span> entsnum != <span class="number">0</span> || st.Vote != prevst.Vote || st.Term != prevst.Term</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看的出来 <strong>fsync 调用很频繁</strong>，每次写入都有 fsync 调用，毕竟每次写入时 entsnum 不为 0</p>
+<p>fsync 的对象为最新的 wal 文件</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">start := time.Now()</span><br><span class="line">err := fileutil.Fdatasync(w.tail().File)</span><br><span class="line">duration := time.Since(start)</span><br><span class="line"><span class="keyword">if</span> duration &gt; warnSyncDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;sync duration of %v, expected less than %v&quot;</span>, duration, warnSyncDuration)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>fsync 调用时间超过 1s 会告警</strong>，磁盘 IO 有波动了 or 不满足要求</p>
+<h1 id="boltdb-apply-delay-warning"><a href="#boltdb-apply-delay-warning" class="headerlink" title="boltdb apply delay warning"></a>boltdb apply delay warning</h1><p>wal 写完，raft 协议走通，可同步数据后 apply 数据到本地存储</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">s.applySnapshot(ep, apply)</span><br><span class="line">st := time.Now()</span><br><span class="line">s.applyEntries(ep, apply)</span><br><span class="line">d := time.Since(st)</span><br><span class="line">entriesNum := <span class="built_in">len</span>(apply.entries)</span><br><span class="line"><span class="keyword">if</span> entriesNum != <span class="number">0</span> &amp;&amp; d &gt; time.Duration(entriesNum)*warnApplyDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;apply entries took too long [%v for %d entries]&quot;</span>, d, <span class="built_in">len</span>(apply.entries))</span><br><span class="line">	plog.Warningf(<span class="string">&quot;avoid queries with large range/delete range!&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>平均 apply 一个 entry 耗时 100ms，*<em>如果 apply 总时间超过 n * 100ms 则告警*</em></p>
+<p>比如 put 请求，最后调到 kvstore.go 的 put 方法，kvindex (B tree) 中搜索一把，再用 boltdb tx 写入一把，kvindex 增加一把，有 lease 的加 lease</p>
+<p>当然上述的都是耗时，只不过 boltdb put 的耗时一般而言比其他的操作都大</p>
+<h1 id="leader-send-out-heartbeat-delay-warning"><a href="#leader-send-out-heartbeat-delay-warning" class="headerlink" title="leader send out heartbeat delay warning"></a>leader send out heartbeat delay warning</h1><p>在 r.sendMessages(rd.Messages) 方法中，也会打印延时告警日志</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a heartbeat message</span></span><br><span class="line"><span class="keyword">if</span> ms[i].Type == raftpb.MsgHeartbeat &#123;</span><br><span class="line">	<span class="comment">// exceed maxDuration time</span></span><br><span class="line">	ok, exceed := r.td.Observe(ms[i].To)</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> limit request rate.</span></span><br><span class="line">		plog.Warningf(<span class="string">&quot;failed to send out heartbeat on time (exceeded the %v timeout for %v)&quot;</span>, r.heartbeat, exceed)</span><br><span class="line">		plog.Warningf(<span class="string">&quot;server is likely overloaded&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个地方的算法，是超过 2*hearbeat 时间作为 exceed 时间</p>
+<p>leader 将这些 Message 先行发送给 followers，如果是心跳消息，则计算当前时间 - 上次记录的时间是否超过了 2*hearbeat，如果是，则打印超过的值；需注意该值如果接近或超过了 election timeout 时间，则会引发其他成员发起选举，导致集群不稳定</p>
+<p>一般这个告警，是由 wal fsync delay 诱发的，而 wal fsync delay 又与磁盘 IO 有关；另外 apply 不是也有 delay 的 warning ？为啥它的影响不大，答：因为 apply 会走 fifo 的调度，是异步的；当然也是有影响的，总会影响整体时延</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">	f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">    sched.Schedule(f)</span><br></pre></td></tr></table></figure>
+
+<p>放入队列就跑</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Schedule schedules a job that will be ran in FIFO order sequentially.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *fifo)</span> <span class="title">Schedule</span><span class="params">(j Job)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	f.pendings = <span class="built_in">append</span>(f.pendings, j)</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="the-clock-difference-againset-peer-is-too-high-warning"><a href="#the-clock-difference-againset-peer-is-too-high-warning" class="headerlink" title="the clock difference againset peer is too high warning"></a>the clock difference againset peer is too high warning</h1><p>peer 间计算时差大于 1s 告警，ps: 当前 peer 比对端 peer 时间大</p>
+<p>etcd 会将其每个 peer 加入到 probe 中，定时发起 get 请求，一方面可以探测 peer health 另一方面通过其返回值，计算 peer 之间的时间差；没发现该 warning 会对业务造成影响；还没过代码，和时间相关的实现也就 lease 了，暂且推测 lease 用的是逻辑时钟，所以没影响</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">monitorProbingStatus</span><span class="params">(s probing.Status, id <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">if</span> s.ClockDiff() &gt; time.Second &#123;</span><br><span class="line">		plog.Warningf(<span class="string">&quot;the clock difference against peer %s is too high [%v &gt; %v]&quot;</span>, id, s.ClockDiff(), time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	rtts.WithLabelValues(id).Observe(s.SRTT().Seconds())</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>probe (4s) 及 monit (30s) 周期</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proberInterval           = ConnReadTimeout - time.Second (<span class="number">5</span> - <span class="number">1</span>)</span><br><span class="line">statusMonitoringInterval = <span class="number">30</span> * time.Second</span><br></pre></td></tr></table></figure>
+
+<p>开始记录值，start 为本次开始 probe 的时间，hh.Now 为对端 peer 返回的时间</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">α = <span class="number">0.125</span></span><br><span class="line">s.record(time.Since(start), hh.Now)</span><br></pre></td></tr></table></figure>
+
+<p>时差计算方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// srtt init 0</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *status)</span> <span class="title">record</span><span class="params">(rtt time.Duration, when time.Time)</span></span> &#123;</span><br><span class="line">	s.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> s.mu.Unlock()</span><br><span class="line">	s.total += <span class="number">1</span></span><br><span class="line">	s.health = <span class="literal">true</span></span><br><span class="line">	s.srtt = time.Duration((<span class="number">1</span>-α)*<span class="keyword">float64</span>(s.srtt) + α*<span class="keyword">float64</span>(rtt))</span><br><span class="line">	s.clockdiff = time.Now().Sub(when) - s.srtt/<span class="number">2</span></span><br><span class="line">	s.err = <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大概来说就是 local time 减掉 peer time，再减修正时间</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -1307,162 +1435,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/8cdb9b5c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/8cdb9b5c.html" class="post-title-link" itemprop="url">ETCD V3 中的 .wal 文件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-03 22:50:39" itemprop="dateCreated datePublished" datetime="2017-10-03T22:50:39Z">2017-10-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>etcd v3.1.9</p>
-</blockquote>
-<p>.wal 文件，即 write ahead log，wal 的实现集中在 wal 目录下</p>
-<h1 id="消息类型"><a href="#消息类型" class="headerlink" title="消息类型"></a>消息类型</h1><p>其中 wal/walpb 目录下定义了 wal 中记录的两种消息类型： Record 和 Snapshot</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">message Record &#123;</span><br><span class="line">	optional int64 type  &#x3D; 1 [(gogoproto.nullable) &#x3D; false];</span><br><span class="line">	optional uint32 crc  &#x3D; 2 [(gogoproto.nullable) &#x3D; false];</span><br><span class="line">	optional bytes data  &#x3D; 3;</span><br><span class="line">&#125;</span><br><span class="line">message Snapshot &#123;</span><br><span class="line">	optional uint64 index &#x3D; 1 [(gogoproto.nullable) &#x3D; false];</span><br><span class="line">	optional uint64 term  &#x3D; 2 [(gogoproto.nullable) &#x3D; false];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>用 pb 比较省事儿，不用自己实现对象序列化反序列化的逻辑</p>
-<h1 id="创建方法"><a href="#创建方法" class="headerlink" title="创建方法"></a>创建方法</h1><p>wal 有两个方法会创建 wal 文件，一个是 Create 方法，另一个是 cut 方法<br>Create 方法会创建初始 wal 文件，名称为 0000000000000000-0000000000000000.wal</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p :&#x3D; filepath.Join(tmpdirpath, walName(0, 0))</span><br></pre></td></tr></table></figure>
-
-<p>查看 Create 创建初始 wal 文件的过程</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// keep temporary wal directory so WAL initialization appears atomic</span></span><br><span class="line">tmpdirpath := filepath.Clean(dirpath) + <span class="string">&quot;.tmp&quot;</span></span><br><span class="line"><span class="comment">// 生成初始 wal 文件名</span></span><br><span class="line">p := filepath.Join(tmpdirpath, walName(<span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line"><span class="comment">// 系统调用 LockFile</span></span><br><span class="line"><span class="comment">// 防止被 purge</span></span><br><span class="line">f, err := fileutil.LockFile(p, os.O_WRONLY|os.O_CREATE, fileutil.PrivateFileMode)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 不是很理解这个地方为何要 seek 到文件末尾</span></span><br><span class="line"><span class="keyword">if</span> _, err = f.Seek(<span class="number">0</span>, os.SEEK_END); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 预分配 wal 文件空间</span></span><br><span class="line"><span class="comment">// SegmentSizeBytes = 64 * 1024 * 1024</span></span><br><span class="line"><span class="comment">// 即 64 MB</span></span><br><span class="line"><span class="keyword">if</span> err = fileutil.Preallocate(f.File, SegmentSizeBytes, <span class="literal">true</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// 将 wal 文件加入 locks slice 中</span></span><br><span class="line">w.locks = <span class="built_in">append</span>(w.locks, f)</span><br><span class="line"><span class="comment">// 写入初始信息 ...</span></span><br><span class="line"><span class="keyword">if</span> w, err = w.renameWal(tmpdirpath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>w.renameWal(tmpdirpath) 值得抽出来说下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除原 wal path</span></span><br><span class="line"><span class="keyword">if</span> err := os.RemoveAll(w.dir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将 tmp wal path -&gt; wal path</span></span><br><span class="line"><span class="keyword">if</span> err := os.Rename(tmpdirpath, w.dir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在这里初始化 FilePipeline</span></span><br><span class="line">w.fp = newFilePipeline(w.dir, SegmentSizeBytes)</span><br><span class="line">df, err := fileutil.OpenDir(w.dir)</span><br><span class="line">w.dirFile = df</span><br><span class="line"><span class="keyword">return</span> w, err</span><br></pre></td></tr></table></figure>
-
-<p>初始写入 wal 内容示意如下</p>
-<p><img src="/images/initial_wal.jpg" alt="initial_wal"></p>
-<h1 id="预分配空间"><a href="#预分配空间" class="headerlink" title="预分配空间"></a>预分配空间</h1><p>在 unix OS 上，首先会使用系统调用 Fallocate 预分配文件空间</p>
-<p>如果 Fallocate 失败，则 fallback 到 preallocExtendTrunc 再次尝试分配</p>
-<p>查看 preallocExtendTrunc 的逻辑</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 移动到文件的当前读写位置，返回 offset</span></span><br><span class="line"><span class="comment">// 一般 curOff = 0</span></span><br><span class="line">curOff, err := f.Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 从当前文件的末尾处，移动至 +sizeInBytes 位置处，返回 offset</span></span><br><span class="line"><span class="comment">// 一般 size = 067108864</span></span><br><span class="line"><span class="comment">// 即 sizeInBytes 的值 64 * 1024 *1024</span></span><br><span class="line">size, err := f.Seek(sizeInBytes, os.SEEK_END)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 移动回文件之前的读写位置，待后续写入</span></span><br><span class="line"><span class="keyword">if</span> _, err = f.Seek(curOff, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 已分配足够空间，返回 nil</span></span><br><span class="line"><span class="comment">// 一般 sizeInBytes == size</span></span><br><span class="line"><span class="keyword">if</span> sizeInBytes &gt; size &#123;</span><br><span class="line">  	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 多分配了空间，以 sizeInBytes 截断文件</span></span><br><span class="line"><span class="comment">// truncate 之后，文件大小才显示为 sizeInBytes 大小</span></span><br><span class="line"><span class="keyword">return</span> f.Truncate(sizeInBytes)</span><br></pre></td></tr></table></figure>
-
-<p>在 darwin OS 上，首先会调用 preallocFixed，该函数中使用了系统调用 SYS_FCNTL 预先分配文件空间</p>
-<p>如果 preallocFixed 失败，则调用 preallocExtendTrunc 再次尝试分配</p>
-<h1 id="编码-解码"><a href="#编码-解码" class="headerlink" title="编码 / 解码"></a>编码 / 解码</h1><p>wal/encoder.go 实现了写入逻辑<br>wal/decoder.go 实现了读取逻辑</p>
-<h1 id="File-Pipeline"><a href="#File-Pipeline" class="headerlink" title="File Pipeline"></a>File Pipeline</h1><p>wal/file_pipeline.go 用来预创建文件，为后续生成新的 wal 文件使用</p>
-<p>fp.Open() 在 cut 方法中被调用，cut 中的调用如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create a temp wal file with name sequence + 1, or truncate the existing one</span></span><br><span class="line">newTail, err := w.fp.Open()</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而 fp.Open() 从 fp.filec 中获取 locks file 返回</p>
-<p>在初始化 file pipeline 方法 newFilePipeline 中启动 fp.run() 协程，查看 fp.run() 实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fp *filePipeline)</span> <span class="title">run</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> <span class="built_in">close</span>(fp.errc)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		f, err := fp.alloc()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fp.errc &lt;- err</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="comment">// fp.filec 大小为 1</span></span><br><span class="line">		<span class="keyword">case</span> fp.filec &lt;- f:</span><br><span class="line">		<span class="keyword">case</span> &lt;-fp.donec:</span><br><span class="line">			os.Remove(f.Name())</span><br><span class="line">			f.Close()</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>查看 fp.alloc() 方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fp *filePipeline)</span> <span class="title">alloc</span><span class="params">()</span> <span class="params">(f *fileutil.LockedFile, err error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// count % 2 so this file isn&#x27;t the same as the one last published</span></span><br><span class="line">	fpath := filepath.Join(fp.dir, fmt.Sprintf(<span class="string">&quot;%d.tmp&quot;</span>, fp.count%<span class="number">2</span>))</span><br><span class="line">	<span class="keyword">if</span> f, err = fileutil.LockFile(fpath, os.O_CREATE|os.O_WRONLY, fileutil.PrivateFileMode); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err = fileutil.Preallocate(f.File, fp.size, <span class="literal">true</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		plog.Errorf(<span class="string">&quot;failed to allocate space when creating new wal file (%v)&quot;</span>, err)</span><br><span class="line">		f.Close()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	fp.count++</span><br><span class="line">	<span class="keyword">return</span> f, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见预生成了 [0-1].tmp 文件，并对该文件加了锁，待调用 fp.Open() 方法获取使用</p>
-<h1 id="Cut-方法"><a href="#Cut-方法" class="headerlink" title="Cut 方法"></a>Cut 方法</h1><p>wal 文件大小上限为 64MB</p>
-<p>因此当写入消息之后， wal 文件大小 &gt; 64MB 时，会调用 cut 方法</p>
-<p>截断之前的 wal 文件，并生成新的 wal 文件用于写入</p>
-<p>cut 的整体思路</p>
-<ol>
-<li>截断当前使用的 wal 文件</li>
-<li>从 file pipeline 中获取 tmp 文件</li>
-<li>向 tmp 文件中写入必要的 headers</li>
-<li>将 tmp 文件 rename to wal 文件，新文件名为 walName(w.seq()+1, w.enti+1)</li>
-<li>将新 wal 文件加入 locks slice 中，并生成 newFileEncoder 用于写入新 wal 文件</li>
-</ol>
-<p>详细阅读 cut 方法（保留了原注释）</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cut closes current file written and creates a new one ready to append.</span></span><br><span class="line"><span class="comment">// cut first creates a temp wal file and writes necessary headers into it.</span></span><br><span class="line"><span class="comment">// Then cut atomically rename temp wal file to a wal file.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *WAL)</span> <span class="title">cut</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">       <span class="comment">// close old wal file; truncate to avoid wasting space if an early cut</span></span><br><span class="line">       <span class="comment">// 从 locks slice 中取最后一个 file</span></span><br><span class="line">       <span class="comment">// seek 到当前读写位置</span></span><br><span class="line">       off, serr := w.tail().Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line">       <span class="keyword">if</span> serr != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> serr</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 截断至当前读写位置</span></span><br><span class="line">       <span class="keyword">if</span> err := w.tail().Truncate(off); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 系统调用 fsync 落盘</span></span><br><span class="line">       <span class="keyword">if</span> err := w.sync(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">	   </span><br><span class="line">       <span class="comment">// 生成新的 wal 文件名</span></span><br><span class="line">       <span class="comment">// seq + 1</span></span><br><span class="line">       <span class="comment">// index + 1</span></span><br><span class="line">       fpath := filepath.Join(w.dir, walName(w.seq()+<span class="number">1</span>, w.enti+<span class="number">1</span>))</span><br><span class="line">       <span class="comment">// create a temp wal file with name sequence + 1, or truncate the existing one</span></span><br><span class="line">       <span class="comment">// 从 filePipeline 中获取预创建好的 [0-1].tmp 文件</span></span><br><span class="line">       newTail, err := w.fp.Open()</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// update writer and save the previous crc</span></span><br><span class="line">       <span class="comment">// 添加至 locks slice 末尾</span></span><br><span class="line">       w.locks = <span class="built_in">append</span>(w.locks, newTail)</span><br><span class="line">       prevCrc := w.encoder.crc.Sum32()</span><br><span class="line">       w.encoder, err = newFileEncoder(w.tail().File, prevCrc)</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">  </span><br><span class="line">       <span class="comment">// 写入之前 wal 的 crc</span></span><br><span class="line">       <span class="keyword">if</span> err = w.saveCrc(prevCrc); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 写入 metadata</span></span><br><span class="line">       <span class="keyword">if</span> err = w.encoder.encode(&amp;walpb.Record&#123;Type: metadataType, Data: w.metadata&#125;); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 写入 raft HardState</span></span><br><span class="line">       <span class="keyword">if</span> err = w.saveState(&amp;w.state); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// atomically move temp wal file to wal file</span></span><br><span class="line">       <span class="comment">// fsync 落盘</span></span><br><span class="line">       <span class="keyword">if</span> err = w.sync(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">		</span><br><span class="line">       <span class="comment">// 获取当前位置 offset</span></span><br><span class="line">       off, err = w.tail().Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// 同一个文件系统相当于 mv</span></span><br><span class="line">       <span class="keyword">if</span> err = os.Rename(newTail.Name(), fpath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// fsync 父目录</span></span><br><span class="line">       <span class="keyword">if</span> err = fileutil.Fsync(w.dirFile); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">	   </span><br><span class="line">       <span class="comment">// 关闭 filePipeline 打开的 newTail</span></span><br><span class="line">       newTail.Close()</span><br><span class="line">		</span><br><span class="line">       <span class="comment">// 重新加锁</span></span><br><span class="line">       <span class="keyword">if</span> newTail, err = fileutil.LockFile(fpath, os.O_WRONLY, fileutil.PrivateFileMode); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// off, err = w.tail().Seek(0, os.SEEK_CUR)</span></span><br><span class="line">       <span class="comment">// 重新设置下次读写位置为当前位置</span></span><br><span class="line">       <span class="keyword">if</span> _, err = newTail.Seek(off, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       w.locks[<span class="built_in">len</span>(w.locks)<span class="number">-1</span>] = newTail</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// 莫名，直接使用之前的 prevCrc 不可以么</span></span><br><span class="line">       prevCrc = w.encoder.crc.Sum32()</span><br><span class="line">       w.encoder, err = newFileEncoder(w.tail().File, prevCrc)</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       plog.Infof(<span class="string">&quot;segmented wal file %v is created&quot;</span>, fpath)</span><br><span class="line">       <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以 cut 方法初始写入 wal 的内容示意如下</p>
-<p><img src="/images/cut_wal.jpeg" alt="cut_wal"></p>
-<h1 id="Sync-方法"><a href="#Sync-方法" class="headerlink" title="Sync 方法"></a>Sync 方法</h1><p>在 wal 中有如下几个地方使用了 sync 方法</p>
-<ol>
-<li>func (w *WAL) Save(st raftpb.HardState, ents []raftpb.Entry) error {}</li>
-<li>func (w *WAL) cut() error {}</li>
-<li>func (w *WAL) SaveSnapshot(e walpb.Snapshot) error {}</li>
-<li>func (w *WAL) Close() error {}</li>
-</ol>
-<p>sync 直接来说是使用了系统调用 fsync，确保数据写入磁盘持久化</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *WAL)</span> <span class="title">sync</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> w.encoder != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> err := w.encoder.flush(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 记录开始时间</span></span><br><span class="line">	start := time.Now()</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 底层是系统调用</span></span><br><span class="line">	err := fileutil.Fdatasync(w.tail().File)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 计算 fsync 耗时</span></span><br><span class="line">	duration := time.Since(start)</span><br><span class="line">	<span class="comment">// 大于 1s 告警</span></span><br><span class="line">	<span class="keyword">if</span> duration &gt; warnSyncDuration &#123;</span><br><span class="line">		plog.Warningf(<span class="string">&quot;sync duration of %v, expected less than %v&quot;</span>, duration, warnSyncDuration)</span><br><span class="line">	&#125;</span><br><span class="line">	syncDurations.Observe(duration.Seconds())</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重点看下 func (w *WAL) Save(st raftpb.HardState, ents []raftpb.Entry) error 方法，毕竟它调用频率较高</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *WAL)</span> <span class="title">Save</span><span class="params">(st raftpb.HardState, ents []raftpb.Entry)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	mustSync := mustSync(st, w.state, <span class="built_in">len</span>(ents))</span><br><span class="line">	<span class="comment">//func mustSync(st, prevst raftpb.HardState, entsnum int) bool &#123;</span></span><br><span class="line">	<span class="comment">//	return entsnum != 0 || st.Vote != prevst.Vote || st.Term != prevst.Term</span></span><br><span class="line">	<span class="comment">//&#125;</span></span><br><span class="line">	...</span><br><span class="line">	curOff, err := w.tail().Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> curOff &lt; SegmentSizeBytes &#123;</span><br><span class="line">		<span class="keyword">if</span> mustSync &#123;</span><br><span class="line">			<span class="keyword">return</span> w.sync()</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> w.cut()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>从上： vote / term 变化，或有 entries 要写入时，调用 w.sync</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1519,14 +1491,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">216k</span>
+    <span title="站点总字数">217k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:17</span>
+    <span title="站点阅读时长">3:18</span>
   </span>
 </div>
 
