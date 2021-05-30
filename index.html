@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">92</span>
+          <span class="site-state-item-count">98</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">42</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,634 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/485f6ed4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/485f6ed4.html" class="post-title-link" itemprop="url">rsync</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-05-30 14:03:15 / 修改时间：16:47:57" itemprop="dateCreated datePublished" datetime="2021-05-30T14:03:15Z">2021-05-30</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>825</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Download"><a href="#Download" class="headerlink" title="Download"></a>Download</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/">https://rsync.samba.org/</a></p>
+<p>最新版本：<code>Rsync version 3.2.3 released</code></p>
+<h1 id="How-rsync-works"><a href="#How-rsync-works" class="headerlink" title="How rsync works"></a>How rsync works</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/how-rsync-works.html">https://rsync.samba.org/how-rsync-works.html</a></p>
+<h1 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h1><p><a target="_blank" rel="noopener" href="https://download.samba.org/pub/rsync/rsync.html">https://download.samba.org/pub/rsync/rsync.html</a></p>
+<ul>
+<li><code>--recursive</code>: recurse into directories</li>
+<li><code>--append</code>: append data onto shorter files</li>
+<li><code>--filter</code></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;usr&#x2F;local&#x2F;Cellar&#x2F;rsync&#x2F;3.2.3&#x2F;bin&#x2F;rsync --verbose --no-whole-file --recursive --append --include&#x3D;&#39;*.log&#39; --include&#x3D;&#39;*&#x2F;&#39; --exclude&#x3D;&#39;*&#39; --prune-empty-dirs dir1&#x2F; dir2&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>注意 rsync 本地目录的特殊之处</p>
+<p><a target="_blank" rel="noopener" href="https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files">https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files</a></p>
+<blockquote>
+<p>–whole-file, This is the default when both the source and destination are specified as local paths, but only if no batch-writing option is in effect.</p>
+</blockquote>
+<h1 id="High-Availability"><a href="#High-Availability" class="headerlink" title="High Availability"></a>High Availability</h1><p><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted">https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b8075dfc.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/b8075dfc.html" class="post-title-link" itemprop="url">infiniband sr-iov</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-05-23 09:52:41 / 修改时间：15:16:54" itemprop="dateCreated datePublished" datetime="2021-05-23T09:52:41Z">2021-05-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/in-between-ethernet-vlans-and-infiniband-pkeys">https://community.mellanox.com/s/article/in-between-ethernet-vlans-and-infiniband-pkeys</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-use-infiniband-pkey-membership-types-in-virtualization-environment--connectx-3--connectx-3-pro-x">https://community.mellanox.com/s/article/howto-use-infiniband-pkey-membership-types-in-virtualization-environment--connectx-3--connectx-3-pro-x</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-ipoib-networks-with-gateway-and-multiple-pkeys">https://community.mellanox.com/s/article/howto-configure-ipoib-networks-with-gateway-and-multiple-pkeys</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/HowTo-Configure-SR-IOV-for-ConnectX-4-ConnectX-5-ConnectX-6-with-KVM-Ethernet">https://community.mellanox.com/s/article/HowTo-Configure-SR-IOV-for-ConnectX-4-ConnectX-5-ConnectX-6-with-KVM-Ethernet</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin">https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/mellanox/k8s-rdma-shared-dev-plugin">https://github.com/mellanox/k8s-rdma-shared-dev-plugin</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/add-pod.html#add-pod">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/add-pod.html#add-pod</a></p>
+<p>IOV: I/O Virtualization</p>
+<p>Single Root I/O Virtualization (SR-IOV) network</p>
+<p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/k8snetworkplumbingwg/sriov-cni">https://github.com/k8snetworkplumbingwg/sriov-cni</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV">https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/3ec4a29b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/3ec4a29b.html" class="post-title-link" itemprop="url">the pod name of volcano job</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-04-05 07:39:58 / 修改时间：07:42:44" itemprop="dateCreated datePublished" datetime="2021-04-05T07:39:58Z">2021-04-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>167</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://github.com/volcano-sh/volcano/blob/master/pkg/controllers/job/job_controller_actions.go#L278">https://github.com/volcano-sh/volcano/blob/master/pkg/controllers/job/job_controller_actions.go#L278</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#123;vj-job-name&#125;-$&#123;task-name&#125;-$&#123;index&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/84d885dc.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/84d885dc.html" class="post-title-link" itemprop="url">learning golang again</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-28 13:29:44" itemprop="dateCreated datePublished" datetime="2021-03-28T13:29:44Z">2021-03-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-04-05 10:01:59" itemprop="dateModified" datetime="2021-04-05T10:01:59Z">2021-04-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>691</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Type-size"><a href="#Type-size" class="headerlink" title="Type size"></a>Type size</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://golang.org/ref/spec#Size_and_alignment_guarantees">https://golang.org/ref/spec#Size_and_alignment_guarantees</a></p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go">https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type example struct &#123;</span><br><span class="line">	flag    bool</span><br><span class="line">	counter int16</span><br><span class="line">	pi      float32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>字节对齐系数 <code>#pragma pack(n)</code></p>
+<ul>
+<li>成员对齐</li>
+<li>结构体对齐</li>
+</ul>
+<p>对齐系数规则</p>
+<blockquote>
+<ol>
+<li>For a variable x of any type: unsafe.Alignof(x) is at least 1.</li>
+<li>For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.</li>
+<li>For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.</li>
+</ol>
+</blockquote>
+<p>layout</p>
+<ul>
+<li>bool(0)</li>
+<li>int16(2)</li>
+<li>float32(4)</li>
+</ul>
+<p>8 bytes</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align">https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align</a></p>
+</blockquote>
+<p>//TODO list</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://draveness.me/golang/">https://draveness.me/golang/</a></li>
+<li><a target="_blank" rel="noopener" href="https://golang.design/under-the-hood/">https://golang.design/under-the-hood/</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2285a922.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/2285a922.html" class="post-title-link" itemprop="url">resnet50</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-14 06:27:47" itemprop="dateCreated datePublished" datetime="2021-03-14T06:27:47Z">2021-03-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-23 09:18:26" itemprop="dateModified" datetime="2021-05-23T09:18:26Z">2021-05-23</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>29</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>deep residual learning framework</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/85943db7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/85943db7.html" class="post-title-link" itemprop="url">Docker container secure</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-13 14:16:08" itemprop="dateCreated datePublished" datetime="2021-03-13T14:16:08Z">2021-03-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-21 11:44:46" itemprop="dateModified" datetime="2021-03-21T11:44:46Z">2021-03-21</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>547</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="docker-security"><a href="#docker-security" class="headerlink" title="docker security"></a>docker security</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/">https://docs.docker.com/engine/security/</a></p>
+<p>docker security 总的来说，一个是使用了 <code>kernel namespace</code> 技术，为每个 container 创建了 <code>process</code>, <code>network</code> 等 namepsace，使得多个 container 不会有很大的相互影响</p>
+<p>另外一个方面是使用了 <code>control groups</code> 技术，用于限制 container 所使用的各类资源</p>
+<blockquote>
+<p>ensure that each container gets its fair share of memory, CPU, disk I/O</p>
+</blockquote>
+<p>简单理解，比如 cpu 资源，<code>cgroup</code> 用于避免某个 container 不当使用（或者恶意 or 无意代码 bug）cpu，导致其他 container 没法正常使用 cpu 的场景</p>
+<h1 id="container-root-user"><a href="#container-root-user" class="headerlink" title="container root user"></a>container root user</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/userns-remap/">https://docs.docker.com/engine/security/userns-remap/</a></p>
+<p>container 中不建议使用 <code>root</code> 用户执行进程，很大部分原因因为容器内的 uid gid 会映射到 host 上，举个例子，一旦容器内的进程逃逸到 host 上，那么它也有 <code>root</code> 用户的权限</p>
+<blockquote>
+<p>虽然说容器内的进程逃逸，是很严重的安全问题，docker 社区会第一时间修复</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -711,721 +1339,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5a3d0ab7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/5a3d0ab7.html" class="post-title-link" itemprop="url">install PyTorch 1.8 from source</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-15 11:47:00" itemprop="dateCreated datePublished" datetime="2020-11-15T11:47:00Z">2020-11-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Issues/" itemprop="url" rel="index"><span itemprop="name">Issues</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本地复现一个 <code>TcpStore</code> 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch</p>
-<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
-<li>macOS 10.15.7</li>
-<li>XCode 12.2 (12B45b)</li>
-</ul>
-<h1 id="源码信息"><a href="#源码信息" class="headerlink" title="源码信息"></a>源码信息</h1><p>master latest commit (2020-11-14): <code>f8248543a13b0144a6f5d0a549f72b1e470d88aa</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit f8248543a13b0144a6f5d0a549f72b1e470d88aa (github&#x2F;master, github&#x2F;gh&#x2F;ljk53&#x2F;194&#x2F;base, github&#x2F;HEAD, master)</span><br><span class="line">Author: Rohan Varma &lt;rvarm1@fb.com&gt;</span><br><span class="line">Date:   Sat Nov 14 13:36:31 2020 -0800</span><br></pre></td></tr></table></figure>
-
-<h1 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h1><blockquote>
-<p>(1) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch#from-source">https://github.com/pytorch/pytorch#from-source</a></p>
-<p>(2) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips">https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips</a></p>
-</blockquote>
-<h2 id="glog"><a href="#glog" class="headerlink" title="glog"></a>glog</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install glog</span><br></pre></td></tr></table></figure>
-
-<h2 id="conda"><a href="#conda" class="headerlink" title="conda"></a>conda</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.6</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add these packages if torch.distributed is needed</span></span><br><span class="line">conda install pkg-config libuv</span><br></pre></td></tr></table></figure>
-
-<h2 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h2><p>uninstall </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda uninstall torch</span><br><span class="line">pip uninstall torch</span><br><span class="line"></span><br><span class="line">rm -rf build&#x2F;</span><br></pre></td></tr></table></figure>
-
-<p>then reinstall</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CMAKE_PREFIX_PATH=<span class="variable">$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))/../&quot;&#125;</span></span><br><span class="line">MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ MAX_JOBS=8 BUILD_CAFFE2=0 BUILD_CAFFE2_OPS=0 USE_GLOG=1 USE_DISTRIBUTED=1 USE_MKLDNN=0 USE_CUDA=0 USE_FBGEMM=0 USE_NNPACK=0 USE_QNNPACK=0 USE_XNNPACK=0 python setup.py develop</span><br></pre></td></tr></table></figure>
-
-<p>Quad-Core Intel Core i7 ~ 45min</p>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; torch.__version__</span><br><span class="line">&#39;1.8.0a0+f1a8a82&#39;</span><br></pre></td></tr></table></figure>
-
-<h2 id="TcpStore"><a href="#TcpStore" class="headerlink" title="TcpStore"></a>TcpStore</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python test&#x2F;distributed&#x2F;test_c10d.py</span><br><span class="line"></span><br><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch.distributed as dist</span><br><span class="line">&gt;&gt;&gt; server_store &#x3D; dist.TCPStore(&quot;127.0.0.1&quot;, 18668, 1, True)</span><br></pre></td></tr></table></figure>
-
-<p>or</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;build&#x2F;bin&#x2F;TCPStoreTest</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5285fc6a.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/5285fc6a.html" class="post-title-link" itemprop="url">pod termination</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-08-23 14:16:34" itemprop="dateCreated datePublished" datetime="2020-08-23T14:16:34Z">2020-08-23</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 06:18:34" itemprop="dateModified" datetime="2020-12-12T06:18:34Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination">https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination</a></p>
-</blockquote>
-<p>简而言之，pod 被删除时</p>
-<ol>
-<li>kubelet 触发 container runtime 对 pod 中的每个 container 的 1 号进程，发送 TERM 信号</li>
-<li>等待 the grace period expires (terminationGracePeriodSeconds 默认为 30s)</li>
-<li>如果 the grace period expires 后 containers 仍未退出，则 kubelet 触发 container runtime，向 pod 中的每个 container 中仍然处于 running 状态的进程发送 KILL 信号</li>
-</ol>
-<p>正确处理 TERM 信号，可以让业务优雅退出（or 更快退出）；例如</p>
-<p>假设 pod command 为</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#run-a-command-in-a-shell">https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#run-a-command-in-a-shell</a></p>
-</blockquote>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">command:</span> [<span class="string">&quot;/bin/bash&quot;</span>]</span><br><span class="line"><span class="attr">args:</span> [<span class="string">&quot;-c&quot;</span>, <span class="string">&quot;/home/rt/run.sh&quot;</span>]</span><br></pre></td></tr></table></figure>
-
-<p>or</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">command:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;/bin/bash&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;/home/rt/run.sh&quot;</span></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><code>/bin/bash /home/rt/run.sh</code> 是 1 号进程</p>
-</blockquote>
-<p>在 /home/rt/run.sh 中可以如此处理，以达到优雅退出的目的</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> prog_exit &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;receive SIGTERM signal&quot;</span></span><br><span class="line">    pkill python</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">trap</span> prog_exit SIGTERM</span><br><span class="line"></span><br><span class="line"><span class="comment"># main function</span></span><br><span class="line">python /home/rt/train.py &amp;</span><br><span class="line"></span><br><span class="line"><span class="built_in">wait</span> $!</span><br></pre></td></tr></table></figure>
-
-<p>ref: docker stop</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/stop/">https://docs.docker.com/engine/reference/commandline/stop/</a></p>
-<p>The main process inside the container will receive SIGTERM, and after a grace period, SIGKILL.</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/a1778563.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/a1778563.html" class="post-title-link" itemprop="url">k8s-subpath-and-s3fs</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-04-05 10:11:38" itemprop="dateCreated datePublished" datetime="2020-04-05T10:11:38Z">2020-04-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:15:32" itemprop="dateModified" datetime="2020-11-22T02:15:32Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>k8s subPath and s3 fuse mount (s3fs)</p>
-<p>意识流分析，致敬一个生产环境中的问题，真是看了很多代码</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/s3fs-fuse/s3fs-fuse">https://github.com/s3fs-fuse/s3fs-fuse</a></p>
-<p>实现了 fuse 接口，底层对接 s3 协议</p>
-<p>打开 s3fs info 日志，观察可知</p>
-<p>fuse 周期性触发</p>
-<ol>
-<li>s3fs_getattr<ol>
-<li>check_object_access<ol>
-<li>get_object_attribute<ol>
-<li>s3 head request</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>check_parent_object_access</li>
-</ol>
-</li>
-<li>s3fs_opendir<ol>
-<li>check_object_access<ol>
-<li>check_parent_object_access</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>s3fs_readdir 方法，该方法底层会调用 list_bucket func，到s3 server查询对象列表<ol>
-<li>查询到有新的对象后，会 add 到本地 stat cache，并且下载到本地</li>
-</ol>
-</li>
-</ol>
-<p>所以使用 s3fs mount s3 bucket 到本地时，s3fs 会周期性同步远端的数据到本地，写入时，也会同步到远端</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -SIGUSR2 <span class="variable">$&#123;s3fs_pid&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>可以动态调整 s3fs 日志级别，s3fs 默认日志输出到 /var/log/messages</p>
-<p>messages.2.gz 文件解压，可以使用 <code>gzip -d messages.2.gz</code></p>
-<hr>
-<p>生产环境出了一个诡异的问题</p>
-<p>server / worker 两个实例，在不同节点，挂载了同一个桶</p>
-<p>k8s subPath 方式挂载子对象，例如 test-bucket/output1</p>
-<p>在开始阶段 server s3fs 会上传 test-bucket/output1 文件夹，两次</p>
-<p>而 worker s3fs 不会</p>
-<p>debug 了一会儿，直接原因与 s3 对象的权限相关，用户创建的对象，s3fs mount 时，没权限 head，但是又能 list 到</p>
-<p>s3fs 如果 list 该对象为非空时，可正常读写该对象下的内容，也与验证结果符合 -.0</p>
-<hr>
-<p>分割线，前边是一些分析</p>
-<p>k8s subPath</p>
-<p>subPath 是相对于 volume root path 的一个 sub path，用于挂载 volume 内的子目录</p>
-<p>实现上首先会将 volume 挂载于节点的 pod volume 路径下</p>
-<ol>
-<li>再去 open subPath，open 之后，成为 kubelet 进程下的一个 fd</li>
-<li>接下来创建 volume-subpaths 下的一个路径（文件名与 volumeMount index 一致），并且判断 subPath 是文件还是文件夹<ol>
-<li>文件夹，mkdir 一把</li>
-<li>文件，写一个空文件</li>
-</ol>
-</li>
-<li>最后将该 fd mount 到上述创建的路径中</li>
-</ol>
-<p>不明点，在 1 步骤上，实际上 subPath 为 noObject；从文件系统的角度不确定它为文件夹，还是对象，而 kubelet 却执行成功了，并顺利挂载到容器中</p>
-<p>从 s3fs 的日志，对 subPath 首先执行了</p>
-<ol>
-<li>s3fs_mkdir，mode 0750</li>
-<li>s3fs_chmod，mode 40777</li>
-</ol>
-<p>即触发了两次 s3 PUT.OBJECT 的操作</p>
-<p>这块就不深入分析了为何如此了</p>
-<p>感叹一下，系统层层调用之后，问题定位需要极其清晰的思路，大胆假设，小心求证；解决问题的思路是第一重要的</p>
-<hr>
-<p>另外 s3fs 1.80 版本 err ret 不打印错误信息，只打印了个 response code，这个也比较伤，建议升级到当前最新版本<br>s3fs 1.86，会把错误信息也打印出来</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/dc3c10.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/dc3c10.html" class="post-title-link" itemprop="url">docker root user</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-12-08 10:20:15" itemprop="dateCreated datePublished" datetime="2019-12-08T10:20:15Z">2019-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:20:35" itemprop="dateModified" datetime="2020-11-22T02:20:35Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>87</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://unit42.paloaltonetworks.com/non-root-containers-kubernetes-cve-2019-11245-care/">https://unit42.paloaltonetworks.com/non-root-containers-kubernetes-cve-2019-11245-care/</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/f68a955a.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/f68a955a.html" class="post-title-link" itemprop="url">spark-cluster-mode-on-k8s</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-12-08 10:16:51" itemprop="dateCreated datePublished" datetime="2019-12-08T10:16:51Z">2019-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 07:20:00" itemprop="dateModified" datetime="2020-11-22T07:20:00Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cluster-overview.html">https://spark.apache.org/docs/latest/cluster-overview.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cluster-overview.html#glossary">https://spark.apache.org/docs/latest/cluster-overview.html#glossary</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-pi.yaml">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-pi.yaml</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-py-pi.yaml">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-py-pi.yaml</a></p>
-<p><code>KUBERNETES_SERVICE_HOST</code></p>
-<p><code>KUBERNETES_SERVICE_PORT</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--class=...</span><br><span class="line">--master k8s://https://%s:%s</span><br><span class="line">--deploy-mode cluster/client</span><br><span class="line">--conf spark.kubernetes.namespace=default</span><br><span class="line">--conf spark.app.name=spark-pi</span><br><span class="line">SparkPi.jar (MainApplicationFile: MainFile is the path to a bundled JAR, Python, or R file of the application.)</span><br></pre></td></tr></table></figure>
-
-<p>SPARK_HOME/bin/spark-submit args</p>
-<p>Spark-on-k8s-operator controller run the <code>spark-submit</code> scripts</p>
-<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ bin/spark-submit \</span><br><span class="line">    --master k8s://https://&lt;k8s-apiserver-host&gt;:&lt;k8s-apiserver-port&gt; \</span><br><span class="line">    --deploy-mode cluster</span><br><span class="line">    --name spark-pi \</span><br><span class="line">    --class org.apache.spark.examples.SparkPi \</span><br><span class="line">    --conf spark.executor.instances=5 \</span><br><span class="line">    --conf spark.kubernetes.container.image=&lt;spark-image&gt; \</span><br><span class="line">    <span class="built_in">local</span>:///path/to/examples.jar</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management</a></p>
-<p>client mode is not supported in 2.3.1 (cluster manager)</p>
-<p>but it seems work in 2.4</p>
-<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/running-on-kubernetes.html">https://spark.apache.org/docs/latest/running-on-kubernetes.html</a></p>
-<p>Dependencies Jars and Files</p>
-<p>logs</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n=&lt;namespace&gt; logs -f &lt;driver-pod-name&gt;</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/cda86f18.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/cda86f18.html" class="post-title-link" itemprop="url">raft</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-11-09 10:20:59" itemprop="dateCreated datePublished" datetime="2019-11-09T10:20:59Z">2019-11-09</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:22:31" itemprop="dateModified" datetime="2020-11-22T02:22:31Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>852</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>CP</p>
-<p>先写 log</p>
-<p>再复制 log</p>
-<p>一致性协议确保大多数都已成功复制 log 后，这个时候 log 也称为被 committed 了</p>
-<p>执行状态机</p>
-<p>三种角色</p>
-<p>Leader / Follower / Candidate</p>
-<p>Leader 负责周期性发起心跳</p>
-<p>Follower 接收心跳</p>
-<p>Follower 选举超时后，发起 Vote，状态转变为 Candidate</p>
-<p>ETCD 的流程</p>
-<p>写 WAL; raft 协议 ok; apply data to boltdb</p>
-<p>使用 raft 来同步 WAL;</p>
-<p>选举的限制</p>
-<p>A candidate must contact a majority of the cluster in order to be elected, which means that every committed entry must be present in at least one of those servers</p>
-<p>Raft determines which of two logs is more up-to-date by comparing the index and term of the last entries in the logs</p>
-<p>简单来说，在发起选举投票时，需要携带最新的 log 信息，包括 index 及 term；term 越大越新，如果 term 相同，则 log 的长度越长越新；这可以保证新选举出来的 leader 包含了之前所有 commited 的信息</p>
-<p>网络分区需要特殊考虑 (2PC)</p>
-<blockquote>
-<p>第一阶段先征求其他节点是否同意选举，如果同意选举则发起真正的选举操作，否则降为 Follower 角色</p>
-</blockquote>
-<p>例如当有 follow 被隔离时，其 term 会不断增大，当其重新加入集群时，会触发选举，影响集群稳定性；为避免如此情况，增加 preVote 阶段，即发起 vote 的前提为</p>
-<ul>
-<li>没有收到有效领导的心跳，至少有一次选举超时</li>
-<li>Candidate的日志足够新（Term更大，或者Term相同raft index更大）</li>
-</ul>
-<p>才开始选举，避免网络隔离后，恢复加入的节点 term 较高，触发集群选举</p>
-<p>客户端也需要考虑，网络分区，无法完成写入，需要 server 端返回特定的错误时，直接切换后端</p>
-<p>Summary</p>
-<ul>
-<li>2PC 两阶段</li>
-<li>Leader 一致性算法</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1482,14 +1395,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">217k</span>
+    <span title="站点总字数">221k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:18</span>
+    <span title="站点阅读时长">3:21</span>
   </span>
 </div>
 

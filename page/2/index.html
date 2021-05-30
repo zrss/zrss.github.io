@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">92</span>
+          <span class="site-state-item-count">98</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">42</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,721 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5a3d0ab7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/5a3d0ab7.html" class="post-title-link" itemprop="url">install PyTorch 1.8 from source</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-11-15 11:47:00" itemprop="dateCreated datePublished" datetime="2020-11-15T11:47:00Z">2020-11-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Issues/" itemprop="url" rel="index"><span itemprop="name">Issues</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>本地复现一个 <code>TcpStore</code> 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch</p>
+<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
+<li>macOS 10.15.7</li>
+<li>XCode 12.2 (12B45b)</li>
+</ul>
+<h1 id="源码信息"><a href="#源码信息" class="headerlink" title="源码信息"></a>源码信息</h1><p>master latest commit (2020-11-14): <code>f8248543a13b0144a6f5d0a549f72b1e470d88aa</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit f8248543a13b0144a6f5d0a549f72b1e470d88aa (github&#x2F;master, github&#x2F;gh&#x2F;ljk53&#x2F;194&#x2F;base, github&#x2F;HEAD, master)</span><br><span class="line">Author: Rohan Varma &lt;rvarm1@fb.com&gt;</span><br><span class="line">Date:   Sat Nov 14 13:36:31 2020 -0800</span><br></pre></td></tr></table></figure>
+
+<h1 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h1><blockquote>
+<p>(1) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch#from-source">https://github.com/pytorch/pytorch#from-source</a></p>
+<p>(2) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips">https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips</a></p>
+</blockquote>
+<h2 id="glog"><a href="#glog" class="headerlink" title="glog"></a>glog</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install glog</span><br></pre></td></tr></table></figure>
+
+<h2 id="conda"><a href="#conda" class="headerlink" title="conda"></a>conda</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.6</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add these packages if torch.distributed is needed</span></span><br><span class="line">conda install pkg-config libuv</span><br></pre></td></tr></table></figure>
+
+<h2 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h2><p>uninstall </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda uninstall torch</span><br><span class="line">pip uninstall torch</span><br><span class="line"></span><br><span class="line">rm -rf build&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>then reinstall</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CMAKE_PREFIX_PATH=<span class="variable">$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))/../&quot;&#125;</span></span><br><span class="line">MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ MAX_JOBS=8 BUILD_CAFFE2=0 BUILD_CAFFE2_OPS=0 USE_GLOG=1 USE_DISTRIBUTED=1 USE_MKLDNN=0 USE_CUDA=0 USE_FBGEMM=0 USE_NNPACK=0 USE_QNNPACK=0 USE_XNNPACK=0 python setup.py develop</span><br></pre></td></tr></table></figure>
+
+<p>Quad-Core Intel Core i7 ~ 45min</p>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; torch.__version__</span><br><span class="line">&#39;1.8.0a0+f1a8a82&#39;</span><br></pre></td></tr></table></figure>
+
+<h2 id="TcpStore"><a href="#TcpStore" class="headerlink" title="TcpStore"></a>TcpStore</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python test&#x2F;distributed&#x2F;test_c10d.py</span><br><span class="line"></span><br><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch.distributed as dist</span><br><span class="line">&gt;&gt;&gt; server_store &#x3D; dist.TCPStore(&quot;127.0.0.1&quot;, 18668, 1, True)</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;build&#x2F;bin&#x2F;TCPStoreTest</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5285fc6a.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/5285fc6a.html" class="post-title-link" itemprop="url">pod termination</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-23 14:16:34" itemprop="dateCreated datePublished" datetime="2020-08-23T14:16:34Z">2020-08-23</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 06:18:34" itemprop="dateModified" datetime="2020-12-12T06:18:34Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination">https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination</a></p>
+</blockquote>
+<p>简而言之，pod 被删除时</p>
+<ol>
+<li>kubelet 触发 container runtime 对 pod 中的每个 container 的 1 号进程，发送 TERM 信号</li>
+<li>等待 the grace period expires (terminationGracePeriodSeconds 默认为 30s)</li>
+<li>如果 the grace period expires 后 containers 仍未退出，则 kubelet 触发 container runtime，向 pod 中的每个 container 中仍然处于 running 状态的进程发送 KILL 信号</li>
+</ol>
+<p>正确处理 TERM 信号，可以让业务优雅退出（or 更快退出）；例如</p>
+<p>假设 pod command 为</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#run-a-command-in-a-shell">https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#run-a-command-in-a-shell</a></p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">command:</span> [<span class="string">&quot;/bin/bash&quot;</span>]</span><br><span class="line"><span class="attr">args:</span> [<span class="string">&quot;-c&quot;</span>, <span class="string">&quot;/home/rt/run.sh&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">command:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;/bin/bash&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;/home/rt/run.sh&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>/bin/bash /home/rt/run.sh</code> 是 1 号进程</p>
+</blockquote>
+<p>在 /home/rt/run.sh 中可以如此处理，以达到优雅退出的目的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> prog_exit &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;receive SIGTERM signal&quot;</span></span><br><span class="line">    pkill python</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">trap</span> prog_exit SIGTERM</span><br><span class="line"></span><br><span class="line"><span class="comment"># main function</span></span><br><span class="line">python /home/rt/train.py &amp;</span><br><span class="line"></span><br><span class="line"><span class="built_in">wait</span> $!</span><br></pre></td></tr></table></figure>
+
+<p>ref: docker stop</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/stop/">https://docs.docker.com/engine/reference/commandline/stop/</a></p>
+<p>The main process inside the container will receive SIGTERM, and after a grace period, SIGKILL.</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/a1778563.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/a1778563.html" class="post-title-link" itemprop="url">k8s-subpath-and-s3fs</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-05 10:11:38" itemprop="dateCreated datePublished" datetime="2020-04-05T10:11:38Z">2020-04-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:15:32" itemprop="dateModified" datetime="2020-11-22T02:15:32Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>k8s subPath and s3 fuse mount (s3fs)</p>
+<p>意识流分析，致敬一个生产环境中的问题，真是看了很多代码</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/s3fs-fuse/s3fs-fuse">https://github.com/s3fs-fuse/s3fs-fuse</a></p>
+<p>实现了 fuse 接口，底层对接 s3 协议</p>
+<p>打开 s3fs info 日志，观察可知</p>
+<p>fuse 周期性触发</p>
+<ol>
+<li>s3fs_getattr<ol>
+<li>check_object_access<ol>
+<li>get_object_attribute<ol>
+<li>s3 head request</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>check_parent_object_access</li>
+</ol>
+</li>
+<li>s3fs_opendir<ol>
+<li>check_object_access<ol>
+<li>check_parent_object_access</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>s3fs_readdir 方法，该方法底层会调用 list_bucket func，到s3 server查询对象列表<ol>
+<li>查询到有新的对象后，会 add 到本地 stat cache，并且下载到本地</li>
+</ol>
+</li>
+</ol>
+<p>所以使用 s3fs mount s3 bucket 到本地时，s3fs 会周期性同步远端的数据到本地，写入时，也会同步到远端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -SIGUSR2 <span class="variable">$&#123;s3fs_pid&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以动态调整 s3fs 日志级别，s3fs 默认日志输出到 /var/log/messages</p>
+<p>messages.2.gz 文件解压，可以使用 <code>gzip -d messages.2.gz</code></p>
+<hr>
+<p>生产环境出了一个诡异的问题</p>
+<p>server / worker 两个实例，在不同节点，挂载了同一个桶</p>
+<p>k8s subPath 方式挂载子对象，例如 test-bucket/output1</p>
+<p>在开始阶段 server s3fs 会上传 test-bucket/output1 文件夹，两次</p>
+<p>而 worker s3fs 不会</p>
+<p>debug 了一会儿，直接原因与 s3 对象的权限相关，用户创建的对象，s3fs mount 时，没权限 head，但是又能 list 到</p>
+<p>s3fs 如果 list 该对象为非空时，可正常读写该对象下的内容，也与验证结果符合 -.0</p>
+<hr>
+<p>分割线，前边是一些分析</p>
+<p>k8s subPath</p>
+<p>subPath 是相对于 volume root path 的一个 sub path，用于挂载 volume 内的子目录</p>
+<p>实现上首先会将 volume 挂载于节点的 pod volume 路径下</p>
+<ol>
+<li>再去 open subPath，open 之后，成为 kubelet 进程下的一个 fd</li>
+<li>接下来创建 volume-subpaths 下的一个路径（文件名与 volumeMount index 一致），并且判断 subPath 是文件还是文件夹<ol>
+<li>文件夹，mkdir 一把</li>
+<li>文件，写一个空文件</li>
+</ol>
+</li>
+<li>最后将该 fd mount 到上述创建的路径中</li>
+</ol>
+<p>不明点，在 1 步骤上，实际上 subPath 为 noObject；从文件系统的角度不确定它为文件夹，还是对象，而 kubelet 却执行成功了，并顺利挂载到容器中</p>
+<p>从 s3fs 的日志，对 subPath 首先执行了</p>
+<ol>
+<li>s3fs_mkdir，mode 0750</li>
+<li>s3fs_chmod，mode 40777</li>
+</ol>
+<p>即触发了两次 s3 PUT.OBJECT 的操作</p>
+<p>这块就不深入分析了为何如此了</p>
+<p>感叹一下，系统层层调用之后，问题定位需要极其清晰的思路，大胆假设，小心求证；解决问题的思路是第一重要的</p>
+<hr>
+<p>另外 s3fs 1.80 版本 err ret 不打印错误信息，只打印了个 response code，这个也比较伤，建议升级到当前最新版本<br>s3fs 1.86，会把错误信息也打印出来</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/dc3c10.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/dc3c10.html" class="post-title-link" itemprop="url">docker root user</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-12-08 10:20:15" itemprop="dateCreated datePublished" datetime="2019-12-08T10:20:15Z">2019-12-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:20:35" itemprop="dateModified" datetime="2020-11-22T02:20:35Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>87</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://unit42.paloaltonetworks.com/non-root-containers-kubernetes-cve-2019-11245-care/">https://unit42.paloaltonetworks.com/non-root-containers-kubernetes-cve-2019-11245-care/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/f68a955a.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/f68a955a.html" class="post-title-link" itemprop="url">spark-cluster-mode-on-k8s</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-12-08 10:16:51" itemprop="dateCreated datePublished" datetime="2019-12-08T10:16:51Z">2019-12-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:20:00" itemprop="dateModified" datetime="2020-11-22T07:20:00Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cluster-overview.html">https://spark.apache.org/docs/latest/cluster-overview.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cluster-overview.html#glossary">https://spark.apache.org/docs/latest/cluster-overview.html#glossary</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-pi.yaml">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-pi.yaml</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-py-pi.yaml">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-py-pi.yaml</a></p>
+<p><code>KUBERNETES_SERVICE_HOST</code></p>
+<p><code>KUBERNETES_SERVICE_PORT</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--class=...</span><br><span class="line">--master k8s://https://%s:%s</span><br><span class="line">--deploy-mode cluster/client</span><br><span class="line">--conf spark.kubernetes.namespace=default</span><br><span class="line">--conf spark.app.name=spark-pi</span><br><span class="line">SparkPi.jar (MainApplicationFile: MainFile is the path to a bundled JAR, Python, or R file of the application.)</span><br></pre></td></tr></table></figure>
+
+<p>SPARK_HOME/bin/spark-submit args</p>
+<p>Spark-on-k8s-operator controller run the <code>spark-submit</code> scripts</p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ bin/spark-submit \</span><br><span class="line">    --master k8s://https://&lt;k8s-apiserver-host&gt;:&lt;k8s-apiserver-port&gt; \</span><br><span class="line">    --deploy-mode cluster</span><br><span class="line">    --name spark-pi \</span><br><span class="line">    --class org.apache.spark.examples.SparkPi \</span><br><span class="line">    --conf spark.executor.instances=5 \</span><br><span class="line">    --conf spark.kubernetes.container.image=&lt;spark-image&gt; \</span><br><span class="line">    <span class="built_in">local</span>:///path/to/examples.jar</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management</a></p>
+<p>client mode is not supported in 2.3.1 (cluster manager)</p>
+<p>but it seems work in 2.4</p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/running-on-kubernetes.html">https://spark.apache.org/docs/latest/running-on-kubernetes.html</a></p>
+<p>Dependencies Jars and Files</p>
+<p>logs</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n=&lt;namespace&gt; logs -f &lt;driver-pod-name&gt;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/cda86f18.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/cda86f18.html" class="post-title-link" itemprop="url">raft</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-09 10:20:59" itemprop="dateCreated datePublished" datetime="2019-11-09T10:20:59Z">2019-11-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:22:31" itemprop="dateModified" datetime="2020-11-22T02:22:31Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>852</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>CP</p>
+<p>先写 log</p>
+<p>再复制 log</p>
+<p>一致性协议确保大多数都已成功复制 log 后，这个时候 log 也称为被 committed 了</p>
+<p>执行状态机</p>
+<p>三种角色</p>
+<p>Leader / Follower / Candidate</p>
+<p>Leader 负责周期性发起心跳</p>
+<p>Follower 接收心跳</p>
+<p>Follower 选举超时后，发起 Vote，状态转变为 Candidate</p>
+<p>ETCD 的流程</p>
+<p>写 WAL; raft 协议 ok; apply data to boltdb</p>
+<p>使用 raft 来同步 WAL;</p>
+<p>选举的限制</p>
+<p>A candidate must contact a majority of the cluster in order to be elected, which means that every committed entry must be present in at least one of those servers</p>
+<p>Raft determines which of two logs is more up-to-date by comparing the index and term of the last entries in the logs</p>
+<p>简单来说，在发起选举投票时，需要携带最新的 log 信息，包括 index 及 term；term 越大越新，如果 term 相同，则 log 的长度越长越新；这可以保证新选举出来的 leader 包含了之前所有 commited 的信息</p>
+<p>网络分区需要特殊考虑 (2PC)</p>
+<blockquote>
+<p>第一阶段先征求其他节点是否同意选举，如果同意选举则发起真正的选举操作，否则降为 Follower 角色</p>
+</blockquote>
+<p>例如当有 follow 被隔离时，其 term 会不断增大，当其重新加入集群时，会触发选举，影响集群稳定性；为避免如此情况，增加 preVote 阶段，即发起 vote 的前提为</p>
+<ul>
+<li>没有收到有效领导的心跳，至少有一次选举超时</li>
+<li>Candidate的日志足够新（Term更大，或者Term相同raft index更大）</li>
+</ul>
+<p>才开始选举，避免网络隔离后，恢复加入的节点 term 较高，触发集群选举</p>
+<p>客户端也需要考虑，网络分区，无法完成写入，需要 server 端返回特定的错误时，直接切换后端</p>
+<p>Summary</p>
+<ul>
+<li>2PC 两阶段</li>
+<li>Leader 一致性算法</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -730,728 +1445,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/ee6e3d9f.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/ee6e3d9f.html" class="post-title-link" itemprop="url">conda-dl</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-06-02 10:33:37" itemprop="dateCreated datePublished" datetime="2019-06-02T10:33:37Z">2019-06-02</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:36:13" itemprop="dateModified" datetime="2020-11-22T02:36:13Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>617</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-python">managing python version</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create --name dl python=3.6</span><br></pre></td></tr></table></figure>
-
-<p>activate your env [dl]</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda info --envs</span><br><span class="line">conda activate dl</span><br></pre></td></tr></table></figure>
-
-<p>PyCharm with anaconda</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#easy-build">build the latest openmpi</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># download the openmpi-v4.0.0.tar.gz from the official website</span></span><br><span class="line"><span class="comment"># untar and run configure</span></span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/openmpi --enable-orterun-prefix-by-default</span><br><span class="line"><span class="comment"># make and install</span></span><br><span class="line">make -j $(nproc) all</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-
-<p>verify openmpi</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun -np 4 --bind-to none --map-by slot hostname</span><br></pre></td></tr></table></figure>
-
-<p>install tensorflow</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/anaconda3/envs/dl/bin/pip --proxy http://127.0.0.1:1081 install tensorflow==1.13.1</span><br></pre></td></tr></table></figure>
-
-<p>install horovod</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HOROVOD_WITH_TENSORFLOW=1 /anaconda3/envs/dl/bin/pip install -v --no-cache-dir horovod==0.16.2</span><br></pre></td></tr></table></figure>
-
-<p>ref <a target="_blank" rel="noopener" href="https://github.com/horovod/horovod/blob/master/Dockerfile">horovod Dockerfile</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/acff1ae2.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/acff1ae2.html" class="post-title-link" itemprop="url">mxnet debug</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-06-01 10:42:52" itemprop="dateCreated datePublished" datetime="2019-06-01T10:42:52Z">2019-06-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:44:17" itemprop="dateModified" datetime="2020-11-22T02:44:17Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>227</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>recomplie mxnet</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DEBUG=1 <span class="keyword">in</span> comfig.mk, <span class="keyword">then</span> recompile the whole framework.</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://github.com/apache/incubator-mxnet/issues/6796#issuecomment-311310985">https://github.com/apache/incubator-mxnet/issues/6796#issuecomment-311310985</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j $(nproc) YOU_OPTIONS will compile parallelly</span><br><span class="line">gdb --args python YOU_ARGS can debug with gdb</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/9ca10b5e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/9ca10b5e.html" class="post-title-link" itemprop="url">horovod-tf</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-05-19 10:44:40" itemprop="dateCreated datePublished" datetime="2019-05-19T10:44:40Z">2019-05-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:45:33" itemprop="dateModified" datetime="2020-11-22T02:45:33Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>408</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>0.16.2</p>
-</blockquote>
-<p>horovod 启动流程</p>
-<p>hvd.init() 发生了什么</p>
-<p>HorovodBasics -&gt; init -&gt; horovod_init -&gt; InitializeHorovodOnce</p>
-<p>启动线程</p>
-<p>BackgroundThreadLoop</p>
-<p>MPI 初始化</p>
-<p>MPI_Comm_dup</p>
-<p>MPI_Comm_rank 获取当前进程的 RANK</p>
-<p>MPI_Comm_size 获取 local size</p>
-<p>两次 AllGather, 把 rank 与 size 分发到所有进程</p>
-<p>检查是否同构，即 size 是否相同</p>
-<p>rank 0 初始化 MessageTable</p>
-<p>initialization_done = true 初始化结束</p>
-<p>主线程等待</p>
-<p>initialization_done = true</p>
-<p>背景线程持续 RunLoopOnce</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (RunLoopOnce(state, is_coordinator));</span><br></pre></td></tr></table></figure>
-
-<p>从 message_queue 中获取数据</p>
-<p>DistributedOptimizer</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/efe6a532.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/efe6a532.html" class="post-title-link" itemprop="url">mxnet-network-and-infiniband</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-05-01 10:46:35" itemprop="dateCreated datePublished" datetime="2019-05-01T10:46:35Z">2019-05-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:50:14" itemprop="dateModified" datetime="2020-11-22T02:50:14Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="MXNet-分布式通信"><a href="#MXNet-分布式通信" class="headerlink" title="MXNet 分布式通信"></a>MXNet 分布式通信</h1><p>MXnet 使用了 dmlc/ps-lite 实现其分布式通信机制</p>
-<p>ps-lite</p>
-<p>van.h 父类，使用 Protocol buffer 定义了数据格式</p>
-<p>zmq_van.h 继承 van.h，使用 zmq 做具体的数据传输</p>
-<p>当前 MXnet 只能使用 IPoIB，不能直接使用 IB verbs 来通信；有个改动 ps-lite 也能直接使用 ib 来通信的 PR 挂了一年多了 …</p>
-<h1 id="RDMA-in-kubernetes"><a href="#RDMA-in-kubernetes" class="headerlink" title="RDMA in kubernetes"></a>RDMA in kubernetes</h1><p>IB 这东西嘛，看起来是没服务发现的能力的；就是使用之前，需要使用 IP 网络通信一次，然后知道对端的 IB 的地址后，才能直接基于 IB 来通信</p>
-<p>NCCL 就是这么干的</p>
-<p>当然参考阿里云的说法</p>
-<blockquote>
-<p>RDMA通讯建连过程普遍分为 TCP 和 RDMA_CM 两种实现，如果应用程序使用RDMA_CM 的建连的方式，vpc网络插件中分配的pod ip 无法作为RDMA_CM 地址， 容器需要设置HostNetwork。并将bond0 ip 设置为CM的通讯地址</p>
-</blockquote>
-<p>这得看下 mlx device plugin 的实现和容器网络的实现，比较好奇，看一下吧</p>
-<p>业界有两种实现 SR-IOV (single root io virtualization) 另一种就是直接共享设备 (HCA: host channel adapter)</p>
-<h2 id="HCA"><a href="#HCA" class="headerlink" title="HCA"></a>HCA</h2><p>HCA 就没啥好说的了，device plugin allocate 时，给 kubelet 返回设备路径，直接整个把 /dev/infiniband 挂载入容器中即可 … 这点会比较误导，相当于可以用所有的 HCA ?</p>
-<p>所以对于 HCA 来说，直接用原先的容器网络来初始化 IB 通信即可，即在容器网络上做 ib 设备地址的发现，随后再用 ib verbs api 来通信</p>
-<p>当然如果实现时，不是使用 tcp 的方式来初始化 IB，使用的是 rdma_cm，会有区别，容器的 ip 不能用于通信，只能用主机上的 bond0 ip 来通信 （主网卡）</p>
-<p>有点儿奇怪可能与 rdma_cm 的 api 有关 …</p>
-<p>另外最好加个这个，让单机多卡的训练可以 IPC 通信</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">securityContext:</span></span><br><span class="line">  <span class="attr">capabilities:</span></span><br><span class="line">    <span class="attr">add:</span> [ <span class="string">&quot;IPC_LOCK&quot;</span> ]</span><br></pre></td></tr></table></figure>
-
-<h2 id="SR-IOV"><a href="#SR-IOV" class="headerlink" title="SR-IOV"></a>SR-IOV</h2><p>PF -&gt; VF</p>
-<p>需要 SR-IOV CNI plugin 及 device plugin 配合</p>
-<p>device plugin 挂载 /dev/infiniband 到容器中</p>
-<p>SR-IOV CNI plugin 负责将 VF 绑定到容器的 network namespace 中</p>
-<p>假设 VF 事先创建好</p>
-<p>逻辑是通的，CNI 记录每个节点哪些 VF 已被分配，每个节点记录剩余几个 VF，当有新的 pod 被调度到当前节点时，CNI 即可分配未使用的 VF 与 pod</p>
-<h1 id="IP-over-Infiniband"><a href="#IP-over-Infiniband" class="headerlink" title="IP over Infiniband"></a>IP over Infiniband</h1><p>IPoIB 由 ipoib driver 实现，能像一般 NIC (ifconfig) 一样使用 ib 网络，当然性能差一些，在到达 NIC 之前，与 socket 通信的开销一致</p>
-<ul>
-<li>socket api</li>
-<li>ib verbs api</li>
-</ul>
-<p>socket api 走 os 调用栈，CPU 参与</p>
-<p>ib verbs 直接走 ib，相当于 bypass 了 os 与 CPU，硬件卸载</p>
-<p>不过有个地方比较疑惑，IPoIB，infiniband 底层的传输方式是 datagram 即不可靠传输，不过上层应用（zmp）都是 tcp，应有自己的重传机制；其次 ps-lite van.h 里也有开关控制重传功能，在未收到当前消息的 ACK 时，不会处理该请求，这里展开说下</p>
-<p>van.h 初始时，如果看到打开了重传开关，则初始化 resend.h</p>
-<p>启动了一个线程，周期性 (Timeout) 的重传 send_buf 中的消息</p>
-<p>van.h 在</p>
-<ul>
-<li>发送数据时，将数据加入 send_buf 中；</li>
-<li>接收到数据时<ul>
-<li>如果是 ACK，则从 send_buf 中移除该消息，并把数据交给上层处理</li>
-<li>若当前数据仍不是 ack 数据，则查看是否已发送过 ACK<ul>
-<li>是的话，则认为是重复消息，不交上层处理，并发送 ACK</li>
-<li>否则 交上层处理，记录到 ACK set 中，并发送 ACK</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>不过这个重传的场景比较神奇，话说 TCP 已经有 ACK 和重传机制了 … 不懂 ps-lite 是遇到了什么具体的场景，再做了一次重传的增强设计</p>
-<p>而且这个设计有个限制，收发数据越多，似乎内存消耗越大，因为记录是否收到过该消息的 ACK 的 set，并没有清理的机会，会一直增加</p>
-<p>所以一般也未见开启这个功能，env.md 里都没说明这两环境变量，姑且认为是个废弃特性吧 …</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS_RESEND&#x3D;1</span><br><span class="line">PS_RESEND_TIMEOUT&#x3D;1000 # ms</span><br></pre></td></tr></table></figure>
-
-<h1 id="厂家"><a href="#厂家" class="headerlink" title="厂家"></a>厂家</h1><h2 id="Azure"><a href="#Azure" class="headerlink" title="Azure"></a>Azure</h2><p>只支持 RDMA on IB 不支持 IP over IB</p>
-<p>In Azure, IP over IB is not supported. Only RDMA over IB is supported.</p>
-<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/azure/virtual-machines/linux/sizes-hpc#rdma-capable-instances">https://docs.microsoft.com/zh-cn/azure/virtual-machines/linux/sizes-hpc#rdma-capable-instances</a></p>
-<h2 id="Aliyun"><a href="#Aliyun" class="headerlink" title="Aliyun"></a>Aliyun</h2><p>k8s 目前只看到 RDMA on IB，IP over IB 没看到，看起来是直接主机网络之后，用 ib0 ip 就行？</p>
-<h2 id="AWS"><a href="#AWS" class="headerlink" title="AWS"></a>AWS</h2><p>sagemaker 25Bbps/s 互联，看起来不像 IB or RoCE</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-ethernet-rdma-sr-iov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-ethernet-rdma-sr-iov-networking-with-connectx4-connectx5</a></p>
-<p>在 Kubernetes 上使用 RDMA</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/e57ea50b.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/e57ea50b.html" class="post-title-link" itemprop="url">welcome to hpc</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-01-19 10:54:39" itemprop="dateCreated datePublished" datetime="2019-01-19T10:54:39Z">2019-01-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 03:00:26" itemprop="dateModified" datetime="2020-11-22T03:00:26Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念</p>
-<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><h2 id="MPI"><a href="#MPI" class="headerlink" title="MPI"></a>MPI</h2><p>Message passing interface</p>
-<p>消息传递接口，可以理解为分布式消息传递框架</p>
-<h2 id="OpenMPI"><a href="#OpenMPI" class="headerlink" title="OpenMPI"></a>OpenMPI</h2><p>MPI 的一种开源实现</p>
-<h2 id="RDMA"><a href="#RDMA" class="headerlink" title="RDMA"></a>RDMA</h2><p>remote direct memory access</p>
-<h2 id="Infiniband"><a href="#Infiniband" class="headerlink" title="Infiniband"></a>Infiniband</h2><p>IB</p>
-<p>网络设备，支持 RDMA</p>
-<h1 id="OpenMPI-1"><a href="#OpenMPI-1" class="headerlink" title="OpenMPI"></a>OpenMPI</h1><p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=developers#ompi-terminology">Terminology</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#mca-def">MCA</a></p>
-<ul>
-<li>framework</li>
-<li>components</li>
-<li>module</li>
-</ul>
-<blockquote>
-<p>An easy example framework to discuss is the MPI framework named “btl”, or the Byte Transfer Layer. It is used to send and receive data on different kinds of networks. Hence, Open MPI has btl components for shared memory, TCP, Infiniband, Myrinet, etc.</p>
-</blockquote>
-<p>不同的 MCA 支持不同的参数，我们可以参考如下查询支持的 MCA 参数</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#available-mca-params">available-mca-params</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ompi_info --param all all --level 9</span><br><span class="line"><span class="comment"># only btl</span></span><br><span class="line">ompi_info --param btl all --level 9</span><br><span class="line"><span class="comment"># only tcp of btl</span></span><br><span class="line">ompi_info --param btl tcp --level 9</span><br></pre></td></tr></table></figure>
-
-<p>可以通过 MCA 参数选择 Components</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#selecting-components">selecting-components</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl ^tcp,openib</span><br></pre></td></tr></table></figure>
-
-<p>不使用 btl framework 中的 tcp component，使用其中的 openib</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/doc/v3.1/man1/mpirun.1.php">mpirun</a></p>
-<p>mpirun 的常用参数</p>
-<ul>
-<li>-H: List of hosts on which to invoke processes.</li>
-<li>-np: Run this many copies of the program on the given nodes. This option indicates that the specified file is an executable program and not an application context. If no value is provided for the number of copies to execute (i.e., neither the “-np” nor its synonyms are provided on the command line), Open MPI will automatically execute a copy of the program on each process slot (see below for description of a “process slot”). This feature, however, can only be used in the SPMD model and will return an error (without beginning execution of the application) otherwise.</li>
-<li>–bind-to: Bind processes to the specified object, defaults to core. Supported options include slot, hwthread, core, l1cache, l2cache, l3cache, socket, numa, board, and none.</li>
-<li>-x: Export the specified environment variables to the remote nodes before executing the program. Only one environment variable can be specified per -x option. Existing environment variables can be specified or new variable names specified with corresponding values. For example: % mpirun -x DISPLAY -x OFILE=/tmp/out … The parser for the -x option is not very sophisticated; it does not even understand quoted values. Users are advised to set variables in the environment, and then use -x to export (not define) them.</li>
-<li>-mca: Send arguments to various MCA modules. See the “MCA” section, below.</li>
-</ul>
-<p><code>--mca btl self</code> 的作用</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=openfabrics#ib-btl">ib-btl</a></p>
-<p>self 用于本地进程通信 (可能使用 lo 设备，也可能不用，例如可以使用内存共享)</p>
-<p>openmpi，假设多机同一个地址族的地址可通，如果主机上有多个网络，openmpi 参考如下链接进行网络选择</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-selection">tcp-selection</a></p>
-<p>注意到 openmpi 会使用所见的所有网络，如果你不想其使用 ip network，你可以显式的禁用之，然而</p>
-<blockquote>
-<p>Note that Open MPI will still use TCP for control messages, such as data between mpirun and the MPI processes, rendezvous information during MPI_INIT, etc. To disable TCP altogether, you also need to disable the tcp component from the OOB framework.</p>
-</blockquote>
-<p>这句话比较有意思，一般来说 mpirun 要求 node 间可以 ssh 免密登录，而 ssh 是应用层协议，依赖 TCP</p>
-<p>openmpi 会选择最优的网络</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability">tcp-routability</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability-1.3">tcp-routability-1.3</a></p>
-<p>如何查看 mpirun 连接的过程</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl self,vader,tcp --mca btl_base_verbose 30 -np 2 -host NodeA,NodeB a.out</span><br></pre></td></tr></table></figure>
-
-<p>a.out 为可执行程序</p>
-<p>如果有 ib 卡，tcp component 会自动下线</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-auto-disable">tcp-auto-disable</a></p>
-<p>openmpi build default option</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#default-build">default-build</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--with-openib(=DIR) and --with-openib-libdir=DIR</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2e8d2c8b.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/2e8d2c8b.html" class="post-title-link" itemprop="url">mpi operator</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-01-19 10:51:00" itemprop="dateCreated datePublished" datetime="2019-01-19T10:51:00Z">2019-01-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:54:17" itemprop="dateModified" datetime="2020-11-22T02:54:17Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>972</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ol>
-<li>计算 Replica 及 Slot 数</li>
-<li>创建 ConfigMap</li>
-</ol>
-<ul>
-<li>hostfile</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[mpiJobName]-worker-i slots&#x3D;[8]</span><br></pre></td></tr></table></figure>
-
-<p>[mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod</p>
-<p>kubexec.sh</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line">POD_NAME=<span class="variable">$1</span></span><br><span class="line"><span class="built_in">shift</span></span><br><span class="line">/opt/kube/kubectl <span class="built_in">exec</span> <span class="variable">$&#123;POD_NAME&#125;</span> -- /bin/sh -c <span class="string">&quot;$*&quot;</span></span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>创建 Statefulset</li>
-</ol>
-<p>Container Command: Sleep</p>
-<ol start="2">
-<li>创建 Launcher (Job)</li>
-</ol>
-<p>Statefulset ready 后，创建 Launcher (Job)</p>
-<p>设置 env OMPI_MCA_plm_rsh_agent 为 kubexec.sh</p>
-<p>即使用 <code>kubectl exec $&#123;POD_NAME&#125; -- /bin/sh -c &quot;$*&quot;</code> 作为 ssh_agent</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=rsh#rsh-not-ssh">rsh-not-ssh</a></p>
-<p>所以 openmpi 是有个潜在要求的，要么是支持 IPoIB，or 要有 IP 网络，纯 IB 网络不行</p>
-<p>当然 SDP (Socket Direct Protocol) 能加速 Socket 又是另外一个话题了</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># server side</span></span><br><span class="line">/etc/init.d/sshd stop</span><br><span class="line">env LD_PRELOAD=/usr/lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/u/etc/libsdp.conf /etc/init.d/sshd start</span><br><span class="line"><span class="comment"># client side</span></span><br><span class="line">LD_PRELOAD=/usr//lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/etc/libsdp.conf scp &lt;file&gt; &lt;user&gt;@&lt;IPoIBaddr&gt;:&lt;dir&gt;</span><br></pre></td></tr></table></figure>
-
-<p>Running ssh, scp over SDP</p>
-<p><code>lsmod | grep sdp</code></p>
-<p><code>sdpnetstat -S</code></p>
-<p>设置 env OMPI_MCA_orte_default_hostfile 为 hostfile</p>
-<p>Container Command: mpirun</p>
-<p>综上，mpi-operator 使用 kube-dns 获得 pod ip，mpirun 使用 <code>kubectl exec</code> 远程登录 container</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1508,14 +1501,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">217k</span>
+    <span title="站点总字数">221k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:18</span>
+    <span title="站点阅读时长">3:21</span>
   </span>
 </div>
 

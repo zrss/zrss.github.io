@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">92</span>
+          <span class="site-state-item-count">98</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">42</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,690 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/64e2c768.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/64e2c768.html" class="post-title-link" itemprop="url">boltdb init bucket</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-02-20 16:50:50" itemprop="dateCreated datePublished" datetime="2018-02-20T16:50:50Z">2018-02-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:52:19" itemprop="dateModified" datetime="2020-11-22T08:52:19Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>how to create a bucket in bbolt</p>
+<p>fresh new db file</p>
+<p>page 3 (start from 0) is a leaf page, it will be used as a root bucket</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    root     pgid   <span class="comment">// page id of the bucket&#x27;s root-level page</span></span><br><span class="line">    sequence <span class="keyword">uint64</span> <span class="comment">// monotonically incrementing, used by NextSequence()</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>bucket 结构表示存储于文件中的 bucket</p>
+<p>另外 tx 会关联一个 Bucket 结构体</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    *bucket</span><br><span class="line">    tx       *Tx                <span class="comment">// the associated transaction</span></span><br><span class="line">    buckets  <span class="keyword">map</span>[<span class="keyword">string</span>]*Bucket <span class="comment">// subbucket cache</span></span><br><span class="line">    page     *page              <span class="comment">// inline page reference</span></span><br><span class="line">    rootNode *node              <span class="comment">// materialized node for the root page.</span></span><br><span class="line">    nodes    <span class="keyword">map</span>[pgid]*node     <span class="comment">// node cache</span></span><br><span class="line">    <span class="comment">// Sets the threshold for filling nodes when they split. By default,</span></span><br><span class="line">    <span class="comment">// the bucket will fill to 50% but it can be useful to increase this</span></span><br><span class="line">    <span class="comment">// amount if you know that your write workloads are mostly append-only.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// This is non-persisted across transactions so it must be set in every Tx.</span></span><br><span class="line">    FillPercent <span class="keyword">float64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见其中组合了 bucket 结构体</p>
+<p>写事务在初始化时，会使用 meta 锁，锁定住 meta 页的修改；随后将 meta 页拷贝至写事务内部存储；而实际上写事务开启时，会使用 rwlock，因此写事务并不会并发，另仅有写事务会修改 meta 页，所以此处的 meta 页拷贝存疑，似乎没必要</p>
+<p>init 方法为 beginTX 内部执行，读写事务都会执行，因此虽然写事务无需 copy meta page 然而读事务需要，因为写事务 commit 之后，会修改 meta page</p>
+<p>完成 meta 页的拷贝后，将 tx 的 root (Bucket) 初始化，并设置其 root bucket 为 meta 中的 root bucket; 第一个写事务的 txid 为 2，0、1 用于设置两个 meta 页</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">    p := db.pageInBuffer(buf[:], pgid(i))</span><br><span class="line">    p.id = pgid(i)</span><br><span class="line">    p.flags = metaPageFlag</span><br><span class="line">    <span class="comment">// Initialize the meta page.</span></span><br><span class="line">    m := p.meta()</span><br><span class="line">    m.magic = magic</span><br><span class="line">    m.version = version</span><br><span class="line">    m.pageSize = <span class="keyword">uint32</span>(db.pageSize)</span><br><span class="line">    m.freelist = <span class="number">2</span></span><br><span class="line">    m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br><span class="line">    m.pgid = <span class="number">4</span></span><br><span class="line">    m.txid = txid(i) <span class="comment">// 0 1 txid used</span></span><br><span class="line">    m.checksum = m.sum64()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>create bucket 时 cursor 从 root bucket page 开始遍历 bucket name 应存放的适当位置</p>
+<p>branch page 节点 / leaf page 节点</p>
+<p>数据存放于 leaf page 节点中</p>
+<p>存储于文件中的为 page，内存中的为 node，从文件中读取到的 page 会 materialed 为内存中的 node</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/4ab1fcf6.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/4ab1fcf6.html" class="post-title-link" itemprop="url">ETCD 链接建立</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 16:48:36" itemprop="dateCreated datePublished" datetime="2017-12-03T16:48:36Z">2017-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:49:22" itemprop="dateModified" datetime="2020-11-22T08:49:22Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>521</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>机缘巧合，在测试的引导下，读了下 etcd 连接建立方面的代码</p>
+<p>etcd 启动后监听 peer url</p>
+<p>peer url 通过 mux 绑定 handler，关于 raft 的 url 的请求绑定到 streamHandler 上，这玩意会 hold 住一个连接，除非遇到错误，&lt;-c.closeNotify()，连接 close</p>
+<p>啥时候重新 p.attachOutgoingConn(conn) 回来，当然是该成员又请求连接到 url 上来时，即 streamReader 重新连接回来时</p>
+<p>streamWriter 使用长链</p>
+<p>streamReader 持续读，与 streamWriter 匹配，streamWriter 不遇到错误，不 close 连接；streamReader 断了之后，100ms 重新 dial 一次，重连上后，对端 streamWriter 能 hold 住新的连接</p>
+<p>etcd 对其每一个 peer 都会启动 streamReader 和 streamWriter，reader 建立连接后，writer 使用不关闭，reader 有数据时读，writer 有写入时写，保持着连接</p>
+<p>所以 etcd peer 间是建立着长链的，可以使用 netstat -anp | grep {etcd_peer_port} 查看 peer 之间的连接建立情况</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b3b02fd2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/b3b02fd2.html" class="post-title-link" itemprop="url">ssl tls and https</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 16:46:00" itemprop="dateCreated datePublished" datetime="2017-12-03T16:46:00Z">2017-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:47:28" itemprop="dateModified" datetime="2020-11-22T08:47:28Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>安全方面的姿势，掌握略有不足，趁着空闲；另外也是为了不仅仅知道，curl 命令访问 https 接口的时候，需要携带三个证书，如此模糊的解释而努力<br>to be cont.</p>
+</blockquote>
+<p>搜索了一下网上已有很多现有资料，这里就重新回顾一下，当做我自己的姿势了</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/denji/golang-tls">https://github.com/denji/golang-tls</a></p>
+<p>首先看下 go 语言中，如何实现 server 端 HTTPS/TLS</p>
+<p><a target="_blank" rel="noopener" href="http://tonybai.com/2015/04/30/go-and-https/">http://tonybai.com/2015/04/30/go-and-https/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="comment">// &quot;fmt&quot;</span></span><br><span class="line">    <span class="comment">// &quot;io&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">HelloServer</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/plain&quot;</span>)</span><br><span class="line">    w.Write([]<span class="keyword">byte</span>(<span class="string">&quot;This is an example server.\n&quot;</span>))</span><br><span class="line">    <span class="comment">// fmt.Fprintf(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">    <span class="comment">// io.WriteString(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">&quot;/hello&quot;</span>, HelloServer)</span><br><span class="line">    err := http.ListenAndServeTLS(<span class="string">&quot;:443&quot;</span>, <span class="string">&quot;server.crt&quot;</span>, <span class="string">&quot;server.key&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">&quot;ListenAndServe: &quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>443 为知名的 HTTPS 服务端口，那么 server.crt、server.key 这两个文件又是如何作用，哪来的呢？</p>
+<p>首先解释哪来的问题</p>
+<p>使用 openssl 生成私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;RSA&quot; ≥ 2048-bit</span></span><br><span class="line">openssl genrsa -out server.key 2048</span><br></pre></td></tr></table></figure>
+
+<p>or 使用另外一种算法生成的私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;ECDSA&quot; ≥ secp384r1</span></span><br><span class="line"><span class="comment"># List ECDSA the supported curves (openssl ecparam -list_curves)</span></span><br><span class="line">openssl ecparam -genkey -name secp384r1 -out server.key</span><br></pre></td></tr></table></figure>
+
+<p>私钥生成好之后，使用私钥生成公钥（x509 自签发 crt）</p>
+<blockquote>
+<p>Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650</span><br></pre></td></tr></table></figure>
+
+<p>所以呢，server.key 是私钥，server.crt 是公钥，生成之后，就可以用来初始化 TLS server 了</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/9bd3bd71.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/9bd3bd71.html" class="post-title-link" itemprop="url">angularjs and webpack</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 15:58:34" itemprop="dateCreated datePublished" datetime="2017-12-03T15:58:34Z">2017-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:03:53" itemprop="dateModified" datetime="2020-11-22T08:03:53Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在给 ETCD cluster on k8s 写 FE (front end)，此篇总结一下框架性的东西</p>
+<p>很久之前在实验室的时候，曾经蹚水过一段时间 fe 开发，深知 fe 领域目前 一天涌现 100 个开发工具 的节奏，从 angularjs (google) 到 react (facebook)，都是 SPA (single page application) 的实践</p>
+<p>使用这两框架，对于 fe 小白开发来说，最大好处是省去了大部分 jQuery 手工操作 DOM 的繁杂代码，都由框架代为更新 DOM 元素了。当然也引入了比服务器端渲染页面的经典设计模式 MVC (model view controller)，更进一步的 MVVM (model view viewModel) 模式，支持视图到模型，模型到视图的双向数据更新特性。由此 fe 的代码得到极大净化</p>
+<p>然而无奈 fe 仍然是个劳动密集型的方向，毕竟是眼见为实，与用户距离最近的东西，一言不合就有需求，就有改动了。因此代码一开始可能是规整的，过了一段时间后，就直接起飞了 …</p>
+<p>现实不讨论了，先进入正题</p>
+<h2 id="找轮子"><a href="#找轮子" class="headerlink" title="找轮子"></a>找轮子</h2><p>不重复造轮子，github 上搜索一把，可以得到很多 startup 项目，找一个 star 比较多的，例如 <a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack%EF%BC%8C%E7%9B%B4%E6%8E%A5%E7%94%A8%E8%AF%A5%E9%A1%B9%E7%9B%AE%E6%9D%A5%E5%BC%80%E5%A7%8B%E5%A5%BD%E4%BA%86">https://github.com/preboot/angularjs-webpack，直接用该项目来开始好了</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/preboot/angularjs-webpack.git</span><br></pre></td></tr></table></figure>
+
+<h2 id="分析轮子"><a href="#分析轮子" class="headerlink" title="分析轮子"></a>分析轮子</h2><p>该项目为 node + angularjs + webpack 的一个极简 demo</p>
+<p>node 就不说了，fe 的革命，很大程度由 node 引发</p>
+<p>angularjs 呢，mvvm 框架</p>
+<p>webpack 简单理解的话，在 java / c++ 等语言中，可以通过 include or import 关键字导入依赖的库，进而在当前模块中使用已实现的方法，避免重复的开发工作。那么在 fe 中 import 依赖的组件，如当前模块依赖的 js / css 代码，webpack 的作用就是理解这些 import 指令，最后将所有代码 打包 成可实际执行的代码</p>
+<h2 id="用轮子造车子"><a href="#用轮子造车子" class="headerlink" title="用轮子造车子"></a>用轮子造车子</h2><h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── LICENSE</span><br><span class="line">├── README.md</span><br><span class="line">├── karma.conf.js</span><br><span class="line">├── node_modules</span><br><span class="line">├── package.json</span><br><span class="line">├── postcss.config.js</span><br><span class="line">├── src</span><br><span class="line">└── webpack.config.js</span><br></pre></td></tr></table></figure>
+
+<p>package.json 定义了 node 项目的依赖</p>
+<p>通过 npm install 安装 package.json 中定义的依赖到项目下的 node_modules 文件夹下</p>
+<p>国内的网络环境一般，需要一些手段加速依赖下载，如淘宝的 npm 镜像站</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装淘宝定义的 cnpm</span></span><br><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br><span class="line"><span class="comment"># 安装项目依赖</span></span><br><span class="line">cnpm install</span><br></pre></td></tr></table></figure>
+
+<p>速度可以说是很快了，秒装</p>
+<p>webpack.config.js 为 webpack 的配置文件，其中比较重要的配置有</p>
+<p>SPA 应用 js 入口</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">config.entry = isTest ? <span class="keyword">void</span> <span class="number">0</span> : &#123;</span><br><span class="line">  app: <span class="string">&#x27;./src/app/app.js&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>SPA 应用 page 入口</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> HtmlWebpackPlugin(&#123;</span><br><span class="line">  template: <span class="string">&#x27;./src/public/index.html&#x27;</span>,</span><br><span class="line">  inject: <span class="string">&#x27;body&#x27;</span></span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+
+<p>base 路径</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config.devServer = &#123;</span><br><span class="line">  contentBase: <span class="string">&#x27;./src/public&#x27;</span>,</span><br><span class="line">  stats: <span class="string">&#x27;minimal&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>即在该路径下有一文件，如 ./src/public/hello.png，那么在浏览器中 url/hello.png 能访问到</p>
+<p>本地开发时 dev server 的访问地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Output path from the view of the page</span><br><span class="line">&#x2F;&#x2F; Uses webpack-dev-server in development</span><br><span class="line">publicPath: isProd ? &#39;&#x2F;&#39; : &#39;http:&#x2F;&#x2F;localhost:8080&#x2F;&#39;,</span><br></pre></td></tr></table></figure>
+
+<h3 id="本地开发"><a href="#本地开发" class="headerlink" title="本地开发"></a>本地开发</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 启动 webpack dev server</span><br><span class="line">npm start</span><br><span class="line">// 浏览器访问 pulicPath 地址即可，如</span><br><span class="line">// http://localhost:8080/</span><br></pre></td></tr></table></figure>
+
+<p>其他的不多说了，此篇质量一般，也是我现在开发 fe 的一个无奈吧，这里增加几句话，那里增加几句话，okay it works，细节不清楚，只是为了完成业务逻辑，当然也因为目前兴趣不在此。详细的可看看 参考 (3)</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack">https://github.com/preboot/angularjs-webpack</a></p>
+<p><a target="_blank" rel="noopener" href="https://npm.taobao.org/">https://npm.taobao.org/</a></p>
+<p><a target="_blank" rel="noopener" href="http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/">http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5015bdda.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/5015bdda.html" class="post-title-link" itemprop="url">etcd-raft-follower</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-11-05 16:21:07" itemprop="dateCreated datePublished" datetime="2017-11-05T16:21:07Z">2017-11-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>to be cont 先写部分吧</p>
+</blockquote>
+<h1 id="MsgProp"><a href="#MsgProp" class="headerlink" title="MsgProp"></a>MsgProp</h1><p>Follower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送</p>
+<h1 id="MsgApp"><a href="#MsgApp" class="headerlink" title="MsgApp"></a>MsgApp</h1><p>Follower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；调用 handleAppendEntries 方法处理 MsgApp 消息；handleAppendEntries 方法中向 m.From 发送 MsgAppResp 消息；消息中包含经过处理 MsgApp 后，当前节点的 Index；冲突时额外返回 Reject: true，RejectHint: lastIndex</p>
+<p>maybeAppend: handleAppendEntries 方法中使用到的 maybeAppend 方法分析</p>
+<p>(1)</p>
+<p>firstIndex 会尝试从 unstable 的 snapshot 中获取 snapshot meta Index，如果 snapshot 为 nil（maybeFirstIndex），则从 storage 中获取 ents[0].Index</p>
+<p>(2)</p>
+<p>lastIndex 会尝试从 unstable 的 ents 中获取最后一个 entry 的 index，如果 unstable 的 ents 为空，则获取 unstable 的 snapshot meta index（maybeLastIndex），如果仍然获取不到，则从 storage 中获取最后一个 entry 的 Index</p>
+<p>看明白最基础的方法 firstIndex 和 lastIndex 后，继续往下</p>
+<p>(3)</p>
+<p>term 尝试获取 index 为 i 的 entry 的 term，entries 的第一个 index 为 dummy index，即每次收到 MsgApp 消息时，m.Index 为 dummy entry (index)，后续为真正的 entries (m.Ents)；dummy index &lt;= i &lt;= lastIndex，如果 index i 不位于该范围中，显然无法找到对应的 term；maybeTerm 尝试在 unstable 中获取 index 为 i 的 entry 的 term，unstable 中无法找到的话，从 storage 中查找</p>
+<p>(4)</p>
+<p>matchTerm(i uint64, term Term) 的实现，首先尝试获取 index i 的 term，随后匹配是否等于 term</p>
+<p>(5)</p>
+<p>findConflict 的实现，对 ents 中的每个 entry 调用 matchTerm 方法，Index 升序遍历，遇到 unmatch的 (即遇到相同 Index 不同 Term 的 entry 认为 conflict)，如果这个 unmatch 的 entry 的 Index &lt;= lastIndex，则有 conflict，返回第一个 conflict entry 的 Index；如果这个 unmatch 的 entry 的 Index &gt; lastIndex，则认为是新的未包含的 entry，则返回第一个新的 entry 的 Index；如果均 match 则返回 0</p>
+<p>(6)</p>
+<p>maybeAppend(m.Index, m.LogTerm, m.Commit, m.Entries…) 的实现，内部会首先判断 matchTerm(m.Index, m.LogTerm)，过了之后，会对每个 entry findConflict，没有 confict 则没啥好添加的，有 conflict，可能是真 conlict 也可能是包含了新的 entries，统一调用 append 方法加入到 unstable 中；注意这是 Follower 的行为，Follower 会使用 Leader 发来的 MsgApp 改写自己本地的 entries；Leader 发来的 MsgApp 中包含了其已经 commited 的 Index 信息，Follower 使用 commited 和 MsgApp 中的最后 Index 中小的那个 Index 作为能 committed 的 index</p>
+<blockquote>
+<p>lastnewi = index + uint64(len(ents))</p>
+</blockquote>
+<p>commitTo(min(commited, lastnewi))</p>
+<p>如果 tocommit &gt; l.lastIndex() 会 panic</p>
+<p>(7)</p>
+<p>综上</p>
+<ul>
+<li>接收到 MsgHeartbeat 消息会更新 commited</li>
+<li>接收到 MsgApp 消息可能会更新 commited</li>
+</ul>
+<h2 id="FAQ-unstable-什么时候会-stable？"><a href="#FAQ-unstable-什么时候会-stable？" class="headerlink" title="FAQ: unstable 什么时候会 stable？"></a>FAQ: unstable 什么时候会 stable？</h2><p>在 node 的 main for loop 中，首先会从 raftlog 中获取 ready to apply 的 entries (即 unstable 和 nextEnts)，将其放入 readyc 通道后，等待 advancec 通道消息；当外部 apply 结束后，调用 node.Advance() 方法，node 获取到 advancec 通道中的消息，开始执行 raftlog 的 apply 更新 apply index 和 stable to 将 unstable 变为 stable</p>
+<p>raftlog 的逻辑图如下 (没写 snapshot 部分)</p>
+<p><img src="/images/raftlog.jpeg" alt="raftlog"></p>
+<h1 id="MsgHeartbeat"><a href="#MsgHeartbeat" class="headerlink" title="MsgHeartbeat"></a>MsgHeartbeat</h1><p>Follower 收到 MsgHeartbeat 消息时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；commitTo MsgHeartbeat 中的 commited index，并向 Leader 回复 MsgHeartbeatResp 消息</p>
+<h1 id="MsgReadIndex"><a href="#MsgReadIndex" class="headerlink" title="MsgReadIndex"></a>MsgReadIndex</h1><p>Follower 收到 MsgReadIndex 消息，将请求转发至 Leader；Leader 返回 MsgReadIndexResp 消息，有且仅有 1 Entry，返回已到达一致性的 Index (consistency=l)；线性 / 序列化，貌似是个术语待查</p>
+<p>Follower 收到 MsgReadIndexResp 消息，有且仅有 1 Entry，将其加入 readStates 中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.readStates = <span class="built_in">append</span>(r.readStates, ReadState&#123;Index: m.Index, RequestCtx: m.Entries[<span class="number">0</span>].Data&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="FAQ-那么-msgs-什么时候会被发送"><a href="#FAQ-那么-msgs-什么时候会被发送" class="headerlink" title="FAQ: 那么 msgs 什么时候会被发送"></a>FAQ: 那么 msgs 什么时候会被发送</h2><p>回到 node 的 main forloop，在 rd = newReady(r, prevSoftSt, prevHardSt) 方法中会读取 r.msgs，并设置 n.readyc 通道，后续将 rd 放入 readyc 通道中，等待外部消费；外部通过 node.Ready() 方法获得内部需 apply or 待发送的 Messages</p>
+<p>在 etcdserver/raft.go 的 main forloop 中获取 readyc 通道消息 rd := &lt;-r.Ready()，该 apply Messages 放入到 r.applyc 通道，该发送的 r.Messages，调用 r.sendMessages(rd.Messages) 发送，结束之后调用 r.Advance()</p>
+<p>另外在 etcdserver/server.go 的 main forloop 中获取 ap ap := &lt;-s.r.apply()，将这次 apply 放入 FIFO 中，FIFO 内部协程异步处理 apply job</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/d7e71fec.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/d7e71fec.html" class="post-title-link" itemprop="url">boltdb-cursor</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-29 15:54:07" itemprop="dateCreated datePublished" datetime="2017-10-29T15:54:07Z">2017-10-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:56:04" itemprop="dateModified" datetime="2020-11-22T07:56:04Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中</p>
+<h1 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h1><p>first / prev / next / last 的实现</p>
+<p>first 就是不断搜索 element 的 index = 0 inode，直到 leaf page 为止</p>
+<p>last 是不断搜索 element 的 index = the count of inodes - 1，直到 leaf page 为止</p>
+<p>first 和 last 实现后，可相应实现 prev / next</p>
+<p>prev 当 inode 中可 – 时则直接回退一格，若为开头 inode，则上移，再 last</p>
+<p>next 当 inode 中可 ++ 时则直接前进一格，若为末尾 indoe，则上移，再 first</p>
+<h1 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h1><p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
+<blockquote>
+<p>nsearch(key)</p>
+</blockquote>
+<p>如果搜到了 leaf page / node，那么就在 inodes 中搜索该 key，返回的 index 为第一个大于等于 key 的 index，若不存在返回 inodes 长度</p>
+<blockquote>
+<p>searchNode(key, n)</p>
+</blockquote>
+<p>如果不是 leaf page / node，且 node 不为 nil (n)，则 searchNode；searchNode 中如果 key 相等则从该 inodes[index].pgid，继续 search(key, inodes[index].pgid)；如果 key 不相等且 index &gt; 0，则设置为最后一个小于的 index，从该 index 继续 search</p>
+<blockquote>
+<p>searchPage(key, p)</p>
+</blockquote>
+<p>实现同上述，不过是从 page 中读取</p>
+<h1 id="获取-node"><a href="#获取-node" class="headerlink" title="获取 node"></a>获取 node</h1><p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
+<p>获取到 node 之后就可以 put 和 del key 了</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
+<p>例如看个创建 bucket 的过程</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="keyword">var</span> value = bucket.write()</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, bucketLeafFlag)</span><br></pre></td></tr></table></figure>
+
+<p>例如看个写入 key / value 的过程</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="comment">// Return an error if there is an existing key with a bucket value.</span></span><br><span class="line"><span class="keyword">if</span> bytes.Equal(key, k) &amp;&amp; (flags&amp;bucketLeafFlag) != <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ErrIncompatibleValue</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -745,696 +1429,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2121ff68.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/2121ff68.html" class="post-title-link" itemprop="url">something-about-golang</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-15 23:17:02" itemprop="dateCreated datePublished" datetime="2017-10-15T23:17:02Z">2017-10-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 15:18:24" itemprop="dateModified" datetime="2020-11-21T15:18:24Z">2020-11-21</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>120</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Intellij-golang"><a href="#Intellij-golang" class="headerlink" title="Intellij golang"></a>Intellij golang</h1><p>用来记录一些 golang 的神奇语法及碎碎念</p>
-<p>step over: 单步调试</p>
-<p><strong>删除数组中的一个元素</strong></p>
-<p>删除 index 元素</p>
-<p>n.inodes = append(n.inodes[:index], n.inodes[index+1:]…)</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/89164994.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/89164994.html" class="post-title-link" itemprop="url">曾經我也想放棄治療</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-15 15:32:12" itemprop="dateCreated datePublished" datetime="2017-10-15T15:32:12Z">2017-10-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 07:32:55" itemprop="dateModified" datetime="2020-11-22T07:32:55Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>79</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Live 版完美，温暖和力量 ——</p>
-<p>曾經我也想放棄治療</p>
-<p>是因為還沒遇見到你</p>
-<p>像你這樣的人存在這世界上，我對世界稍微有了好感</p>
-<p>像你這樣的人存在這世界上，我對世界稍微有了期待</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/3d903bd6.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/3d903bd6.html" class="post-title-link" itemprop="url">岁月无可回头(11)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-13 21:59:32" itemprop="dateCreated datePublished" datetime="2017-10-13T21:59:32Z">2017-10-13</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:46:24" itemprop="dateModified" datetime="2020-12-12T07:46:24Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>254</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>很久没写了，这次真的情绪很低落</p>
-<p>自己明明那么认真，然而却事与愿违</p>
-<p>不过想想也可以理解，毕竟每个人心中重要的事情不一样，接受吧</p>
-<p>是呢，工作半年，“我变强了，也变秃了”，不再是小年轻的模样，已是满脸胡须</p>
-<p>年轻真好呀，可以</p>
-<p>跑到海角之南，只为追一首歌的回忆</p>
-<p>天不怕地不怕的闯</p>
-<p>藐视一切</p>
-<p>可惜，又不可惜</p>
-<p>梦醒的感觉而已</p>
-<p>美好又遗憾</p>
-<p>2017年10月13日21:59:32 杭州</p>
-<hr>
-<p>三年后，此时的我，回去翻这些文字（陆陆续续写了 11 篇），只能感叹 “没有岁月可回头” ~ 希望今后有更强大的内心，去面对更多挑战</p>
-<p>2020年08月01日00:47:47 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/77fa05dc.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/77fa05dc.html" class="post-title-link" itemprop="url">ETCD V3 中的 db 文件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:11:15" itemprop="dateCreated datePublished" datetime="2017-10-04T23:11:15Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>etcd v3.1.9</p>
-</blockquote>
-<p>to be cont.</p>
-<p>boltdb 原哥们，不维护了貌似，coreos 的人继续维护 <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt">https://github.com/coreos/bbolt</a></p>
-<p>另外这个 issues 和 free page 相关，即能解决部分 boltdb 内存碎片问题</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/pull/3">https://github.com/coreos/bbolt/pull/3</a></p>
-<h1 id="boltdb"><a href="#boltdb" class="headerlink" title="boltdb"></a>boltdb</h1><p>bolt_unix.go 几个工具方法，如 flock / funlock / mmap / munmap</p>
-<p>bolt_linux.go fsync db 文件</p>
-<p>入口处在 db.go 的 Open 方法，通过 Open 方法初始化一个 db 文件；对应 etcd 中 mvcc/backend/backend.go 中的 newBackend 方法的调用</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newBackend</span><span class="params">(path <span class="keyword">string</span>, d time.Duration, limit <span class="keyword">int</span>)</span> *<span class="title">backend</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">// bolt db</span></span><br><span class="line">	db, err := bolt.Open(path, <span class="number">0600</span>, boltOpenOptions)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		plog.Panicf(<span class="string">&quot;cannot open database at %s (%v)&quot;</span>, path, err)</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Open 方法中，如果是新建的 db 文件，则调用 db.init() 写入 metadata 信息，boltdb 的注释写的很赞，感觉就是个工业又学术的艺术品，赞！</p>
-<p>查看 db.init() 干了什么，直接上图吧，往 db 文件中写了四个 page （size 一般是 4096 字节） 的内容</p>
-<p><img src="/images/initial_db.jpeg" alt="initial_db"></p>
-<p>然后就是各种初始化了，初始化 pagePool，mmap the data file as a byte slice，初始化 freelist</p>
-<p>etcd 的 InitialMmapSize 设置为 10 1024 1024 * 1024，吓人，那是否 etcd 一启动，就会占用这么大的实际内存？并不是的哈，在 mac 上实测 top 命令看到的是 314MB，ps aux 看到的 vsz 556879888，rss 476460，很好奇，按理来说 vsz 的单位应该是 kb 呀，但是这个数字有点儿大的吓人，实际应该是字节，也就是 500 多 MB，那么 rss 又怎么理解呢？rss 的单位又是 kb，实际使用了 470 多 MB？神奇，总之并不是启动之后立马占用 10 G内存</p>
-<p>开头写两个一样的 meta page 貌似是为了做保护，看到 mmap 的方法中有这段注释</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Validate the meta pages. We only return an error if both meta pages fail</span></span><br><span class="line"><span class="comment">// validation, since meta0 failing validation means that it wasn&#x27;t saved</span></span><br><span class="line"><span class="comment">// properly -- but we can recover using meta1. And vice-versa.</span></span><br><span class="line">err0 := db.meta0.validate()</span><br><span class="line">err1 := db.meta1.validate()</span><br><span class="line"><span class="keyword">if</span> err0 != <span class="literal">nil</span> &amp;&amp; err1 != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> err0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>说直接一点儿，boltdb 使用 mmap 把一个名为 db 的文件映射到内存中的 []byte 数组，然后直接操作内存，但是不管怎么说是外部存储，最终还是要落盘的，所以呢推测是用了 B+ tree，然后把写入的内容组织成 page，使用指针操作，这块代码有点像 C 其实</p>
-<p>freelist allocate 的逻辑是从 freelist 记录的所有 free page 中分配 n 个连续的 page</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// allocate returns the starting page id of a contiguous list of pages of a given size.</span></span><br><span class="line"><span class="comment">// If a contiguous block cannot be found then 0 is returned.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">allocate</span><span class="params">(n <span class="keyword">int</span>)</span> <span class="title">pgid</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(f.ids) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> initial, previd pgid</span><br><span class="line">	<span class="keyword">for</span> i, id := <span class="keyword">range</span> f.ids &#123;</span><br><span class="line">		<span class="keyword">if</span> id &lt;= <span class="number">1</span> &#123;</span><br><span class="line">			<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;invalid page allocation: %d&quot;</span>, id))</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Reset initial page if this is not contiguous.</span></span><br><span class="line">		<span class="keyword">if</span> previd == <span class="number">0</span> || id-previd != <span class="number">1</span> &#123;</span><br><span class="line">			initial = id</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// If we found a contiguous block then remove it and return it.</span></span><br><span class="line">		<span class="keyword">if</span> (id-initial)+<span class="number">1</span> == pgid(n) &#123;</span><br><span class="line">			<span class="comment">// If we&#x27;re allocating off the beginning then take the fast path</span></span><br><span class="line">			<span class="comment">// and just adjust the existing slice. This will use extra memory</span></span><br><span class="line">			<span class="comment">// temporarily but the append() in free() will realloc the slice</span></span><br><span class="line">			<span class="comment">// as is necessary.</span></span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 将已分配的连续页移出 free list 记录表 (ids)</span></span><br><span class="line">			<span class="comment">// 并释放 ids 空间</span></span><br><span class="line">			<span class="keyword">if</span> (i + <span class="number">1</span>) == n &#123;</span><br><span class="line">				f.ids = f.ids[i+<span class="number">1</span>:]</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="built_in">copy</span>(f.ids[i-n+<span class="number">1</span>:], f.ids[i+<span class="number">1</span>:])</span><br><span class="line">				f.ids = f.ids[:<span class="built_in">len</span>(f.ids)-n]</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// Remove from the free cache.</span></span><br><span class="line">			<span class="comment">// 移出 free list cache</span></span><br><span class="line">			<span class="keyword">for</span> i := pgid(<span class="number">0</span>); i &lt; pgid(n); i++ &#123;</span><br><span class="line">				<span class="built_in">delete</span>(f.cache, initial+i)</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 返回起始页</span></span><br><span class="line">			<span class="keyword">return</span> initial</span><br><span class="line">		&#125;</span><br><span class="line">		previd = id</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>freelist 的 write 实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// read initializes the freelist from a freelist page.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">read</span><span class="params">(p *page)</span></span> &#123;</span><br><span class="line">	<span class="comment">// If the page.count is at the max uint16 value (64k) then it&#x27;s considered</span></span><br><span class="line">	<span class="comment">// an overflow and the size of the freelist is stored as the first element.</span></span><br><span class="line">	idx, count := <span class="number">0</span>, <span class="keyword">int</span>(p.count)</span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0xFFFF</span> &#123;</span><br><span class="line">		idx = <span class="number">1</span></span><br><span class="line">		count = <span class="keyword">int</span>(((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[<span class="number">0</span>])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Copy the list of page ids from the freelist.</span></span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0</span> &#123;</span><br><span class="line">		f.ids = <span class="literal">nil</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ids := ((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[idx:count]</span><br><span class="line">		f.ids = <span class="built_in">make</span>([]pgid, <span class="built_in">len</span>(ids))</span><br><span class="line">		<span class="built_in">copy</span>(f.ids, ids)</span><br><span class="line">		<span class="comment">// Make sure they&#x27;re sorted.</span></span><br><span class="line">		sort.Sort(pgids(f.ids))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Rebuild the page cache.</span></span><br><span class="line">	f.reindex()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>freelist 的 read 实现，对应 write；如何 write 的，就如何 read</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// read initializes the freelist from a freelist page.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">read</span><span class="params">(p *page)</span></span> &#123;</span><br><span class="line">	<span class="comment">// If the page.count is at the max uint16 value (64k) then it&#x27;s considered</span></span><br><span class="line">	<span class="comment">// an overflow and the size of the freelist is stored as the first element.</span></span><br><span class="line">	<span class="comment">// page 中的 count 怎么理解 ？</span></span><br><span class="line">	<span class="comment">// 看着像是 page 下面维护着一系列 pgid</span></span><br><span class="line">	idx, count := <span class="number">0</span>, <span class="keyword">int</span>(p.count)</span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0xFFFF</span> &#123;</span><br><span class="line">		idx = <span class="number">1</span></span><br><span class="line">		count = <span class="keyword">int</span>(((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[<span class="number">0</span>])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Copy the list of page ids from the freelist.</span></span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0</span> &#123;</span><br><span class="line">		f.ids = <span class="literal">nil</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ids := ((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[idx:count]</span><br><span class="line">		f.ids = <span class="built_in">make</span>([]pgid, <span class="built_in">len</span>(ids))</span><br><span class="line">		<span class="built_in">copy</span>(f.ids, ids)</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// copy 结束之后，是否可以设置 ids = nil，帮助 gc ?</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">// Make sure they&#x27;re sorted.</span></span><br><span class="line">		sort.Sort(pgids(f.ids))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Rebuild the page cache.</span></span><br><span class="line">	f.reindex()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>freelist 的 reindex 实现，其实就是构造 cache，很直接的实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// reindex rebuilds the free cache based on available and pending free lists.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">reindex</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 既然已知大小的话，make 的时候为啥不指定 capacity</span></span><br><span class="line">	<span class="comment">// 好吧，我晕了，这个是 map，怎么指定大小？naive</span></span><br><span class="line">	f.cache = <span class="built_in">make</span>(<span class="keyword">map</span>[pgid]<span class="keyword">bool</span>)</span><br><span class="line">	<span class="keyword">for</span> _, id := <span class="keyword">range</span> f.ids &#123;</span><br><span class="line">		f.cache[id] = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// pending 记录了 tx 中使用过，未被释放的 page id</span></span><br><span class="line">	<span class="keyword">for</span> _, pendingIDs := <span class="keyword">range</span> f.pending &#123;</span><br><span class="line">		<span class="keyword">for</span> _, pendingID := <span class="keyword">range</span> pendingIDs &#123;</span><br><span class="line">			f.cache[pendingID] = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>boltdb 在 beginRWTx 中释放空间</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">beginRWTx</span><span class="params">()</span> <span class="params">(*Tx, error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// If the database was opened with Options.ReadOnly, return an error.</span></span><br><span class="line">	<span class="keyword">if</span> db.readOnly &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, ErrDatabaseReadOnly</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Obtain writer lock. This is released by the transaction when it closes.</span></span><br><span class="line">	<span class="comment">// This enforces only one writer transaction at a time.</span></span><br><span class="line">	db.rwlock.Lock()</span><br><span class="line">	<span class="comment">// Once we have the writer lock then we can lock the meta pages so that</span></span><br><span class="line">	<span class="comment">// we can set up the transaction.</span></span><br><span class="line">	db.metalock.Lock()</span><br><span class="line">	<span class="keyword">defer</span> db.metalock.Unlock()</span><br><span class="line">	<span class="comment">// Exit if the database is not open yet.</span></span><br><span class="line">	<span class="keyword">if</span> !db.opened &#123;</span><br><span class="line">		db.rwlock.Unlock()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, ErrDatabaseNotOpen</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Create a transaction associated with the database.</span></span><br><span class="line">	t := &amp;Tx&#123;writable: <span class="literal">true</span>&#125;</span><br><span class="line">	t.init(db)</span><br><span class="line">	db.rwtx = t</span><br><span class="line">	<span class="comment">// Free any pages associated with closed read-only transactions.</span></span><br><span class="line">	<span class="comment">// 获取当前事务中的最小 txid</span></span><br><span class="line">	<span class="keyword">var</span> minid txid = <span class="number">0xFFFFFFFFFFFFFFFF</span></span><br><span class="line">	<span class="keyword">for</span> _, t := <span class="keyword">range</span> db.txs &#123;</span><br><span class="line">		<span class="keyword">if</span> t.meta.txid &lt; minid &#123;</span><br><span class="line">			minid = t.meta.txid</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 释放该 txid 之前的 page</span></span><br><span class="line">	<span class="keyword">if</span> minid &gt; <span class="number">0</span> &#123;</span><br><span class="line">		db.freelist.release(minid - <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> t, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>查看 db.freelist.release 的实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// release moves all page ids for a transaction id (or older) to the freelist.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">release</span><span class="params">(txid txid)</span></span> &#123;</span><br><span class="line">	m := <span class="built_in">make</span>(pgids, <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">for</span> tid, ids := <span class="keyword">range</span> f.pending &#123;</span><br><span class="line">		<span class="keyword">if</span> tid &lt;= txid &#123;</span><br><span class="line">			<span class="comment">// Move transaction&#x27;s pending pages to the available freelist.</span></span><br><span class="line">			<span class="comment">// Don&#x27;t remove from the cache since the page is still free.</span></span><br><span class="line">			m = <span class="built_in">append</span>(m, ids...)</span><br><span class="line">			<span class="built_in">delete</span>(f.pending, tid)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	sort.Sort(m)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 可重新使用的 pending page 与当前可使用的 page merge sort</span></span><br><span class="line">	f.ids = pgids(f.ids).merge(m)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>leafPageElement 结构</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> leafPageElement <span class="keyword">struct</span> &#123;</span><br><span class="line">	flags <span class="keyword">uint32</span> <span class="comment">// 4 bytes; 2 leafElement / 1 branchElement / 4 meta / </span></span><br><span class="line">	pos   <span class="keyword">uint32</span> <span class="comment">// 4 bytes</span></span><br><span class="line">	ksize <span class="keyword">uint32</span> <span class="comment">// 4 bytes</span></span><br><span class="line">	vsize <span class="keyword">uint32</span> <span class="comment">// 4 bytes</span></span><br><span class="line">	<span class="comment">// pos = 16 that remain space to store key and value</span></span><br><span class="line">	<span class="comment">// for example ksize = 8 that 64 bytes for key</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如图所示</p>
-<p><img src="/images/leafPageElement.jpeg" alt="leafPageElement"></p>
-<p>即叶子节点中存储了 key 和 value</p>
-<h1 id="etcd"><a href="#etcd" class="headerlink" title="etcd"></a>etcd</h1><p>查看 mvcc/kvstore.go 的 func (s *store) put(key, value []byte, leaseID lease.LeaseID) 方法</p>
-<p>查看如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *store)</span> <span class="title">put</span><span class="params">(key, value []<span class="keyword">byte</span>, leaseID lease.LeaseID)</span></span> &#123;</span><br><span class="line">	s.txnModify = <span class="literal">true</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 每次 put revision + 1</span></span><br><span class="line">	rev := s.currentRev.main + <span class="number">1</span></span><br><span class="line">	c := rev</span><br><span class="line">	oldLease := lease.NoLease</span><br><span class="line">	<span class="comment">// if the key exists before, use its previous created and</span></span><br><span class="line">	<span class="comment">// get its previous leaseID</span></span><br><span class="line">	_, created, ver, err := s.kvindex.Get(key, rev)</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		c = created.main</span><br><span class="line">		oldLease = s.le.GetLease(lease.LeaseItem&#123;Key: <span class="keyword">string</span>(key)&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// revision to bytes</span></span><br><span class="line">	ibytes := newRevBytes()</span><br><span class="line">	revToBytes(revision&#123;main: rev, sub: s.currentRev.sub&#125;, ibytes)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// </span></span><br><span class="line">	ver = ver + <span class="number">1</span></span><br><span class="line">	kv := mvccpb.KeyValue&#123;</span><br><span class="line">		Key:            key,</span><br><span class="line">		Value:          value,</span><br><span class="line">		CreateRevision: c,</span><br><span class="line">		ModRevision:    rev,</span><br><span class="line">		Version:        ver,</span><br><span class="line">		Lease:          <span class="keyword">int64</span>(leaseID),</span><br><span class="line">	&#125;</span><br><span class="line">	d, err := kv.Marshal()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		plog.Fatalf(<span class="string">&quot;cannot marshal event: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// boltdb 中的 key 为 revision</span></span><br><span class="line">	<span class="comment">// value 为 mvccpb.KeyValue</span></span><br><span class="line">	<span class="comment">// 存入 boltdb 即 db 文件</span></span><br><span class="line">	s.tx.UnsafeSeqPut(keyBucketName, ibytes, d)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 存入 key -&gt; revision 的索引</span></span><br><span class="line">	s.kvindex.Put(key, revision&#123;main: rev, sub: s.currentRev.sub&#125;)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 这个是啥</span></span><br><span class="line">	<span class="comment">// s.changes 什么时候释放，不然内存不会爆？</span></span><br><span class="line">	s.changes = <span class="built_in">append</span>(s.changes, kv)</span><br><span class="line">	s.currentRev.sub += <span class="number">1</span></span><br><span class="line">	<span class="comment">// lease 相关代码先略去不表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>查看 kvindex 的实现，实际上为 newTreeIndex()，即 mvcc/index.go，摘抄一句 package 注释</p>
-<p>Package btree implements in-memory B-Trees of arbitrary degree.</p>
-<p>okay, index 底层是 B tree</p>
-<p>查看 kvindex.put 方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ti *treeIndex)</span> <span class="title">Put</span><span class="params">(key []<span class="keyword">byte</span>, rev revision)</span></span> &#123;</span><br><span class="line">	keyi := &amp;keyIndex&#123;key: key&#125;</span><br><span class="line">	ti.Lock()</span><br><span class="line">	<span class="keyword">defer</span> ti.Unlock()</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// B tree get</span></span><br><span class="line">	item := ti.tree.Get(keyi)</span><br><span class="line">	<span class="keyword">if</span> item == <span class="literal">nil</span> &#123;</span><br><span class="line">		keyi.put(rev.main, rev.sub)</span><br><span class="line">		ti.tree.ReplaceOrInsert(keyi)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// update value in B tree</span></span><br><span class="line">	okeyi := item.(*keyIndex)</span><br><span class="line">	okeyi.put(rev.main, rev.sub)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>kvindex 是个完全在内存中的索引，如果 etcd 重启了之后，需要恢复 kvindex 么？答案是需要的</p>
-<p>etcdserver/server.go -&gt; s.kv.Restore(newbe) -&gt; func (s store) Restore(b backend.Backend) error {} -&gt; func (s store) restore() error {}</p>
-<p>在最后这个方法中从 db 文件恢复 kvindex</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/45aaba66.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/45aaba66.html" class="post-title-link" itemprop="url">ETCD V3 中的 Restore</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:07:43" itemprop="dateCreated datePublished" datetime="2017-10-04T23:07:43Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>etcd v3.1.9</p>
-</blockquote>
-<p>数据是如此重要，有必要看下 etcdctl restore 的实现</p>
-<p>etcdctl 的实现均在 etcdctl 目录下，ctlv2 是 v2 的实现，ctlv3 是 v3 的实现，统一入口 main.go，通过环境变量 ETCDCTL_API 指定使用哪个版本的 etcdctl</p>
-<p>查看 etcdctl/ctlv3/command/snapshot_command.go 中的 snapshotRestoreCommandFunc 方法</p>
-<h1 id="Restore-的整体过程"><a href="#Restore-的整体过程" class="headerlink" title="Restore 的整体过程"></a>Restore 的整体过程</h1><ol>
-<li>使用 —initial-cluster / —name / —initial-cluster-token / —initial-advertise-peer-urls 参数生成 etcd 集群及成员参数</li>
-<li>校验参数</li>
-<li>如果 data-dir 已经存在，报错退出</li>
-<li>生成 etcd v3 backend db 文件 (makeDB)</li>
-<li>生成 .wal 和 .snap 文件 (makeWALAndSnap)</li>
-</ol>
-<h1 id="makeDB"><a href="#makeDB" class="headerlink" title="makeDB"></a>makeDB</h1><p>具体查看 makeDB 方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// makeDB copies the database snapshot to the snapshot directory</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeDB</span><span class="params">(snapdir, dbfile <span class="keyword">string</span>, commit <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 打开 db 文件</span></span><br><span class="line">	f, ferr := os.OpenFile(dbfile, os.O_RDONLY, <span class="number">0600</span>)</span><br><span class="line">	<span class="keyword">if</span> ferr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitInvalidInput, ferr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> f.Close()</span><br><span class="line">	<span class="comment">// get snapshot integrity hash</span></span><br><span class="line">	<span class="keyword">if</span> _, err := f.Seek(-sha256.Size, os.SEEK_END); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	sha := <span class="built_in">make</span>([]<span class="keyword">byte</span>, sha256.Size)</span><br><span class="line">	<span class="keyword">if</span> _, err := f.Read(sha); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> _, err := f.Seek(<span class="number">0</span>, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 创建 data-dir/member/snap 目录</span></span><br><span class="line">	<span class="keyword">if</span> err := fileutil.CreateDirAll(snapdir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 拷贝 db 文件至 data-dir/member/snap/db</span></span><br><span class="line">	dbpath := filepath.Join(snapdir, <span class="string">&quot;db&quot;</span>)</span><br><span class="line">	db, dberr := os.OpenFile(dbpath, os.O_RDWR|os.O_CREATE, <span class="number">0600</span>)</span><br><span class="line">	<span class="keyword">if</span> dberr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, dberr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> _, err := io.Copy(db, f); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// truncate away integrity hash, if any.</span></span><br><span class="line">	off, serr := db.Seek(<span class="number">0</span>, os.SEEK_END)</span><br><span class="line">	<span class="keyword">if</span> serr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, serr)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// db 文件中是否存在 hash 值这块有点意思</span></span><br><span class="line">	<span class="comment">// 看着是以 512 chunk 的方式写入的</span></span><br><span class="line">	<span class="comment">// % 512 以后余下的字节数等于 sha256.Size 的话</span></span><br><span class="line">	<span class="comment">// 那么 db 文件存在 hash 值</span></span><br><span class="line">	hasHash := (off % <span class="number">512</span>) == sha256.Size</span><br><span class="line">	<span class="keyword">if</span> hasHash &#123;</span><br><span class="line">		<span class="comment">// 去掉 db 文件末尾的 hash 值</span></span><br><span class="line">		<span class="keyword">if</span> err := db.Truncate(off - sha256.Size); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitIO, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 如果既没有 hash 值，restore 参数又没有指定 --skip-hash-check</span></span><br><span class="line">	<span class="comment">// 那么报错退出</span></span><br><span class="line">	<span class="comment">// 注意此时已经生成了 data-dir/member/snap/db 文件</span></span><br><span class="line">	<span class="keyword">if</span> !hasHash &amp;&amp; !skipHashCheck &#123;</span><br><span class="line">		err := fmt.Errorf(<span class="string">&quot;snapshot missing hash but --skip-hash-check=false&quot;</span>)</span><br><span class="line">		ExitWithError(ExitBadArgs, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> hasHash &amp;&amp; !skipHashCheck &#123;</span><br><span class="line">		<span class="comment">// check for match</span></span><br><span class="line">		<span class="keyword">if</span> _, err := db.Seek(<span class="number">0</span>, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitIO, err)</span><br><span class="line">		&#125;</span><br><span class="line">		h := sha256.New()</span><br><span class="line">		<span class="keyword">if</span> _, err := io.Copy(h, db); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitIO, err)</span><br><span class="line">		&#125;</span><br><span class="line">		dbsha := h.Sum(<span class="literal">nil</span>)</span><br><span class="line">		<span class="keyword">if</span> !reflect.DeepEqual(sha, dbsha) &#123;</span><br><span class="line">			err := fmt.Errorf(<span class="string">&quot;expected sha256 %v, got %v&quot;</span>, sha, dbsha)</span><br><span class="line">			ExitWithError(ExitInvalidInput, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// db hash is OK, can now modify DB so it can be part of a new cluster</span></span><br><span class="line">	db.Close()</span><br><span class="line">	<span class="comment">// update consistentIndex so applies go through on etcdserver despite</span></span><br><span class="line">	<span class="comment">// having a new raft instance</span></span><br><span class="line">	be := backend.NewDefaultBackend(dbpath)</span><br><span class="line">	<span class="comment">// a lessor never timeouts leases</span></span><br><span class="line">	lessor := lease.NewLessor(be, math.MaxInt64)</span><br><span class="line">	s := mvcc.NewStore(be, lessor, (*initIndex)(&amp;commit))</span><br><span class="line">	id := s.TxnBegin()</span><br><span class="line">	btx := be.BatchTx()</span><br><span class="line">	del := <span class="function"><span class="keyword">func</span><span class="params">(k, v []<span class="keyword">byte</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		_, _, err := s.TxnDeleteRange(id, k, <span class="literal">nil</span>)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// db 文件中存储了 member 的信息</span></span><br><span class="line">	<span class="comment">// 此处删除</span></span><br><span class="line">	<span class="comment">// delete stored members from old cluster since using new members</span></span><br><span class="line">	btx.UnsafeForEach([]<span class="keyword">byte</span>(<span class="string">&quot;members&quot;</span>), del)</span><br><span class="line">	<span class="comment">// todo: add back new members when we start to deprecate old snap file.</span></span><br><span class="line">	btx.UnsafeForEach([]<span class="keyword">byte</span>(<span class="string">&quot;members_removed&quot;</span>), del)</span><br><span class="line">	<span class="comment">// trigger write-out of new consistent index</span></span><br><span class="line">	s.TxnEnd(id)</span><br><span class="line">	s.Commit()</span><br><span class="line">	s.Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="makeWALAndSnap"><a href="#makeWALAndSnap" class="headerlink" title="makeWALAndSnap"></a>makeWALAndSnap</h1><p>具体查看 makeWALAndSnap 方法，无图言 x，makeWALAndSnap 生成的 .wal 和 .snap 文件内容如下</p>
-<p><img src="/images/restore_wal.jpeg" alt="restore_wal"></p>
-<p>代码注释如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// makeWAL creates a WAL for the initial cluster</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeWALAndSnap</span><span class="params">(waldir, snapdir <span class="keyword">string</span>, cl *membership.RaftCluster)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 新建 data-dir/member/wal 目录</span></span><br><span class="line">	<span class="keyword">if</span> err := fileutil.CreateDirAll(waldir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// etcd v2 storage</span></span><br><span class="line">	<span class="comment">// add members again to persist them to the store we create.</span></span><br><span class="line">	st := store.New(etcdserver.StoreClusterPrefix, etcdserver.StoreKeysPrefix)</span><br><span class="line">	cl.SetStore(st)</span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> cl.Members() &#123;</span><br><span class="line">		cl.AddMember(m)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// cluster and member metadata</span></span><br><span class="line">	<span class="comment">// write to wal</span></span><br><span class="line">	m := cl.MemberByName(restoreName)</span><br><span class="line">	md := &amp;etcdserverpb.Metadata&#123;NodeID: <span class="keyword">uint64</span>(m.ID), ClusterID: <span class="keyword">uint64</span>(cl.ID())&#125;</span><br><span class="line">	metadata, merr := md.Marshal()</span><br><span class="line">	<span class="keyword">if</span> merr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitInvalidInput, merr)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 生成初始 wal 文件</span></span><br><span class="line">	w, walerr := wal.Create(waldir, metadata)</span><br><span class="line">	<span class="keyword">if</span> walerr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, walerr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> w.Close()</span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// add entries for raft start</span></span><br><span class="line">	peers := <span class="built_in">make</span>([]raft.Peer, <span class="built_in">len</span>(cl.MemberIDs()))</span><br><span class="line">	<span class="keyword">for</span> i, id := <span class="keyword">range</span> cl.MemberIDs() &#123;</span><br><span class="line">		ctx, err := json.Marshal((*cl).Member(id))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitInvalidInput, err)</span><br><span class="line">		&#125;</span><br><span class="line">		peers[i] = raft.Peer&#123;ID: <span class="keyword">uint64</span>(id), Context: ctx&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	ents := <span class="built_in">make</span>([]raftpb.Entry, <span class="built_in">len</span>(peers))</span><br><span class="line">	nodeIDs := <span class="built_in">make</span>([]<span class="keyword">uint64</span>, <span class="built_in">len</span>(peers))</span><br><span class="line">	<span class="keyword">for</span> i, p := <span class="keyword">range</span> peers &#123;</span><br><span class="line">		nodeIDs[i] = p.ID</span><br><span class="line">		cc := raftpb.ConfChange&#123;</span><br><span class="line">			Type:    raftpb.ConfChangeAddNode,</span><br><span class="line">			NodeID:  p.ID,</span><br><span class="line">			Context: p.Context&#125;</span><br><span class="line">		d, err := cc.Marshal()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitInvalidInput, err)</span><br><span class="line">		&#125;</span><br><span class="line">		e := raftpb.Entry&#123;</span><br><span class="line">			Type:  raftpb.EntryConfChange,</span><br><span class="line">			Term:  <span class="number">1</span>,</span><br><span class="line">			Index: <span class="keyword">uint64</span>(i + <span class="number">1</span>),</span><br><span class="line">			Data:  d,</span><br><span class="line">		&#125;</span><br><span class="line">		ents[i] = e</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// add nodes entries are committed</span></span><br><span class="line">	<span class="comment">// initial term 1</span></span><br><span class="line">	<span class="comment">// save to wal</span></span><br><span class="line">	commit, term := <span class="keyword">uint64</span>(<span class="built_in">len</span>(ents)), <span class="keyword">uint64</span>(<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">if</span> err := w.Save(raftpb.HardState&#123;</span><br><span class="line">		Term:   term,</span><br><span class="line">		Vote:   peers[<span class="number">0</span>].ID,</span><br><span class="line">		Commit: commit&#125;, ents); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	b, berr := st.Save()</span><br><span class="line">	<span class="keyword">if</span> berr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitError, berr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// first snapshot</span></span><br><span class="line">	raftSnap := raftpb.Snapshot&#123;</span><br><span class="line">		Data: b,</span><br><span class="line">		Metadata: raftpb.SnapshotMetadata&#123;</span><br><span class="line">			Index: commit,</span><br><span class="line">			Term:  term,</span><br><span class="line">			ConfState: raftpb.ConfState&#123;</span><br><span class="line">				Nodes: nodeIDs,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// save snapshot</span></span><br><span class="line">	<span class="comment">// Term: 1</span></span><br><span class="line">	<span class="comment">// Index: The number of member in cluster</span></span><br><span class="line">	snapshotter := snap.New(snapdir)</span><br><span class="line">	<span class="keyword">if</span> err := snapshotter.SaveSnap(raftSnap); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// write to wal</span></span><br><span class="line">	<span class="keyword">if</span> err := w.SaveSnapshot(walpb.Snapshot&#123;Index: commit, Term: term&#125;); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/3869686e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/3869686e.html" class="post-title-link" itemprop="url">ETCD V3 如何完成一次 put 请求</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:00:55" itemprop="dateCreated datePublished" datetime="2017-10-04T23:00:55Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 15:06:26" itemprop="dateModified" datetime="2020-11-21T15:06:26Z">2020-11-21</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>etcd 完成一次写入需要经过哪些过程？</p>
-<p>implementation of put grpc request</p>
-<p>key.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *kvServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">processInternalRaftRequest</span><span class="params">(ctx context.Context, r pb.InternalRaftRequest)</span> <span class="params">(*applyResult, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func (s *EtcdServer) processInternalRaftRequestOnce(ctx context.Context, r pb.InternalRaftRequest) (*applyResult, error)</span><br></pre></td></tr></table></figure>
-
-<p>注册一个等待 id；完成之后调用 s.w.Trigger 触发完成 or GC<br>ch := s.w.Register(id)</p>
-<p>raft propose (提议写入数据)</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// propose PutRequest</span></span><br><span class="line">s.r.Propose(cctx, data)</span><br></pre></td></tr></table></figure>
-
-<p>node.go</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func (n *node) Propose(ctx context.Context, data []byte) error</span><br></pre></td></tr></table></figure>
-
-<p>n.step 往 propc 通道传入数据</p>
-<p>node run main roop</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span> <span class="title">run</span><span class="params">(r *raft)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">		<span class="keyword">case</span> m := &lt;-propc:</span><br><span class="line">			r.logger.Infof(<span class="string">&quot;handle propc message&quot;</span>)</span><br><span class="line">			m.From = r.id</span><br><span class="line">			r.Step(m)</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>raft/raft.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *raft)</span> <span class="title">Step</span><span class="params">(m pb.Message)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		r.step(r, m)</span><br><span class="line">  </span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r.step(r, m)</p>
-<p>leader 和 follower 行为不同</p>
-<p>对于 follower 来说</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">stepFollower</span><span class="params">(r *raft, m pb.Message)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">case</span> pb.MsgProp:</span><br><span class="line">		<span class="keyword">if</span> r.lead == None &#123;</span><br><span class="line">			r.logger.Infof(<span class="string">&quot;%x no leader at term %d; dropping proposal&quot;</span>, r.id, r.Term)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// forward to leader</span></span><br><span class="line">		m.To = r.lead</span><br><span class="line">		<span class="comment">// just append to raft pb.Message ?</span></span><br><span class="line">		r.send(m)</span><br><span class="line">    </span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r.send(m) 只是把 message append 到 raft/raft.go 的 msgs []pb.Message 数组中，谁去消费这个 message ？</p>
-<p>node.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newReady</span><span class="params">(r *raft, prevSoftSt *SoftState, prevHardSt pb.HardState)</span> <span class="title">Ready</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    rd := Ready&#123;</span><br><span class="line">		Entries:          r.raftLog.unstableEntries(),</span><br><span class="line">		CommittedEntries: r.raftLog.nextEnts(),</span><br><span class="line">		Messages:         r.msgs,</span><br><span class="line">	&#125;</span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Ready 又是由谁消费的？</p>
-<p>node.go main roop</p>
-<p>func (n node) run(r raft)</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span> <span class="title">run</span><span class="params">(r *raft)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">		<span class="keyword">if</span> advancec != <span class="literal">nil</span> &#123;</span><br><span class="line">			readyc = <span class="literal">nil</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			rd = newReady(r, prevSoftSt, prevHardSt)</span><br><span class="line">			<span class="keyword">if</span> rd.containsUpdates() &#123;</span><br><span class="line">				readyc = n.readyc</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				readyc = <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">  </span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">        <span class="keyword">case</span> readyc &lt;- rd:</span><br><span class="line">                  r.logger.Infof(<span class="string">&quot;handle ready&quot;</span>)</span><br><span class="line">                  <span class="keyword">if</span> rd.SoftState != <span class="literal">nil</span> &#123;</span><br><span class="line">                      prevSoftSt = rd.SoftState</span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> <span class="built_in">len</span>(rd.Entries) &gt; <span class="number">0</span> &#123;</span><br><span class="line">                      prevLastUnstablei = rd.Entries[<span class="built_in">len</span>(rd.Entries)<span class="number">-1</span>].Index</span><br><span class="line">                      prevLastUnstablet = rd.Entries[<span class="built_in">len</span>(rd.Entries)<span class="number">-1</span>].Term</span><br><span class="line">                      havePrevLastUnstablei = <span class="literal">true</span></span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> !IsEmptyHardState(rd.HardState) &#123;</span><br><span class="line">                      prevHardSt = rd.HardState</span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> !IsEmptySnap(rd.Snapshot) &#123;</span><br><span class="line">                      prevSnapi = rd.Snapshot.Metadata.Index</span><br><span class="line">                  &#125;</span><br><span class="line">                  r.msgs = <span class="literal">nil</span></span><br><span class="line">                  r.readStates = <span class="literal">nil</span></span><br><span class="line">                  advancec = n.advancec</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>readyc 又由谁消费呢？</p>
-<p>实际上 readyc 是 n.readyc，所以找下 n.readyc 由谁消费即可</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">type node struct &#123;</span><br><span class="line">	...</span><br><span class="line">	readyc     chan Ready</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line">func (n *node) Ready() &lt;-chan Ready &#123; return n.readyc &#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以我们继续追寻哪里取了 Ready() 通道</p>
-<p>终于在</p>
-<p>etcdserver/raft.go 中发现了</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *raftNode)</span> <span class="title">start</span><span class="params">(rh *raftReadyHandler)</span></span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> rd := &lt;-r.Ready():</span><br><span class="line">				<span class="keyword">if</span> rd.SoftState != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="comment">// lead has changed</span></span><br><span class="line">					<span class="keyword">if</span> lead := atomic.LoadUint64(&amp;r.lead); rd.SoftState.Lead != raft.None &amp;&amp; lead != rd.SoftState.Lead &#123;</span><br><span class="line">						r.mu.Lock()</span><br><span class="line">						r.lt = time.Now()</span><br><span class="line">						r.mu.Unlock()</span><br><span class="line">						<span class="comment">// prometheus record the count of leader changes</span></span><br><span class="line">						leaderChanges.Inc()</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">if</span> rd.SoftState.Lead == raft.None &#123;</span><br><span class="line">						hasLeader.Set(<span class="number">0</span>)</span><br><span class="line">					&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">						hasLeader.Set(<span class="number">1</span>)</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// store current seen leader</span></span><br><span class="line">					atomic.StoreUint64(&amp;r.lead, rd.SoftState.Lead)</span><br><span class="line">					islead = rd.RaftState == raft.StateLeader</span><br><span class="line">					<span class="comment">// raft handler</span></span><br><span class="line">					rh.updateLeadership()</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(rd.ReadStates) != <span class="number">0</span> &#123;</span><br><span class="line">					<span class="keyword">select</span> &#123;</span><br><span class="line">					<span class="keyword">case</span> r.readStateC &lt;- rd.ReadStates[<span class="built_in">len</span>(rd.ReadStates)<span class="number">-1</span>]:</span><br><span class="line">					<span class="keyword">case</span> &lt;-time.After(internalTimeout):</span><br><span class="line">						plog.Warningf(<span class="string">&quot;timed out sending read state&quot;</span>)</span><br><span class="line">					<span class="keyword">case</span> &lt;-r.stopped:</span><br><span class="line">						<span class="keyword">return</span></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				raftDone := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">				ap := apply&#123;</span><br><span class="line">					entries:  rd.CommittedEntries,</span><br><span class="line">					snapshot: rd.Snapshot,</span><br><span class="line">					raftDone: raftDone,</span><br><span class="line">				&#125;</span><br><span class="line">				updateCommittedIndex(&amp;ap, rh)</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> r.applyc &lt;- ap:</span><br><span class="line">				<span class="keyword">case</span> &lt;-r.stopped:</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// the leader can write to its disk in parallel with replicating to the followers and them</span></span><br><span class="line">				<span class="comment">// writing to their disks.</span></span><br><span class="line">				<span class="comment">// For more details, check raft thesis 10.2.1</span></span><br><span class="line">				<span class="keyword">if</span> islead &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeLeaderSend struct&#123;&#125;</span></span><br><span class="line">					r.sendMessages(rd.Messages)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// gofail: var raftBeforeSave struct&#123;&#125;</span></span><br><span class="line">				<span class="keyword">if</span> err := r.storage.Save(rd.HardState, rd.Entries); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					plog.Fatalf(<span class="string">&quot;raft save state and entries error: %v&quot;</span>, err)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> !raft.IsEmptyHardState(rd.HardState) &#123;</span><br><span class="line">					proposalsCommitted.Set(<span class="keyword">float64</span>(rd.HardState.Commit))</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// gofail: var raftAfterSave struct&#123;&#125;</span></span><br><span class="line">				<span class="keyword">if</span> !raft.IsEmptySnap(rd.Snapshot) &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeSaveSnap struct&#123;&#125;</span></span><br><span class="line">					<span class="keyword">if</span> err := r.storage.SaveSnap(rd.Snapshot); err != <span class="literal">nil</span> &#123;</span><br><span class="line">						plog.Fatalf(<span class="string">&quot;raft save snapshot error: %v&quot;</span>, err)</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// gofail: var raftAfterSaveSnap struct&#123;&#125;</span></span><br><span class="line">					r.raftStorage.ApplySnapshot(rd.Snapshot)</span><br><span class="line">					plog.Infof(<span class="string">&quot;raft applied incoming snapshot at index %d&quot;</span>, rd.Snapshot.Metadata.Index)</span><br><span class="line">					<span class="comment">// gofail: var raftAfterApplySnap struct&#123;&#125;</span></span><br><span class="line">				&#125;</span><br><span class="line">				r.raftStorage.Append(rd.Entries)</span><br><span class="line">				<span class="keyword">if</span> !islead &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeFollowerSend struct&#123;&#125;</span></span><br><span class="line">					r.sendMessages(rd.Messages)</span><br><span class="line">				&#125;</span><br><span class="line">				raftDone &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">				r.Advance()</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该部分会将 apply 的 message 放入 applc 通道中，最终由</p>
-<p>server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">run</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">			f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">			sched.Schedule(f)</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>做持久化，并且 trigger 写入结束</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1491,14 +1485,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">217k</span>
+    <span title="站点总字数">221k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:18</span>
+    <span title="站点阅读时长">3:21</span>
   </span>
 </div>
 
