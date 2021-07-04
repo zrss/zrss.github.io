@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">98</span>
+          <span class="site-state-item-count">99</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -245,6 +245,121 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/cd7f3948.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/cd7f3948.html" class="post-title-link" itemprop="url">golang logrus</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-04 07:24:06 / 修改时间：07:53:55" itemprop="dateCreated datePublished" datetime="2021-07-04T07:24:06Z">2021-07-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="log-output-format-sample"><a href="#log-output-format-sample" class="headerlink" title="log output format sample"></a>log output format sample</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO[2021-07-04 15:26:26]main.go:28 have a nice day                               zs&#x3D;log</span><br><span class="line">INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                     zs&#x3D;log</span><br></pre></td></tr></table></figure>
+
+<h1 id="code-sample"><a href="#code-sample" class="headerlink" title="code sample"></a>code sample</h1><blockquote>
+<p>show timestamp: <a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/415">https://github.com/Sirupsen/logrus/issues/415</a></p>
+<p>the meaning of [0000]: <a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/163">https://github.com/Sirupsen/logrus/issues/163</a></p>
+<p>add common prefix: <a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/773">https://github.com/sirupsen/logrus/issues/773</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#default-fields">https://github.com/sirupsen/logrus#default-fields</a></p>
+<p>have a little overhead, add filename and line number: <a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922">https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922</a> </p>
+<p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#logging-method-name">https://github.com/sirupsen/logrus#logging-method-name</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go">https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go</a> </p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;path&quot;</span></span><br><span class="line">	<span class="string">&quot;runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/sirupsen/logrus&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;logrus.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   <span class="literal">true</span>,</span><br><span class="line">		TimestampFormat: <span class="string">&quot;2006-01-02 15:04:05&quot;</span>,</span><br><span class="line">		CallerPrettyfier: <span class="function"><span class="keyword">func</span><span class="params">(f *runtime.Frame)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">			_, filename := path.Split(f.File)</span><br><span class="line">			<span class="comment">// do not log func name</span></span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, filename + <span class="string">&quot;:&quot;</span> + strconv.Itoa(f.Line)</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.SetFormatter(formatter)</span><br><span class="line">	log.SetReportCaller(<span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(<span class="string">&quot;zs&quot;</span>, <span class="string">&quot;log&quot;</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(<span class="string">&quot;have a nice day&quot;</span>)</span><br><span class="line">	contextLogger.Infof(<span class="string">&quot;%s gogogo&quot;</span>, <span class="string">&quot;zs&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="third-party-formatter"><a href="#third-party-formatter" class="headerlink" title="third-party formatter"></a>third-party formatter</h1><p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#formatters">https://github.com/sirupsen/logrus#formatters</a></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/x-cray/logrus-prefixed-formatter">https://github.com/x-cray/logrus-prefixed-formatter</a></li>
+</ul>
+<h2 id="log-output-format-sample-1"><a href="#log-output-format-sample-1" class="headerlink" title="log output format sample"></a>log output format sample</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[2021-07-04 15:50:26]  INFO log: have a nice day</span><br><span class="line">[2021-07-04 15:50:26]  INFO log: zs gogogo</span><br></pre></td></tr></table></figure>
+
+<h2 id="code-sample-1"><a href="#code-sample-1" class="headerlink" title="code sample"></a>code sample</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;github.com&#x2F;sirupsen&#x2F;logrus&quot;</span><br><span class="line">	prefixed &quot;github.com&#x2F;x-cray&#x2F;logrus-prefixed-formatter&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var log &#x3D; logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter :&#x3D; &amp;prefixed.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   true,</span><br><span class="line">		TimestampFormat: &quot;2006-01-02 15:04:05&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.Formatter &#x3D; formatter</span><br><span class="line"></span><br><span class="line">	contextLogger :&#x3D; log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(&quot;have a nice day&quot;)</span><br><span class="line">	contextLogger.Infof(&quot;%s gogogo&quot;, &quot;zs&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>as previous code show</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contextLogger :&#x3D; log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>u can prefix a <em>log</em> key and colon before the msg output</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/485f6ed4.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -271,7 +386,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-05-30 14:03:15 / 修改时间：16:47:57" itemprop="dateCreated datePublished" datetime="2021-05-30T14:03:15Z">2021-05-30</time>
+      <time title="创建时间：2021-05-30 14:03:15 / 修改时间：17:00:14" itemprop="dateCreated datePublished" datetime="2021-05-30T14:03:15Z">2021-05-30</time>
     </span>
 
   
@@ -367,10 +482,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-05-23 09:52:41 / 修改时间：15:16:54" itemprop="dateCreated datePublished" datetime="2021-05-23T09:52:41Z">2021-05-23</time>
+      <time title="创建时间：2021-05-23 09:52:41" itemprop="dateCreated datePublished" datetime="2021-05-23T09:52:41Z">2021-05-23</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-30 17:00:14" itemprop="dateModified" datetime="2021-05-30T17:00:14Z">2021-05-30</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -1223,122 +1344,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/fca75258.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/fca75258.html" class="post-title-link" itemprop="url">ib_write_bw failed</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-20 20:00:00" itemprop="dateCreated datePublished" datetime="2020-11-20T20:00:00Z">2020-11-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 06:29:47" itemprop="dateModified" datetime="2020-12-12T06:29:47Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://github.com/linux-rdma/perftest/blob/master/src/write_bw.c">https://github.com/linux-rdma/perftest/blob/master/src/write_bw.c</a></p>
-<p>main</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_param.verb = WRITE;</span><br><span class="line">user_param.tst = BW;</span><br></pre></td></tr></table></figure>
-
-<p>parser</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-c, --connection&#x3D;&lt;RC&#x2F;XRC&#x2F;UC&#x2F;DC&gt; Connection type RC&#x2F;XRC&#x2F;UC&#x2F;DC (default RC)</span><br><span class="line">-s, --size&#x3D;&lt;size&gt; Size of message to exchange (default 65536)</span><br></pre></td></tr></table></figure>
-
-<p>init_perftest_params</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_SIZE_BW   (65536)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_SIZE_LAT  (2)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_CACHE_LINE_SIZE (64)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_PAGE_SIZE (4096)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_FLOWS (1)</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;size = (user_param-&gt;tst == BW ) ? DEF_SIZE_BW : DEF_SIZE_LAT;</span><br><span class="line"></span><br><span class="line">user_param-&gt;connection_type	= (user_param-&gt;connection_type == RawEth) ? RawEth : RC;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;cache_line_size	= get_cache_line_size();</span><br><span class="line">user_param-&gt;cycle_buffer = sysconf(_SC_PAGESIZE);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (user_param-&gt;cycle_buffer &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    user_param-&gt;cycle_buffer = DEF_PAGE_SIZE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;flows = DEF_FLOWS;</span><br></pre></td></tr></table></figure>
-
-<p><code>get_cache_line_size()</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line"> <span class="meta">#<span class="meta-keyword">if</span> !defined(__FreeBSD__)</span></span><br><span class="line">	size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);</span><br><span class="line">	<span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">if</span> defined(__sparc__) &amp;&amp; defined(__arch64__)</span></span><br><span class="line">		<span class="keyword">char</span>* file_name =</span><br><span class="line">			<span class="string">&quot;/sys/devices/system/cpu/cpu0/l2_cache_line_size&quot;</span>;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">		<span class="keyword">char</span>* file_name =</span><br><span class="line">			<span class="string">&quot;/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size&quot;</span>;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">		FILE *fp;</span><br><span class="line">		<span class="keyword">char</span> line[<span class="number">10</span>];</span><br><span class="line">		fp = fopen(file_name, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">		<span class="keyword">if</span> (fp == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> DEF_CACHE_LINE_SIZE;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span>(fgets(line,<span class="number">10</span>,fp) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">			size = atoi(line);</span><br><span class="line">			fclose(fp);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">if</span> (size &lt;= <span class="number">0</span>)</span><br><span class="line">		size = DEF_CACHE_LINE_SIZE;</span><br></pre></td></tr></table></figure>
-
-<p><code>getconf LEVEL1_DCACHE_LINESIZE</code></p>
-<p>main -&gt; alloc_ctx</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ctx-&gt;size = user_param-&gt;size;</span><br><span class="line"></span><br><span class="line">num_of_qps_factor = (user_param-&gt;mr_per_qp) ? <span class="number">1</span> : user_param-&gt;num_of_qps;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* holds the size of maximum between msg size and cycle buffer,</span></span><br><span class="line"><span class="comment">* aligned to cache line,</span></span><br><span class="line"><span class="comment">* it is multiply by 2 for send and receive</span></span><br><span class="line"><span class="comment">* with reference to number of flows and number of QPs */</span></span><br><span class="line">ctx-&gt;buff_size = INC(BUFF_SIZE(ctx-&gt;size, ctx-&gt;cycle_buffer),</span><br><span class="line">				 ctx-&gt;cache_line_size) * <span class="number">2</span> * num_of_qps_factor * user_param-&gt;flows;</span><br></pre></td></tr></table></figure>
-
-<p>65536 = 64Kb</p>
-<p>generally, 16 pages</p>
-<p>root cause: ulimit -l is 16 (default) in container</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1395,14 +1400,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">221k</span>
+    <span title="站点总字数">223k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:21</span>
+    <span title="站点阅读时长">3:23</span>
   </span>
 </div>
 

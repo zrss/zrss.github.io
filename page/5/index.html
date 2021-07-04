@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">98</span>
+          <span class="site-state-item-count">99</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,122 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2413e37b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/2413e37b.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 4)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-08 11:21:05" itemprop="dateCreated datePublished" datetime="2018-07-08T11:21:05Z">2018-07-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 03:23:08" itemprop="dateModified" datetime="2020-12-06T03:23:08Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>现在我们知道 Server 端会首先进入 onOpen 状态，随后会持续从 socket 中获取 WebSocket Frame 组装成 Message 后，回调业务层 onMessage 方法</p>
+<p>而 Client 端在接收到 101 status code 之后，也会进入 onOpen 状态，典型的 Client 端实现如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create WebSocket connection.</span></span><br><span class="line"><span class="keyword">const</span> socket = <span class="keyword">new</span> WebSocket(<span class="string">&#x27;wss://remoteAddress:443&#x27;</span>);</span><br><span class="line"><span class="comment">// Connection opened</span></span><br><span class="line">socket.addEventListener(<span class="string">&#x27;open&#x27;</span>, function (event) &#123;</span><br><span class="line">    socket.send(<span class="string">&#x27;Hello Server!&#x27;</span>);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// Listen for messages</span></span><br><span class="line">socket.addEventListener(<span class="string">&#x27;message&#x27;</span>, function (event) &#123;</span><br><span class="line">    console.log(<span class="string">&#x27;Message from server &#x27;</span>, event.data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket">https://developer.mozilla.org/en-US/docs/Web/API/WebSocket</a></p>
+<p>而我遇到的问题是，web terminal 一般实现，会在 onOpen 中发送一个设置 terminal size 的 message，例如 k8s 中可以发送如下消息</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Connection opened</span></span><br><span class="line">socket.addEventListener(<span class="string">&#x27;open&#x27;</span>, <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    socket.send(<span class="string">&#x27;4&#123;&quot;Width&quot;:80,&quot;Height&quot;:20&#125;&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>该消息不能被立即发送，若立即发送，则会导致 Tomcat side ServerEndpoint onMessage 一直未被调用</p>
+<p>而后端 k8s side 的数据能推送至 Client side，具体来说 Client side 能接收到 k8s side 推送回来的初始化空数据，而 Client side 发送的数据帧 ServerEndpoint onMessage 一直未被调用</p>
+<p>说明 WebSocket 链接是没问题的，于是乎 Client 发送的数据帧被发送到了哪里？</p>
+<p>之前的几篇讨论中，其实我是判定如果 ServerEndpoint onOpen stuck 住，会出现该问题。然而实际情况可以说明，既然后端的数据可以推送至客户端，证明 onOpen 已经执行结束</p>
+<p>ServerEndpoint onOpen 时执行的逻辑如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> hashmap frontEndWsSessionMap;</span><br><span class="line"><span class="keyword">static</span> hashmap backEndWsSessionMap;</span><br><span class="line">onOpen(session) &#123;</span><br><span class="line">    wsBackEndSession = connectToBackEnd(...);</span><br><span class="line">    backEndWsSessionMap.put(wsBackEndSession.getId(), session);</span><br><span class="line">    frontEndWsSessionMap.put(session.getId(), wsBackEndSession);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而通过查看代码知道 connectToBackEnd，即 Server side 实现 WebSocket 请求时，用了两个新的线程，其中一个用于接收数据，另一个用于获取数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Switch to WebSocket</span></span><br><span class="line">WsRemoteEndpointImplClient wsRemoteEndpointClient = <span class="keyword">new</span> WsRemoteEndpointImplClient(channel);</span><br><span class="line">WsSession wsSession = <span class="keyword">new</span> WsSession(endpoint, wsRemoteEndpointClient,</span><br><span class="line">        <span class="keyword">this</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, extensionsAgreed,</span><br><span class="line">        subProtocol, Collections.&lt;String,String&gt;emptyMap(), secure,</span><br><span class="line">        clientEndpointConfiguration);</span><br><span class="line">WsFrameClient wsFrameClient = <span class="keyword">new</span> WsFrameClient(response, channel,</span><br><span class="line">        wsSession, transformation);</span><br><span class="line"><span class="comment">// WsFrame adds the necessary final transformations. Copy the</span></span><br><span class="line"><span class="comment">// completed transformation chain to the remote end point.</span></span><br><span class="line">wsRemoteEndpointClient.setTransformation(wsFrameClient.getTransformation());</span><br><span class="line">endpoint.onOpen(wsSession, clientEndpointConfiguration);</span><br><span class="line">registerSession(endpoint, wsSession);</span><br><span class="line"><span class="comment">/* It is possible that the server sent one or more messages as soon as</span></span><br><span class="line"><span class="comment"> * the WebSocket connection was established. Depending on the exact</span></span><br><span class="line"><span class="comment"> * timing of when those messages were sent they could be sat in the</span></span><br><span class="line"><span class="comment"> * input buffer waiting to be read and will not trigger a &quot;data</span></span><br><span class="line"><span class="comment"> * available to read&quot; event. Therefore, it is necessary to process the</span></span><br><span class="line"><span class="comment"> * input buffer here. Note that this happens on the current thread which</span></span><br><span class="line"><span class="comment"> * means that this thread will be used for any onMessage notifications.</span></span><br><span class="line"><span class="comment"> * This is a special case. Subsequent &quot;data available to read&quot; events</span></span><br><span class="line"><span class="comment"> * will be handled by threads from the AsyncChannelGroup&#x27;s executor.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">wsFrameClient.startInputProcessing();</span><br></pre></td></tr></table></figure>
+
+<p>链接建立之后，会立即调用 wsFrameClient.startInputProcessing(); 处理当前 response 中的数据，即调用 ClientEndpoint onMessage 方法</p>
+<p>后续的数据处理由线程池中的读线程完成</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onMessage(String message, session) &#123;</span><br><span class="line">    frontEndSession = backEndWsSessionMap.get(session.getId());</span><br><span class="line">    frontEndSession.getBasicRemote.sendText(message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大致流程也是类似的，从 socketOutput 中持续获取数据，组装 okay 之后，回调 ClientEndpoint onMessage 方法</p>
+<p>综上，上述逻辑 okay，并不是在 onOpen 中 stuck</p>
+<p>至此与问题现象对比之后，可以认为如果问题出现 Tomcat 侧，则仅可能为 onDataAvailable 之后，一直未能从 socketInputStream 中获取到数据</p>
+<p>如果可以抓包分析的话，抓包最为简单，之所以费这么大劲儿分析 Tomcat WebSocket 的实现，实际上是因为全是 TLS 流量，so 抓到的全是 tcp 包，根本没法区分</p>
+<p>尝试过导入 Nginx 的私钥，也没法解，听 Nginx 的同事说是 Nginx 与 Server 之间还会动态协商一个私钥 … 醉了</p>
+<p>如果能确定 Client 的 WebSocket 包都发送到达 Tomcat 了，这也可以确认是 Server side 的问题，然鹅</p>
+<p>绝望 … so sad</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -1749,144 +1865,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/e0d55f2c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/e0d55f2c.html" class="post-title-link" itemprop="url">Job 与 CronJob</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-04-01 16:52:38" itemprop="dateCreated datePublished" datetime="2018-04-01T16:52:38Z">2018-04-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:55:19" itemprop="dateModified" datetime="2020-11-22T08:55:19Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>k8s 1.7 闲暇记录</p>
-<p>CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本</p>
-<p>k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能</p>
-<h1 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h1><p>Job 相比于 StatefulSet / Deployment 的特殊字段</p>
-<ul>
-<li>.spec.restartPolicy: 仅支持 OnFailed / Never，两种方式控制范围不同，前者当 Pod 容器失败退出时，重启容器，后者当 Pod 容器失败退出时，新建 Pod，会导致 Pod 中的所有容器重启</li>
-<li>.spec.completions: 完成数，即在 completion 个 pod 执行成功后，认为 Job 完成</li>
-<li>.spec.parallelism: 并发数，即允许同时执行的 pod 数</li>
-<li>.spec.activeDeadlineSeconds: Job 执行时间的上限，若超过上限时间仍未完成则 Job 状态变为 DeadlineExceeded，不会再有新的 Pod 被创建，并且已存在的 Pod 将会被删除</li>
-</ul>
-<p>通过 completions 和 parallelism 的组合设置，可以达到如下几种 Job 的执行效果</p>
-<ul>
-<li>一次性任务</li>
-</ul>
-<p>completions =1 &amp;&amp; parallelism = 1</p>
-<ul>
-<li>固定结束次数任务</li>
-</ul>
-<p>completions &gt; 1 &amp;&amp; parallelism = 1</p>
-<ul>
-<li>并行任务</li>
-</ul>
-<p>completions = 1 &amp;&amp; parallelism &gt; 1</p>
-<ul>
-<li>自定义任务</li>
-</ul>
-<p>completions &gt;=1 &amp;&amp; parallelism &gt;=1</p>
-<p>Job 的接口</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;apis&#x2F;batch&#x2F;v1&#x2F;namespaces&#x2F;&#123;namespace&#125;&#x2F;jobs</span><br></pre></td></tr></table></figure>
-
-<p>Job example yaml</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">activeDeadlineSeconds:</span> <span class="number">100</span></span><br><span class="line">  <span class="attr">parallelism:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">completions:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">command:</span> [<span class="string">&quot;echo&quot;</span>, <span class="string">&quot;hello&quot;</span>]</span><br><span class="line">      <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="CronJob"><a href="#CronJob" class="headerlink" title="CronJob"></a>CronJob</h1><p>顾名思义，定时任务，支持类似 linux cron 的定时策略，定时调度 Job，可以这么理解 CronJob 控制 Job，而 Job 控制 Pod，Pod 完成具体的业务逻辑</p>
-<p>CronJob 的特殊字段</p>
-<ul>
-<li>.spec.schedule: core of cronjob and it is like one line of a crontab (cron table) file，即定时策略配置，例如 */1 * * * *，每分钟调度一次 Job 执行</li>
-<li>.spec.startingDeadlineSeconds: 调度 Job 最大开始时间，如果错过任务执行，错过的工作执行将被视为是失败的任务</li>
-<li>.spec.concurrencyPolicy: Allow/Forbid/Replace，即允许并行执行任务，Forbid 不允许并行执行任务，Replace 取消当前执行的任务，并新建一个任务取代它；考虑任务执行时间较长，而定时间隔较短的情况下，该字段的意义明显</li>
-<li>.spec.suspend: 暂停调度任务，不影响已调度的任务</li>
-<li>.spec.successfulJobsHistoryLimit: 保留成功执行的任务记录数</li>
-<li>.spec.failedJobsHistoryLimit: 保留执行失败的任务记录数</li>
-</ul>
-<p>注意 CronJob 在 1.7 中仍然为 Alpha 版本，接口为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;apis&#x2F;batch&#x2F;v2alpha1&#x2F;namespaces&#x2F;&#123;namespace&#125;&#x2F;cronjobs</span><br></pre></td></tr></table></figure>
-
-<p>CronJob example yaml</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v2alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">CronJob</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">schedule:</span> <span class="string">&quot;*/1 * * * *&quot;</span></span><br><span class="line">  <span class="attr">jobTemplate:</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">template:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">containers:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">            <span class="attr">args:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">date;</span> <span class="string">echo</span> <span class="string">Hello</span> <span class="string">from</span> <span class="string">the</span> <span class="string">Kubernetes</span> <span class="string">cluster</span></span><br><span class="line">          <span class="attr">restartPolicy:</span> <span class="string">OnFailure</span></span><br></pre></td></tr></table></figure>
-
-<p>由 CronJob 创建的 Job，在 Job 的 metadata 字段的 ObjectReference 有所体现，会写明是由 cronJob controller 控制</p>
-<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>查看了 job/cronjob 的功能后，我们发现 job 适合用来执行一些初始化 / 统计数据 / 备份 / 清理工作，即那些不需要一直运行的工作，需要长期运行的工作，当然还是 Deployment/StatefulSet 更合适了</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1943,14 +1921,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">221k</span>
+    <span title="站点总字数">223k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:21</span>
+    <span title="站点阅读时长">3:23</span>
   </span>
 </div>
 

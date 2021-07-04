@@ -187,7 +187,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">98</span>
+          <span class="site-state-item-count">99</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -198,7 +198,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-count">43</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -237,6 +237,124 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/3ac56ec7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/archives/3ac56ec7.html" class="post-title-link" itemprop="url">openmpi</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-06-02 10:36:50" itemprop="dateCreated datePublished" datetime="2019-06-02T10:36:50Z">2019-06-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:41:40" itemprop="dateModified" datetime="2020-11-22T02:41:40Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://github.com/open-mpi/ompi/issues/6691#issuecomment-497245597">https://github.com/open-mpi/ompi/issues/6691#issuecomment-497245597</a></p>
+<p>ess_hnp_module.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">orte_set_attribute(&amp;transports, ORTE_RML_TRANSPORT_TYPE, ORTE_ATTR_LOCAL, orte_mgmt_transport, OPAL_STRING);</span><br><span class="line">orte_mgmt_conduit = orte_rml.open_conduit(&amp;transports);</span><br><span class="line">orte_set_attribute(&amp;transports, ORTE_RML_TRANSPORT_TYPE, ORTE_ATTR_LOCAL, orte_coll_transport, OPAL_STRING);</span><br><span class="line">orte_coll_conduit = orte_rml.open_conduit(&amp;transports);</span><br></pre></td></tr></table></figure>
+
+<p>rml: resource message layer</p>
+<p>根据 attr 选择 rtmod, 返回的为 mod 在 array 中的 index</p>
+<blockquote>
+<p>Open conduit - call each component and see if they can provide a<br>conduit that can satisfy all these attributes - return the conduit id<br>(a negative value indicates error)</p>
+</blockquote>
+<p>rml_base_stubs.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orte_rml_API_open_conduit</span><br></pre></td></tr></table></figure>
+
+<p>遍历 active 的 rml mod, 调用各个 rml mod 的 open_conduit, 例如 oob (rml_oob_component.c), 返回 mod 之后，存入 array，返回 array index</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">open_conduit()</span><br><span class="line"></span><br><span class="line">orte_get_attribute(attributes, ORTE_RML_TRANSPORT_TYPE, (void**)&amp;comp_attrib, OPAL_STRING)</span><br></pre></td></tr></table></figure>
+
+<p>从 attr 里获取 key 值，即 orte_mgmt_transport or orte_coll_transport, 确定是否指定了 oob</p>
+<p>继续获取 routed mod</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orte_get_attribute(attributes, ORTE_RML_ROUTED_ATTRIB, (<span class="keyword">void</span>**)&amp;comp_attrib, OPAL_STRING);</span><br></pre></td></tr></table></figure>
+
+<p>根据设置的 routed mod (NULL 则按优先级) 分配 routed mod</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">md-&gt;routed = orte_routed.assign_module(comp_attrib);</span><br></pre></td></tr></table></figure>
+
+<p>orte_mca_params.c</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">orte_mgmt_transport &#x3D; &quot;oob&quot; &#x2F;&#x2F; default</span><br><span class="line"></span><br><span class="line">--mca orte_mgmt_transport </span><br><span class="line"></span><br><span class="line">ORTE management messages</span><br><span class="line"></span><br><span class="line">orte_coll_transport &#x3D; &quot;fabric,ethernet&quot; &#x2F;&#x2F; default</span><br><span class="line"></span><br><span class="line">--mca orte_coll_transports</span><br><span class="line"></span><br><span class="line">ORTE collectives</span><br></pre></td></tr></table></figure>
+
+<p>plm_base_launch_support.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">param = <span class="literal">NULL</span>;</span><br><span class="line"><span class="keyword">if</span> (ORTE_SUCCESS != (rc = orte_regx.nidmap_create(orte_node_pool, &amp;param))) &#123;</span><br><span class="line">    ORTE_ERROR_LOG(rc);</span><br><span class="line">    <span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="literal">NULL</span> != orte_node_regex) &#123;</span><br><span class="line">    <span class="built_in">free</span>(orte_node_regex);</span><br><span class="line">&#125;</span><br><span class="line">orte_node_regex = param;</span><br><span class="line"><span class="comment">/* if this is too long, then we&#x27;ll have to do it with</span></span><br><span class="line"><span class="comment"> * a phone home operation instead */</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">strlen</span>(param) &lt; orte_plm_globals.node_regex_threshold) &#123;</span><br><span class="line">    opal_argv_append(argc, argv, <span class="string">&quot;-&quot;</span>OPAL_MCA_CMD_LINE_ID);</span><br><span class="line">    opal_argv_append(argc, argv, <span class="string">&quot;orte_node_regex&quot;</span>);</span><br><span class="line">    opal_argv_append(argc, argv, orte_node_regex);</span><br><span class="line">    <span class="comment">/* mark that the nidmap has been communicated */</span></span><br><span class="line">    orte_nidmap_communicated = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>orte_node_pool</p>
+<p><code>node_regex_threshold</code> = 1024 default len</p>
+<p>Resource Allocation Subsystem (RAS)</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -1347,143 +1465,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/1d091a1a.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/archives/1d091a1a.html" class="post-title-link" itemprop="url">docker image tar archieve</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-11-17 14:02:27" itemprop="dateCreated datePublished" datetime="2018-11-17T14:02:27Z">2018-11-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 06:05:41" itemprop="dateModified" datetime="2020-11-22T06:05:41Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>21k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>19 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>简析 crane pull image 过程</p>
-<p>详细过程在内网写了，粗略过程罗列于此</p>
-<p>以 docker hub registry 为例</p>
-<p>以 crane 二进制工具为参考</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/google/go-containerregistry/blob/master/cmd/crane/doc/crane.md">https://github.com/google/go-containerregistry/blob/master/cmd/crane/doc/crane.md</a></p>
-<p>google 的同事真是为世界造轮子，many thanks</p>
-<h1 id="Target"><a href="#Target" class="headerlink" title="Target"></a>Target</h1><p>从 registry 下载 nginx:latest 镜像</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx:latest</span><br></pre></td></tr></table></figure>
-
-<h1 id="Auth"><a href="#Auth" class="headerlink" title="Auth"></a>Auth</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/registry/spec/auth/token/#requesting-a-token">https://docs.docker.com/registry/spec/auth/token/#requesting-a-token</a></p>
-<ol>
-<li>ping registry</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl -i https://registry.hub.docker.com/v2/</span><br><span class="line">HTTP/1.1 401 Unauthorized</span><br><span class="line">Content-Type: application/json; charset=utf-8</span><br><span class="line">Docker-Distribution-Api-Version: registry/2.0</span><br><span class="line">Www-Authenticate: Bearer realm=<span class="string">&quot;https://auth.docker.io/token&quot;</span>,service=<span class="string">&quot;registry.docker.io&quot;</span></span><br><span class="line">Date: Sat, 17 Nov 2018 01:27:49 GMT</span><br><span class="line">Content-Length: 87</span><br><span class="line">Strict-Transport-Security: max-age=31536000</span><br></pre></td></tr></table></figure>
-
-<p>在 Www-Authenticate 请求头中可见 Registry 使用 Bearer 认证方式</p>
-<ol start="2">
-<li>refresh docker auth</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl &quot;https:&#x2F;&#x2F;auth.docker.io&#x2F;token?service&#x3D;registry.docker.io&amp;scope&#x3D;repository:library&#x2F;nginx:pull&quot; | python -mjson.tool</span><br><span class="line">&#123;</span><br><span class="line">    &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1YyI6WyJNSUlDK2pDQ0FwK2dBd0lCQWdJQkFEQUtCZ2dxaGtqT1BRUURBakJHTVVRd1FnWURWUVFERXpzeVYwNVpPbFZMUzFJNlJFMUVVanBTU1U5Rk9reEhOa0U2UTFWWVZEcE5SbFZNT2tZelNFVTZOVkF5VlRwTFNqTkdPa05CTmxrNlNrbEVVVEFlRncweE9EQXlNVFF5TXpBMk5EZGFGdzB4T1RBeU1UUXlNekEyTkRkYU1FWXhSREJDQmdOVkJBTVRPMVpCUTFZNk5VNWFNenBNTkZSWk9sQlFTbGc2VWsxQlZEcEdWalpQT2xZMU1sTTZRa2szV2pwU1REVk9PbGhXVDBJNlFsTmFSanBHVTFRMk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBMGtyTmgyZWxESnVvYjVERWd5Wi9oZ3l1ZlpxNHo0OXdvNStGRnFRK3VPTGNCMDRyc3N4cnVNdm1aSzJZQ0RSRVRERU9xNW5keEVMMHNaTE51UXRMSlNRdFY1YUhlY2dQVFRkeVJHUTl2aURPWGlqNFBocE40R0N0eFV6YTNKWlNDZC9qbm1YbmtUeDViOElUWXBCZzg2TGNUdmMyRFVUV2tHNy91UThrVjVPNFFxNlZKY05TUWRId1B2Mmp4YWRZa3hBMnhaaWNvRFNFQlpjWGRneUFCRWI2YkRnUzV3QjdtYjRRVXBuM3FXRnRqdCttKzBsdDZOR3hvenNOSFJHd3EwakpqNWtZbWFnWHpEQm5NQ3l5eDFBWFpkMHBNaUlPSjhsaDhRQ09GMStsMkVuV1U1K0thaTZKYVNEOFZJc2VrRzB3YXd4T1dER3U0YzYreE1XYUx3SURBUUFCbzRHeU1JR3ZNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVBCZ05WSFNVRUNEQUdCZ1JWSFNVQU1FUUdBMVVkRGdROUJEdFdRVU5XT2pWT1dqTTZURFJVV1RwUVVFcFlPbEpOUVZRNlJsWTJUenBXTlRKVE9rSkpOMW82VWt3MVRqcFlWazlDT2tKVFdrWTZSbE5VTmpCR0JnTlZIU01FUHpBOWdEc3lWMDVaT2xWTFMxSTZSRTFFVWpwU1NVOUZPa3hITmtFNlExVllWRHBOUmxWTU9rWXpTRVU2TlZBeVZUcExTak5HT2tOQk5sazZTa2xFVVRBS0JnZ3Foa2pPUFFRREFnTkpBREJHQWlFQWdZTWF3Si9uMXM0dDlva0VhRjh2aGVkeURzbERObWNyTHNRNldmWTFmRTRDSVFEbzNWazJXcndiSjNmU1dwZEVjT3hNazZ1ZEFwK2c1Nkd6TjlRSGFNeVZ1QT09Il19.eyJhY2Nlc3MiOlt7InR5cGUiOiJyZXBvc2l0b3J5IiwibmFtZSI6ImxpYnJhcnkvbmdpbngiLCJhY3Rpb25zIjpbInB1bGwiXX1dLCJhdWQiOiJyZWdpc3RyeS5kb2NrZXIuaW8iLCJleHAiOjE1NDI0MTg2MjgsImlhdCI6MTU0MjQxODMyOCwiaXNzIjoiYXV0aC5kb2NrZXIuaW8iLCJqdGkiOiI1SG5JQllqVkluZERFYlRkRlUzOSIsIm5iZiI6MTU0MjQxODAyOCwic3ViIjoiIn0.zzVk9t-govqoyzQCwHfivOAkdIG0D6r5RoMS7HRq4vOBj1bQdASOfB6YqVLGWP6G-4cf6ESCDTxdidREgZYnklpApX7dYdrAf6OpxA5HXP5MYDMTE7PEZueoUpBipz0UsPI4lzMC1j80UjjgTVHyjiIMcwgxPXpT6-zPJJFp9EjDrLsBHtj2cdmPv_54KA0j50VQLZKccUvC67z0iT5KpSRvKyFcWLEActeCnmuZjkJgySmaVduVfLiDLFbboBOw0mNLeTFIodfHoEdFqYBooBK1d_x37GFCSunYH8fFZ0XkfS7OFDyaYiOlQzafbnz0TxLIUU-jOEsJkaofOnHF2Q&quot;,</span><br><span class="line">    &quot;access_token&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1YyI6WyJNSUlDK2pDQ0FwK2dBd0lCQWdJQkFEQUtCZ2dxaGtqT1BRUURBakJHTVVRd1FnWURWUVFERXpzeVYwNVpPbFZMUzFJNlJFMUVVanBTU1U5Rk9reEhOa0U2UTFWWVZEcE5SbFZNT2tZelNFVTZOVkF5VlRwTFNqTkdPa05CTmxrNlNrbEVVVEFlRncweE9EQXlNVFF5TXpBMk5EZGFGdzB4T1RBeU1UUXlNekEyTkRkYU1FWXhSREJDQmdOVkJBTVRPMVpCUTFZNk5VNWFNenBNTkZSWk9sQlFTbGc2VWsxQlZEcEdWalpQT2xZMU1sTTZRa2szV2pwU1REVk9PbGhXVDBJNlFsTmFSanBHVTFRMk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBMGtyTmgyZWxESnVvYjVERWd5Wi9oZ3l1ZlpxNHo0OXdvNStGRnFRK3VPTGNCMDRyc3N4cnVNdm1aSzJZQ0RSRVRERU9xNW5keEVMMHNaTE51UXRMSlNRdFY1YUhlY2dQVFRkeVJHUTl2aURPWGlqNFBocE40R0N0eFV6YTNKWlNDZC9qbm1YbmtUeDViOElUWXBCZzg2TGNUdmMyRFVUV2tHNy91UThrVjVPNFFxNlZKY05TUWRId1B2Mmp4YWRZa3hBMnhaaWNvRFNFQlpjWGRneUFCRWI2YkRnUzV3QjdtYjRRVXBuM3FXRnRqdCttKzBsdDZOR3hvenNOSFJHd3EwakpqNWtZbWFnWHpEQm5NQ3l5eDFBWFpkMHBNaUlPSjhsaDhRQ09GMStsMkVuV1U1K0thaTZKYVNEOFZJc2VrRzB3YXd4T1dER3U0YzYreE1XYUx3SURBUUFCbzRHeU1JR3ZNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVBCZ05WSFNVRUNEQUdCZ1JWSFNVQU1FUUdBMVVkRGdROUJEdFdRVU5XT2pWT1dqTTZURFJVV1RwUVVFcFlPbEpOUVZRNlJsWTJUenBXTlRKVE9rSkpOMW82VWt3MVRqcFlWazlDT2tKVFdrWTZSbE5VTmpCR0JnTlZIU01FUHpBOWdEc3lWMDVaT2xWTFMxSTZSRTFFVWpwU1NVOUZPa3hITmtFNlExVllWRHBOUmxWTU9rWXpTRVU2TlZBeVZUcExTak5HT2tOQk5sazZTa2xFVVRBS0JnZ3Foa2pPUFFRREFnTkpBREJHQWlFQWdZTWF3Si9uMXM0dDlva0VhRjh2aGVkeURzbERObWNyTHNRNldmWTFmRTRDSVFEbzNWazJXcndiSjNmU1dwZEVjT3hNazZ1ZEFwK2c1Nkd6TjlRSGFNeVZ1QT09Il19.eyJhY2Nlc3MiOlt7InR5cGUiOiJyZXBvc2l0b3J5IiwibmFtZSI6ImxpYnJhcnkvbmdpbngiLCJhY3Rpb25zIjpbInB1bGwiXX1dLCJhdWQiOiJyZWdpc3RyeS5kb2NrZXIuaW8iLCJleHAiOjE1NDI0MTg2MjgsImlhdCI6MTU0MjQxODMyOCwiaXNzIjoiYXV0aC5kb2NrZXIuaW8iLCJqdGkiOiI1SG5JQllqVkluZERFYlRkRlUzOSIsIm5iZiI6MTU0MjQxODAyOCwic3ViIjoiIn0.zzVk9t-govqoyzQCwHfivOAkdIG0D6r5RoMS7HRq4vOBj1bQdASOfB6YqVLGWP6G-4cf6ESCDTxdidREgZYnklpApX7dYdrAf6OpxA5HXP5MYDMTE7PEZueoUpBipz0UsPI4lzMC1j80UjjgTVHyjiIMcwgxPXpT6-zPJJFp9EjDrLsBHtj2cdmPv_54KA0j50VQLZKccUvC67z0iT5KpSRvKyFcWLEActeCnmuZjkJgySmaVduVfLiDLFbboBOw0mNLeTFIodfHoEdFqYBooBK1d_x37GFCSunYH8fFZ0XkfS7OFDyaYiOlQzafbnz0TxLIUU-jOEsJkaofOnHF2Q&quot;,</span><br><span class="line">    &quot;expires_in&quot;: 300,</span><br><span class="line">    &quot;issued_at&quot;: &quot;2018-11-17T01:32:08.367366757Z&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>设置 token var</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export token&#x3D;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1YyI6WyJNSUlDK2pDQ0FwK2dBd0lCQWdJQkFEQUtCZ2dxaGtqT1BRUURBakJHTVVRd1FnWURWUVFERXpzeVYwNVpPbFZMUzFJNlJFMUVVanBTU1U5Rk9reEhOa0U2UTFWWVZEcE5SbFZNT2tZelNFVTZOVkF5VlRwTFNqTkdPa05CTmxrNlNrbEVVVEFlRncweE9EQXlNVFF5TXpBMk5EZGFGdzB4T1RBeU1UUXlNekEyTkRkYU1FWXhSREJDQmdOVkJBTVRPMVpCUTFZNk5VNWFNenBNTkZSWk9sQlFTbGc2VWsxQlZEcEdWalpQT2xZMU1sTTZRa2szV2pwU1REVk9PbGhXVDBJNlFsTmFSanBHVTFRMk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBMGtyTmgyZWxESnVvYjVERWd5Wi9oZ3l1ZlpxNHo0OXdvNStGRnFRK3VPTGNCMDRyc3N4cnVNdm1aSzJZQ0RSRVRERU9xNW5keEVMMHNaTE51UXRMSlNRdFY1YUhlY2dQVFRkeVJHUTl2aURPWGlqNFBocE40R0N0eFV6YTNKWlNDZC9qbm1YbmtUeDViOElUWXBCZzg2TGNUdmMyRFVUV2tHNy91UThrVjVPNFFxNlZKY05TUWRId1B2Mmp4YWRZa3hBMnhaaWNvRFNFQlpjWGRneUFCRWI2YkRnUzV3QjdtYjRRVXBuM3FXRnRqdCttKzBsdDZOR3hvenNOSFJHd3EwakpqNWtZbWFnWHpEQm5NQ3l5eDFBWFpkMHBNaUlPSjhsaDhRQ09GMStsMkVuV1U1K0thaTZKYVNEOFZJc2VrRzB3YXd4T1dER3U0YzYreE1XYUx3SURBUUFCbzRHeU1JR3ZNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVBCZ05WSFNVRUNEQUdCZ1JWSFNVQU1FUUdBMVVkRGdROUJEdFdRVU5XT2pWT1dqTTZURFJVV1RwUVVFcFlPbEpOUVZRNlJsWTJUenBXTlRKVE9rSkpOMW82VWt3MVRqcFlWazlDT2tKVFdrWTZSbE5VTmpCR0JnTlZIU01FUHpBOWdEc3lWMDVaT2xWTFMxSTZSRTFFVWpwU1NVOUZPa3hITmtFNlExVllWRHBOUmxWTU9rWXpTRVU2TlZBeVZUcExTak5HT2tOQk5sazZTa2xFVVRBS0JnZ3Foa2pPUFFRREFnTkpBREJHQWlFQWdZTWF3Si9uMXM0dDlva0VhRjh2aGVkeURzbERObWNyTHNRNldmWTFmRTRDSVFEbzNWazJXcndiSjNmU1dwZEVjT3hNazZ1ZEFwK2c1Nkd6TjlRSGFNeVZ1QT09Il19.eyJhY2Nlc3MiOlt7InR5cGUiOiJyZXBvc2l0b3J5IiwibmFtZSI6ImxpYnJhcnkvbmdpbngiLCJhY3Rpb25zIjpbInB1bGwiXX1dLCJhdWQiOiJyZWdpc3RyeS5kb2NrZXIuaW8iLCJleHAiOjE1NDI0MTg2MjgsImlhdCI6MTU0MjQxODMyOCwiaXNzIjoiYXV0aC5kb2NrZXIuaW8iLCJqdGkiOiI1SG5JQllqVkluZERFYlRkRlUzOSIsIm5iZiI6MTU0MjQxODAyOCwic3ViIjoiIn0.zzVk9t-govqoyzQCwHfivOAkdIG0D6r5RoMS7HRq4vOBj1bQdASOfB6YqVLGWP6G-4cf6ESCDTxdidREgZYnklpApX7dYdrAf6OpxA5HXP5MYDMTE7PEZueoUpBipz0UsPI4lzMC1j80UjjgTVHyjiIMcwgxPXpT6-zPJJFp9EjDrLsBHtj2cdmPv_54KA0j50VQLZKccUvC67z0iT5KpSRvKyFcWLEActeCnmuZjkJgySmaVduVfLiDLFbboBOw0mNLeTFIodfHoEdFqYBooBK1d_x37GFCSunYH8fFZ0XkfS7OFDyaYiOlQzafbnz0TxLIUU-jOEsJkaofOnHF2Q</span><br></pre></td></tr></table></figure>
-
-<h1 id="Pull"><a href="#Pull" class="headerlink" title="Pull"></a>Pull</h1><ol>
-<li>Get Image Manifest</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">curl -v -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application&#x2F;vnd.docker.distribution.manifest.v2+json&quot; &quot;https:&#x2F;&#x2F;registry.hub.docker.com&#x2F;v2&#x2F;library&#x2F;nginx&#x2F;manifests&#x2F;latest&quot;</span><br><span class="line">resp</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;schemaVersion&quot;: 2,</span><br><span class="line">    &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.distribution.manifest.v2+json&quot;,</span><br><span class="line">    &quot;config&quot;: &#123;</span><br><span class="line">        &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.container.image.v1+json&quot;,</span><br><span class="line">        &quot;size&quot;: 6022,</span><br><span class="line">        &quot;digest&quot;: &quot;sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;layers&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">            &quot;size&quot;: 22486277,</span><br><span class="line">            &quot;digest&quot;: &quot;sha256:a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">            &quot;size&quot;: 22204196,</span><br><span class="line">            &quot;digest&quot;: &quot;sha256:67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">            &quot;size&quot;: 203,</span><br><span class="line">            &quot;digest&quot;: &quot;sha256:e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>Get Image Config</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br></pre></td><td class="code"><pre><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; &quot;https:&#x2F;&#x2F;registry.hub.docker.com&#x2F;v2&#x2F;library&#x2F;nginx&#x2F;blobs&#x2F;sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&quot;</span><br><span class="line">HTTP&#x2F;1.1 307 Temporary Redirect</span><br><span class="line">Content-Type: text&#x2F;html; charset&#x3D;utf-8</span><br><span class="line">Docker-Distribution-Api-Version: registry&#x2F;2.0</span><br><span class="line">Location: https:&#x2F;&#x2F;production.cloudflare.docker.com&#x2F;registry-v2&#x2F;docker&#x2F;registry&#x2F;v2&#x2F;blobs&#x2F;sha256&#x2F;e8&#x2F;e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&#x2F;data?verify&#x3D;1542423249-8ogA6RSAc3PlmtNd%2FOuiIuAUo3c%3D</span><br><span class="line">Date: Sat, 17 Nov 2018 02:04:09 GMT</span><br><span class="line">Content-Length: 244</span><br><span class="line">Strict-Transport-Security: max-age&#x3D;31536000</span><br><span class="line">redirect</span><br><span class="line"></span><br><span class="line">curl https:&#x2F;&#x2F;production.cloudflare.docker.com&#x2F;registry-v2&#x2F;docker&#x2F;registry&#x2F;v2&#x2F;blobs&#x2F;sha256&#x2F;e8&#x2F;e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&#x2F;data?verify&#x3D;1542423249-8ogA6RSAc3PlmtNd%2FOuiIuAUo3c%3D | python -mjson.tool</span><br><span class="line">config json file</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;architecture&quot;: &quot;amd64&quot;,</span><br><span class="line">    &quot;config&quot;: &#123;</span><br><span class="line">        &quot;Hostname&quot;: &quot;&quot;,</span><br><span class="line">        &quot;Domainname&quot;: &quot;&quot;,</span><br><span class="line">        &quot;User&quot;: &quot;&quot;,</span><br><span class="line">        &quot;AttachStdin&quot;: false,</span><br><span class="line">        &quot;AttachStdout&quot;: false,</span><br><span class="line">        &quot;AttachStderr&quot;: false,</span><br><span class="line">        &quot;ExposedPorts&quot;: &#123;</span><br><span class="line">            &quot;80&#x2F;tcp&quot;: &#123;&#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Tty&quot;: false,</span><br><span class="line">        &quot;OpenStdin&quot;: false,</span><br><span class="line">        &quot;StdinOnce&quot;: false,</span><br><span class="line">        &quot;Env&quot;: [</span><br><span class="line">            &quot;PATH&#x3D;&#x2F;usr&#x2F;local&#x2F;sbin:&#x2F;usr&#x2F;local&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin:&#x2F;sbin:&#x2F;bin&quot;,</span><br><span class="line">            &quot;NGINX_VERSION&#x3D;1.15.6-1~stretch&quot;,</span><br><span class="line">            &quot;NJS_VERSION&#x3D;1.15.6.0.2.5-1~stretch&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Cmd&quot;: [</span><br><span class="line">            &quot;nginx&quot;,</span><br><span class="line">            &quot;-g&quot;,</span><br><span class="line">            &quot;daemon off;&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;ArgsEscaped&quot;: true,</span><br><span class="line">        &quot;Image&quot;: &quot;sha256:eb4657966d3e92498b450e24969a0a2808f254ab44102f31674543f642e35ed7&quot;,</span><br><span class="line">        &quot;Volumes&quot;: null,</span><br><span class="line">        &quot;WorkingDir&quot;: &quot;&quot;,</span><br><span class="line">        &quot;Entrypoint&quot;: null,</span><br><span class="line">        &quot;OnBuild&quot;: [],</span><br><span class="line">        &quot;Labels&quot;: &#123;</span><br><span class="line">            &quot;maintainer&quot;: &quot;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;StopSignal&quot;: &quot;SIGTERM&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;container&quot;: &quot;d4fa15093ad8ad3df60d7403c1752a379503686e32a76b70771b3ea268ec5d66&quot;,</span><br><span class="line">    &quot;container_config&quot;: &#123;</span><br><span class="line">        &quot;Hostname&quot;: &quot;d4fa15093ad8&quot;,</span><br><span class="line">        &quot;Domainname&quot;: &quot;&quot;,</span><br><span class="line">        &quot;User&quot;: &quot;&quot;,</span><br><span class="line">        &quot;AttachStdin&quot;: false,</span><br><span class="line">        &quot;AttachStdout&quot;: false,</span><br><span class="line">        &quot;AttachStderr&quot;: false,</span><br><span class="line">        &quot;ExposedPorts&quot;: &#123;</span><br><span class="line">            &quot;80&#x2F;tcp&quot;: &#123;&#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Tty&quot;: false,</span><br><span class="line">        &quot;OpenStdin&quot;: false,</span><br><span class="line">        &quot;StdinOnce&quot;: false,</span><br><span class="line">        &quot;Env&quot;: [</span><br><span class="line">            &quot;PATH&#x3D;&#x2F;usr&#x2F;local&#x2F;sbin:&#x2F;usr&#x2F;local&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin:&#x2F;sbin:&#x2F;bin&quot;,</span><br><span class="line">            &quot;NGINX_VERSION&#x3D;1.15.6-1~stretch&quot;,</span><br><span class="line">            &quot;NJS_VERSION&#x3D;1.15.6.0.2.5-1~stretch&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Cmd&quot;: [</span><br><span class="line">            &quot;&#x2F;bin&#x2F;sh&quot;,</span><br><span class="line">            &quot;-c&quot;,</span><br><span class="line">            &quot;#(nop) &quot;,</span><br><span class="line">            &quot;CMD [\&quot;nginx\&quot; \&quot;-g\&quot; \&quot;daemon off;\&quot;]&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;ArgsEscaped&quot;: true,</span><br><span class="line">        &quot;Image&quot;: &quot;sha256:eb4657966d3e92498b450e24969a0a2808f254ab44102f31674543f642e35ed7&quot;,</span><br><span class="line">        &quot;Volumes&quot;: null,</span><br><span class="line">        &quot;WorkingDir&quot;: &quot;&quot;,</span><br><span class="line">        &quot;Entrypoint&quot;: null,</span><br><span class="line">        &quot;OnBuild&quot;: [],</span><br><span class="line">        &quot;Labels&quot;: &#123;</span><br><span class="line">            &quot;maintainer&quot;: &quot;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;StopSignal&quot;: &quot;SIGTERM&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;created&quot;: &quot;2018-11-16T13:32:10.147294787Z&quot;,</span><br><span class="line">    &quot;docker_version&quot;: &quot;17.06.2-ce&quot;,</span><br><span class="line">    &quot;history&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-15T22:45:06.938205528Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop) ADD file:dab9baf938799c515ddce14c02f899da5992f0b76a432fa10a2338556a3cb04f in &#x2F; &quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-15T22:45:07.243453424Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  CMD [\&quot;bash\&quot;]&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:31:11.175776557Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  LABEL maintainer&#x3D;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:31:11.487598267Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  ENV NGINX_VERSION&#x3D;1.15.6-1~stretch&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:31:11.783900832Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  ENV NJS_VERSION&#x3D;1.15.6.0.2.5-1~stretch&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:07.382613887Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c set -x \t&amp;&amp; apt-get update \t&amp;&amp; apt-get install --no-install-recommends --no-install-suggests -y gnupg1 apt-transport-https ca-certificates \t&amp;&amp; \tNGINX_GPGKEY&#x3D;573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \tfound&#x3D;&#39;&#39;; \tfor server in \t\tha.pool.sks-keyservers.net \t\thkp:&#x2F;&#x2F;keyserver.ubuntu.com:80 \t\thkp:&#x2F;&#x2F;p80.pool.sks-keyservers.net:80 \t\tpgp.mit.edu \t; do \t\techo \&quot;Fetching GPG key $NGINX_GPGKEY from $server\&quot;; \t\tapt-key adv --keyserver \&quot;$server\&quot; --keyserver-options timeout&#x3D;10 --recv-keys \&quot;$NGINX_GPGKEY\&quot; &amp;&amp; found&#x3D;yes &amp;&amp; break; \tdone; \ttest -z \&quot;$found\&quot; &amp;&amp; echo &gt;&amp;2 \&quot;error: failed to fetch GPG key $NGINX_GPGKEY\&quot; &amp;&amp; exit 1; \tapt-get remove --purge --auto-remove -y gnupg1 &amp;&amp; rm -rf &#x2F;var&#x2F;lib&#x2F;apt&#x2F;lists&#x2F;* \t&amp;&amp; dpkgArch&#x3D;\&quot;$(dpkg --print-architecture)\&quot; \t&amp;&amp; nginxPackages&#x3D;\&quot; \t\tnginx&#x3D;$&#123;NGINX_VERSION&#125; \t\tnginx-module-xslt&#x3D;$&#123;NGINX_VERSION&#125; \t\tnginx-module-geoip&#x3D;$&#123;NGINX_VERSION&#125; \t\tnginx-module-image-filter&#x3D;$&#123;NGINX_VERSION&#125; \t\tnginx-module-njs&#x3D;$&#123;NJS_VERSION&#125; \t\&quot; \t&amp;&amp; case \&quot;$dpkgArch\&quot; in \t\tamd64|i386) \t\t\techo \&quot;deb https:&#x2F;&#x2F;nginx.org&#x2F;packages&#x2F;mainline&#x2F;debian&#x2F; stretch nginx\&quot; &gt;&gt; &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;nginx.list \t\t\t&amp;&amp; apt-get update \t\t\t;; \t\t*) \t\t\techo \&quot;deb-src https:&#x2F;&#x2F;nginx.org&#x2F;packages&#x2F;mainline&#x2F;debian&#x2F; stretch nginx\&quot; &gt;&gt; &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;nginx.list \t\t\t\t\t\t&amp;&amp; tempDir&#x3D;\&quot;$(mktemp -d)\&quot; \t\t\t&amp;&amp; chmod 777 \&quot;$tempDir\&quot; \t\t\t\t\t\t&amp;&amp; savedAptMark&#x3D;\&quot;$(apt-mark showmanual)\&quot; \t\t\t\t\t\t&amp;&amp; apt-get update \t\t\t&amp;&amp; apt-get build-dep -y $nginxPackages \t\t\t&amp;&amp; ( \t\t\t\tcd \&quot;$tempDir\&quot; \t\t\t\t&amp;&amp; DEB_BUILD_OPTIONS&#x3D;\&quot;nocheck parallel&#x3D;$(nproc)\&quot; \t\t\t\t\tapt-get source --compile $nginxPackages \t\t\t) \t\t\t\t\t\t&amp;&amp; apt-mark showmanual | xargs apt-mark auto &gt; &#x2F;dev&#x2F;null \t\t\t&amp;&amp; &#123; [ -z \&quot;$savedAptMark\&quot; ] || apt-mark manual $savedAptMark; &#125; \t\t\t\t\t\t&amp;&amp; ls -lAFh \&quot;$tempDir\&quot; \t\t\t&amp;&amp; ( cd \&quot;$tempDir\&quot; &amp;&amp; dpkg-scanpackages . &gt; Packages ) \t\t\t&amp;&amp; grep &#39;^Package: &#39; \&quot;$tempDir&#x2F;Packages\&quot; \t\t\t&amp;&amp; echo \&quot;deb [ trusted&#x3D;yes ] file:&#x2F;&#x2F;$tempDir .&#x2F;\&quot; &gt; &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;temp.list \t\t\t&amp;&amp; apt-get -o Acquire::GzipIndexes&#x3D;false update \t\t\t;; \tesac \t\t&amp;&amp; apt-get install --no-install-recommends --no-install-suggests -y \t\t\t\t\t\t$nginxPackages \t\t\t\t\t\tgettext-base \t&amp;&amp; apt-get remove --purge --auto-remove -y apt-transport-https ca-certificates &amp;&amp; rm -rf &#x2F;var&#x2F;lib&#x2F;apt&#x2F;lists&#x2F;* &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;nginx.list \t\t&amp;&amp; if [ -n \&quot;$tempDir\&quot; ]; then \t\tapt-get purge -y --auto-remove \t\t&amp;&amp; rm -rf \&quot;$tempDir\&quot; &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;temp.list; \tfi&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:08.778195069Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c ln -sf &#x2F;dev&#x2F;stdout &#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log \t&amp;&amp; ln -sf &#x2F;dev&#x2F;stderr &#x2F;var&#x2F;log&#x2F;nginx&#x2F;error.log&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:09.22115772Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  EXPOSE 80&#x2F;tcp&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:09.696803649Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  STOPSIGNAL [SIGTERM]&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:10.147294787Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;&#x2F;bin&#x2F;sh -c #(nop)  CMD [\&quot;nginx\&quot; \&quot;-g\&quot; \&quot;daemon off;\&quot;]&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    &quot;os&quot;: &quot;linux&quot;,</span><br><span class="line">    &quot;rootfs&quot;: &#123;</span><br><span class="line">        &quot;type&quot;: &quot;layers&quot;,</span><br><span class="line">        &quot;diff_ids&quot;: [</span><br><span class="line">            &quot;sha256:ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3&quot;,</span><br><span class="line">            &quot;sha256:876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795&quot;,</span><br><span class="line">            &quot;sha256:9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b&quot;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>Get Image Layers</li>
-</ol>
-<p>根据 Image Manifest Layers 下载 Image Layers</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application&#x2F;vnd.docker.distribution.manifest.v2+json&quot; &quot;https:&#x2F;&#x2F;registry.hub.docker.com&#x2F;v2&#x2F;library&#x2F;nginx&#x2F;blobs&#x2F;sha256:a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0&quot;</span><br><span class="line">curl -o a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0.tar.gz https:&#x2F;&#x2F;production.cloudflare.docker.com&#x2F;registry-v2&#x2F;docker&#x2F;registry&#x2F;v2&#x2F;blobs&#x2F;sha256&#x2F;a5&#x2F;a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0&#x2F;data?verify&#x3D;1542424303-e8ERUR8oG%2BoBh41TGIpCy7iFeYg%3D</span><br><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application&#x2F;vnd.docker.distribution.manifest.v2+json&quot; &quot;https:&#x2F;&#x2F;registry.hub.docker.com&#x2F;v2&#x2F;library&#x2F;nginx&#x2F;blobs&#x2F;sha256:67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b&quot;</span><br><span class="line">curl -o 67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b.tar.gz https:&#x2F;&#x2F;production.cloudflare.docker.com&#x2F;registry-v2&#x2F;docker&#x2F;registry&#x2F;v2&#x2F;blobs&#x2F;sha256&#x2F;67&#x2F;67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b&#x2F;data\?verify\&#x3D;1542424505-PVOE52Er6OY7iKDTx5QZSZxI99I%3D</span><br><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application&#x2F;vnd.docker.distribution.manifest.v2+json&quot; &quot;https:&#x2F;&#x2F;registry.hub.docker.com&#x2F;v2&#x2F;library&#x2F;nginx&#x2F;blobs&#x2F;sha256:e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527&quot;</span><br><span class="line">curl -o e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527.tar.gz https:&#x2F;&#x2F;production.cloudflare.docker.com&#x2F;registry-v2&#x2F;docker&#x2F;registry&#x2F;v2&#x2F;blobs&#x2F;sha256&#x2F;e8&#x2F;e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527&#x2F;data\?verify\&#x3D;1542424575-kXRXCIAWm%2FXyHHfrhI1yOIPt4FA%3D</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>Generated Image Tar Archive Description (manifest.json)</li>
-</ol>
-<p>根据 Config file 及 Layers files 的组织目录结构，生成 Image Tar Archive Manifest</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;Config&quot;: &quot;sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&quot;,</span><br><span class="line">        &quot;RepoTags&quot;: [</span><br><span class="line">            &quot;index.docker.io&#x2F;library&#x2F;nginx:latest&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Layers&quot;: [</span><br><span class="line">            &quot;a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0.tar.gz&quot;,</span><br><span class="line">            &quot;67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b.tar.gz&quot;,</span><br><span class="line">            &quot;e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527.tar.gz&quot;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>Tar Archive File Structure Summary</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── 67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b.tar.gz --- Layer file</span><br><span class="line">├── a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0.tar.gz --- Layer file</span><br><span class="line">├── e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527.tar.gz --- Layer file</span><br><span class="line">├── manifest.json --- Image Tar Archive Description</span><br><span class="line">└── sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a --- Image Config</span><br><span class="line">0 directories, 5 files</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
@@ -1540,14 +1521,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">221k</span>
+    <span title="站点总字数">223k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">3:21</span>
+    <span title="站点阅读时长">3:23</span>
   </span>
 </div>
 
