@@ -4,6 +4,7 @@ tags:
   - golang
   - log
 categories: 笔记
+abbrlink: cd7f3948
 ---
 
 # log output format sample
@@ -15,19 +16,24 @@ INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                   
 
 # code sample
 
-> show timestamp: https://github.com/Sirupsen/logrus/issues/415
->
-> the meaning of [0000]: https://github.com/Sirupsen/logrus/issues/163
->
-> add common prefix: https://github.com/sirupsen/logrus/issues/773
->
-> https://github.com/sirupsen/logrus#default-fields
-> 
-> have a little overhead, add filename and line number: https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922 
->
-> https://github.com/sirupsen/logrus#logging-method-name
->
-> https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go 
+show timestamp
+
+* https://github.com/Sirupsen/logrus/issues/415
+
+the meaning of [0000]
+
+* https://github.com/Sirupsen/logrus/issues/163
+
+add common prefix
+
+* https://github.com/sirupsen/logrus/issues/773
+* https://github.com/sirupsen/logrus#default-fields
+
+have a little overhead, add filename and line number
+
+* https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922 
+* https://github.com/sirupsen/logrus#logging-method-name
+* https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go 
 
 ```golang
 package main
