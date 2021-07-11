@@ -4,6 +4,7 @@ tags:
   - bash
   - pipeline
 categories: 笔记
+abbrlink: 7cb1245f
 ---
 
 # get exit code of pipeline command in background
@@ -12,13 +13,14 @@ https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background
 
 https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0
 
-```
+```shell
 someCommand="python test.py"
 
 {
   ${someCommand} 2>&1 | tee -a training.log
   exit ${PIPESTATUS[0]}
 } &
+
 wait $!
 echo $?
 ```
@@ -37,13 +39,15 @@ https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html
 
 注意 **return the exit status of the last command waited for**
 
-所以在 shell 中获取 pipeline command status 的简易方法似乎只能通过 `${PIPESTATUS[0]}`
+所以上述代码，wait 命令实际上获取到的是 tee 命令的退出码
+
+在 shell 中获取 pipeline command status 的简易方法似乎只能通过 `${PIPESTATUS[0]}`
 
 # get pid of pipeline command in background
 
 进一步的，我们想获取 someCommand 的 pid，有办法么，尝试做如下改造
 
-```
+```shell
 someCommand="python test.py"
 
 {
@@ -52,6 +56,7 @@ someCommand="python test.py"
     wait ${pid_someCommand}
     exit $?
 } | tee -a training.log &
+
 wait $!
 echo ${PIPESTATUS[0]}
 ```
@@ -66,7 +71,7 @@ but not work
 
 最后只能使用 `ps -ef | grep someCommand` 的终极大法，加上通过 subshell pid 作为 parent id 过滤
 
-```
+```shell
 someCommand="python test.py"
 
 {
@@ -91,7 +96,7 @@ someCommand_pid 55863
 
 # test.py
 
-```
+```python
 import time
 import sys
 
