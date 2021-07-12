@@ -5,6 +5,7 @@ tags:
   - context
   - cobra
 categories: 笔记
+abbrlink: e9a26fdf
 ---
 
 * https://www.sohamkamani.com/golang/context-cancellation-and-values/
