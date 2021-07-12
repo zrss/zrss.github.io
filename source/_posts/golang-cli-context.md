@@ -81,9 +81,11 @@ var rootCmd = &cobra.Command{
 		cli := run.New()
 		err := cli.LongRun(cmd.Context())
 
-		fmt.Printf("cli run err: %v\n", err)
-		if exitError, ok := err.(*exec.ExitError); ok {
-			fmt.Printf("exit code: %d\n", exitError.ExitCode())
+		if err != nil {
+			fmt.Printf("cli run err: %v\n", err)
+			if exitError, ok := err.(*exec.ExitError); ok {
+				fmt.Printf("exit code: %d\n", exitError.ExitCode())
+			}
 		}
 	},
 }
