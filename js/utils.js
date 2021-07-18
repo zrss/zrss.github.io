@@ -6,13 +6,28 @@ HTMLElement.prototype.wrap = function(wrapper) {
   wrapper.appendChild(this);
 };
 
-// https://caniuse.com/#feat=mdn-api_element_classlist_replace
+// https://caniuse.com/mdn-api_element_classlist_replace
 if (typeof DOMTokenList.prototype.replace !== 'function') {
   DOMTokenList.prototype.replace = function(remove, add) {
     this.remove(remove);
     this.add(add);
   };
 }
+
+(function() {
+  const onPageLoaded = () => document.dispatchEvent(
+    new Event('page:loaded', {
+      bubbles: true
+    })
+  );
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('readystatechange', onPageLoaded, { once: true });
+  } else {
+    onPageLoaded();
+  }
+  document.addEventListener('pjax:success', onPageLoaded);
+})();
 
 NexT.utils = {
 
@@ -72,7 +87,7 @@ NexT.utils = {
    */
   registerCopyCode: function() {
     let figure = document.querySelectorAll('figure.highlight');
-    if (figure.length === 0) figure = document.querySelectorAll('pre');
+    if (figure.length === 0) figure = document.querySelectorAll('pre:not(.mermaid)');
     figure.forEach(element => {
       element.querySelectorAll('.code .line span').forEach(span => {
         span.classList.forEach(name => {
@@ -85,21 +100,30 @@ NexT.utils = {
       button.addEventListener('click', () => {
         const lines = element.querySelector('.code') || element.querySelector('code');
         const code = lines.innerText;
-        const ta = document.createElement('textarea');
-        ta.style.top = window.scrollY + 'px'; // Prevent page scrolling
-        ta.style.position = 'absolute';
-        ta.style.opacity = '0';
-        ta.readOnly = true;
-        ta.value = code;
-        document.body.append(ta);
-        ta.select();
-        ta.setSelectionRange(0, code.length);
-        ta.readOnly = false;
-        const result = document.execCommand('copy');
-        button.querySelector('i').className = result ? 'fa fa-check-circle fa-fw' : 'fa fa-times-circle fa-fw';
-        ta.blur(); // For iOS
-        button.blur();
-        document.body.removeChild(ta);
+        if (navigator.clipboard) {
+          // https://caniuse.com/mdn-api_clipboard_writetext
+          navigator.clipboard.writeText(code).then(() => {
+            button.querySelector('i').className = 'fa fa-check-circle fa-fw';
+          }, () => {
+            button.querySelector('i').className = 'fa fa-times-circle fa-fw';
+          });
+        } else {
+          const ta = document.createElement('textarea');
+          ta.style.top = window.scrollY + 'px'; // Prevent page scrolling
+          ta.style.position = 'absolute';
+          ta.style.opacity = '0';
+          ta.readOnly = true;
+          ta.value = code;
+          document.body.append(ta);
+          ta.select();
+          ta.setSelectionRange(0, code.length);
+          ta.readOnly = false;
+          const result = document.execCommand('copy');
+          button.querySelector('i').className = result ? 'fa fa-check-circle fa-fw' : 'fa fa-times-circle fa-fw';
+          ta.blur(); // For iOS
+          button.blur();
+          document.body.removeChild(ta);
+        }
       });
       element.addEventListener('mouseleave', () => {
         setTimeout(() => {
@@ -152,7 +176,7 @@ NexT.utils = {
           backToTop.querySelector('span').innerText = Math.round(scrollPercent) + '%';
         }
         if (readingProgressBar) {
-          readingProgressBar.style.width = scrollPercent.toFixed(2) + '%';
+          readingProgressBar.style.setProperty('--progress', scrollPercent.toFixed(2) + '%');
         }
       }
       if (!Array.isArray(NexT.utils.sections)) return;
@@ -165,7 +189,7 @@ NexT.utils = {
         index--;
       }
       this.activateNavByIndex(index);
-    });
+    }, { passive: true });
 
     backToTop && backToTop.addEventListener('click', () => {
       window.anime({
@@ -258,6 +282,14 @@ NexT.utils = {
     });
   },
 
+  registerPostReward: function() {
+    const button = document.querySelector('.reward-container button');
+    if (!button) return;
+    button.addEventListener('click', () => {
+      document.querySelector('.post-reward').classList.toggle('active');
+    });
+  },
+
   activateNavByIndex: function(index) {
     const target = document.querySelectorAll('.post-toc li a.nav-link')[index];
     if (!target || target.classList.contains('active-current')) return;
@@ -281,24 +313,6 @@ NexT.utils = {
     });
   },
 
-  supportsPDFs: function() {
-    const ua = navigator.userAgent;
-    const supportsPdfMimeType = typeof navigator.mimeTypes['application/pdf'] !== 'undefined';
-    const isIOS = /iphone|ipad|ipod/i.test(ua.toLowerCase());
-    return ua.includes('irefox') || (supportsPdfMimeType && !isIOS);
-  },
-
-  getComputedStyle: function(element) {
-    const clone = element.cloneNode(true);
-    clone.style.position = 'absolute';
-    clone.style.visibility = 'hidden';
-    clone.style.display = 'block';
-    element.parentNode.appendChild(clone);
-    const height = clone.clientHeight;
-    element.parentNode.removeChild(clone);
-    return height;
-  },
-
   /**
    * Init Sidebar & TOC inner dimensions on all pages and for all schemes.
    * Need for Sidebar/TOC inner scrolling if content taller then viewport.
@@ -318,7 +332,7 @@ NexT.utils = {
 
   updateSidebarPosition: function() {
     NexT.utils.initSidebarDimension();
-    if (window.screen.width < 992 || CONFIG.scheme === 'Pisces' || CONFIG.scheme === 'Gemini') return;
+    if (window.innerWidth < 992 || CONFIG.scheme === 'Pisces' || CONFIG.scheme === 'Gemini') return;
     // Expand sidebar on post detail page by default, when post has a toc.
     const hasTOC = document.querySelector('.post-toc');
     let display = CONFIG.page.sidebar;
@@ -331,37 +345,75 @@ NexT.utils = {
     }
   },
 
-  getScript: function(url, callback, condition) {
-    if (condition) {
-      callback();
-    } else {
-      let script = document.createElement('script');
-      script.onload = script.onreadystatechange = function(_, isAbort) {
-        if (isAbort || !script.readyState || /loaded|complete/.test(script.readyState)) {
-          script.onload = script.onreadystatechange = null;
-          script = undefined;
-          if (!isAbort && callback) setTimeout(callback, 0);
-        }
-      };
-      script.src = url;
-      document.head.appendChild(script);
+  getScript: function(src, options = {}, legacyCondition) {
+    if (typeof options === 'function') {
+      return this.getScript(src, {
+        condition: legacyCondition
+      }).then(options);
     }
-  },
+    const {
+      condition = false,
+      attributes: {
+        id = '',
+        async = false,
+        defer = false,
+        crossOrigin = '',
+        dataset = {},
+        ...otherAttributes
+      } = {},
+      parentNode = null
+    } = options;
+    return new Promise((resolve, reject) => {
+      if (condition) {
+        resolve();
+      } else {
+        const script = document.createElement('script');
 
-  loadComments: function(selector, callback) {
-    const element = document.querySelector(selector);
-    if (!CONFIG.comments.lazyload || !element) {
-      callback();
-      return;
-    }
-    const intersectionObserver = new IntersectionObserver((entries, observer) => {
-      const entry = entries[0];
-      if (entry.isIntersecting) {
-        callback();
-        observer.disconnect();
+        if (id) script.id = id;
+        if (crossOrigin) script.crossOrigin = crossOrigin;
+        script.async = async;
+        script.defer = defer;
+        Object.assign(script.dataset, dataset);
+        Object.entries(otherAttributes).forEach(([name, value]) => {
+          script.setAttribute(name, String(value));
+        });
+
+        script.onload = resolve;
+        script.onerror = reject;
+
+        if (typeof src === 'object') {
+          const { url, integrity } = src;
+          script.src = url;
+          if (integrity) {
+            script.integrity = integrity;
+            script.crossOrigin = 'anonymous';
+          }
+        } else {
+          script.src = src;
+        }
+        (parentNode || document.head).appendChild(script);
       }
     });
-    intersectionObserver.observe(element);
-    return intersectionObserver;
+  },
+
+  loadComments: function(selector, legacyCallback) {
+    if (legacyCallback) {
+      return this.loadComments(selector).then(legacyCallback);
+    }
+    return new Promise(resolve => {
+      const element = document.querySelector(selector);
+      if (!CONFIG.comments.lazyload || !element) {
+        resolve();
+        return;
+      }
+      const intersectionObserver = new IntersectionObserver((entries, observer) => {
+        const entry = entries[0];
+        if (!entry.isIntersecting) return;
+
+        resolve();
+        observer.disconnect();
+      });
+      intersectionObserver.observe(element);
+    });
   }
 };

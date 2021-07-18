@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           // Trigger a DOM reflow
           element.classList.add(animateAction);
-        }, 0);
+        });
       });
     },
     hideSidebar: function() {
@@ -57,5 +57,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateFooterPosition();
   window.addEventListener('resize', updateFooterPosition);
-  window.addEventListener('scroll', updateFooterPosition);
+  window.addEventListener('scroll', updateFooterPosition, { passive: true });
 });
