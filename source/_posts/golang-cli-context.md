@@ -11,6 +11,10 @@ abbrlink: e9a26fdf
 * https://www.sohamkamani.com/golang/context-cancellation-and-values/
 * https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine
 
+> https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them.
+>
+> A Context is safe for simultaneous use by multiple goroutines. Code can pass a single Context to any number of goroutines and cancel that Context to signal all of them.
+
 # project structure
 
 ```
@@ -121,3 +125,13 @@ func New() *CLI {
 	return &CLI{}
 }
 ```
+
+https://pkg.go.dev/os/exec#CommandContext
+
+> The provided context is used to kill the process (by calling os.Process.Kill) if the context becomes done before the command completes on its own.
+
+https://github.com/golang/go/issues/21135
+
+> proposal: os/exec: allow user of CommandContext to specify the kill signal when context is done
+
+commandContext will trigger SIGKILL when the ctx is done ...
