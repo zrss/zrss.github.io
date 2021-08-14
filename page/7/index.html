@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-count">103</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-count">49</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,120 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/d7e71fec.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/d7e71fec.html" class="post-title-link" itemprop="url">boltdb-cursor</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-29 15:54:07" itemprop="dateCreated datePublished" datetime="2017-10-29T15:54:07Z">2017-10-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:56:04" itemprop="dateModified" datetime="2020-11-22T07:56:04Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中</p>
+<h1 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h1><p>first / prev / next / last 的实现</p>
+<p>first 就是不断搜索 element 的 index = 0 inode，直到 leaf page 为止</p>
+<p>last 是不断搜索 element 的 index = the count of inodes - 1，直到 leaf page 为止</p>
+<p>first 和 last 实现后，可相应实现 prev / next</p>
+<p>prev 当 inode 中可 – 时则直接回退一格，若为开头 inode，则上移，再 last</p>
+<p>next 当 inode 中可 ++ 时则直接前进一格，若为末尾 indoe，则上移，再 first</p>
+<h1 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h1><p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
+<blockquote>
+<p>nsearch(key)</p>
+</blockquote>
+<p>如果搜到了 leaf page / node，那么就在 inodes 中搜索该 key，返回的 index 为第一个大于等于 key 的 index，若不存在返回 inodes 长度</p>
+<blockquote>
+<p>searchNode(key, n)</p>
+</blockquote>
+<p>如果不是 leaf page / node，且 node 不为 nil (n)，则 searchNode；searchNode 中如果 key 相等则从该 inodes[index].pgid，继续 search(key, inodes[index].pgid)；如果 key 不相等且 index &gt; 0，则设置为最后一个小于的 index，从该 index 继续 search</p>
+<blockquote>
+<p>searchPage(key, p)</p>
+</blockquote>
+<p>实现同上述，不过是从 page 中读取</p>
+<h1 id="获取-node"><a href="#获取-node" class="headerlink" title="获取 node"></a>获取 node</h1><p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
+<p>获取到 node 之后就可以 put 和 del key 了</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
+<p>例如看个创建 bucket 的过程</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="keyword">var</span> value = bucket.write()</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, bucketLeafFlag)</span><br></pre></td></tr></table></figure>
+
+<p>例如看个写入 key / value 的过程</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="comment">// Return an error if there is an existing key with a bucket value.</span></span><br><span class="line"><span class="keyword">if</span> bytes.Equal(key, k) &amp;&amp; (flags&amp;bucketLeafFlag) != <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ErrIncompatibleValue</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1205,148 +1319,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/3869686e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/3869686e.html" class="post-title-link" itemprop="url">ETCD V3 如何完成一次 put 请求</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:00:55" itemprop="dateCreated datePublished" datetime="2017-10-04T23:00:55Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 15:06:26" itemprop="dateModified" datetime="2020-11-21T15:06:26Z">2020-11-21</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>etcd 完成一次写入需要经过哪些过程？</p>
-<p>implementation of put grpc request</p>
-<p>key.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *kvServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">processInternalRaftRequest</span><span class="params">(ctx context.Context, r pb.InternalRaftRequest)</span> <span class="params">(*applyResult, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func (s *EtcdServer) processInternalRaftRequestOnce(ctx context.Context, r pb.InternalRaftRequest) (*applyResult, error)</span><br></pre></td></tr></table></figure>
-
-<p>注册一个等待 id；完成之后调用 s.w.Trigger 触发完成 or GC<br>ch := s.w.Register(id)</p>
-<p>raft propose (提议写入数据)</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// propose PutRequest</span></span><br><span class="line">s.r.Propose(cctx, data)</span><br></pre></td></tr></table></figure>
-
-<p>node.go</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func (n *node) Propose(ctx context.Context, data []byte) error</span><br></pre></td></tr></table></figure>
-
-<p>n.step 往 propc 通道传入数据</p>
-<p>node run main roop</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span> <span class="title">run</span><span class="params">(r *raft)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">		<span class="keyword">case</span> m := &lt;-propc:</span><br><span class="line">			r.logger.Infof(<span class="string">&quot;handle propc message&quot;</span>)</span><br><span class="line">			m.From = r.id</span><br><span class="line">			r.Step(m)</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>raft/raft.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *raft)</span> <span class="title">Step</span><span class="params">(m pb.Message)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		r.step(r, m)</span><br><span class="line">  </span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r.step(r, m)</p>
-<p>leader 和 follower 行为不同</p>
-<p>对于 follower 来说</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">stepFollower</span><span class="params">(r *raft, m pb.Message)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">case</span> pb.MsgProp:</span><br><span class="line">		<span class="keyword">if</span> r.lead == None &#123;</span><br><span class="line">			r.logger.Infof(<span class="string">&quot;%x no leader at term %d; dropping proposal&quot;</span>, r.id, r.Term)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// forward to leader</span></span><br><span class="line">		m.To = r.lead</span><br><span class="line">		<span class="comment">// just append to raft pb.Message ?</span></span><br><span class="line">		r.send(m)</span><br><span class="line">    </span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r.send(m) 只是把 message append 到 raft/raft.go 的 msgs []pb.Message 数组中，谁去消费这个 message ？</p>
-<p>node.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newReady</span><span class="params">(r *raft, prevSoftSt *SoftState, prevHardSt pb.HardState)</span> <span class="title">Ready</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    rd := Ready&#123;</span><br><span class="line">		Entries:          r.raftLog.unstableEntries(),</span><br><span class="line">		CommittedEntries: r.raftLog.nextEnts(),</span><br><span class="line">		Messages:         r.msgs,</span><br><span class="line">	&#125;</span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Ready 又是由谁消费的？</p>
-<p>node.go main roop</p>
-<p>func (n node) run(r raft)</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span> <span class="title">run</span><span class="params">(r *raft)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">		<span class="keyword">if</span> advancec != <span class="literal">nil</span> &#123;</span><br><span class="line">			readyc = <span class="literal">nil</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			rd = newReady(r, prevSoftSt, prevHardSt)</span><br><span class="line">			<span class="keyword">if</span> rd.containsUpdates() &#123;</span><br><span class="line">				readyc = n.readyc</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				readyc = <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">  </span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">        <span class="keyword">case</span> readyc &lt;- rd:</span><br><span class="line">                  r.logger.Infof(<span class="string">&quot;handle ready&quot;</span>)</span><br><span class="line">                  <span class="keyword">if</span> rd.SoftState != <span class="literal">nil</span> &#123;</span><br><span class="line">                      prevSoftSt = rd.SoftState</span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> <span class="built_in">len</span>(rd.Entries) &gt; <span class="number">0</span> &#123;</span><br><span class="line">                      prevLastUnstablei = rd.Entries[<span class="built_in">len</span>(rd.Entries)<span class="number">-1</span>].Index</span><br><span class="line">                      prevLastUnstablet = rd.Entries[<span class="built_in">len</span>(rd.Entries)<span class="number">-1</span>].Term</span><br><span class="line">                      havePrevLastUnstablei = <span class="literal">true</span></span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> !IsEmptyHardState(rd.HardState) &#123;</span><br><span class="line">                      prevHardSt = rd.HardState</span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> !IsEmptySnap(rd.Snapshot) &#123;</span><br><span class="line">                      prevSnapi = rd.Snapshot.Metadata.Index</span><br><span class="line">                  &#125;</span><br><span class="line">                  r.msgs = <span class="literal">nil</span></span><br><span class="line">                  r.readStates = <span class="literal">nil</span></span><br><span class="line">                  advancec = n.advancec</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>readyc 又由谁消费呢？</p>
-<p>实际上 readyc 是 n.readyc，所以找下 n.readyc 由谁消费即可</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">type node struct &#123;</span><br><span class="line">	...</span><br><span class="line">	readyc     chan Ready</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line">func (n *node) Ready() &lt;-chan Ready &#123; return n.readyc &#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以我们继续追寻哪里取了 Ready() 通道</p>
-<p>终于在</p>
-<p>etcdserver/raft.go 中发现了</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *raftNode)</span> <span class="title">start</span><span class="params">(rh *raftReadyHandler)</span></span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> rd := &lt;-r.Ready():</span><br><span class="line">				<span class="keyword">if</span> rd.SoftState != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="comment">// lead has changed</span></span><br><span class="line">					<span class="keyword">if</span> lead := atomic.LoadUint64(&amp;r.lead); rd.SoftState.Lead != raft.None &amp;&amp; lead != rd.SoftState.Lead &#123;</span><br><span class="line">						r.mu.Lock()</span><br><span class="line">						r.lt = time.Now()</span><br><span class="line">						r.mu.Unlock()</span><br><span class="line">						<span class="comment">// prometheus record the count of leader changes</span></span><br><span class="line">						leaderChanges.Inc()</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">if</span> rd.SoftState.Lead == raft.None &#123;</span><br><span class="line">						hasLeader.Set(<span class="number">0</span>)</span><br><span class="line">					&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">						hasLeader.Set(<span class="number">1</span>)</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// store current seen leader</span></span><br><span class="line">					atomic.StoreUint64(&amp;r.lead, rd.SoftState.Lead)</span><br><span class="line">					islead = rd.RaftState == raft.StateLeader</span><br><span class="line">					<span class="comment">// raft handler</span></span><br><span class="line">					rh.updateLeadership()</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(rd.ReadStates) != <span class="number">0</span> &#123;</span><br><span class="line">					<span class="keyword">select</span> &#123;</span><br><span class="line">					<span class="keyword">case</span> r.readStateC &lt;- rd.ReadStates[<span class="built_in">len</span>(rd.ReadStates)<span class="number">-1</span>]:</span><br><span class="line">					<span class="keyword">case</span> &lt;-time.After(internalTimeout):</span><br><span class="line">						plog.Warningf(<span class="string">&quot;timed out sending read state&quot;</span>)</span><br><span class="line">					<span class="keyword">case</span> &lt;-r.stopped:</span><br><span class="line">						<span class="keyword">return</span></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				raftDone := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">				ap := apply&#123;</span><br><span class="line">					entries:  rd.CommittedEntries,</span><br><span class="line">					snapshot: rd.Snapshot,</span><br><span class="line">					raftDone: raftDone,</span><br><span class="line">				&#125;</span><br><span class="line">				updateCommittedIndex(&amp;ap, rh)</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> r.applyc &lt;- ap:</span><br><span class="line">				<span class="keyword">case</span> &lt;-r.stopped:</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// the leader can write to its disk in parallel with replicating to the followers and them</span></span><br><span class="line">				<span class="comment">// writing to their disks.</span></span><br><span class="line">				<span class="comment">// For more details, check raft thesis 10.2.1</span></span><br><span class="line">				<span class="keyword">if</span> islead &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeLeaderSend struct&#123;&#125;</span></span><br><span class="line">					r.sendMessages(rd.Messages)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// gofail: var raftBeforeSave struct&#123;&#125;</span></span><br><span class="line">				<span class="keyword">if</span> err := r.storage.Save(rd.HardState, rd.Entries); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					plog.Fatalf(<span class="string">&quot;raft save state and entries error: %v&quot;</span>, err)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> !raft.IsEmptyHardState(rd.HardState) &#123;</span><br><span class="line">					proposalsCommitted.Set(<span class="keyword">float64</span>(rd.HardState.Commit))</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// gofail: var raftAfterSave struct&#123;&#125;</span></span><br><span class="line">				<span class="keyword">if</span> !raft.IsEmptySnap(rd.Snapshot) &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeSaveSnap struct&#123;&#125;</span></span><br><span class="line">					<span class="keyword">if</span> err := r.storage.SaveSnap(rd.Snapshot); err != <span class="literal">nil</span> &#123;</span><br><span class="line">						plog.Fatalf(<span class="string">&quot;raft save snapshot error: %v&quot;</span>, err)</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// gofail: var raftAfterSaveSnap struct&#123;&#125;</span></span><br><span class="line">					r.raftStorage.ApplySnapshot(rd.Snapshot)</span><br><span class="line">					plog.Infof(<span class="string">&quot;raft applied incoming snapshot at index %d&quot;</span>, rd.Snapshot.Metadata.Index)</span><br><span class="line">					<span class="comment">// gofail: var raftAfterApplySnap struct&#123;&#125;</span></span><br><span class="line">				&#125;</span><br><span class="line">				r.raftStorage.Append(rd.Entries)</span><br><span class="line">				<span class="keyword">if</span> !islead &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeFollowerSend struct&#123;&#125;</span></span><br><span class="line">					r.sendMessages(rd.Messages)</span><br><span class="line">				&#125;</span><br><span class="line">				raftDone &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">				r.Advance()</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该部分会将 apply 的 message 放入 applc 通道中，最终由</p>
-<p>server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">run</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">			f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">			sched.Schedule(f)</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>做持久化，并且 trigger 写入结束</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1371,13 +1343,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">224k</span>
+    <span title="站点总字数">225k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:23</span>
+    <span title="站点阅读时长">3:25</span>
   </span>
 </div>
 

@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-count">103</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-count">49</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,125 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b40cf9b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b40cf9b.html" class="post-title-link" itemprop="url">k8s annotation of storage</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-24 12:06:44" itemprop="dateCreated datePublished" datetime="2018-06-24T12:06:44Z">2018-06-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 04:08:29" itemprop="dateModified" datetime="2020-12-06T04:08:29Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>k8s 1.7.6</p>
+<p>kubernetes/pkg/controller/volume/persistentvolume/pv_controller.go</p>
+</blockquote>
+<p>claim.Spec.VolumeName == nil 时</p>
+<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 volume.beta.kubernetes.io/storage-class 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
+<ul>
+<li>volume.beta.kubernetes.io/storage-class</li>
+<li>Spec.StorageClassName</li>
+</ul>
+<p>在允许动态提供存储（enableDynamicProvisioning）的情况下，尝试去提供一个 volume</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newClaim, err := ctrl.setClaimProvisioner(claim, storageClass)</span><br></pre></td></tr></table></figure>
+
+<p>动态的 pvc 会增加如下 annotation</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">volume.beta.kubernetes.io/storage-provisioner: class.Provisioner</span><br><span class="line">pv.kubernetes.io/bound-by-controller: yes</span><br><span class="line">pv.kubernetes.io/provisioned-by: plugin.GetPluginName()</span><br></pre></td></tr></table></figure>
+
+<p>从存储提供服务获取 volume 的过程是异步的，当获取完成时，设置如下 annotation</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pv.kubernetes.io/bind-completed: yes</span><br></pre></td></tr></table></figure>
+
+<p>如果是其他可以直接 bind 的情况，在 bind 的方法中也会设置上述 annotation</p>
+<p>所以可以通过 pvc annotation</p>
+<ul>
+<li>pv.kubernetes.io/bound-by-controller: yes</li>
+</ul>
+<p>确认该 pvc 为动态创建还是直接使用</p>
+<p>不过该字段还有一种情况下可能被设置</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> claim.Name != volume.Spec.ClaimRef.Name || claim.Namespace != volume.Spec.ClaimRef.Namespace &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef.UID != <span class="string">&quot;&quot;</span> &amp;&amp; claim.UID != volume.Spec.ClaimRef.UID &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>volume 和 claim binding 时，发现 volume 与 claim 的字段不匹配</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Check if the claim was already bound (either by controller or by user)</span></span><br><span class="line">shouldBind := <span class="literal">false</span></span><br><span class="line"><span class="keyword">if</span> volume.Name != claim.Spec.VolumeName &#123;</span><br><span class="line">    shouldBind = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>clain 和 volume binding 时，也会出现这种情况，当 volume 与 claim 的字段不匹配时</p>
+<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 pv.kubernetes.io/bound-by-controller: yes 判断动态创建是否准确?</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1436,120 +1555,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/d7e71fec.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/d7e71fec.html" class="post-title-link" itemprop="url">boltdb-cursor</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-29 15:54:07" itemprop="dateCreated datePublished" datetime="2017-10-29T15:54:07Z">2017-10-29</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 07:56:04" itemprop="dateModified" datetime="2020-11-22T07:56:04Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中</p>
-<h1 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h1><p>first / prev / next / last 的实现</p>
-<p>first 就是不断搜索 element 的 index = 0 inode，直到 leaf page 为止</p>
-<p>last 是不断搜索 element 的 index = the count of inodes - 1，直到 leaf page 为止</p>
-<p>first 和 last 实现后，可相应实现 prev / next</p>
-<p>prev 当 inode 中可 – 时则直接回退一格，若为开头 inode，则上移，再 last</p>
-<p>next 当 inode 中可 ++ 时则直接前进一格，若为末尾 indoe，则上移，再 first</p>
-<h1 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h1><p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
-<blockquote>
-<p>nsearch(key)</p>
-</blockquote>
-<p>如果搜到了 leaf page / node，那么就在 inodes 中搜索该 key，返回的 index 为第一个大于等于 key 的 index，若不存在返回 inodes 长度</p>
-<blockquote>
-<p>searchNode(key, n)</p>
-</blockquote>
-<p>如果不是 leaf page / node，且 node 不为 nil (n)，则 searchNode；searchNode 中如果 key 相等则从该 inodes[index].pgid，继续 search(key, inodes[index].pgid)；如果 key 不相等且 index &gt; 0，则设置为最后一个小于的 index，从该 index 继续 search</p>
-<blockquote>
-<p>searchPage(key, p)</p>
-</blockquote>
-<p>实现同上述，不过是从 page 中读取</p>
-<h1 id="获取-node"><a href="#获取-node" class="headerlink" title="获取 node"></a>获取 node</h1><p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
-<p>获取到 node 之后就可以 put 和 del key 了</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
-<p>例如看个创建 bucket 的过程</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="keyword">var</span> value = bucket.write()</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, bucketLeafFlag)</span><br></pre></td></tr></table></figure>
-
-<p>例如看个写入 key / value 的过程</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="comment">// Return an error if there is an existing key with a bucket value.</span></span><br><span class="line"><span class="keyword">if</span> bytes.Equal(key, k) &amp;&amp; (flags&amp;bucketLeafFlag) != <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ErrIncompatibleValue</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1574,13 +1579,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">224k</span>
+    <span title="站点总字数">225k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:23</span>
+    <span title="站点阅读时长">3:25</span>
   </span>
 </div>
 
