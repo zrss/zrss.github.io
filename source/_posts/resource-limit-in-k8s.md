@@ -51,6 +51,8 @@ https://github.com/moby/moby/issues/15621#issuecomment-181418985
 
 在 docker container 未退出时会设置 container event
 
+https://docs.docker.com/engine/reference/commandline/events/
+
 docker container 设置 OOMKilled 原理，参考该 issue
 
 https://github.com/moby/moby/issues/38352#issuecomment-446329512
