@@ -96,3 +96,17 @@ multi cpu 机器注意 quota 可以是 period 的倍数，例如限制 container
 * `--memory-swap`: int({limits.memory})
 
 the container does not have access to swap
+
+## K8s OOM Watcher
+
+https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go
+
+* /dev/kmsg
+
+> Start watches for system oom's and records an event for every system oom encountered.
+
+当前 kubelet 观测到发生 system oom 时（非 cgroup oom），生成 event；如下 PR 尝试将进程 oom 关联至 pod，未合入
+
+https://github.com/kubernetes/kubernetes/issues/100483
+
+https://github.com/kubernetes/kubernetes/pull/100487
