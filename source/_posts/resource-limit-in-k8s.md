@@ -24,6 +24,13 @@ https://docs.docker.com/config/containers/resource_constraints/#limit-a-containe
 * `--memory-swap`:
 * `--oom-kill-disable`:
 
+针对 OOM 补充说明如下
+
+1. 容器内进程使用 memory 超过限制，kernel 会触发 oom killer (cgroup)，kill oom_score 高分进程
+2. 容器只要 1 pid 进程未退出，则容器不会退出
+
+OOM 始终针对的是进程，而非容器
+
 ## Docker Container OOMKilled status
 
 1. https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container
