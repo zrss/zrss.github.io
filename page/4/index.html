@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">103</span>
+          <span class="site-state-item-count">105</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-count">53</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,296 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/efe6a532.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/efe6a532.html" class="post-title-link" itemprop="url">mxnet-network-and-infiniband</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-01 10:46:35" itemprop="dateCreated datePublished" datetime="2019-05-01T10:46:35Z">2019-05-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:50:14" itemprop="dateModified" datetime="2020-11-22T02:50:14Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="MXNet-分布式通信"><a href="#MXNet-分布式通信" class="headerlink" title="MXNet 分布式通信"></a>MXNet 分布式通信</h1><p>MXnet 使用了 dmlc/ps-lite 实现其分布式通信机制</p>
+<p>ps-lite</p>
+<p>van.h 父类，使用 Protocol buffer 定义了数据格式</p>
+<p>zmq_van.h 继承 van.h，使用 zmq 做具体的数据传输</p>
+<p>当前 MXnet 只能使用 IPoIB，不能直接使用 IB verbs 来通信；有个改动 ps-lite 也能直接使用 ib 来通信的 PR 挂了一年多了 …</p>
+<h1 id="RDMA-in-kubernetes"><a href="#RDMA-in-kubernetes" class="headerlink" title="RDMA in kubernetes"></a>RDMA in kubernetes</h1><p>IB 这东西嘛，看起来是没服务发现的能力的；就是使用之前，需要使用 IP 网络通信一次，然后知道对端的 IB 的地址后，才能直接基于 IB 来通信</p>
+<p>NCCL 就是这么干的</p>
+<p>当然参考阿里云的说法</p>
+<blockquote>
+<p>RDMA通讯建连过程普遍分为 TCP 和 RDMA_CM 两种实现，如果应用程序使用RDMA_CM 的建连的方式，vpc网络插件中分配的pod ip 无法作为RDMA_CM 地址， 容器需要设置HostNetwork。并将bond0 ip 设置为CM的通讯地址</p>
+</blockquote>
+<p>这得看下 mlx device plugin 的实现和容器网络的实现，比较好奇，看一下吧</p>
+<p>业界有两种实现 SR-IOV (single root io virtualization) 另一种就是直接共享设备 (HCA: host channel adapter)</p>
+<h2 id="HCA"><a href="#HCA" class="headerlink" title="HCA"></a>HCA</h2><p>HCA 就没啥好说的了，device plugin allocate 时，给 kubelet 返回设备路径，直接整个把 /dev/infiniband 挂载入容器中即可 … 这点会比较误导，相当于可以用所有的 HCA ?</p>
+<p>所以对于 HCA 来说，直接用原先的容器网络来初始化 IB 通信即可，即在容器网络上做 ib 设备地址的发现，随后再用 ib verbs api 来通信</p>
+<p>当然如果实现时，不是使用 tcp 的方式来初始化 IB，使用的是 rdma_cm，会有区别，容器的 ip 不能用于通信，只能用主机上的 bond0 ip 来通信 （主网卡）</p>
+<p>有点儿奇怪可能与 rdma_cm 的 api 有关 …</p>
+<p>另外最好加个这个，让单机多卡的训练可以 IPC 通信</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">securityContext:</span></span><br><span class="line">  <span class="attr">capabilities:</span></span><br><span class="line">    <span class="attr">add:</span> [ <span class="string">&quot;IPC_LOCK&quot;</span> ]</span><br></pre></td></tr></table></figure>
+
+<h2 id="SR-IOV"><a href="#SR-IOV" class="headerlink" title="SR-IOV"></a>SR-IOV</h2><p>PF -&gt; VF</p>
+<p>需要 SR-IOV CNI plugin 及 device plugin 配合</p>
+<p>device plugin 挂载 /dev/infiniband 到容器中</p>
+<p>SR-IOV CNI plugin 负责将 VF 绑定到容器的 network namespace 中</p>
+<p>假设 VF 事先创建好</p>
+<p>逻辑是通的，CNI 记录每个节点哪些 VF 已被分配，每个节点记录剩余几个 VF，当有新的 pod 被调度到当前节点时，CNI 即可分配未使用的 VF 与 pod</p>
+<h1 id="IP-over-Infiniband"><a href="#IP-over-Infiniband" class="headerlink" title="IP over Infiniband"></a>IP over Infiniband</h1><p>IPoIB 由 ipoib driver 实现，能像一般 NIC (ifconfig) 一样使用 ib 网络，当然性能差一些，在到达 NIC 之前，与 socket 通信的开销一致</p>
+<ul>
+<li>socket api</li>
+<li>ib verbs api</li>
+</ul>
+<p>socket api 走 os 调用栈，CPU 参与</p>
+<p>ib verbs 直接走 ib，相当于 bypass 了 os 与 CPU，硬件卸载</p>
+<p>不过有个地方比较疑惑，IPoIB，infiniband 底层的传输方式是 datagram 即不可靠传输，不过上层应用（zmp）都是 tcp，应有自己的重传机制；其次 ps-lite van.h 里也有开关控制重传功能，在未收到当前消息的 ACK 时，不会处理该请求，这里展开说下</p>
+<p>van.h 初始时，如果看到打开了重传开关，则初始化 resend.h</p>
+<p>启动了一个线程，周期性 (Timeout) 的重传 send_buf 中的消息</p>
+<p>van.h 在</p>
+<ul>
+<li>发送数据时，将数据加入 send_buf 中；</li>
+<li>接收到数据时<ul>
+<li>如果是 ACK，则从 send_buf 中移除该消息，并把数据交给上层处理</li>
+<li>若当前数据仍不是 ack 数据，则查看是否已发送过 ACK<ul>
+<li>是的话，则认为是重复消息，不交上层处理，并发送 ACK</li>
+<li>否则 交上层处理，记录到 ACK set 中，并发送 ACK</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>不过这个重传的场景比较神奇，话说 TCP 已经有 ACK 和重传机制了 … 不懂 ps-lite 是遇到了什么具体的场景，再做了一次重传的增强设计</p>
+<p>而且这个设计有个限制，收发数据越多，似乎内存消耗越大，因为记录是否收到过该消息的 ACK 的 set，并没有清理的机会，会一直增加</p>
+<p>所以一般也未见开启这个功能，env.md 里都没说明这两环境变量，姑且认为是个废弃特性吧 …</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS_RESEND=1</span><br><span class="line">PS_RESEND_TIMEOUT=1000 # ms</span><br></pre></td></tr></table></figure>
+
+<h1 id="厂家"><a href="#厂家" class="headerlink" title="厂家"></a>厂家</h1><h2 id="Azure"><a href="#Azure" class="headerlink" title="Azure"></a>Azure</h2><p>只支持 RDMA on IB 不支持 IP over IB</p>
+<p>In Azure, IP over IB is not supported. Only RDMA over IB is supported.</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/azure/virtual-machines/linux/sizes-hpc#rdma-capable-instances">https://docs.microsoft.com/zh-cn/azure/virtual-machines/linux/sizes-hpc#rdma-capable-instances</a></p>
+<h2 id="Aliyun"><a href="#Aliyun" class="headerlink" title="Aliyun"></a>Aliyun</h2><p>k8s 目前只看到 RDMA on IB，IP over IB 没看到，看起来是直接主机网络之后，用 ib0 ip 就行？</p>
+<h2 id="AWS"><a href="#AWS" class="headerlink" title="AWS"></a>AWS</h2><p>sagemaker 25Bbps/s 互联，看起来不像 IB or RoCE</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-ethernet-rdma-sr-iov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-ethernet-rdma-sr-iov-networking-with-connectx4-connectx5</a></p>
+<p>在 Kubernetes 上使用 RDMA</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/e57ea50b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/e57ea50b.html" class="post-title-link" itemprop="url">welcome to hpc</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-19 10:54:39" itemprop="dateCreated datePublished" datetime="2019-01-19T10:54:39Z">2019-01-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 03:00:26" itemprop="dateModified" datetime="2020-11-22T03:00:26Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念</p>
+<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><h2 id="MPI"><a href="#MPI" class="headerlink" title="MPI"></a>MPI</h2><p>Message passing interface</p>
+<p>消息传递接口，可以理解为分布式消息传递框架</p>
+<h2 id="OpenMPI"><a href="#OpenMPI" class="headerlink" title="OpenMPI"></a>OpenMPI</h2><p>MPI 的一种开源实现</p>
+<h2 id="RDMA"><a href="#RDMA" class="headerlink" title="RDMA"></a>RDMA</h2><p>remote direct memory access</p>
+<h2 id="Infiniband"><a href="#Infiniband" class="headerlink" title="Infiniband"></a>Infiniband</h2><p>IB</p>
+<p>网络设备，支持 RDMA</p>
+<h1 id="OpenMPI-1"><a href="#OpenMPI-1" class="headerlink" title="OpenMPI"></a>OpenMPI</h1><p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=developers#ompi-terminology">Terminology</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#mca-def">MCA</a></p>
+<ul>
+<li>framework</li>
+<li>components</li>
+<li>module</li>
+</ul>
+<blockquote>
+<p>An easy example framework to discuss is the MPI framework named “btl”, or the Byte Transfer Layer. It is used to send and receive data on different kinds of networks. Hence, Open MPI has btl components for shared memory, TCP, Infiniband, Myrinet, etc.</p>
+</blockquote>
+<p>不同的 MCA 支持不同的参数，我们可以参考如下查询支持的 MCA 参数</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#available-mca-params">available-mca-params</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ompi_info --param all all --level 9</span><br><span class="line"><span class="comment"># only btl</span></span><br><span class="line">ompi_info --param btl all --level 9</span><br><span class="line"><span class="comment"># only tcp of btl</span></span><br><span class="line">ompi_info --param btl tcp --level 9</span><br></pre></td></tr></table></figure>
+
+<p>可以通过 MCA 参数选择 Components</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#selecting-components">selecting-components</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl ^tcp,openib</span><br></pre></td></tr></table></figure>
+
+<p>不使用 btl framework 中的 tcp component，使用其中的 openib</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/doc/v3.1/man1/mpirun.1.php">mpirun</a></p>
+<p>mpirun 的常用参数</p>
+<ul>
+<li>-H: List of hosts on which to invoke processes.</li>
+<li>-np: Run this many copies of the program on the given nodes. This option indicates that the specified file is an executable program and not an application context. If no value is provided for the number of copies to execute (i.e., neither the “-np” nor its synonyms are provided on the command line), Open MPI will automatically execute a copy of the program on each process slot (see below for description of a “process slot”). This feature, however, can only be used in the SPMD model and will return an error (without beginning execution of the application) otherwise.</li>
+<li>–bind-to: Bind processes to the specified object, defaults to core. Supported options include slot, hwthread, core, l1cache, l2cache, l3cache, socket, numa, board, and none.</li>
+<li>-x: Export the specified environment variables to the remote nodes before executing the program. Only one environment variable can be specified per -x option. Existing environment variables can be specified or new variable names specified with corresponding values. For example: % mpirun -x DISPLAY -x OFILE=/tmp/out … The parser for the -x option is not very sophisticated; it does not even understand quoted values. Users are advised to set variables in the environment, and then use -x to export (not define) them.</li>
+<li>-mca: Send arguments to various MCA modules. See the “MCA” section, below.</li>
+</ul>
+<p><code>--mca btl self</code> 的作用</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=openfabrics#ib-btl">ib-btl</a></p>
+<p>self 用于本地进程通信 (可能使用 lo 设备，也可能不用，例如可以使用内存共享)</p>
+<p>openmpi，假设多机同一个地址族的地址可通，如果主机上有多个网络，openmpi 参考如下链接进行网络选择</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-selection">tcp-selection</a></p>
+<p>注意到 openmpi 会使用所见的所有网络，如果你不想其使用 ip network，你可以显式的禁用之，然而</p>
+<blockquote>
+<p>Note that Open MPI will still use TCP for control messages, such as data between mpirun and the MPI processes, rendezvous information during MPI_INIT, etc. To disable TCP altogether, you also need to disable the tcp component from the OOB framework.</p>
+</blockquote>
+<p>这句话比较有意思，一般来说 mpirun 要求 node 间可以 ssh 免密登录，而 ssh 是应用层协议，依赖 TCP</p>
+<p>openmpi 会选择最优的网络</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability">tcp-routability</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability-1.3">tcp-routability-1.3</a></p>
+<p>如何查看 mpirun 连接的过程</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl self,vader,tcp --mca btl_base_verbose 30 -np 2 -host NodeA,NodeB a.out</span><br></pre></td></tr></table></figure>
+
+<p>a.out 为可执行程序</p>
+<p>如果有 ib 卡，tcp component 会自动下线</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-auto-disable">tcp-auto-disable</a></p>
+<p>openmpi build default option</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#default-build">default-build</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--with-openib(=DIR) and --with-openib-libdir=DIR</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1323,301 +1613,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/73c2c618.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/73c2c618.html" class="post-title-link" itemprop="url">client go informers</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-16 14:09:09" itemprop="dateCreated datePublished" datetime="2018-09-16T14:09:09Z">2018-09-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 06:09:55" itemprop="dateModified" datetime="2020-11-22T06:09:55Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>426</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>占个坑，还是在 ut 的时候被坑到了，后续有时间补上，这个我认为 k8s 最成功的地方</p>
-<p>不是容器调度，而是这套基于 etcd 抽象出来的 api 😃</p>
-<ul>
-<li>informer</li>
-<li>lister</li>
-</ul>
-<p>这 informer 呀，其实就是提供 add/update/create 回调的封装 (所谓 informer)</p>
-<p>而这 lister 呢，是对象 cache，从 lister 中可以获取到对象。lister 由 informer 提供。</p>
-<p>其实还挺自然的，想想 informer 回调 add/update/create 的时候，基本思路</p>
-<ul>
-<li>list-watch kube-apiserver</li>
-<li>watch 到对象变化，根据 cache 计算 diff，然后相应回调 add/update/create</li>
-</ul>
-<p>所以它是需要 lister 这样的 local cache 的</p>
-<p>所以如果自己要实现一个 k8s style 的 controller，需要使用到 informer 时，首先初始化 informer，初始化 ok 之后，如果需要查对象，那可以通过 informer 的 lister 来获取</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/bed8f754.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/bed8f754.html" class="post-title-link" itemprop="url">knative startup</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-01 14:26:45" itemprop="dateCreated datePublished" datetime="2018-09-01T14:26:45Z">2018-09-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 06:37:30" itemprop="dateModified" datetime="2020-11-22T06:37:30Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>也许 kubernetes 对于开发者来说仍然过于复杂，另外现实系统中，又对服务发布后的流量管理有诸多需求</p>
-<p>Knative 的出现，似乎是要真正实现 PAAS on the kubernetes</p>
-<p>开发者仅需要关心如何编写代码 (write code) ，其他的所有，交给 Knative 吧（Maybe）</p>
-<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=F4_2gxTtLaQ&t=849s">One Platform for Your Functions, Applications, and Containers (Cloud Next ‘18)</a></p>
-<h1 id="Knative-serving"><a href="#Knative-serving" class="headerlink" title="Knative serving"></a>Knative serving</h1><h2 id="controller"><a href="#controller" class="headerlink" title="controller"></a>controller</h2><ul>
-<li>revision</li>
-<li>configuration</li>
-<li>services</li>
-<li>routes</li>
-</ul>
-<p>抽象了一套统一的框架去实现四个 controller，不过当前命名的不是很理想，虽然都在 controller package 下面，然而文件名仅为 revision.go … 不如 kubernetes 的 job_controller.go 来的直接，也便于搜索</p>
-<p>controller 的主要方法均为 Reconsile，即从 kube-apiserver list-watch CRD 的增量更新后，调用 Reconsile 执行相应操作，使得最终状态与用户期望的一致</p>
-<p>提到 list-watch 而又不能不提到 kubernetes 中的杰出 api sdk 实现——informer</p>
-<p>基于已日渐稳定的 kubernetes，knative 目前实现的简洁直接</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctrlr.Run(threadsPerController, stopCh)</span><br></pre></td></tr></table></figure>
-
-<p>每个 controller 启动 2 (threadsPerController) 个 goroutine 处理 list-watch 获得的 CRD 更新信息</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; threadiness; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> c.processNextWorkItem(syncHandler) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>syncHandler 由各个不同的 controller 传入</p>
-<p>下面简单分析 knative serving 模块的几个 controller</p>
-<h3 id="services"><a href="#services" class="headerlink" title="services"></a>services</h3><p>根据 knative 的 simple demo app，开始的时候，我们需要使用 yaml 创建一个 service，这是所有 knative 奇妙之旅的开端 getting-started-knative-app</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">serving.knative.dev/v1alpha1</span> <span class="comment"># Current version of Knative</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloworld-go</span> <span class="comment"># The name of the app</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span> <span class="comment"># The namespace the app will use</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">runLatest:</span></span><br><span class="line">    <span class="attr">configuration:</span></span><br><span class="line">      <span class="attr">revisionTemplate:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">container:</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">gcr.io/knative-samples/helloworld-go</span> <span class="comment"># The URL to the image of the app</span></span><br><span class="line">            <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">TARGET</span> <span class="comment"># The environment variable printed out by the sample app</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&quot;Go Sample v1&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>services 的 reconcile 首先会查询</p>
-<p>service 对应的 configuration (its name is the same with service-name) 是否存在</p>
-<ul>
-<li>不存在，创建之</li>
-<li>存在，reconcile 之</li>
-</ul>
-<p>service 对应的 routes (its name is the same with service-name) 是否存在</p>
-<ul>
-<li>不存在，创建之</li>
-<li>存在，reconcile 之</li>
-</ul>
-<h3 id="configuration"><a href="#configuration" class="headerlink" title="configuration"></a>configuration</h3><p>获取对应的 rev</p>
-<p>[config-name]-[config.spec.Generation]: helloworld-go-00001</p>
-<ul>
-<li>不存在，创建之</li>
-</ul>
-<p>随后更新 configuration 的 status</p>
-<p>所以可以看到在 configuration 中其实实现了 app 的多版本管理，每次 configuration 的修改（Generation + 1）均会生成一个新的 revision</p>
-<h3 id="revision"><a href="#revision" class="headerlink" title="revision"></a>revision</h3><p>revision 关注下述几种资源，在下述资源有变化时，将变化加入 queue 中，等待 revision 2 个 goroutine 处理之</p>
-<ul>
-<li>revisionInformer</li>
-<li>deploymentInformer</li>
-</ul>
-<p>暂时仅关注 revisionInformer，endpointsInformer 及 deploymentInformer</p>
-<p>revision controller 获取到 revision 之后</p>
-<p>若未找到其对应的 deployment</p>
-<p>[rev-name]-deployment</p>
-<p>将其 revision 的 status 更新为</p>
-<ul>
-<li>ResourcesAvailable [status: Unknown, reason: Deploying]</li>
-<li>ContainerHealthy [status: Unknown, reason: Deploying]</li>
-<li>Ready [status: Unknown, reason: Deploying]</li>
-</ul>
-<p>并调用 kube-apiserver api 创建 deployment</p>
-<p>注意到在创建 deployment 时，revision controller 需要连接至该 deployment 的镜像仓库，获取其 digest，因此如果 revision controller 所在节点的网络受限的话，revision 的 status 可能会提示如下信息</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:03:43Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Deploying</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>即连接镜像仓库（如示例中的连接 gcr.io 超时），导致 revision notReady，正常工作的 revision 状态如下</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>非 active 的 revision 状态如下</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Inactive</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>若找到其对应的 deployment</p>
-<p>则根据 rev 的状态，决定 deployment replica 的数量</p>
-<ul>
-<li>rev.spec.servingState 状态为 Active，且 deployment replica = 0 时，需将其调整为 1</li>
-<li>rev.spec.servingState 状态为 Reserve，且 deployment replica != 0 时，需将其调整为 0</li>
-</ul>
-<p>如果期望的 deployment replica 与实际的 replica 相同，那么将 rev 的 status 更新为</p>
-<ul>
-<li>ResourcesAvailable [status: Unknown, reason: Updating]</li>
-<li>ContainerHealthy [status: Unknown, reason: Updating]</li>
-<li>Ready [status: Unknown, reason: Updating]</li>
-</ul>
-<p>如果不相同，调用 kube-apiserver api 更新 deployment</p>
-<h3 id="routes"><a href="#routes" class="headerlink" title="routes"></a>routes</h3><p>routes 获取其对应的 kubernetes svc</p>
-<p>[route-name] 例如 helloworld-go</p>
-<ul>
-<li>不存在，创建之</li>
-<li>否则，更新之</li>
-</ul>
-<p>随后通过 istio CRD Istio VirtualService 配置流量</p>
-<ul>
-<li>不存在，创建之</li>
-<li>否则，更新之</li>
-</ul>
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>controller of serving</p>
-<ul>
-<li>services controller</li>
-<li>configuration controller</li>
-<li>routes controller</li>
-<li>revision controller</li>
-</ul>
-<p>数据源均来自 list-watch 相应的 CRD，实现相应的 reconcile 方法</p>
-<p>services controller 负责创建 configuration 和 routes 资源</p>
-<p>configuration controller 负责创建 revision 资源</p>
-<p>routes controller 负责创建 Istio VirtualService 资源</p>
-<h1 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h1><p>Knative 还处于较为年轻的阶段，花了两天时间最后成功在内网环境上成功运行了其 simple demo app。目前在需要使用 proxy 访问公网网络的情况下，如何配置 knative，其文档中还没有相关的说明</p>
-<p>目前为止尝试 knative 的一些 debug 经历，可参看下述 issues</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/knative/docs/issues/365">Knative http proxy sample</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1954">istio-statsd-prom-bridge pod crash due to unknown short flag</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1971">Configuration is waiting for a Revision to become ready</a></p>
-<p>to be cont …</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1642,13 +1637,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">225k</span>
+    <span title="站点总字数">228k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:25</span>
+    <span title="站点阅读时长">3:28</span>
   </span>
 </div>
 

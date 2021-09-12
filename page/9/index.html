@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">103</span>
+          <span class="site-state-item-count">105</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-count">53</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,221 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/248b0a97.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/248b0a97.html" class="post-title-link" itemprop="url">岁月无可回头(10)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-11 12:53:16" itemprop="dateCreated datePublished" datetime="2017-06-11T12:53:16Z">2017-06-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:37:28" itemprop="dateModified" datetime="2020-12-12T07:37:28Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>685</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>忙了一周 + 1 天，又是一个全员加班的周六</p>
+<p>从上周六开始，独立维护了一套平台环境，验证服务升级部署</p>
+<p>只能说进一步熟悉了业务</p>
+<p>支撑了另外一个部门的服务部署，对面那哥们问我来多久了，我曰一个半月，对方回感觉都要成 xx 专家了，我曰怎么会，术业有专攻，对方回之前在哪儿待的，我曰啊，在学校呀，对方回天将降大任于斯人也</p>
+<p>工作呀，对我来说，最需要成就感，哎，果然是个骄傲的不行的人，老师评价的不错，是得改改了，没必要和自己过不去</p>
+<p>刚看了一个文档，终于理解了 etcd 的神逻辑。Disaster recovery 的时候，需要使用旧的数据 force-start-new 一个单节点集群，该集群正常启动后，将其 peer url 更新为对外 url，后继可正常添加成员</p>
+<p>在 cluster-health 的情况下才可以 Member add。Member add 之前，删除其 data-dir，避免数据不一致</p>
+<p>从 snapshot 恢复时，不用 force-start-new，因为 snapshot 没有集群 metadata，只有 key 数据</p>
+<p>如果是数据从 v2 迁移至 v3，对 data-dir 执行 migrate 之后只是将 key data 转成了 mvcc 格式，而 cluster meta data 还是旧的，因此需要走 force new start 流程</p>
+<p>如果是全新的集群启动，则所有 etcd 以 new 状态启动即可</p>
+<p>这样就覆盖了所有流程</p>
+<p>终于要去见来杭的 Gloria 了，据说为了见人，还特意剪了个发型，不过被剪成 SB 了，笑，等会儿看看有多惊艳</p>
+<p>杭州应该进入了梅雨季节，一言不合就下雨，天气略闷热，而我的工作略忙</p>
+<p>这篇在地铁，公交上写完</p>
+<p>2017年06月11日12:53:16 杭州</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/9c716334.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/9c716334.html" class="post-title-link" itemprop="url">岁月无可回头(9)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-04 12:44:32" itemprop="dateCreated datePublished" datetime="2017-06-04T12:44:32Z">2017-06-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:40:28" itemprop="dateModified" datetime="2020-12-12T07:40:28Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>480</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>累</p>
+</blockquote>
+<p>这次不文艺风了，吐槽篇</p>
+<p>昨晚第一次刷夜完成了一次安装，哦对了，是提心吊胆，一脸懵逼的完成了</p>
+<p>这么复杂一个系统，那么多组件，随便崩一个，修复起来都够呛，对于新手如我，简单问题能弄就直接弄了，不能也只能一遍一遍的重装。现在才理解“概率性”失败的含义，囧，总之就是因为事情太复杂，偶尔一些未知因素叠加在一起，就导致了异常的情况，然后就概率性失败了，重试的时候可能好可能不好。</p>
+<p>这些天好混乱，各种事情堆着，这个事儿还没做出个结果，又有其他事情也说要了结一下，总感觉这样子赶鸭子上架，没有准备和思考时间，对自己能力提升有限，更别说底下的工作效率了。</p>
+<p>最近基本都和程序打交道，别提遇到坑爹的领路人。我遇到的问题，去咨询他，blabla 胡乱给我解释一通，老哥，我也是写过代码的好不好，那么容易忽悠么，总之，好几次最后都是我和他说了正确的解释。哎初来乍到，就当供着你吧，谁让我也是好人。</p>
+<p>本来这周末是部门出游的，部门其他组都去的差不多的，就我们组只去了零星几个，可见强度。特别是看着群里的两位小伙伴（hcl, yy）还在端午假期中，无限感慨呀。</p>
+<p>2017年06月04日12:44:32 杭州</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1003,240 +1218,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2085299337.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2085299337.html" class="post-title-link" itemprop="url">读书(1)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-21T00:00:00Z">2017-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>615</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>均有一定程度的剧透<br>个人观点，难免偏颇，欢迎讨论，挑事者不送</p>
-</blockquote>
-<h1 id="巨人的陨落（三册）"><a href="#巨人的陨落（三册）" class="headerlink" title="巨人的陨落（三册）"></a>巨人的陨落（三册）</h1><p>很有意思，别样的“历史”书</p>
-<p>构筑了，在一战爆发前后的大背景下，各种各样人物的故事，间接说明了那个时代的新老代思想冲击，谴责了发动一战的罪恶动机</p>
-<p>当然其中人物的爱恨情仇也很精彩</p>
-<h1 id="从你的全世界路过"><a href="#从你的全世界路过" class="headerlink" title="从你的全世界路过"></a>从你的全世界路过</h1><p>恕我直言，忍痛读完，觉得十分没有营养</p>
-<p>文字表达一般，一言不合就我有一个朋友，尴尬症都犯了</p>
-<p>故事矫情，一言不合就离婚，不明真相的以为这个社会已然如此狂躁了</p>
-<h1 id="挪威的森林"><a href="#挪威的森林" class="headerlink" title="挪威的森林"></a>挪威的森林</h1><p>渡，爱着直子，被绿子爱着</p>
-<p>看的很压抑，并不是很能体会书中的各种结束生命</p>
-<h1 id="解忧杂货店"><a href="#解忧杂货店" class="headerlink" title="解忧杂货店"></a>解忧杂货店</h1><p>故事开始的时候，觉得有点懵，后来才慢慢读懂，原来是一个跨时间对话的剧情</p>
-<p>故事的大框架是</p>
-<p>现在的人告诫过去的人该如何生活，过去人看到了穿越时空的建议，并听从这些建议后，改变了他们的生活，也使得生命更有意义</p>
-<p>大框架下容纳了好几个人物的小故事，印象比较深的</p>
-<p>为了追寻音乐梦想，忤逆父亲的期待，而又在追梦的途中不得志的音乐人，最后为了救出陷于火灾之中的孤儿，献出了自己的生命</p>
-<p>起先家境优越，后因种种情况，债台高筑的家庭，父母决定出逃，而“我”并不理解父母，毅然逃离，长大后，才发现父母为了保护自己，双双投海的事实</p>
-<p>作品构思很严密，故事最后形成了一个闭环</p>
-<p>白纸的寓意很震撼，跨时间通信无疑幻想，把握现在，为自己的人生手绘风景</p>
-<h1 id="嫌疑人X的献身"><a href="#嫌疑人X的献身" class="headerlink" title="嫌疑人X的献身"></a>嫌疑人X的献身</h1><p>侦探类的书，看过阿加莎克里斯蒂的几本，《尼罗河上的惨案》、《东方快车》、《无人生还》和《三幕悲剧》等</p>
-<p>情节设计的出人意料</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/8886ac74.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/8886ac74.html" class="post-title-link" itemprop="url">数据库相关知识</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-01-12 00:00:01" itemprop="dateCreated datePublished" datetime="2017-01-12T00:00:01Z">2017-01-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:41:58" itemprop="dateModified" datetime="2020-12-12T07:41:58Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="DBA"><a href="#DBA" class="headerlink" title="DBA"></a>DBA</h1><p>Database administrator。大公司一般才有这个职位。小公司，一般都研发的自己去写SQL语句，小公司也没多大数据量不需要做什么数据库优化之类的。主要工作就是写SQL语句，生成报表，优化数据库性能之类的工作。</p>
-<h1 id="isolation"><a href="#isolation" class="headerlink" title="isolation"></a>isolation</h1><p>什么是事务</p>
-<p>该事务中的所有操作都成功完成且其结果被永久保存在数据库中，如果事务中有的操作没有成功完成，则事务中的所有操作都需要被回滚，回到事务执行前的状态。</p>
-<p>事务作为一个整体被执行，包含在其中的对数据库的操作要么全部被执行，要么都不执行。</p>
-<p>例如银行转账情景，账户A向账户B转100块钱，有如下步骤，从账户A中转出100块钱，向账户B中转入100块钱，必须这两个操作都执行成功，才认为转账流程成功结束。</p>
-<p>因为写代码的时候，一般的编程模型，都是先扣除账户A的100块钱，再向账户B中增加100块钱。如果扣除账户A钱失败时，显然后继步骤不用执行了。在向账户B中加钱失败时，需要将100块钱还给账户A。</p>
-<p>我自己的理解的话，数据库支持事务，是为了保证数据的一致性。</p>
-<p>数据库隔离级别，之前面试的时候偶尔会被问到，算是比较基础，也很重要的一个关于数据库事务方面的支持。</p>
-<p>这是最简单的一种情况，实际生产环境中，还存在多线程的情况，即有多个线程在同时读取更新数据。然后会有事务隔离级别的问题。</p>
-<p>未提交读（Read uncommitted）<br>已提交读（Read committed）<br>可重复读（Repeatable read）<br>可串行化（Serializable）<br>未提交读</p>
-<p>A、B两个事务，数据为4，B事务修改数据为8，A事务读取到修改后的数据得到8，然而之后B事务执行失败，数据回滚为4。</p>
-<p>失败的应用情景：B事务账户充值，A事务账户支付，本来A事务需要支付8块钱，B事务充值4块钱，然而充值失败发生了退款，A事务拿到的是8块钱的数据，因此支付成功了，导致了不一致性。</p>
-<p>已提交读</p>
-<p>一般用这个级别就够了。</p>
-<p>可重复读<br>A事务在开始阶段读取了数据，后继阶段也读取了数据，还是读取到一样的数据；因为其他事务在这个时间段会插入数据，可重复度避免了这种情况。</p>
-<p>可串行化</p>
-<p>实际中基本不用，事务执行完全串行化，性能太差。</p>
-<h1 id="sharding"><a href="#sharding" class="headerlink" title="sharding"></a>sharding</h1><p>数据库的水平划分和垂直划分。</p>
-<p>水平划分是指，单表的记录数过多，将单表数据分散存储在多表中。比如说资源记录表 resource，水平划分之后，单表固定存储 1000W 条记录，超出之后，resource_0，resource_1 依次存储。</p>
-<p>垂直划分，是将单表中的字段拆分为多表，比如 resource 有 text、desc 字段，分别存储为 resource_text，resource_desc 表。</p>
-<p>sharding 的作用在于降低单点数据量，提高系统性能，提高数据存储的安全性。</p>
-<h1 id="deadlock"><a href="#deadlock" class="headerlink" title="deadlock"></a>deadlock</h1><p>和事务，并发都有关系。举个简单不靠谱的例子，我喜欢你，你喜欢他，他喜欢我，得了都单着吧，成循环了都。</p>
-<p>数据库里，事务A、事务B，都需要R_1，R_2，才能完成事务，但是事务A获取到R_1，事务B获取到R_2，两个事务都没有获取到足够的资源，都在等待，永远没法结束了，这就是死锁。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1261,13 +1242,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">225k</span>
+    <span title="站点总字数">228k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:25</span>
+    <span title="站点阅读时长">3:28</span>
   </span>
 </div>
 

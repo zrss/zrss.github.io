@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">103</span>
+          <span class="site-state-item-count">105</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-count">53</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,256 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/6555f3f9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/6555f3f9.html" class="post-title-link" itemprop="url">resource limit in k8s</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-05 02:30:20" itemprop="dateCreated datePublished" datetime="2021-09-05T02:30:20Z">2021-09-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-12 09:05:57" itemprop="dateModified" datetime="2021-09-12T09:05:57Z">2021-09-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Docker-Resource-Limit"><a href="#Docker-Resource-Limit" class="headerlink" title="Docker Resource Limit"></a>Docker Resource Limit</h1><h2 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#cpu">https://docs.docker.com/config/containers/resource_constraints/#cpu</a></p>
+<ul>
+<li><code>--cpu-period</code>: CFS 调度算法中的 cpu 时间分片，默认为 100ms</li>
+<li><code>--cpu-quota</code>: CFS quota，在每个 cpu period 分片中，在 cpu 限流前，docker container 能使用的 cpu 时间</li>
+<li><code>--cpuset-cpus</code>: docker container binding to cpu core</li>
+<li><code>--cpu-shares</code>: Set this flag to a value greater or less than the default of 1024 to increase or reduce the container’s weight, and give it access to a greater or lesser proportion of the host machine’s CPU cycles. This is only enforced when CPU cycles are constrained. When plenty of CPU cycles are available, all containers use as much CPU as they need. In that way, this is a <strong>soft limit</strong>.</li>
+</ul>
+<h2 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory">https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory</a></p>
+<ul>
+<li><code>--memory</code>: The maximum amount of memory the container can use (cgroup limit)</li>
+<li><code>--memory-swap</code>:</li>
+<li><code>--oom-kill-disable</code>:</li>
+</ul>
+<h2 id="Docker-Container-OOMKilled-status"><a href="#Docker-Container-OOMKilled-status" class="headerlink" title="Docker Container OOMKilled status"></a>Docker Container OOMKilled status</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container">https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/14440#issuecomment-119243820">https://github.com/moby/moby/issues/14440#issuecomment-119243820</a></li>
+<li><a target="_blank" rel="noopener" href="https://plumbr.io/blog/java/oomkillers-in-docker-are-more-complex-than-you-thought">https://plumbr.io/blog/java/oomkillers-in-docker-are-more-complex-than-you-thought</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhimin-wen.medium.com/memory-limit-of-pod-and-oom-killer-891ee1f1cad8">https://zhimin-wen.medium.com/memory-limit-of-pod-and-oom-killer-891ee1f1cad8</a></li>
+<li><a target="_blank" rel="noopener" href="https://faun.pub/understanding-docker-container-memory-limit-behavior-41add155236c">https://faun.pub/understanding-docker-container-memory-limit-behavior-41add155236c</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/15621#issuecomment-181418985">https://github.com/moby/moby/issues/15621#issuecomment-181418985</a></li>
+<li><a target="_blank" rel="noopener" href="https://draveness.me/docker/">https://draveness.me/docker/</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/38352#issuecomment-446329512">https://github.com/moby/moby/issues/38352#issuecomment-446329512</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/containerd/cgroups/issues/74">https://github.com/containerd/cgroups/issues/74</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/78973">https://github.com/kubernetes/kubernetes/issues/78973</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/50632">https://github.com/kubernetes/kubernetes/issues/50632</a></li>
+</ol>
+<p>容器内的子进程发生了 oom killed，在 docker container 退出时也会被设置 OOMKilled 标志；参考该 issue</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/15621#issuecomment-181418985">https://github.com/moby/moby/issues/15621#issuecomment-181418985</a></p>
+<p>在 docker container 未退出时会设置 container event</p>
+<p>docker container 设置 OOMKilled 原理，参考该 issue</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/38352#issuecomment-446329512">https://github.com/moby/moby/issues/38352#issuecomment-446329512</a></p>
+<p>在实现上</p>
+<ol>
+<li>containerd 监听了一系列事件，假若获取到 cgroup oom event 则记录 OOMKilled = true</li>
+<li>containerd 将处理后的事件发送至 dockerd 进一步处理</li>
+<li>dockerd 在处理 OOM 事件时，记录 container oom 事件</li>
+<li>dockerd 在处理 Exit 事件时，将 OOMKilled = true 其写入容器的 status</li>
+</ol>
+<h1 id="K8S-Resource-Limit"><a href="#K8S-Resource-Limit" class="headerlink" title="K8S Resource Limit"></a>K8S Resource Limit</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run">https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run</a></p>
+<h2 id="CPU-Docker-Container-config"><a href="#CPU-Docker-Container-config" class="headerlink" title="CPU (Docker Container config)"></a>CPU (Docker Container config)</h2><blockquote>
+<p>CPU is always requested as an absolute quantity, never as a relative quantity; 0.1 is the same amount of CPU on a single-core, dual-core, or 48-core machine.</p>
+</blockquote>
+<ul>
+<li><code>--cpu-shares</code>: max({requests.cpu} * 1024, 2)</li>
+</ul>
+<p>例如 requests 为 180，则 <code>--cpu-shares=184320</code></p>
+<ul>
+<li><p><code>--cpu-period</code>: 100</p>
+</li>
+<li><p><code>--cpu-quota</code>: limits.cpu * 100</p>
+</li>
+</ul>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/a/63352630">https://stackoverflow.com/a/63352630</a></p>
+<p> The resulting value is the total amount of CPU time in microseconds that a container can use every <strong>100ms</strong>. A container cannot use more than its share of CPU time during this interval.</p>
+<p>The default quota period is 100ms. The minimum resolution of CPU quota is 1ms.</p>
+</blockquote>
+<p>cpu 时间分片为 period，quota 为实际每个 period 周期中，可使用的 cpu time；假若受到 qutoa 限制的 cpu 任务，在当前 period 的 quota 仍未完成，则当前任务挂起，等待下个 period 继续执行</p>
+<p>multi cpu 机器注意 quota 可以是 period 的倍数，例如限制 container 使用 0.5 cpu，则 <code>--cpu-quota=50</code>，假若主机有 20 cpu，限制 container 使用 10 cpu，则 <code>--cpu-quota=10*100=1000</code></p>
+<h2 id="Memory-Docker-Container-config"><a href="#Memory-Docker-Container-config" class="headerlink" title="Memory (Docker Container config)"></a>Memory (Docker Container config)</h2><ul>
+<li><code>--memory</code>: int({limits.memory})</li>
+<li><code>--memory-swap</code>: int({limits.memory})</li>
+</ul>
+<p>the container does not have access to swap</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/cbf18cae.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/cbf18cae.html" class="post-title-link" itemprop="url">learning lenet5</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-15 03:21:13" itemprop="dateCreated datePublished" datetime="2021-08-15T03:21:13Z">2021-08-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-05 03:22:51" itemprop="dateModified" datetime="2021-09-05T03:22:51Z">2021-09-05</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>389</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ol>
+<li><a target="_blank" rel="noopener" href="https://medium.com/analytics-vidhya/lenet-with-tensorflow-a35da0d503df">https://medium.com/analytics-vidhya/lenet-with-tensorflow-a35da0d503df</a></li>
+<li><a target="_blank" rel="noopener" href="https://medium.com/@mgazar/lenet-5-in-9-lines-of-code-using-keras-ac99294c8086">https://medium.com/@mgazar/lenet-5-in-9-lines-of-code-using-keras-ac99294c8086</a></li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/api_docs/python/tf/pad">https://www.tensorflow.org/api_docs/python/tf/pad</a></p>
+<blockquote>
+<p>paddings is an integer tensor with shape [n, 2], where n is the rank of tensor. </p>
+</blockquote>
+<p>each dimension D</p>
+<ul>
+<li>paddings[D, 0]: add before tensor </li>
+<li>paddings[D, 1]: add after tensor</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/api_docs/python/tf/expand_dims">https://www.tensorflow.org/api_docs/python/tf/expand_dims</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1021,231 +1271,6 @@ InitContainer --&gt; SidecarContainer
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/84d885dc.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/84d885dc.html" class="post-title-link" itemprop="url">learning golang again</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-28 13:29:44" itemprop="dateCreated datePublished" datetime="2021-03-28T13:29:44Z">2021-03-28</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-04-05 10:01:59" itemprop="dateModified" datetime="2021-04-05T10:01:59Z">2021-04-05</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>691</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Type-size"><a href="#Type-size" class="headerlink" title="Type size"></a>Type size</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://golang.org/ref/spec#Size_and_alignment_guarantees">https://golang.org/ref/spec#Size_and_alignment_guarantees</a></p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go">https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go</a></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type example struct &#123;</span><br><span class="line">	flag    bool</span><br><span class="line">	counter int16</span><br><span class="line">	pi      float32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>字节对齐系数 <code>#pragma pack(n)</code></p>
-<ul>
-<li>成员对齐</li>
-<li>结构体对齐</li>
-</ul>
-<p>对齐系数规则</p>
-<blockquote>
-<ol>
-<li>For a variable x of any type: unsafe.Alignof(x) is at least 1.</li>
-<li>For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.</li>
-<li>For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.</li>
-</ol>
-</blockquote>
-<p>layout</p>
-<ul>
-<li>bool(0)</li>
-<li>int16(2)</li>
-<li>float32(4)</li>
-</ul>
-<p>8 bytes</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align">https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align</a></p>
-</blockquote>
-<p>//TODO list</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://draveness.me/golang/">https://draveness.me/golang/</a></li>
-<li><a target="_blank" rel="noopener" href="https://golang.design/under-the-hood/">https://golang.design/under-the-hood/</a></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/2285a922.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2285a922.html" class="post-title-link" itemprop="url">resnet50</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-14 06:27:47" itemprop="dateCreated datePublished" datetime="2021-03-14T06:27:47Z">2021-03-14</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-05-23 09:18:26" itemprop="dateModified" datetime="2021-05-23T09:18:26Z">2021-05-23</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>29</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>deep residual learning framework</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1270,13 +1295,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">225k</span>
+    <span title="站点总字数">228k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:25</span>
+    <span title="站点阅读时长">3:28</span>
   </span>
 </div>
 
