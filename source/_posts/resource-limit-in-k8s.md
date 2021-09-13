@@ -62,7 +62,7 @@ https://github.com/moby/moby/issues/38352#issuecomment-446329512
 1. containerd 监听了一系列事件，假若获取到 cgroup oom event 则记录 OOMKilled = true
 2. containerd 将处理后的事件发送至 dockerd 进一步处理
 3. dockerd 在处理 OOM 事件时，记录 container oom 事件
-4. dockerd 在处理 Exit 事件时，将 OOMKilled = true 其写入容器的 status
+4. dockerd 在处理 Exit 事件时，将 OOMKilled = true 写入容器的 status
 
 # K8S Resource Limit
 
