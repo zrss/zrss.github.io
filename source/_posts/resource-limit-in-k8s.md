@@ -105,7 +105,13 @@ https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watche
 
 > Start watches for system oom's and records an event for every system oom encountered.
 
-当前 kubelet 观测到发生 system oom 时（非 cgroup oom），生成 event；如下 PR 尝试将进程 oom 关联至 pod，未合入
+当前 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询
+
+```
+kubectl get event --field-selector type=Warning,reason=SystemOOM
+```
+
+如下 PR 尝试将 pod 内进程 oom 关联至 pod，未合入
 
 https://github.com/kubernetes/kubernetes/issues/100483
 
