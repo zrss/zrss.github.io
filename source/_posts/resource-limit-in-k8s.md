@@ -105,7 +105,7 @@ https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watche
 
 > Start watches for system oom's and records an event for every system oom encountered.
 
-当前 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询
+当 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询
 
 ```
 kubectl get event --field-selector type=Warning,reason=SystemOOM
