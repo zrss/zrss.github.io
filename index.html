@@ -198,7 +198,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-13 16:24:55" itemprop="dateModified" datetime="2021-09-13T16:24:55Z">2021-09-13</time>
+        <time title="修改时间：2021-09-13 16:27:17" itemprop="dateModified" datetime="2021-09-13T16:27:17Z">2021-09-13</time>
       </span>
 
   
@@ -305,7 +305,7 @@
 <blockquote>
 <p>Start watches for system oom’s and records an event for every system oom encountered.</p>
 </blockquote>
-<p>当前 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询</p>
+<p>当 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get event --field-selector type=Warning,reason=SystemOOM</span><br></pre></td></tr></table></figure>
 
 <p>如下 PR 尝试将 pod 内进程 oom 关联至 pod，未合入</p>
