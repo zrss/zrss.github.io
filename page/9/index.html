@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-count">106</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,155 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/d220c1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/d220c1.html" class="post-title-link" itemprop="url">ETCD V3 中的 .snap 文件</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-02 00:00:00" itemprop="dateCreated datePublished" datetime="2017-10-02T00:00:00Z">2017-10-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:40:09" itemprop="dateModified" datetime="2020-12-12T07:40:09Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>etcd v3.1.9</p>
+</blockquote>
+<h1 id="什么时候生成"><a href="#什么时候生成" class="headerlink" title="什么时候生成"></a>什么时候生成</h1><p>etcd 启动时设置了参数 –snapshot-count 即 index 变化 达到该值时，会生成 .snap 文件</p>
+<p>相关代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">triggerSnapshot</span><span class="params">(ep *etcdProgress)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> ep.appliedi-ep.snapi &lt;= s.snapCount &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	plog.Infof(<span class="string">&quot;start to snapshot (applied: %d, lastsnap: %d)&quot;</span>, ep.appliedi, ep.snapi)</span><br><span class="line">	s.snapshot(ep.appliedi, ep.confState)</span><br><span class="line">	ep.snapi = ep.appliedi</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="文件名规则"><a href="#文件名规则" class="headerlink" title="文件名规则"></a>文件名规则</h1><p>snap 的全称呢 snapshot，是快照的意思，在 etcd v3 里面呢，是把 v2 的内存数据存储到磁盘上，生成 [Term]-[Index].snap 一类的文件</p>
+<blockquote>
+<p>snap 文件名生成规则</p>
+<p>fname := fmt.Sprintf(“%016x-%016x%s”, snapshot.Metadata.Term, snapshot.Metadata.Index, snapSuffix)</p>
+</blockquote>
+<h1 id="是否可以删除"><a href="#是否可以删除" class="headerlink" title="是否可以删除"></a>是否可以删除</h1><p>说到 v2 的存储，全部在内存中，而且是一个非常直接的实现，看着就是个多叉树</p>
+<p>那么是否 .snap 文件就可以删除掉了呢</p>
+<ol>
+<li>如果存储了 v2 的数据，显然不能删除，否则 etcd 重启之后，就无法从 .snap 文件中恢复出 v2 的数据了；当然恢复也不会是全量的数据，因为有 —snapshot-count 控制，会丢这个数的 Index</li>
+<li>如果没存储 v2 的数据，都是存的 v3 的数据，这种情况下，能否删除？<br>这就要看 .snap 文件除了存储 v2 的数据还存了什么东东；以及存的这东东，还有什么其他重要的用途了</li>
+</ol>
+<p>看了 etcd v3 的 restore 代码之后，我们知道 restore 会在 snap 文件下生成 v3 的存储 db 文件，以及一个 .snap 文件，这个 .snap 文件存储了啥东西嘞</p>
+<p>相关代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// first snapshot</span></span><br><span class="line">raftSnap := raftpb.Snapshot&#123;</span><br><span class="line">  Data: b,</span><br><span class="line">  Metadata: raftpb.SnapshotMetadata&#123;</span><br><span class="line">    Index: commit,</span><br><span class="line">    Term:  term,</span><br><span class="line">    ConfState: raftpb.ConfState&#123;</span><br><span class="line">      Nodes: nodeIDs,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的 Data 并不重要，只是存储了两个 namespace，其实就是两路径</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">st := store.New(etcdserver.StoreClusterPrefix, etcdserver.StoreKeysPrefix)</span><br></pre></td></tr></table></figure>
+
+<p>重要的是 Metadata 中的 Index 和 Term</p>
+<p><strong>显然也不能删除</strong></p>
+<p>etcd 在启动时，会读取 .snap 文件，获取其中的 Metadata.Index，使用这个值去搜索应该从哪个 wal 文件开始继续处理</p>
+<p>回忆一下 .wal 文件名的第二段，正是当时 wal 存储中的 index</p>
+<p>wal 的搜索代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nameIndex, ok := searchIndex(names, snap.Index)</span><br><span class="line"><span class="keyword">if</span> !ok || !isValidSeq(names[nameIndex:]) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, ErrFileNotFound</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从最旧的 wal 搜索到最新的 wal <code>sort.Strings(names)</code>，直到搜索到</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> index &gt;= curIndex &#123;</span><br><span class="line">    <span class="keyword">return</span> i, <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 .snap 文件不存在，那么会从 index = 0 开始搜索 wal 文件，也就是说 .snap 文件不存在的时候，必须存在 0000000000000000-0000000000000000.wal 文件，否则 etcd 启动时会报如下错误</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2017-10-02 13:49:08.313573 C | etcdserver: open wal error: wal: file not found</span><br></pre></td></tr></table></figure>
+
+<p>wal 中存储了 raft MemoryStorage 的 entries / raft HardState，etcd member id 和集群 id</p>
+<h1 id="构造一个异常情况"><a href="#构造一个异常情况" class="headerlink" title="构造一个异常情况"></a>构造一个异常情况</h1><p>purge 保留 1，snapshot count 设置的超大，重启 etcd 会发生什么？</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/etcd --max-snapshots <span class="string">&#x27;1&#x27;</span> --max-wals <span class="string">&#x27;1&#x27;</span> --snapshot-count <span class="string">&#x27;20000000&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个异常意义在于 snapshot 文件并未生成，而此时 wal 被 purge 之后，第一个 wal 被删掉了，那么重启 etcd 后会出现前述 wal: file not found 的错误。</p>
+<p>持续往 etcd 写入数据，直到生成新的 wal 文件，然而不幸的是，并没有观察到 purge 的动作。 那么问题来了，etcd 是在哪儿做了保护？</p>
+<p>查看 purge 的代码发现了如下的轨迹</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">l, err := TryLockFile(f, os.O_WRONLY, PrivateFileMode)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说 TryLockFile 成功才可以被 purge 掉，那么我们可以进一步推测没生成 .snap 文件之前，etcd 不会释放 LockFile，阻止仍然有用的 wal 文件被 purge 掉</p>
+<p>为了验证我们的猜想，查看 wal/wal.go 的 ReleaseLockTo 方法，直接贴该方法的注释吧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ReleaseLockTo releases the locks, which has smaller index than the given index except the largest one among them.</span><br><span class="line">For example, if WAL is holding lock 1,2,3,4,5,6, ReleaseLockTo(4) will release lock 1,2 but keep 3. ReleaseLockTo(5) will release 1,2,3 but keep 4.</span><br></pre></td></tr></table></figure>
+
+<p>继续看，ReleaseLockTo 方法被谁调用，即什么时候释放 wal 文件的 lock，什么时候允许 wal 被 purge</p>
+<p>okay，答案符合我们的预期。ReleaseLockTo 在 etcdserver/storage.go 的 SaveSnap 方法中被调用，还是直接贴该方法的注释吧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SaveSnap saves the snapshot to disk and release the locked wal files since they will not be used.</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1114,110 +1263,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/54a8e93c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/54a8e93c.html" class="post-title-link" itemprop="url">岁月无可回头(1)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-07 23:27:31" itemprop="dateCreated datePublished" datetime="2017-04-07T23:27:31Z">2017-04-07</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:40:48" itemprop="dateModified" datetime="2020-12-12T07:40:48Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>523</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>来杭七天，安坐下来用文字消磨时光。</p>
-<p>头一天到的时候已经晚上 10 点，独自一人一路地铁再打车到下榻的地方，已然快 11 点半了，只能匆匆休息。回想起当时在列车上的心情，有点惆怅，又有点无奈，不过更多的是平静吧。毕竟做了很多自己想做的事情，没有遗憾。</p>
-<p>“很幸福而不完美”，觉得很完美了，纠结到最后还是能见了你一面，深感上天待我不薄。还有很多小细节了；你说杭州妹纸比较美，还很多记不清了，时间要能停留在水果先生店里待着，发呆，也挺好的，可惜不能。</p>
-<p>完事开头难，何况是初来到一个没有人脉积累的城市。</p>
-<p>租房的事情忙了几天。后面这些天都是一些琐事，购置各种物品，办各种手续，包括和中介扯皮。真心不出来混，不当家，不自己过日子，不知道生活中的各种细节，不知道人心。</p>
-<p>住的小区距离华为1.7KM、网易1.1KM、阿里1.3KM，不太远，可以步行上下班就是了。杭州滨江区这边还算是开发区，公司集中，非上下班高峰期，路上车少人少，空旷。南方城市，绿化都很好。在这待了七年的同学表妹说是很小资的一座城市，当然应该指杭州核心西湖区那边的情况了。</p>
-<p>其实还有很多可写的，不过都太过于细节，就不记录了，不然岂不成老太婆了，啥事情都要说。</p>
-<p>好梦，晚安世界。</p>
-<p>2017年04月07日23:27:31 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1242,13 +1287,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">229k</span>
+    <span title="站点总字数">232k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:28</span>
+    <span title="站点阅读时长">3:31</span>
   </span>
 </div>
 
