@@ -13,7 +13,7 @@ timezone: 'UTC'
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://example.com/child' and root as '/child/'
-url: http://blog.zhesih.com
+url: https://zrss.github.io
 root: /
 permalink: archives/:abbrlink.html
 abbrlink:

@@ -1,7 +1,8 @@
 ---
 title: infiniband ethernet
-date: 2021-12-26 14:44:37
 tags: infiniband
+abbrlink: 50cf0505
+date: 2021-12-26 14:44:37
 ---
 
 > TODO
