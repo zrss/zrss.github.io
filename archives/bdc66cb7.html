@@ -16,29 +16,29 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.zhesih.com","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 <meta name="description" content="golang profiling (即剖析)，golang 原生提供了 pprof 性能分析工具 前段时间分析了一个 apiserver 处理请求性能较低的问题，正是使用了 pprof 确定了问题点，从而解决了该问题 这次使用 etcd https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd 来举个例子，关于 pprof 的使用及可视化，Ref 中提到了 golang 性能分析大名鼎鼎的几篇">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Performance of golang (etcd)">
-<meta property="og:url" content="http://blog.zhesih.com/archives/bdc66cb7.html">
+<meta property="og:url" content="https://zrss.github.io/archives/bdc66cb7.html">
 <meta property="og:site_name" content="随风飘散的记忆">
 <meta property="og:description" content="golang profiling (即剖析)，golang 原生提供了 pprof 性能分析工具 前段时间分析了一个 apiserver 处理请求性能较低的问题，正是使用了 pprof 确定了问题点，从而解决了该问题 这次使用 etcd https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd 来举个例子，关于 pprof 的使用及可视化，Ref 中提到了 golang 性能分析大名鼎鼎的几篇">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://blog.zhesih.com/images/web-pprof.svg">
-<meta property="og:image" content="http://blog.zhesih.com/images/torch.svg">
+<meta property="og:image" content="https://zrss.github.io/images/web-pprof.svg">
+<meta property="og:image" content="https://zrss.github.io/images/torch.svg">
 <meta property="article:published_time" content="2018-08-12T15:20:27.000Z">
 <meta property="article:modified_time" content="2020-12-12T07:33:48.385Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="go">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://blog.zhesih.com/images/web-pprof.svg">
+<meta name="twitter:image" content="https://zrss.github.io/images/web-pprof.svg">
 
 
-<link rel="canonical" href="http://blog.zhesih.com/archives/bdc66cb7.html">
+<link rel="canonical" href="https://zrss.github.io/archives/bdc66cb7.html">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.zhesih.com/archives/bdc66cb7.html","path":"archives/bdc66cb7.html","title":"Performance of golang (etcd)"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/bdc66cb7.html","path":"archives/bdc66cb7.html","title":"Performance of golang (etcd)"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>Performance of golang (etcd) | 随风飘散的记忆</title>
@@ -122,7 +122,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">106</span>
+          <span class="site-state-item-count">108</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -132,7 +132,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-count">54</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -174,7 +174,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/bdc66cb7.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/bdc66cb7.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -357,13 +357,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">232k</span>
+    <span title="站点总字数">233k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:31</span>
+    <span title="站点阅读时长">3:32</span>
   </span>
 </div>
 

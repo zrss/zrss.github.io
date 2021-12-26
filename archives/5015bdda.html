@@ -16,28 +16,28 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.zhesih.com","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 <meta name="description" content="to be cont 先写部分吧  MsgPropFollower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送 MsgAppFollower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionE">
 <meta property="og:type" content="article">
 <meta property="og:title" content="etcd-raft-follower">
-<meta property="og:url" content="http://blog.zhesih.com/archives/5015bdda.html">
+<meta property="og:url" content="https://zrss.github.io/archives/5015bdda.html">
 <meta property="og:site_name" content="随风飘散的记忆">
 <meta property="og:description" content="to be cont 先写部分吧  MsgPropFollower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送 MsgAppFollower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionE">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://blog.zhesih.com/images/raftlog.jpeg">
+<meta property="og:image" content="https://zrss.github.io/images/raftlog.jpeg">
 <meta property="article:published_time" content="2017-11-05T16:21:07.000Z">
 <meta property="article:modified_time" content="2020-12-12T07:12:41.689Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="tech">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://blog.zhesih.com/images/raftlog.jpeg">
+<meta name="twitter:image" content="https://zrss.github.io/images/raftlog.jpeg">
 
 
-<link rel="canonical" href="http://blog.zhesih.com/archives/5015bdda.html">
+<link rel="canonical" href="https://zrss.github.io/archives/5015bdda.html">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.zhesih.com/archives/5015bdda.html","path":"archives/5015bdda.html","title":"etcd-raft-follower"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/5015bdda.html","path":"archives/5015bdda.html","title":"etcd-raft-follower"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>etcd-raft-follower | 随风飘散的记忆</title>
@@ -121,7 +121,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">106</span>
+          <span class="site-state-item-count">108</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -131,7 +131,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-count">54</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -173,7 +173,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5015bdda.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5015bdda.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -326,13 +326,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">232k</span>
+    <span title="站点总字数">233k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:31</span>
+    <span title="站点阅读时长">3:32</span>
   </span>
 </div>
 

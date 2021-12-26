@@ -16,11 +16,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.zhesih.com","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 <meta name="description" content="领略了繁华沧桑谁人过往不相似">
 <meta property="og:type" content="website">
 <meta property="og:title" content="随风飘散的记忆">
-<meta property="og:url" content="http://blog.zhesih.com/page/6/index.html">
+<meta property="og:url" content="https://zrss.github.io/page/6/index.html">
 <meta property="og:site_name" content="随风飘散的记忆">
 <meta property="og:description" content="领略了繁华沧桑谁人过往不相似">
 <meta property="og:locale" content="zh_CN">
@@ -29,7 +29,7 @@
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="http://blog.zhesih.com/page/6/">
+<link rel="canonical" href="https://zrss.github.io/page/6/">
 
 
 
@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">106</span>
+          <span class="site-state-item-count">108</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-count">54</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -167,7 +167,307 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5964173e.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6b5275bc.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/6b5275bc.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 3)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-08 11:09:28" itemprop="dateCreated datePublished" datetime="2018-07-08T11:09:28Z">2018-07-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 03:13:48" itemprop="dateModified" datetime="2020-12-06T03:13:48Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>回答上篇末尾的调用时序问题</p>
+<p>Tomcat 7 默认使用 BIO Http11Protocol</p>
+<p>注意到在 Http11Protocol 的 process 方法中（AbstractProtocol）有如下逻辑</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (processor.isUpgrade()) &#123;</span><br><span class="line">        <span class="comment">// Init WebSocket OPEN_READ processor httpUpgradeHandler is null</span></span><br><span class="line">        <span class="comment">// And when the second round came, upgradeDispatch will dispatch OPEN_READ status</span></span><br><span class="line">        <span class="comment">// ha, upgradeServletInputStream.onDataAvailable() will be called</span></span><br><span class="line">        state = processor.upgradeDispatch(status);</span><br><span class="line">        <span class="comment">// but, pay attention to that fact</span></span><br><span class="line">        <span class="comment">// WsFrameServer.onDataAvailable is a for loop so it will remain in it</span></span><br><span class="line">        <span class="comment">// that&#x27;s the reason why we can&#x27;t see the state of Upgraded return</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Init WebSocket OPEN_READ will go through here</span></span><br><span class="line">        state = processor.process(wrapper);</span><br><span class="line">        <span class="comment">// Finally adapter.service(request, response) will be called in processor.process</span></span><br><span class="line">        <span class="comment">// then the request will go through filter</span></span><br><span class="line">        <span class="comment">// Once it arrives the WsFilter</span></span><br><span class="line">        <span class="comment">// and it will call upgrade method with a WsHttpUpgradeHandler in WsFilter</span></span><br><span class="line">        <span class="comment">// That will instance a WsHttpUpgradeHandler and call action Upgrade hook</span></span><br><span class="line">        <span class="comment">// That&#x27;s the time httpUpgradeHandler be set to WsHttpUpgradeHandler and no more null value</span></span><br><span class="line">        <span class="comment">// So isUpgrade() return true and state will become</span></span><br><span class="line">        <span class="comment">// SocketState.UPGRADING</span></span><br><span class="line">        <span class="comment">// And it will create a new processor named upgradeProcessor to replace previous processor</span></span><br><span class="line">        <span class="comment">// in the state of SocketState.UPGRADING in following code</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isDebugEnabled()) &#123;</span><br><span class="line">        getLog().debug(<span class="string">&quot;Socket: [&quot;</span> + wrapper +</span><br><span class="line">                <span class="string">&quot;], Status in: [&quot;</span> + status +</span><br><span class="line">                <span class="string">&quot;], State out: [&quot;</span> + state + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">        <span class="comment">// it means that if it is a WebSocket Request</span></span><br><span class="line">        <span class="comment">// it turns out to be once debug info</span></span><br><span class="line">        <span class="comment">// Status in: OPEN_READ, State out: UPGRADING</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">while</span> (state == SocketState.UPGRADING);</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">if</span> (state == SocketState.UPGRADING) &#123;</span><br><span class="line">    <span class="comment">// Get the HTTP upgrade handler</span></span><br><span class="line">    HttpUpgradeHandler httpUpgradeHandler =</span><br><span class="line">            processor.getHttpUpgradeHandler();</span><br><span class="line">    <span class="comment">// Release the Http11 processor to be re-used</span></span><br><span class="line">    release(wrapper, processor, <span class="keyword">false</span>, <span class="keyword">false</span>);</span><br><span class="line">    <span class="comment">// Create the upgrade processor</span></span><br><span class="line">    processor = createUpgradeProcessor(</span><br><span class="line">            wrapper, httpUpgradeHandler);</span><br><span class="line">    <span class="comment">// Mark the connection as upgraded</span></span><br><span class="line">    wrapper.setUpgraded(<span class="keyword">true</span>);</span><br><span class="line">    <span class="comment">// Associate with the processor with the connection</span></span><br><span class="line">    connections.put(socket, processor);</span><br><span class="line">    <span class="comment">// Initialise the upgrade handler (which may trigger</span></span><br><span class="line">    <span class="comment">// some IO using the new protocol which is why the lines</span></span><br><span class="line">    <span class="comment">// above are necessary)</span></span><br><span class="line">    <span class="comment">// This cast should be safe. If it fails the error</span></span><br><span class="line">    <span class="comment">// handling for the surrounding try/catch will deal with</span></span><br><span class="line">    <span class="comment">// it.</span></span><br><span class="line">    httpUpgradeHandler.init((WebConnection) processor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以 Tomcat 7 WebSocket 实现上的时序是正确的，大致的请求处理流程如下</p>
+<ul>
+<li>Client 与 OS 特定端口建立 Connection …</li>
+<li>Http11Protocol.process 被调用，传入 OPEN_READ status</li>
+<li>processor.process(wrapper) 被调用</li>
+<li>WsFilter 被调用，发现为 HTTP Upgrade to websocket request，设置 httpUpgradeHandler 为 WsHttpUpgradeHandler</li>
+<li>processor.process(wrapper) 返回 UPGRADING state</li>
+<li>Http11Protocol.process 创建新的 upgradeProcessor 以代替之前的 processor</li>
+<li>调用 WsHttpUpgradeHandler.init 方法</li>
+<li>init 方法执行<ul>
+<li>在 sos 上注册 WsWriteListener 方法</li>
+<li>调用 onOpen 方法</li>
+<li>在 sis 上注册 WsReadListener 方法</li>
+</ul>
+</li>
+<li>status 仍然为 OPEN_READ</li>
+<li>processor.upgradeDispatch(status) 被调用，for loop socketInputStream</li>
+</ul>
+<p>上述过程均在同一线程中执行，Tomcat 7 Http11Protocol 实现的是简单的处理模型，Acceptor 获取 socket，当有新的 socket 连接时，使用一个新线程去处理。</p>
+<p>现在我们可以给出 WebSocket ServerEndpoint 的精确时序了</p>
+<ul>
+<li>SocketState OPEN_READ 后 ServerEndpoint onOpen 被调用</li>
+<li>WsFrameServer onDataAvailable 被调用</li>
+<li>onDataAvailable 组装好 Message 后 ServerEndpoint onMessage 被调用</li>
+</ul>
+<p>因此即使 onOpen 执行时间过长，数据也只是被累积在 socket 输入缓冲区中，一旦执行结束后，依然能触发 onDataAvailable，从而回调 ServerEndpoint onMessage</p>
+<p>另一方面也说明了，onOpen 首先被执行，onMessage 其次被执行的时序</p>
+<p>值得注意的是 WebSocket 一旦成功 upgradeDispatch(OPEN_READ) state 后，逻辑将会停留在循环从 socketInputStream 获取数据上</p>
+<p>而我们知道 WebSocket 为双工协议，那么 OPEN_WRITE 状态什么时候被 upgradeDispatch ? 这不被 upgradeDispatch 的话，Server side 就没法向 Client side 推送数据了？</p>
+<p>WsRemoteEndpointImplServer onWritePossible</p>
+<p>从 byteBuffers 中读取字节，并写入 socketOutputStream 中，byteBuffers 读取 complete 发送完成后，循环退出</p>
+<p>这仅是 onWritePossible 自身的逻辑</p>
+<p>而实际上如果是 upgradeDispatch(OPEN_WRITE) trigger onWritePossible(useDispatch: false)</p>
+<p>WsRemoteEndpointImplServer doWrite trigger onWritePossible(useDispatch: true)</p>
+<p>耐人寻味</p>
+<p>注意到我们使用 wsSession.getBasicRemote().sendText() 发送消息，实际上最后调用的为 doWrite 方法，所以逻辑就清晰了，实际上并不一定需要 upgradeDispatch(OPEN_WRITE) 才能写入，只不过在实现上，通过 upgradeDispatch(OPEN_WRITE) 执行的 doWrite 与在 onOpen / onMessage 中使用 wsSession 直接写入的 doWrite 传入参数不同，均能完成写入</p>
+<ul>
+<li>upgradeDispatch(OPEN_WRITE): onWritePossible(useDispatch: false)</li>
+<li>wsSession.getBasicRemote().sendText(…): onWritePossible(useDispatch: true)</li>
+</ul>
+<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><p>这块逻辑看的还不是特别清晰，主要是为了没有 OPEN_WRITE state 也是可以写入的这个结论</p>
+<p>所以完整的 WebSocket 请求流程</p>
+<ul>
+<li>客户端发起 WebSocket 请求时，需要新建一个链接</li>
+<li>Tomcat 接收到 socket 链接后，按通用处理流程处理之</li>
+<li>WebSocket 的第一个请求为 HTTP GET Upgrade 请求，这个请求在通用处理流程中经过 WsFilter</li>
+<li>WsFilter 识别到该请求为 WebSocket 请求，随后设置 WsHttpUpgradeHandler 为其 httpUpgradeHandler，调用 upgrade 方法，并 preInit WsHttpUpgradeHandler</li>
+<li>Tomcat 发现当前 socket state 变为 UPGRADING，因此创建 upgradeProcessor 以替换之前的 http processor，此时会执行 WsHttpUpgradeHandler init 方法</li>
+<li>WsHttpUpgradeHandler init 方法中会回调 <strong>ServerEndpoint onOpen</strong> 方法</li>
+<li>Tomcat 继续处理时发现 processor 为 upgradeProcessor，因此调用 upgradeDispatch(OPEN_READ)</li>
+<li>这时触发 WsHttpUpgradeHandler.onDataAvailable()，随即继续调用至 WsFrameServer.onDataAvailable()</li>
+<li>WsFrameServer.onDataAvailable() 尝试获取对象锁之后，进入 for loop 获取 socketInputStream 输入逻辑，组装好数据后，回调 <strong>ServerEndpoint onMessage</strong> 方法，即业务层此时可以感知到 Client 发送的数据</li>
+<li>到这里当前线程就一直在干读取 socket 中的数据并调用 onMessage 这件事儿了</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/724944fd.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/724944fd.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 2)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-06 20:28:07" itemprop="dateCreated datePublished" datetime="2018-07-06T20:28:07Z">2018-07-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 03:18:54" itemprop="dateModified" datetime="2020-12-06T03:18:54Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>接着上一篇，来分析一下 Tomcat 7 中 WebSocket 的实现</p>
+<h1 id="WsFilter"><a href="#WsFilter" class="headerlink" title="WsFilter"></a>WsFilter</h1><p>WebSocket 的实现入口处为 WsFilter，该 Filter 检查 HTTP header 中是否包含下述字段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket</span><br></pre></td></tr></table></figure>
+
+<p>且为 HTTP GET 请求。若符合 WebSocket Handshake 要求，则从 WebSocketContainer 中查找请求路径是否有 filter 拦截，若没有则继续后续的 filter，若有则进入 UpgradeUtil.doUpgrade 方法</p>
+<h1 id="WsServerContainer"><a href="#WsServerContainer" class="headerlink" title="WsServerContainer"></a>WsServerContainer</h1><p>回头来看 WsServerContainer 的初始化，当然最为重要的是注册了 WsFilter</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">FilterRegistration.Dynamic fr = servletContext.addFilter(</span><br><span class="line">        <span class="string">&quot;Tomcat WebSocket (JSR356) Filter&quot;</span>, <span class="keyword">new</span> WsFilter());</span><br><span class="line">fr.setAsyncSupported(<span class="keyword">true</span>);</span><br><span class="line">EnumSet&lt;DispatcherType&gt; types = EnumSet.of(DispatcherType.REQUEST,</span><br><span class="line">        DispatcherType.FORWARD);</span><br><span class="line">fr.addMappingForUrlPatterns(types, <span class="keyword">true</span>, <span class="string">&quot;/*&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>可见 WsFilter 拦截所有请求，当遇到 HTTP Upgrade to websocket 协议的请求时执行 doUpgrade 逻辑</p>
+<h1 id="UpgradeUtil-doUpgrade"><a href="#UpgradeUtil-doUpgrade" class="headerlink" title="UpgradeUtil.doUpgrade"></a>UpgradeUtil.doUpgrade</h1><p>doUpgrade 在各种检查后，可以接受 Client Upgrade 请求时，需向 Client 端返回的 HTTP 报文头中添加如下字段（Sec-WebSocket-Protocol / Sec-WebSocket-Extensions 可选）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket</span><br><span class="line">Connection: upgrade</span><br><span class="line">Sec-WebSocket-Accept: [key]</span><br><span class="line">Sec-WebSocket-Protocol: [subProtocol]</span><br><span class="line">Sec-WebSocket-Extensions: [extensions]</span><br></pre></td></tr></table></figure>
+
+<p>当然还需要初始化 ServerEndpoint 实例（@ServerEndpoint 注解）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Endpoint ep;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    Class&lt;?&gt; clazz = sec.getEndpointClass();</span><br><span class="line">    <span class="keyword">if</span> (Endpoint.class.isAssignableFrom(clazz)) &#123;</span><br><span class="line">        ep = (Endpoint) sec.getConfigurator().getEndpointInstance(</span><br><span class="line">                clazz);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ep = <span class="keyword">new</span> PojoEndpointServer();</span><br><span class="line">        <span class="comment">// Need to make path params available to POJO</span></span><br><span class="line">        perSessionServerEndpointConfig.getUserProperties().put(</span><br><span class="line">                PojoEndpointServer.POJO_PATH_PARAM_KEY, pathParams);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (InstantiationException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ServletException(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后向 Client 返回 HTTP Response</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">WsHttpUpgradeHandler wsHandler =</span><br><span class="line">        ((RequestFacade) inner).upgrade(WsHttpUpgradeHandler.class);</span><br><span class="line">wsHandler.preInit(ep, perSessionServerEndpointConfig, sc, wsRequest,</span><br><span class="line">        negotiatedExtensionsPhase2, subProtocol, transformation, pathParams,</span><br><span class="line">        req.isSecure());</span><br></pre></td></tr></table></figure>
+
+<p>而 WsHttpUpgradeHandler 则会用于处理</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The handler for all further incoming data on the current connection.</span><br></pre></td></tr></table></figure>
+
+<h1 id="WsHttpUpgradeHandler"><a href="#WsHttpUpgradeHandler" class="headerlink" title="WsHttpUpgradeHandler"></a>WsHttpUpgradeHandler</h1><p>WsHttpUpgradeHandler init 方法中干了很多事情</p>
+<ul>
+<li>首先从 WebConnection 中获取输入流/输出流</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.connection = connection;</span><br><span class="line">AbstractServletInputStream sis;</span><br><span class="line">AbstractServletOutputStream sos;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    sis = connection.getInputStream();</span><br><span class="line">    sos = connection.getOutputStream();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>实例化 WsSession，注意 SessionId 使用一个 static AtomicLong 维护，每次增加 1</li>
+<li>实例化 WsFrameServer，用于读写 Message</li>
+<li>在 sos 上注册 WsWriteListener</li>
+<li>调用 ServerEndpoint onOpen 方法</li>
+<li>在 sis 上注册 WsReadListener</li>
+</ul>
+<h2 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h2><p>所以综上所述，每一次 HTTP Upgrade 请求均会创建一个新的 ServerEndpoint 实例，因此定义于 ServerEndpoint 中的 static 变量需注意确保线程安全</p>
+<p>另外 ServerEndpoint 中 onOpen 和 onMessage 的执行顺序为 onOpen 必然首先执行，若 onOpen 执行时间过长，则就算 sis 中有数据等待处理，也不会触发 onMessage，因为从 WsHttpUpgradeHandler init 方法中可以看出 onOpen 调用结束后，才会在 sis 上注册 WsReadListener。接下来继续分析，如何触发 WsReadListener</p>
+<h1 id="Connector"><a href="#Connector" class="headerlink" title="Connector"></a>Connector</h1><p>AbstractServiceInputStream.onDataAvailable() 方法中调用 listener.onDataAvailable(); 即 WsReadListener.onDataAvailable()</p>
+<p>而 AbstractServiceInputStream.onDataAvailable() 又由 AbstractProcessor.upgradeDispatch(SocketStatus status) 调用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> SocketState <span class="title">upgradeDispatch</span><span class="params">(SocketStatus status)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (status == SocketStatus.OPEN_READ) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletInputStream.onDataAvailable();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            <span class="comment">// The error handling within the ServletInputStream should have</span></span><br><span class="line">            <span class="comment">// marked the stream for closure which will get picked up below,</span></span><br><span class="line">            <span class="comment">// triggering the clean-up of this processor.</span></span><br><span class="line">            getLog().debug(sm.getString(<span class="string">&quot;abstractProcessor.onDataAvailableFail&quot;</span>), ioe);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == SocketStatus.OPEN_WRITE) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletOutputStream.onWritePossible();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            <span class="comment">// The error handling within the ServletOutputStream should have</span></span><br><span class="line">            <span class="comment">// marked the stream for closure which will get picked up below,</span></span><br><span class="line">            <span class="comment">// triggering the clean-up of this processor.</span></span><br><span class="line">            getLog().debug(sm.getString(<span class="string">&quot;abstractProcessor.onWritePossibleFail&quot;</span>), ioe);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == SocketStatus.STOP) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletInputStream.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            getLog().debug(sm.getString(</span><br><span class="line">                    <span class="string">&quot;abstractProcessor.isCloseFail&quot;</span>, ioe));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletOutputStream.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            getLog().debug(sm.getString(</span><br><span class="line">                    <span class="string">&quot;abstractProcessor.osCloseFail&quot;</span>, ioe));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Unexpected state</span></span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (upgradeServletInputStream.isCloseRequired() ||</span><br><span class="line">            upgradeServletOutputStream.isCloseRequired()) &#123;</span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> SocketState.UPGRADED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Tomcat 7 默认使用 BIO，Http11Protocol.createUpgradeProcessor，其中将 socket 超时时间设置为不超时，并返回一个 Processor</p>
+<p>因此 Tomcat 处理 WebSocket 请求的大致流程为</p>
+<ul>
+<li>JIOEndpoint accept socket and new a thread to handle it</li>
+<li>Worker wait for the next socket to be assigned and call handler to process socket</li>
+<li>Http11ConnectionHandler</li>
+<li>Http11Processor</li>
+</ul>
+<p>客户端首先打开一个 connection，connection 建立后，向服务器端发起 WebSocket Handshake 请求，服务器接受后，返回 101 status code，双方可在当前 connection 上双工通信</p>
+<p>当 SocketStatus 为 OPEN_READ 时，回调 readListener 的 onDataAvailable 方法，此处逻辑有 trick 的地方，值得注意的是如果 SocketStatus.OPEN_READ 时，仍未完成注册 readListener，则不会触发 listener.onDataAvailable() … 显然，因为 listener 为 null</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">onDataAvailable</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (listener == <span class="keyword">null</span>) &#123; <span class="comment">// it doesn&#x27;t have a listener</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ready = Boolean.TRUE;</span><br><span class="line">    Thread thread = Thread.currentThread();</span><br><span class="line">    ClassLoader originalClassLoader = thread.getContextClassLoader();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        thread.setContextClassLoader(applicationLoader);</span><br><span class="line">        listener.onDataAvailable();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        thread.setContextClassLoader(originalClassLoader);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 WsFrameServer 的 onDataAvailable 方法中首先尝试获取对象锁，获取成功后，for loop 监听 Servlet 输入流，当有数据时读取数据供 WsFrameServer 处理，处理 okay 后，回调 ServerEndpoint 的 onMessage 方法，业务层即感知到从 ws 连接中获取到数据</p>
+<p>另外 ServerEndpoint onOpen 是在 WsHttpUpgradeHandler init 方法中被回调，看看官方文档对 handler 的 init 方法的描述</p>
+<blockquote>
+<p>This method is called once the request/response pair where the upgrade is initiated has completed processing and is the point where control of the connection passes from the container to the HttpUpgradeHandler.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-7.0-doc/api/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.html">https://tomcat.apache.org/tomcat-7.0-doc/api/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.html</a></p>
+<p>so 理论上要想使得 Tomcat 7 WebSocket 能正常工作的前提为</p>
+<ul>
+<li>WsHttpUpgradeHandler init 方法被调用 —— WsHttpUpgradeHandler</li>
+<li>在 sos 上注册 WsWriteListener 方法结束 —— WsHttpUpgradeHandler</li>
+<li>SocketStatus.OPEN_WRITE —— AbstractProcessor</li>
+<li>onOpen 方法回调结束 —— ServerEndpoint</li>
+<li>在 sis 上注册 WsReadListener 方法结束 —— WsHttpUpgradeHandler</li>
+<li>SocketStatus.OPEN_READ —— AbstractProcessor</li>
+</ul>
+<p>接下来需要搞清楚一个问题，上述这些逻辑是单线程在跑，还是多线程，单线程的话，时序问题不大，但是多线程的情况下，就很有讲究了</p>
+<p>To be cont. 下一遍回答上述时序问题</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5964173e.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -331,7 +631,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/8e645281.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/8e645281.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -459,7 +759,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b8d588f2.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b8d588f2.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -675,7 +975,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/b40cf9b.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b40cf9b.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -794,7 +1094,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/5679b106.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5679b106.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1002,7 +1302,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/e830320c.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e830320c.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1140,7 +1440,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/893d27a1.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/893d27a1.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1370,7 +1670,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/e0d55f2c.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e0d55f2c.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1499,207 +1799,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/64e2c768.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/64e2c768.html" class="post-title-link" itemprop="url">boltdb init bucket</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-02-20 16:50:50" itemprop="dateCreated datePublished" datetime="2018-02-20T16:50:50Z">2018-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:52:19" itemprop="dateModified" datetime="2020-11-22T08:52:19Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>how to create a bucket in bbolt</p>
-<p>fresh new db file</p>
-<p>page 3 (start from 0) is a leaf page, it will be used as a root bucket</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    root     pgid   <span class="comment">// page id of the bucket&#x27;s root-level page</span></span><br><span class="line">    sequence <span class="keyword">uint64</span> <span class="comment">// monotonically incrementing, used by NextSequence()</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br></pre></td></tr></table></figure>
-
-<p>bucket 结构表示存储于文件中的 bucket</p>
-<p>另外 tx 会关联一个 Bucket 结构体</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    *bucket</span><br><span class="line">    tx       *Tx                <span class="comment">// the associated transaction</span></span><br><span class="line">    buckets  <span class="keyword">map</span>[<span class="keyword">string</span>]*Bucket <span class="comment">// subbucket cache</span></span><br><span class="line">    page     *page              <span class="comment">// inline page reference</span></span><br><span class="line">    rootNode *node              <span class="comment">// materialized node for the root page.</span></span><br><span class="line">    nodes    <span class="keyword">map</span>[pgid]*node     <span class="comment">// node cache</span></span><br><span class="line">    <span class="comment">// Sets the threshold for filling nodes when they split. By default,</span></span><br><span class="line">    <span class="comment">// the bucket will fill to 50% but it can be useful to increase this</span></span><br><span class="line">    <span class="comment">// amount if you know that your write workloads are mostly append-only.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// This is non-persisted across transactions so it must be set in every Tx.</span></span><br><span class="line">    FillPercent <span class="keyword">float64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见其中组合了 bucket 结构体</p>
-<p>写事务在初始化时，会使用 meta 锁，锁定住 meta 页的修改；随后将 meta 页拷贝至写事务内部存储；而实际上写事务开启时，会使用 rwlock，因此写事务并不会并发，另仅有写事务会修改 meta 页，所以此处的 meta 页拷贝存疑，似乎没必要</p>
-<p>init 方法为 beginTX 内部执行，读写事务都会执行，因此虽然写事务无需 copy meta page 然而读事务需要，因为写事务 commit 之后，会修改 meta page</p>
-<p>完成 meta 页的拷贝后，将 tx 的 root (Bucket) 初始化，并设置其 root bucket 为 meta 中的 root bucket; 第一个写事务的 txid 为 2，0、1 用于设置两个 meta 页</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">    p := db.pageInBuffer(buf[:], pgid(i))</span><br><span class="line">    p.id = pgid(i)</span><br><span class="line">    p.flags = metaPageFlag</span><br><span class="line">    <span class="comment">// Initialize the meta page.</span></span><br><span class="line">    m := p.meta()</span><br><span class="line">    m.magic = magic</span><br><span class="line">    m.version = version</span><br><span class="line">    m.pageSize = <span class="keyword">uint32</span>(db.pageSize)</span><br><span class="line">    m.freelist = <span class="number">2</span></span><br><span class="line">    m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br><span class="line">    m.pgid = <span class="number">4</span></span><br><span class="line">    m.txid = txid(i) <span class="comment">// 0 1 txid used</span></span><br><span class="line">    m.checksum = m.sum64()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>create bucket 时 cursor 从 root bucket page 开始遍历 bucket name 应存放的适当位置</p>
-<p>branch page 节点 / leaf page 节点</p>
-<p>数据存放于 leaf page 节点中</p>
-<p>存储于文件中的为 page，内存中的为 node，从文件中读取到的 page 会 materialed 为内存中的 node</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.zhesih.com/archives/4ab1fcf6.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/4ab1fcf6.html" class="post-title-link" itemprop="url">ETCD 链接建立</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-12-03 16:48:36" itemprop="dateCreated datePublished" datetime="2017-12-03T16:48:36Z">2017-12-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:49:22" itemprop="dateModified" datetime="2020-11-22T08:49:22Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>521</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>机缘巧合，在测试的引导下，读了下 etcd 连接建立方面的代码</p>
-<p>etcd 启动后监听 peer url</p>
-<p>peer url 通过 mux 绑定 handler，关于 raft 的 url 的请求绑定到 streamHandler 上，这玩意会 hold 住一个连接，除非遇到错误，&lt;-c.closeNotify()，连接 close</p>
-<p>啥时候重新 p.attachOutgoingConn(conn) 回来，当然是该成员又请求连接到 url 上来时，即 streamReader 重新连接回来时</p>
-<p>streamWriter 使用长链</p>
-<p>streamReader 持续读，与 streamWriter 匹配，streamWriter 不遇到错误，不 close 连接；streamReader 断了之后，100ms 重新 dial 一次，重连上后，对端 streamWriter 能 hold 住新的连接</p>
-<p>etcd 对其每一个 peer 都会启动 streamReader 和 streamWriter，reader 建立连接后，writer 使用不关闭，reader 有数据时读，writer 有写入时写，保持着连接</p>
-<p>所以 etcd peer 间是建立着长链的，可以使用 netstat -anp | grep {etcd_peer_port} 查看 peer 之间的连接建立情况</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1724,13 +1823,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">232k</span>
+    <span title="站点总字数">233k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:31</span>
+    <span title="站点阅读时长">3:32</span>
   </span>
 </div>
 
