@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-count">109</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,104 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/c69c7a93.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/c69c7a93.html" class="post-title-link" itemprop="url">disk-io</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-21 15:34:07" itemprop="dateCreated datePublished" datetime="2017-10-21T15:34:07Z">2017-10-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:34:51" itemprop="dateModified" datetime="2020-11-22T07:34:51Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>191</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>现在环境中 etcd 数据目录独立挂盘，看磁盘命名应该是个 lv</p>
+<p>df -h 查看到类似</p>
+<p>/device-mapper</p>
+<p>和 lvm 相关 <a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/LVM">https://wiki.archlinux.org/index.php/LVM</a></p>
+<p>pvs <a target="_blank" rel="noopener" href="https://linux.die.net/man/8/pvs">https://linux.die.net/man/8/pvs</a></p>
+<p>iotop</p>
+<p>iotop -n 1 -b -o</p>
+<p>iostat</p>
+<p>监控变化</p>
+<p>watch -n 2 -d “xxx”</p>
+<p>自动执行</p>
+<p>watch -n 2 “xxx”</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1212,152 +1310,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9e766461.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/9e766461.html" class="post-title-link" itemprop="url">ETCD V2 的启动过程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-03 00:00:01" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:01Z">2017-10-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:39:23" itemprop="dateModified" datetime="2020-12-12T07:39:23Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>简单的源码阅读</p>
-<p>链接: <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd/tree/release-2.3">https://github.com/coreos/etcd/tree/release-2.3</a></p>
-</blockquote>
-<h1 id="Main"><a href="#Main" class="headerlink" title="Main"></a>Main</h1><ol>
-<li>检查运行 arch</li>
-<li>parse 启动配置参数</li>
-<li>设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志）</li>
-<li>声明停止通道 <code>var stopped &lt;-chan struct&#123;&#125;</code></li>
-<li>打印 etcd 版本 / GitSHA / 编译时的 Go VERSION / 运行架构信息</li>
-</ol>
-<p>检查数据目录是否存在，若存在日志提示 (<strong>只有 data-dir 存在</strong>，就会打印如下日志)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">the server is already initialized as member before, starting as etcd member...</span><br></pre></td></tr></table></figure>
-
-<p>不管数据目录存在与否，均如此启动</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stopped, err = startEtcd(cfg)</span><br></pre></td></tr></table></figure>
-
-<p>最后获取到停止信号停止</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// etcd process stpo</span></span><br><span class="line">&lt;-stoped</span><br></pre></td></tr></table></figure>
-
-<h1 id="startEtcd"><a href="#startEtcd" class="headerlink" title="startEtcd"></a>startEtcd</h1><p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
-<p>接下来使用 listen-client-url 新建 client listener，这块直接使用 net.Listen 方法，开启 tcp 服务；然后判断系统文件描述符限制，如果 &lt; 150，则 panic，然后限制 listener 的数量为 系统描述符限制 - 150</p>
-<p>初始化 net.Listen 的 keepAliveListener</p>
-<p>初始化 etcd server config</p>
-<p>初始化 etcdserver</p>
-<p>启动 etcdserver</p>
-<hr>
-<p>注册操作系统终止回调函数 osutil.RegisterInterruptHandler(s.Stop)</p>
-<hr>
-<p>使用 cors 初始化 clientHandler</p>
-<p>使用 etcdhttp 初始化 peerHandler</p>
-<p>goroutine 为每个 peer listener 开启 http 服务 处理请求，5 min read timeout</p>
-<p>goroutine 为每个 client listener 开启 http 服务 处理请求，0 min read timeout // 与 golang 的一个 bug 有关</p>
-<p>etcdhttp/peer.go</p>
-<p>etcdhttp/client.go</p>
-<p>其实是 http server，待阅读</p>
-<hr>
-<p>最后，返回停止通道及错误</p>
-<h1 id="etcdserver-NewServer"><a href="#etcdserver-NewServer" class="headerlink" title="etcdserver.NewServer"></a>etcdserver.NewServer</h1><p>初始化 etcdserver</p>
-<p>集群信息存在 /0</p>
-<p>key 信息存在 /1</p>
-<p>检查数据目录版本，并更新数据目录</p>
-<p>判断以何种方式启动</p>
-<p><strong>(1) !haveWAL &amp;&amp; !cfg.NewCluster</strong></p>
-<p>没有 wal 目录且 new-cluster == false，此时通过从启动参数 initial-token 及 initial-cluster 配置的集群信息来访问集群（会将自己的 peer url 排除），获取到当前存在的集群信息</p>
-<p>校验 启动参数中配置的集群信息与获取到存在的集群信息，并为 local member 设置 id</p>
-<p>此时成员信息从 remote peer 中获取，当前 server 的 cluster id 被设置为 remote peer 中获取到 cluster id</p>
-<p>打印启动参数 <code>cfg.Print()</code></p>
-<p>启动 raftnode</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id, n, s, w = startNode(cfg, cl, nil)</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1382,13 +1334,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">233k</span>
+    <span title="站点总字数">235k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:32</span>
+    <span title="站点阅读时长">3:33</span>
   </span>
 </div>
 
