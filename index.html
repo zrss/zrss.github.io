@@ -297,10 +297,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2021-12-26 14:44:37 / 修改时间：06:45:47" itemprop="dateCreated datePublished" datetime="2021-12-26T14:44:37Z">2021-12-26</time>
+      <time title="创建时间：2021-12-26 14:44:37" itemprop="dateCreated datePublished" datetime="2021-12-26T14:44:37Z">2021-12-26</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-06 05:53:58" itemprop="dateModified" datetime="2022-03-06T05:53:58Z">2022-03-06</time>
+      </span>
 
   
       </div>
@@ -310,14 +316,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>769</span>
+      <span>5.1k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
+      <span>5 分钟</span>
     </span>
 </div>
 
@@ -328,17 +334,81 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>TODO</p>
+          <h1 id="Configure-RoCE"><a href="#Configure-RoCE" class="headerlink" title="Configure RoCE"></a>Configure RoCE</h1><p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4">https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/understanding-show-gids-script">https://community.mellanox.com/s/article/understanding-show-gids-script</a></p>
+<blockquote>
+<p>Use <code>ibv_query_gid</code> and <code>ibv_find_gid_index</code> functions defined in libibverbs to get the desired GID index.</p>
+</blockquote>
+<p>根据上述材料可知，RoCE 首先需要网卡设备支持比如 mlnx ConnectX-4</p>
+<p>以 mlnx 网卡设备为例</p>
+<ol>
+<li>找到 mlnx 设备 GID 映射到的网络设备</li>
+</ol>
+<p><code>cat /sys/class/infiniband/mlx5_0/ports/1/gid_attrs/ndevs/1</code></p>
+<ol start="2">
+<li>查看 GIDs 1 对应的 RoCE type</li>
+</ol>
+<p><code>cat /sys/class/infiniband/mlx5_0/ports/1/gid_attrs/types/1</code></p>
+<ol start="3">
+<li>查看 GIDs 1 地址</li>
+</ol>
+<p><code>cat /sys/class/infiniband/mlx5_0/ports/1/gids/1</code></p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>GID Index</th>
+<th>RoCE version</th>
+<th>GID Address</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ens785f0</td>
+<td>1</td>
+<td>RoCEv2</td>
+<td>fe80:0000:0000:0000:e61d:2dff:fef2:a488</td>
+</tr>
+</tbody></table>
+<p>确定好需要使用的 GID 后，可使用 <code>ib_send_bw</code> 指定 GID 进行 RoCE 通信</p>
+<p>另外注意到</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4">https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4</a></p>
+</blockquote>
+<p>在 mlnx 设备映射到的网络设备中增加的 vlan 网卡也支持 RoCE</p>
+<h1 id="RoCE-in-container"><a href="#RoCE-in-container" class="headerlink" title="RoCE in container"></a>RoCE in container</h1><h2 id="NCCL-RoCE-failed-in-container"><a href="#NCCL-RoCE-failed-in-container" class="headerlink" title="NCCL RoCE failed in container"></a>NCCL RoCE failed in container</h2><blockquote>
+<p>NCCL WARN Call to ibv_modify_qp failed with error No such device</p>
 </blockquote>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IB setup</span></span><br><span class="line">ibv_context* ctx = ncclIbDevs[lComm-&gt;dev].context;</span><br><span class="line"><span class="keyword">uint8_t</span> ib_port = ncclIbDevs[lComm-&gt;dev].port;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ibv_port_attr</span> <span class="title">portAttr</span>;</span></span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">wrap_ibv_query_port</span>(ctx, ib_port, &amp;portAttr));</span><br><span class="line"><span class="class"><span class="keyword">union</span> <span class="title">ibv_gid</span> <span class="title">gid</span>;</span></span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">wrap_ibv_query_gid</span>(ctx, ib_port, <span class="built_in">ncclParamIbGidIndex</span>(), &amp;gid));</span><br><span class="line"></span><br><span class="line"><span class="comment">// QP Creation</span></span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbInitVerbs</span>(ctx, &amp;rComm-&gt;verbs));</span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbCreateQp</span>(ib_port, &amp;rComm-&gt;verbs, IBV_ACCESS_REMOTE_WRITE, &amp;rComm-&gt;qp));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Adjust the MTU</span></span><br><span class="line">remQpInfo.mtu = (<span class="keyword">enum</span> ibv_mtu)std::<span class="built_in">min</span>(remQpInfo.mtu, portAttr.active_mtu);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Setup QP</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ibv_qp</span>* <span class="title">qp</span> =</span> rComm-&gt;qp;</span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbRtrQp</span>(qp, &amp;remQpInfo));</span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbRtsQp</span>(qp));</span><br></pre></td></tr></table></figure>
 
-<p><code>ib_write_bw</code></p>
-<blockquote>
+<p><strong>ncclIbRtrQp</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ncclResult_t <span class="title">ncclIbRtrQp</span><span class="params">(ibv_qp* qp, struct ncclIbQpInfo* info)</span> </span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ibv_qp_attr</span> <span class="title">qpAttr</span>;</span></span><br><span class="line">  <span class="built_in">memset</span>(&amp;qpAttr, <span class="number">0</span>, <span class="built_in"><span class="keyword">sizeof</span></span>(struct ibv_qp_attr));</span><br><span class="line">  qpAttr.qp_state = IBV_QPS_RTR;</span><br><span class="line">  qpAttr.path_mtu = info-&gt;mtu;</span><br><span class="line">  qpAttr.dest_qp_num = info-&gt;qpn;</span><br><span class="line">  qpAttr.rq_psn = <span class="number">0</span>;</span><br><span class="line">  qpAttr.max_dest_rd_atomic = <span class="number">1</span>;</span><br><span class="line">  qpAttr.min_rnr_timer = <span class="number">12</span>;</span><br><span class="line">  <span class="keyword">if</span> (info-&gt;lid == <span class="number">0</span>) &#123;</span><br><span class="line">    qpAttr.ah_attr.is_global = <span class="number">1</span>;</span><br><span class="line">    qpAttr.ah_attr.grh.dgid.global.subnet_prefix = info-&gt;spn;</span><br><span class="line">    qpAttr.ah_attr.grh.dgid.global.interface_id = info-&gt;iid;</span><br><span class="line">    qpAttr.ah_attr.grh.flow_label = <span class="number">0</span>;</span><br><span class="line">    qpAttr.ah_attr.grh.sgid_index = <span class="built_in">ncclParamIbGidIndex</span>();</span><br><span class="line">    qpAttr.ah_attr.grh.hop_limit = <span class="number">255</span>;</span><br><span class="line">    qpAttr.ah_attr.grh.traffic_class = <span class="built_in">ncclParamIbTc</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    qpAttr.ah_attr.is_global = <span class="number">0</span>;</span><br><span class="line">    qpAttr.ah_attr.dlid = info-&gt;lid;</span><br><span class="line">  &#125;</span><br><span class="line">  qpAttr.ah_attr.sl = <span class="built_in">ncclParamIbSl</span>();</span><br><span class="line">  qpAttr.ah_attr.src_path_bits = <span class="number">0</span>;</span><br><span class="line">  qpAttr.ah_attr.port_num = info-&gt;ib_port;</span><br><span class="line">  <span class="built_in">NCCLCHECK</span>(<span class="built_in">wrap_ibv_modify_qp</span>(qp, &amp;qpAttr, IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN | IBV_QP_RQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER));</span><br><span class="line">  <span class="keyword">return</span> ncclSuccess;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>推测是在容器中虽然发现了 mlnx 设备，但是并没有发现 mlnx 设备对应的网络设备（例如 demo 中的 ens785f0)，也就无法找到可使用的 GID 进行 RoCE 通信</p>
+<h2 id="ib-write-bw-failed-in-container"><a href="#ib-write-bw-failed-in-container" class="headerlink" title="ib_write_bw failed in container"></a>ib_write_bw failed in container</h2><blockquote>
 <p>Failed to modify QP 100 to RTR</p>
 </blockquote>
-<p><strong>ncclIbRtrQp</strong></p>
-<p>NCCL WARN Call to ibv_modify_qp failed with error No such device</p>
+<p>使用 <code>ib_write_bw</code> 也会报错，看报错信息，与 NCCL 出错的方法一致 <code>ncclIbRtrQp</code></p>
+<h2 id="multus-cni"><a href="#multus-cni" class="headerlink" title="multus-cni"></a>multus-cni</h2><p><a target="_blank" rel="noopener" href="https://github.com/k8snetworkplumbingwg/multus-cni">https://github.com/k8snetworkplumbingwg/multus-cni</a></p>
+<p>理论上需要使用 multus-cni 以 macvlan 的方式增加 RoCE 网络设备到容器中</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin/issues/18">https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin/issues/18</a></p>
+<blockquote>
+<p>instead of calico, you should use macvlan cni where those virtual devices are child of enp175s0. RoCE can make use of those netdevices.</p>
+<p>Other users are using multus plugin, which allows you to have multiple netdev interfaces in a Pod. Such as first managed default veth interface via your existing plugin, and second macvlan or sriov interface via 2nd cni.<br>This way you get both of both world for performance and functionality.</p>
+</blockquote>
+<p>根据 multus-cni quick start 文档，假若 multus 实测可兼容目前 k8s 集群默认的 cni 插件的情况下，需要额外增加 macvlan RoCE 网络设备的 crd 资源配置（假若主机上有多个 RoCE 网络设备，则可分别创建多个 crd 资源配置，每个资源配置对应其中一个 RoCE 网络设备）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF | kubectl create -f -</span><br><span class="line">apiVersion: &quot;k8s.cni.cncf.io/v1&quot;</span><br><span class="line">kind: NetworkAttachmentDefinition</span><br><span class="line">metadata:</span><br><span class="line">  name: macvlan-conf</span><br><span class="line">spec:</span><br><span class="line">  config: &#x27;&#123;</span><br><span class="line">      &quot;cniVersion&quot;: &quot;0.3.0&quot;,</span><br><span class="line">      &quot;type&quot;: &quot;macvlan&quot;,</span><br><span class="line">      &quot;master&quot;: &quot;eth0&quot;,</span><br><span class="line">      &quot;mode&quot;: &quot;bridge&quot;,</span><br><span class="line">      &quot;ipam&quot;: &#123;</span><br><span class="line">        &quot;type&quot;: &quot;host-local&quot;,</span><br><span class="line">        &quot;subnet&quot;: &quot;192.168.1.0/24&quot;,</span><br><span class="line">        &quot;rangeStart&quot;: &quot;192.168.1.200&quot;,</span><br><span class="line">        &quot;rangeEnd&quot;: &quot;192.168.1.216&quot;,</span><br><span class="line">        &quot;routes&quot;: [</span><br><span class="line">          &#123; &quot;dst&quot;: &quot;0.0.0.0/0&quot; &#125;</span><br><span class="line">        ],</span><br><span class="line">        &quot;gateway&quot;: &quot;192.168.1.1&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;&#x27;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<p><strong>当然前提是 k8s 集群中已安装了 macvlan cni</strong></p>
+<blockquote>
+<p>type: This tells CNI which binary to call on disk. Each CNI plugin is a binary that’s called. Typically, these binaries are stored in /opt/cni/bin on each node, and CNI executes this binary. In this case we’ve specified the loopback binary (which create a loopback-type network interface). <strong>If this is your first time installing Multus, you might want to verify that the plugins that are in the “type” field are actually on disk in the /opt/cni/bin directory.</strong></p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/">https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cni.dev/plugins/current/main/macvlan/">https://www.cni.dev/plugins/current/main/macvlan/</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/network/macvlan/">https://docs.docker.com/network/macvlan/</a></p>
+<blockquote>
+<p>Some applications, especially legacy applications or applications which monitor network traffic, expect to be directly connected to the physical network. In this type of situation, you can use the macvlan network driver to assign a MAC address to each container’s virtual network interface, making it appear to be a physical network interface directly connected to the physical network.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/network/network-tutorial-macvlan/">https://docs.docker.com/network/network-tutorial-macvlan/</a></p>
 
       
     </div>
@@ -1270,7 +1340,7 @@ InitContainer --&gt; SidecarContainer
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1281,13 +1351,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">235k</span>
+    <span title="站点总字数">239k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:33</span>
+    <span title="站点阅读时长">3:37</span>
   </span>
 </div>
 
