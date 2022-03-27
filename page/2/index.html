@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">109</span>
+          <span class="site-state-item-count">110</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-count">55</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,123 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/7cb1245f.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/7cb1245f.html" class="post-title-link" itemprop="url">get pid of pipeline command in background</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-11 07:58:30 / 修改时间：10:30:11" itemprop="dateCreated datePublished" datetime="2021-07-11T07:58:30Z">2021-07-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="get-exit-code-of-pipeline-command-in-background"><a href="#get-exit-code-of-pipeline-command-in-background" class="headerlink" title="get exit code of pipeline command in background"></a>get exit code of pipeline command in background</h1><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process">https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process</a></p>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0">https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">  $</span><span class="bash">&#123;someCommand&#125; 2&gt;&amp;1 | tee -a training.log</span></span><br><span class="line">  exit $&#123;PIPESTATUS[0]&#125;</span><br><span class="line">&#125; &amp;</span><br><span class="line"></span><br><span class="line">wait $!</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
+
+<p>回显</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127</span><br></pre></td></tr></table></figure>
+
+<p>综上 wait 即使指定的是 pid，然而内部代码实现依然会 wait pid 对应的 job，这点 wait 的文档里边说的比较隐晦</p>
+<p><a target="_blank" rel="noopener" href="https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html">https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html</a></p>
+<blockquote>
+<p>Wait until the child process specified by each process ID pid or job specification jobspec exits and return the exit status of the last command waited for.</p>
+</blockquote>
+<p>注意 <strong>return the exit status of the last command waited for</strong></p>
+<p>所以上述代码，wait 命令实际上获取到的是 tee 命令的退出码</p>
+<p>在 shell 中获取 pipeline command status 的简易方法似乎只能通过 <code>$&#123;PIPESTATUS[0]&#125;</code></p>
+<h1 id="get-pid-of-pipeline-command-in-background"><a href="#get-pid-of-pipeline-command-in-background" class="headerlink" title="get pid of pipeline command in background"></a>get pid of pipeline command in background</h1><p>进一步的，我们想获取 someCommand 的 pid，有办法么，尝试做如下改造</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    $&#123;someCommand&#125; 2&gt;&amp;1 &amp;</span><br><span class="line">    pid_someCommand=$!</span><br><span class="line">    wait $&#123;pid_someCommand&#125;</span><br><span class="line">    exit $?</span><br><span class="line">&#125; | tee -a training.log &amp;</span><br><span class="line"></span><br><span class="line">wait $!</span><br><span class="line">echo $&#123;PIPESTATUS[0]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>回显</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0</span><br></pre></td></tr></table></figure>
+
+<p>but not work</p>
+<p>最后只能使用 <code>ps -ef | grep someCommand</code> 的终极大法，加上通过 subshell pid 作为 parent id 过滤</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">  $</span><span class="bash">&#123;someCommand&#125; 2&gt;&amp;1 | tee -a training.log</span></span><br><span class="line">  exit $&#123;PIPESTATUS[0]&#125;</span><br><span class="line">&#125; &amp;</span><br><span class="line">someCommand_job_pid=$!</span><br><span class="line"></span><br><span class="line">someCommand_pid=`ps -efj | awk -v parent_pid=$&#123;someCommand_job_pid&#125; &#x27;$3==parent_pid &#123; print $0 &#125;&#x27; | grep &quot;$&#123;someCommand&#125;&quot; | awk &#x27;&#123; print $2 &#125;&#x27;`</span><br><span class="line">echo someCommand_pid $&#123;someCommand_pid&#125;</span><br><span class="line"></span><br><span class="line">wait $&#123;someCommand_job_pid&#125;</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
+
+<p>回显</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">someCommand_pid 55863</span><br><span class="line">127</span><br></pre></td></tr></table></figure>
+
+<h1 id="test-py"><a href="#test-py" class="headerlink" title="test.py"></a>test.py</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">time.sleep(<span class="number">5</span>)</span><br><span class="line">sys.exit(<span class="number">127</span>)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1170,102 +1287,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5a3d0ab7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/5a3d0ab7.html" class="post-title-link" itemprop="url">PyTorch Distributed Bootstrap</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-13 11:36:00" itemprop="dateCreated datePublished" datetime="2021-02-13T11:36:00Z">2021-02-13</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-14 15:19:48" itemprop="dateModified" datetime="2021-02-14T15:19:48Z">2021-02-14</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>195</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>init_process_group</p>
-<p>store TCPStore</p>
-<p>rank == 0 作为 TCPStore rendezvous handler 的 server</p>
-<p>hostname</p>
-<p>port</p>
-<p>tcp://</p>
-<p>rank</p>
-<p>world_size</p>
-<h1 id="TCPStore"><a href="#TCPStore" class="headerlink" title="TCPStore"></a>TCPStore</h1><p><code>isServer</code> 为 True 时，内部启动 <code>TCPStoreDaemon</code></p>
-<p><code>waitWorkerReady</code> 为 True 时，10ms 轮询一次是否获取到足够到 <code>workerNumber</code></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1290,13 +1311,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">239k</span>
+    <span title="站点总字数">248k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:37</span>
+    <span title="站点阅读时长">3:45</span>
   </span>
 </div>
 
