@@ -274,6 +274,10 @@ func (m *ManagerImpl) GetDeviceRunContainerOptions(pod *v1.Pod, container *v1.Co
 			return nil, err
 		}
 	}
+
+	...
+
+}
 ```
 
 19/11/10 的 commit
@@ -299,6 +303,7 @@ func (m *ManagerImpl) Allocate(pod *v1.Pod, container *v1.Container) error {
 	}
 
     ...
+
 }
 ```
 
@@ -329,3 +334,5 @@ https://github.com/kubernetes/kubernetes/pull/87759#discussion_r383888297
 > This would only work if Pod admission is serialized. @derekwaynecarr can you confirm that this is the case?
 
 总之呢，最后是确认了是 work 的
+
+https://developer.aliyun.com/article/784148
