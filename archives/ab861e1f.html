@@ -25,7 +25,7 @@
 <meta property="og:description" content="相关问题: https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;kubernetes&#x2F;issues&#x2F;72486, init container 申请 devices 资源时，似乎会锁定资源，导致 container 无法申请到足够的 devices 资源 讨论目的: 探索 k8s init container 挂载 gpu 的实现逻辑 k8s release-1.19 分支代码  kub">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-03-27T12:48:00.000Z">
-<meta property="article:modified_time" content="2022-03-27T14:20:04.248Z">
+<meta property="article:modified_time" content="2022-03-27T14:45:42.589Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="k8s">
 <meta property="article:tag" content="device manager">
@@ -120,7 +120,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">110</span>
+          <span class="site-state-item-count">111</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -130,7 +130,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -197,7 +197,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2022-03-27 12:48:00 / 修改时间：14:20:04" itemprop="dateCreated datePublished" datetime="2022-03-27T12:48:00Z">2022-03-27</time>
+      <time title="创建时间：2022-03-27 12:48:00 / 修改时间：14:45:42" itemprop="dateCreated datePublished" datetime="2022-03-27T12:48:00Z">2022-03-27</time>
     </span>
 
   
@@ -208,7 +208,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>8.9k</span>
+      <span>9k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -298,7 +298,7 @@
 <li>在后续的 container 分配时，优先使用 devicesToReuse 分配 device</li>
 </ol>
 <p>不过在 syncPod 内部也有一个 workaround 的 case</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">GetDeviceRunContainerOptions</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="params">(*DeviceRunContainerOptions, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> container.Resources.Limits &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">		<span class="comment">// This is a device plugin resource yet we don&#x27;t have cached</span></span><br><span class="line">		<span class="comment">// resource state. This is likely due to a race during node</span></span><br><span class="line">		<span class="comment">// restart. We re-issue allocate request to cover this race.</span></span><br><span class="line">		<span class="keyword">if</span> m.podDevices.containerDevices(podUID, contName, resource) == <span class="literal">nil</span> &#123;</span><br><span class="line">			needsReAllocate = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> needsReAllocate &#123;</span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">&quot;needs re-allocate device plugin resources for pod %s, container %s&quot;</span>, podUID, container.Name)</span><br><span class="line">		<span class="keyword">if</span> err := m.Allocate(pod, container); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">GetDeviceRunContainerOptions</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="params">(*DeviceRunContainerOptions, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> container.Resources.Limits &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">		<span class="comment">// This is a device plugin resource yet we don&#x27;t have cached</span></span><br><span class="line">		<span class="comment">// resource state. This is likely due to a race during node</span></span><br><span class="line">		<span class="comment">// restart. We re-issue allocate request to cover this race.</span></span><br><span class="line">		<span class="keyword">if</span> m.podDevices.containerDevices(podUID, contName, resource) == <span class="literal">nil</span> &#123;</span><br><span class="line">			needsReAllocate = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> needsReAllocate &#123;</span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">&quot;needs re-allocate device plugin resources for pod %s, container %s&quot;</span>, podUID, container.Name)</span><br><span class="line">		<span class="keyword">if</span> err := m.Allocate(pod, container); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>19/11/10 的 commit</p>
 <blockquote>
@@ -306,7 +306,7 @@
 </blockquote>
 <p>注释说明这种情况出现在 node 重启，pod 又被分配到了一个 node 上，但是这个 node 的 extended resource capacity 又并未 polulates 的情况</p>
 <p>回到 deviceManger Allocate 方法</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate is the call that you can use to allocate a set of devices</span></span><br><span class="line"><span class="comment">// from the registered device plugins.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">Allocate</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, ok := m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]; !ok &#123;</span><br><span class="line">		m.devicesToReuse[<span class="keyword">string</span>(pod.UID)] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sets.String)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// If pod entries to m.devicesToReuse other than the current pod exist, delete them.</span></span><br><span class="line">	<span class="keyword">for</span> podUID := <span class="keyword">range</span> m.devicesToReuse &#123;</span><br><span class="line">		<span class="keyword">if</span> podUID != <span class="keyword">string</span>(pod.UID) &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.devicesToReuse, podUID)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate is the call that you can use to allocate a set of devices</span></span><br><span class="line"><span class="comment">// from the registered device plugins.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">Allocate</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, ok := m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]; !ok &#123;</span><br><span class="line">		m.devicesToReuse[<span class="keyword">string</span>(pod.UID)] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sets.String)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// If pod entries to m.devicesToReuse other than the current pod exist, delete them.</span></span><br><span class="line">	<span class="keyword">for</span> podUID := <span class="keyword">range</span> m.devicesToReuse &#123;</span><br><span class="line">		<span class="keyword">if</span> podUID != <span class="keyword">string</span>(pod.UID) &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.devicesToReuse, podUID)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可见其中使用了 map，并不是并发安全的；因此上述 workaround 代码，假若触发条件非单一 pod 的情况下，是有并发问题的；既然提交了如此久，未被修复，那么我也认为该处 workaround 代码无多 pod 并发冲突 … :) 当然啦，这不是乱说的，找到上边代码合入的 PR 讨论，也可以佐证是 serialized 的</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/87759">https://github.com/kubernetes/kubernetes/pull/87759</a></p>
@@ -332,6 +332,7 @@
 <p>This would only work if Pod admission is serialized. @derekwaynecarr can you confirm that this is the case?</p>
 </blockquote>
 <p>总之呢，最后是确认了是 work 的</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/784148">https://developer.aliyun.com/article/784148</a></p>
 
     </div>
 
@@ -349,6 +350,9 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
+                <a href="/archives/926bc5d1.html" rel="prev" title="gpu device plugin">
+                  <i class="fa fa-chevron-left"></i> gpu device plugin
+                </a>
             </div>
             <div class="post-nav-item">
                 <a href="/archives/dfdab12d.html" rel="next" title="golang memory model">
@@ -385,13 +389,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">248k</span>
+    <span title="站点总字数">251k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:45</span>
+    <span title="站点阅读时长">3:48</span>
   </span>
 </div>
 

@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">110</span>
+          <span class="site-state-item-count">111</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -167,6 +167,114 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/926bc5d1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/926bc5d1.html" class="post-title-link" itemprop="url">gpu device plugin</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-04-05 10:06:00 / 修改时间：05:57:58" itemprop="dateCreated datePublished" datetime="2022-04-05T10:06:00Z">2022-04-05</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="device-plugin-init-and-list-watch"><a href="#device-plugin-init-and-list-watch" class="headerlink" title="device plugin init and list-watch"></a>device plugin init and list-watch</h1><h2 id="init"><a href="#init" class="headerlink" title="init"></a>init</h2><p>device plugin 启动时</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *NvidiaDevicePlugin)</span> <span class="title">initialize</span><span class="params">()</span></span> &#123;</span><br><span class="line">	m.cachedDevices = m.Devices()</span><br><span class="line">	m.server = grpc.NewServer([]grpc.ServerOption&#123;&#125;...)</span><br><span class="line">	m.health = <span class="built_in">make</span>(<span class="keyword">chan</span> *Device)</span><br><span class="line">	m.stop = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用 <code>m.Devices()</code> 获取当前节点上的 gpu 设备列表信息</p>
+<h2 id="list-watch"><a href="#list-watch" class="headerlink" title="list-watch"></a>list-watch</h2><p>返回 gpu 设备详情，注意到不健康的设备 <code>health</code> 字段会被设置 <code>Unhealthy</code> 值</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-m.stop:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	<span class="keyword">case</span> d := &lt;-m.health:</span><br><span class="line">		<span class="comment">// <span class="doctag">FIXME:</span> there is no way to recover from the Unhealthy state.</span></span><br><span class="line">		d.Health = pluginapi.Unhealthy</span><br><span class="line">		log.Printf(<span class="string">&quot;&#x27;%s&#x27; device marked unhealthy: %s&quot;</span>, m.resourceName, d.ID)</span><br><span class="line">		s.Send(&amp;pluginapi.ListAndWatchResponse&#123;Devices: m.apiDevices()&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="device-plugin-health-check"><a href="#device-plugin-health-check" class="headerlink" title="device plugin health check"></a>device plugin health check</h1><p>health 检测的实现也比较直接</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> m.CheckHealth(m.stop, m.cachedDevices, m.health)</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>nvml</code> go lib API 将已发现的每个设备注册到 <code>eventSet</code>，假若不支持该 API 的设备，则直接标记为 <code>Unhealthy</code></p>
+<p>注册 ok 后，开启 for loop 等待 event</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http://docs.nvidia.com/deploy/xid-errors/index.html#topic_4</span></span><br><span class="line"><span class="comment">// Application errors: the GPU should still be healthy</span></span><br><span class="line">applicationErrorXids := []<span class="keyword">uint64</span>&#123;</span><br><span class="line">	<span class="number">13</span>, <span class="comment">// Graphics Engine Exception</span></span><br><span class="line">	<span class="number">31</span>, <span class="comment">// GPU memory page fault</span></span><br><span class="line">	<span class="number">43</span>, <span class="comment">// GPU stopped processing</span></span><br><span class="line">	<span class="number">45</span>, <span class="comment">// Preemptive cleanup, due to previous errors</span></span><br><span class="line">	<span class="number">68</span>, <span class="comment">// Video processor exception</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">skippedXids := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">uint64</span>]<span class="keyword">bool</span>)</span><br><span class="line"><span class="keyword">for</span> _, id := <span class="keyword">range</span> applicationErrorXids &#123;</span><br><span class="line">	skippedXids[id] = <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-stop:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	e, err := nvml.WaitForEvent(eventSet, <span class="number">5000</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &amp;&amp; e.Etype != nvml.XidCriticalError &#123;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> skippedXids[e.Edata] &#123;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> e.UUID == <span class="literal">nil</span> || <span class="built_in">len</span>(*e.UUID) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="comment">// All devices are unhealthy</span></span><br><span class="line">		log.Printf(<span class="string">&quot;XidCriticalError: Xid=%d, All devices will go unhealthy.&quot;</span>, e.Edata)</span><br><span class="line">		<span class="keyword">for</span> _, d := <span class="keyword">range</span> devices &#123;</span><br><span class="line">			unhealthy &lt;- d</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, d := <span class="keyword">range</span> devices &#123;</span><br><span class="line">		<span class="comment">// Please see https://github.com/NVIDIA/gpu-monitoring-tools/blob/148415f505c96052cb3b7fdf443b34ac853139ec/bindings/go/nvml/nvml.h#L1424</span></span><br><span class="line">		<span class="comment">// for the rationale why gi and ci can be set as such when the UUID is a full GPU UUID and not a MIG device UUID.</span></span><br><span class="line">		gpu, gi, ci, err := nvml.ParseMigDeviceUUID(d.ID)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			gpu = d.ID</span><br><span class="line">			gi = <span class="number">0xFFFFFFFF</span></span><br><span class="line">			ci = <span class="number">0xFFFFFFFF</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> gpu == *e.UUID &amp;&amp; gi == *e.GpuInstanceId &amp;&amp; ci == *e.ComputeInstanceId &#123;</span><br><span class="line">			log.Printf(<span class="string">&quot;XidCriticalError: Xid=%d on Device=%s, the device will go unhealthy.&quot;</span>, e.Edata, d.ID)</span><br><span class="line">			unhealthy &lt;- d</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意到 gpu device plugin 会忽略特定 <code>Xid</code>，因为这些 <code>Xid</code> 明确不是硬件故障</p>
+<h1 id="NVIDIA-Health-amp-Diagnostic"><a href="#NVIDIA-Health-amp-Diagnostic" class="headerlink" title="NVIDIA Health &amp; Diagnostic"></a>NVIDIA Health &amp; Diagnostic</h1><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deploy/index.html">https://docs.nvidia.com/deploy/index.html</a></p>
+<h2 id="xid"><a href="#xid" class="headerlink" title="xid"></a>xid</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deploy/xid-errors/index.html#topic_4">https://docs.nvidia.com/deploy/xid-errors/index.html#topic_4</a></p>
+<blockquote>
+<p>The Xid message is an error report from the NVIDIA driver that is printed to the operating system’s kernel log or event log. Xid messages indicate that a general GPU error occurred, most often due to the driver programming the GPU incorrectly or to corruption of the commands sent to the GPU. The messages can be indicative of a hardware problem, an NVIDIA software problem, or a user application problem.</p>
+<p>Under Linux, the Xid error messages are placed in the location /var/log/messages. Grep for “NVRM: Xid” to find all the Xid messages.</p>
+</blockquote>
+<h2 id="NVVS-NVIDIA-Validation-Suite"><a href="#NVVS-NVIDIA-Validation-Suite" class="headerlink" title="NVVS (NVIDIA Validation Suite)"></a>NVVS (NVIDIA Validation Suite)</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deploy/nvvs-user-guide/index.html">https://docs.nvidia.com/deploy/nvvs-user-guide/index.html</a></p>
+<blockquote>
+<p>Easily integrate into Cluster Scheduler and Cluster Management applications</p>
+</blockquote>
+<h1 id="k8s-device"><a href="#k8s-device" class="headerlink" title="k8s device"></a>k8s device</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListAndWatchResponse <span class="keyword">struct</span> &#123;</span><br><span class="line">	Devices              []*Device <span class="string">`protobuf:&quot;bytes,1,rep,name=devices,...`</span></span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// E.g:</span></span><br><span class="line"><span class="comment">// struct Device &#123;</span></span><br><span class="line"><span class="comment">//    ID: &quot;GPU-fef8089b-4820-abfc-e83e-94318197576e&quot;,</span></span><br><span class="line"><span class="comment">//    Health: &quot;Healthy&quot;,</span></span><br><span class="line"><span class="comment">//    Topology:</span></span><br><span class="line"><span class="comment">//      Node:</span></span><br><span class="line"><span class="comment">//        ID: 1</span></span><br></pre></td></tr></table></figure>
+
+<p>结合 Health 信息，k8s 调度器就可以忽略 <code>UnHealthy</code> 的 GPU 设备了</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ab861e1f.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -192,7 +300,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2022-03-27 12:48:00 / 修改时间：14:20:04" itemprop="dateCreated datePublished" datetime="2022-03-27T12:48:00Z">2022-03-27</time>
+      <time title="创建时间：2022-03-27 12:48:00 / 修改时间：14:45:42" itemprop="dateCreated datePublished" datetime="2022-03-27T12:48:00Z">2022-03-27</time>
     </span>
 
   
@@ -203,7 +311,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>8.9k</span>
+      <span>9k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -293,7 +401,7 @@
 <li>在后续的 container 分配时，优先使用 devicesToReuse 分配 device</li>
 </ol>
 <p>不过在 syncPod 内部也有一个 workaround 的 case</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">GetDeviceRunContainerOptions</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="params">(*DeviceRunContainerOptions, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> container.Resources.Limits &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">		<span class="comment">// This is a device plugin resource yet we don&#x27;t have cached</span></span><br><span class="line">		<span class="comment">// resource state. This is likely due to a race during node</span></span><br><span class="line">		<span class="comment">// restart. We re-issue allocate request to cover this race.</span></span><br><span class="line">		<span class="keyword">if</span> m.podDevices.containerDevices(podUID, contName, resource) == <span class="literal">nil</span> &#123;</span><br><span class="line">			needsReAllocate = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> needsReAllocate &#123;</span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">&quot;needs re-allocate device plugin resources for pod %s, container %s&quot;</span>, podUID, container.Name)</span><br><span class="line">		<span class="keyword">if</span> err := m.Allocate(pod, container); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">GetDeviceRunContainerOptions</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="params">(*DeviceRunContainerOptions, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> container.Resources.Limits &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">		<span class="comment">// This is a device plugin resource yet we don&#x27;t have cached</span></span><br><span class="line">		<span class="comment">// resource state. This is likely due to a race during node</span></span><br><span class="line">		<span class="comment">// restart. We re-issue allocate request to cover this race.</span></span><br><span class="line">		<span class="keyword">if</span> m.podDevices.containerDevices(podUID, contName, resource) == <span class="literal">nil</span> &#123;</span><br><span class="line">			needsReAllocate = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> needsReAllocate &#123;</span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">&quot;needs re-allocate device plugin resources for pod %s, container %s&quot;</span>, podUID, container.Name)</span><br><span class="line">		<span class="keyword">if</span> err := m.Allocate(pod, container); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>19/11/10 的 commit</p>
 <blockquote>
@@ -301,7 +409,7 @@
 </blockquote>
 <p>注释说明这种情况出现在 node 重启，pod 又被分配到了一个 node 上，但是这个 node 的 extended resource capacity 又并未 polulates 的情况</p>
 <p>回到 deviceManger Allocate 方法</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate is the call that you can use to allocate a set of devices</span></span><br><span class="line"><span class="comment">// from the registered device plugins.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">Allocate</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, ok := m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]; !ok &#123;</span><br><span class="line">		m.devicesToReuse[<span class="keyword">string</span>(pod.UID)] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sets.String)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// If pod entries to m.devicesToReuse other than the current pod exist, delete them.</span></span><br><span class="line">	<span class="keyword">for</span> podUID := <span class="keyword">range</span> m.devicesToReuse &#123;</span><br><span class="line">		<span class="keyword">if</span> podUID != <span class="keyword">string</span>(pod.UID) &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.devicesToReuse, podUID)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate is the call that you can use to allocate a set of devices</span></span><br><span class="line"><span class="comment">// from the registered device plugins.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">Allocate</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, ok := m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]; !ok &#123;</span><br><span class="line">		m.devicesToReuse[<span class="keyword">string</span>(pod.UID)] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sets.String)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// If pod entries to m.devicesToReuse other than the current pod exist, delete them.</span></span><br><span class="line">	<span class="keyword">for</span> podUID := <span class="keyword">range</span> m.devicesToReuse &#123;</span><br><span class="line">		<span class="keyword">if</span> podUID != <span class="keyword">string</span>(pod.UID) &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.devicesToReuse, podUID)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可见其中使用了 map，并不是并发安全的；因此上述 workaround 代码，假若触发条件非单一 pod 的情况下，是有并发问题的；既然提交了如此久，未被修复，那么我也认为该处 workaround 代码无多 pod 并发冲突 … :) 当然啦，这不是乱说的，找到上边代码合入的 PR 讨论，也可以佐证是 serialized 的</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/87759">https://github.com/kubernetes/kubernetes/pull/87759</a></p>
@@ -327,6 +435,7 @@
 <p>This would only work if Pod admission is serialized. @derekwaynecarr can you confirm that this is the case?</p>
 </blockquote>
 <p>总之呢，最后是确认了是 work 的</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/784148">https://developer.aliyun.com/article/784148</a></p>
 
       
     </div>
@@ -1276,128 +1385,8 @@ InitContainer --&gt; SidecarContainer
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e9a26fdf.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/e9a26fdf.html" class="post-title-link" itemprop="url">golang cli context</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-12 16:44:12" itemprop="dateCreated datePublished" datetime="2021-07-12T16:44:12Z">2021-07-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 03:26:20" itemprop="dateModified" datetime="2021-07-18T03:26:20Z">2021-07-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li><a target="_blank" rel="noopener" href="https://www.sohamkamani.com/golang/context-cancellation-and-values/">https://www.sohamkamani.com/golang/context-cancellation-and-values/</a></li>
-<li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine">https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine</a></li>
-</ul>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them">https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them</a>.</p>
-<p>A Context is safe for simultaneous use by multiple goroutines. Code can pass a single Context to any number of goroutines and cancel that Context to signal all of them.</p>
-</blockquote>
-<h1 id="project-structure"><a href="#project-structure" class="headerlink" title="project structure"></a>project structure</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── cmd</span><br><span class="line">│   └── command.go</span><br><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── main.go</span><br><span class="line">└── pkg</span><br><span class="line">    └── run</span><br><span class="line">        └── long_run_cli.go</span><br><span class="line"></span><br><span class="line">3 directories, 5 files</span><br></pre></td></tr></table></figure>
-
-<h1 id="main-go"><a href="#main-go" class="headerlink" title="main.go"></a>main.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/cmd&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)</span><br><span class="line"></span><br><span class="line">	ctx := context.Background()</span><br><span class="line">	ctx, cancel := context.WithCancel(ctx)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-c:</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	cmd.Execute(ctx)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="command-go"><a href="#command-go" class="headerlink" title="command.go"></a>command.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cmd</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/spf13/cobra&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/pkg/run&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> rootCmd = &amp;cobra.Command&#123;</span><br><span class="line">	Use:   <span class="string">&quot;long run cli&quot;</span>,</span><br><span class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">		cli := run.New()</span><br><span class="line">		err := cli.LongRun(cmd.Context())</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;cli run err: %v\n&quot;</span>, err)</span><br><span class="line">			<span class="keyword">if</span> exitError, ok := err.(*exec.ExitError); ok &#123;</span><br><span class="line">				fmt.Printf(<span class="string">&quot;exit code: %d\n&quot;</span>, exitError.ExitCode())</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Execute</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := rootCmd.ExecuteContext(ctx); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;err: %v\n&quot;</span>, err)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="long-run-cli-go"><a href="#long-run-cli-go" class="headerlink" title="long_run_cli.go"></a>long_run_cli.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> run</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> CLI <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cli CLI)</span> <span class="title">LongRun</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	cmd := exec.CommandContext(ctx, <span class="string">&quot;sleep&quot;</span>, <span class="string">&quot;30&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> cmd.Run()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> *<span class="title">CLI</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;CLI&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/exec#CommandContext">https://pkg.go.dev/os/exec#CommandContext</a></p>
-<blockquote>
-<p>The provided context is used to kill the process (by calling os.Process.Kill) if the context becomes done before the command completes on its own.</p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/issues/21135">https://github.com/golang/go/issues/21135</a></p>
-<blockquote>
-<p>proposal: os/exec: allow user of CommandContext to specify the kill signal when context is done</p>
-</blockquote>
-<p>commandContext will trigger SIGKILL when the ctx is done …</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
@@ -1420,13 +1409,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">248k</span>
+    <span title="站点总字数">251k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:45</span>
+    <span title="站点阅读时长">3:48</span>
   </span>
 </div>
 
