@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/Z.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="conda 4.12.0 macOS 10.15.7   示例为个人 PC 环境下的回显  Conda makes environments first-class citizens, making it easy to create independent environments even for C libraries. Conda is written entirely in Pyth">
+<meta property="og:type" content="article">
+<meta property="og:title" content="conda activate">
+<meta property="og:url" content="https://zrss.github.io/archives/467ab0db.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="conda 4.12.0 macOS 10.15.7   示例为个人 PC 环境下的回显  Conda makes environments first-class citizens, making it easy to create independent environments even for C libraries. Conda is written entirely in Pyth">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-06T20:42:00.000Z">
+<meta property="article:modified_time" content="2022-04-10T13:49:22.053Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="conda">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/467ab0db.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/467ab0db.html","path":"archives/467ab0db.html","title":"conda activate"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>conda activate | 随风飘散的记忆</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">激活流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2-conda-env-path"><span class="nav-number">2.1.</span> <span class="nav-text">查询 conda env path</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#set-ld-library-path-inside-python"><span class="nav-number">3.</span> <span class="nav-text">set ld_library_path inside python</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/467ab0db.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          conda activate
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-06 20:42:00" itemprop="dateCreated datePublished" datetime="2022-04-06T20:42:00Z">2022-04-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-10 13:49:22" itemprop="dateModified" datetime="2022-04-10T13:49:22Z">2022-04-10</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<ul>
+<li>conda 4.12.0</li>
+<li>macOS 10.15.7</li>
+</ul>
+</blockquote>
+<p>示例为个人 PC 环境下的回显</p>
+<blockquote>
+<p>Conda makes environments first-class citizens, making it easy to create independent environments even for C libraries. Conda is written entirely in Python</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># conda environments:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">base                     /Users/huangzhesi/miniconda</span><br><span class="line">conda-dev             *  /Users/huangzhesi/miniconda/envs/conda-dev</span><br><span class="line">pandas                   /Users/huangzhesi/miniconda/envs/pandas</span><br><span class="line">pytorch-1.8              /Users/huangzhesi/miniconda/envs/pytorch-1.8</span><br><span class="line">pytorch-dev              /Users/huangzhesi/miniconda/envs/pytorch-dev</span><br><span class="line">tensorflow-1.x           /Users/huangzhesi/miniconda/envs/tensorflow-1.x</span><br></pre></td></tr></table></figure>
+
+<p>今天来探索下我们输入 <code>conda activate conda-dev</code> 命令后，实际上 conda 为了我们做什么</p>
+<p>先说结论</p>
+<ol>
+<li>设置了 conda env bin 到环境变量 PATH（替换 <em>old</em> conda env 值，比如 base conda env）</li>
+<li>未修改环境变量 <code>LD_LIBRARY_PATH</code>，原因如下</li>
+</ol>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda-build/en/latest/resources/use-shared-libraries.html#shared-libraries-in-macos-and-linux">https://docs.conda.io/projects/conda-build/en/latest/resources/use-shared-libraries.html#shared-libraries-in-macos-and-linux</a></p>
+<p><a target="_blank" rel="noopener" href="https://conda.io/projects/conda-build/en/latest/concepts/recipe.html#prefix-replacement">https://conda.io/projects/conda-build/en/latest/concepts/recipe.html#prefix-replacement</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/issues/308#issuecomment-36058087">https://github.com/conda/conda/issues/308#issuecomment-36058087</a></p>
+<p>the problem with activate setting LD_LIBRARY_PATH (even when conda packages themselves don’t need it) is that it might break other things on the users system.</p>
+</blockquote>
+<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/tree/4.12.0">https://github.com/conda/conda/tree/4.12.0</a></p>
+<p><code>conda activate</code> 命令在 conda/activate.py 文件里边实现</p>
+<p>调用顺序如下</p>
+<ol>
+<li>activate</li>
+<li>build_activate</li>
+<li>_build_activate_stack</li>
+</ol>
+<p>最终返回一个 structure</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="string">&#x27;unset_vars&#x27;</span>: unset_vars,</span><br><span class="line">    <span class="string">&#x27;set_vars&#x27;</span>: set_vars,</span><br><span class="line">    <span class="string">&#x27;export_vars&#x27;</span>: export_vars,</span><br><span class="line">    <span class="string">&#x27;deactivate_scripts&#x27;</span>: deactivate_scripts,</span><br><span class="line">    <span class="string">&#x27;activate_scripts&#x27;</span>: activate_scripts,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见 <code>conda activate</code> 命令实际上会 <code>unset</code>，<code>set</code>，<code>export</code> vars，以达到激活环境的效果</p>
+<h1 id="激活流程"><a href="#激活流程" class="headerlink" title="激活流程"></a>激活流程</h1><h2 id="查询-conda-env-path"><a href="#查询-conda-env-path" class="headerlink" title="查询 conda env path"></a>查询 conda env path</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conda_prefix</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="keyword">return</span> abspath(sys.prefix)</span><br></pre></td></tr></table></figure>
+
+<p><code>root_prefix</code> case = <code>conda_prefix</code> = <code>/Users/huangzhesi/miniconda</code></p>
+<p>prefix magic file = <code>&#123;conda_prefix&#125;/conda-meta/history</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># path is the prefix magic file</span></span><br><span class="line">        <span class="keyword">if</span> isfile(path):</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                fh = <span class="built_in">open</span>(path, <span class="string">&#x27;a+&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>测试 history file 是否有读写权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ls -alh /Users/huangzhesi/miniconda/conda-meta | grep <span class="built_in">history</span></span><br><span class="line">-rw-r--r--    1 huangzhesi  staff   8.2K 12 19 21:44 <span class="built_in">history</span></span><br></pre></td></tr></table></figure>
+
+<p>(1) 假若 history file 有读写权限，则 context envs dirs 按如下顺序</p>
+<ol>
+<li><code>/Users/huangzhesi/miniconda/envs</code></li>
+<li><code>~/.conda/envs</code></li>
+</ol>
+<p>(2) 若 history file 没有读写权限，则 context envs dirs 按如下顺序</p>
+<ol>
+<li><code>~/.conda/envs</code></li>
+<li><code>/Users/huangzhesi/miniconda/envs</code></li>
+</ol>
+<p>从 context envs dirs 中查询待激活的 env</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name is the conda activate &#123;name&#125;</span></span><br><span class="line">    <span class="keyword">for</span> envs_dir <span class="keyword">in</span> envs_dirs:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isdir(envs_dir):</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        prefix = join(envs_dir, name)</span><br><span class="line">        <span class="keyword">if</span> isdir(prefix):</span><br><span class="line">            <span class="keyword">return</span> abspath(prefix)</span><br></pre></td></tr></table></figure>
+
+<p>到这里 prefix 就确定了 <code>prefix = locate_prefix_by_name(env_name_or_prefix)</code></p>
+<p><code>prefix = /Users/huangzhesi/miniconda/envs/conda-dev</code></p>
+<ul>
+<li>CONDA_SHLVL=1</li>
+<li>CONDA_PREFIX=/Users/huangzhesi/miniconda</li>
+</ul>
+<p>替换 <code>old_conda_prefix</code>，比如 base conda env</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">new_path = self.pathsep_join(</span><br><span class="line">    self._replace_prefix_in_path(old_conda_prefix, prefix))</span><br></pre></td></tr></table></figure>
+
+<p>需要设置的环境变量</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">env_vars_to_export = OrderedDict((</span><br><span class="line">    (<span class="string">&#x27;path&#x27;</span>, new_path),</span><br><span class="line">    (<span class="string">&#x27;conda_prefix&#x27;</span>, prefix),</span><br><span class="line">    (<span class="string">&#x27;conda_shlvl&#x27;</span>, new_conda_shlvl),</span><br><span class="line">    (<span class="string">&#x27;conda_default_env&#x27;</span>, conda_default_env),</span><br><span class="line">    (<span class="string">&#x27;conda_prompt_modifier&#x27;</span>, conda_prompt_modifier)))</span><br></pre></td></tr></table></figure>
+
+<h1 id="set-ld-library-path-inside-python"><a href="#set-ld-library-path-inside-python" class="headerlink" title="set ld_library_path inside python"></a>set ld_library_path inside python</h1><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python">https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python</a></p>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/856116/changing-ld-library-path-at-runtime-for-ctypes">https://stackoverflow.com/questions/856116/changing-ld-library-path-at-runtime-for-ctypes</a></p>
+<p>比较 hack，不优雅 …</p>
+<p>如果 conda env 中安装的非 conda package，其依赖 shared libraries，没太好办法，手动设置 <code>LD_LIBRARY_PATH</code> 环境变量吧</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/conda/" rel="tag"># conda</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/926bc5d1.html" rel="next" title="gpu device plugin">
+                  gpu device plugin <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">254k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:51</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":"forest","js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js","integrity":"sha256-sVAx+v/Q7v0Q2xm5vN7h5ccSna6gaLREhG9sF8pKT6I="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>
