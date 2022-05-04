@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">114</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">58</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,425 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/bed8f754.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/bed8f754.html" class="post-title-link" itemprop="url">knative startup</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-01 14:26:45" itemprop="dateCreated datePublished" datetime="2018-09-01T14:26:45Z">2018-09-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 06:37:30" itemprop="dateModified" datetime="2020-11-22T06:37:30Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>也许 kubernetes 对于开发者来说仍然过于复杂，另外现实系统中，又对服务发布后的流量管理有诸多需求</p>
+<p>Knative 的出现，似乎是要真正实现 PAAS on the kubernetes</p>
+<p>开发者仅需要关心如何编写代码 (write code) ，其他的所有，交给 Knative 吧（Maybe）</p>
+<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=F4_2gxTtLaQ&t=849s">One Platform for Your Functions, Applications, and Containers (Cloud Next ‘18)</a></p>
+<h1 id="Knative-serving"><a href="#Knative-serving" class="headerlink" title="Knative serving"></a>Knative serving</h1><h2 id="controller"><a href="#controller" class="headerlink" title="controller"></a>controller</h2><ul>
+<li>revision</li>
+<li>configuration</li>
+<li>services</li>
+<li>routes</li>
+</ul>
+<p>抽象了一套统一的框架去实现四个 controller，不过当前命名的不是很理想，虽然都在 controller package 下面，然而文件名仅为 revision.go … 不如 kubernetes 的 job_controller.go 来的直接，也便于搜索</p>
+<p>controller 的主要方法均为 Reconsile，即从 kube-apiserver list-watch CRD 的增量更新后，调用 Reconsile 执行相应操作，使得最终状态与用户期望的一致</p>
+<p>提到 list-watch 而又不能不提到 kubernetes 中的杰出 api sdk 实现——informer</p>
+<p>基于已日渐稳定的 kubernetes，knative 目前实现的简洁直接</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctrlr.Run(threadsPerController, stopCh)</span><br></pre></td></tr></table></figure>
+
+<p>每个 controller 启动 2 (threadsPerController) 个 goroutine 处理 list-watch 获得的 CRD 更新信息</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; threadiness; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> c.processNextWorkItem(syncHandler) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>syncHandler 由各个不同的 controller 传入</p>
+<p>下面简单分析 knative serving 模块的几个 controller</p>
+<h3 id="services"><a href="#services" class="headerlink" title="services"></a>services</h3><p>根据 knative 的 simple demo app，开始的时候，我们需要使用 yaml 创建一个 service，这是所有 knative 奇妙之旅的开端 getting-started-knative-app</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">serving.knative.dev/v1alpha1</span> <span class="comment"># Current version of Knative</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloworld-go</span> <span class="comment"># The name of the app</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span> <span class="comment"># The namespace the app will use</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">runLatest:</span></span><br><span class="line">    <span class="attr">configuration:</span></span><br><span class="line">      <span class="attr">revisionTemplate:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">container:</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">gcr.io/knative-samples/helloworld-go</span> <span class="comment"># The URL to the image of the app</span></span><br><span class="line">            <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">TARGET</span> <span class="comment"># The environment variable printed out by the sample app</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&quot;Go Sample v1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>services 的 reconcile 首先会查询</p>
+<p>service 对应的 configuration (its name is the same with service-name) 是否存在</p>
+<ul>
+<li>不存在，创建之</li>
+<li>存在，reconcile 之</li>
+</ul>
+<p>service 对应的 routes (its name is the same with service-name) 是否存在</p>
+<ul>
+<li>不存在，创建之</li>
+<li>存在，reconcile 之</li>
+</ul>
+<h3 id="configuration"><a href="#configuration" class="headerlink" title="configuration"></a>configuration</h3><p>获取对应的 rev</p>
+<p>[config-name]-[config.spec.Generation]: helloworld-go-00001</p>
+<ul>
+<li>不存在，创建之</li>
+</ul>
+<p>随后更新 configuration 的 status</p>
+<p>所以可以看到在 configuration 中其实实现了 app 的多版本管理，每次 configuration 的修改（Generation + 1）均会生成一个新的 revision</p>
+<h3 id="revision"><a href="#revision" class="headerlink" title="revision"></a>revision</h3><p>revision 关注下述几种资源，在下述资源有变化时，将变化加入 queue 中，等待 revision 2 个 goroutine 处理之</p>
+<ul>
+<li>revisionInformer</li>
+<li>deploymentInformer</li>
+</ul>
+<p>暂时仅关注 revisionInformer，endpointsInformer 及 deploymentInformer</p>
+<p>revision controller 获取到 revision 之后</p>
+<p>若未找到其对应的 deployment</p>
+<p>[rev-name]-deployment</p>
+<p>将其 revision 的 status 更新为</p>
+<ul>
+<li>ResourcesAvailable [status: Unknown, reason: Deploying]</li>
+<li>ContainerHealthy [status: Unknown, reason: Deploying]</li>
+<li>Ready [status: Unknown, reason: Deploying]</li>
+</ul>
+<p>并调用 kube-apiserver api 创建 deployment</p>
+<p>注意到在创建 deployment 时，revision controller 需要连接至该 deployment 的镜像仓库，获取其 digest，因此如果 revision controller 所在节点的网络受限的话，revision 的 status 可能会提示如下信息</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:03:43Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Deploying</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
+
+<p>即连接镜像仓库（如示例中的连接 gcr.io 超时），导致 revision notReady，正常工作的 revision 状态如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
+
+<p>非 active 的 revision 状态如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Inactive</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
+
+<p>若找到其对应的 deployment</p>
+<p>则根据 rev 的状态，决定 deployment replica 的数量</p>
+<ul>
+<li>rev.spec.servingState 状态为 Active，且 deployment replica = 0 时，需将其调整为 1</li>
+<li>rev.spec.servingState 状态为 Reserve，且 deployment replica != 0 时，需将其调整为 0</li>
+</ul>
+<p>如果期望的 deployment replica 与实际的 replica 相同，那么将 rev 的 status 更新为</p>
+<ul>
+<li>ResourcesAvailable [status: Unknown, reason: Updating]</li>
+<li>ContainerHealthy [status: Unknown, reason: Updating]</li>
+<li>Ready [status: Unknown, reason: Updating]</li>
+</ul>
+<p>如果不相同，调用 kube-apiserver api 更新 deployment</p>
+<h3 id="routes"><a href="#routes" class="headerlink" title="routes"></a>routes</h3><p>routes 获取其对应的 kubernetes svc</p>
+<p>[route-name] 例如 helloworld-go</p>
+<ul>
+<li>不存在，创建之</li>
+<li>否则，更新之</li>
+</ul>
+<p>随后通过 istio CRD Istio VirtualService 配置流量</p>
+<ul>
+<li>不存在，创建之</li>
+<li>否则，更新之</li>
+</ul>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>controller of serving</p>
+<ul>
+<li>services controller</li>
+<li>configuration controller</li>
+<li>routes controller</li>
+<li>revision controller</li>
+</ul>
+<p>数据源均来自 list-watch 相应的 CRD，实现相应的 reconcile 方法</p>
+<p>services controller 负责创建 configuration 和 routes 资源</p>
+<p>configuration controller 负责创建 revision 资源</p>
+<p>routes controller 负责创建 Istio VirtualService 资源</p>
+<h1 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h1><p>Knative 还处于较为年轻的阶段，花了两天时间最后成功在内网环境上成功运行了其 simple demo app。目前在需要使用 proxy 访问公网网络的情况下，如何配置 knative，其文档中还没有相关的说明</p>
+<p>目前为止尝试 knative 的一些 debug 经历，可参看下述 issues</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/knative/docs/issues/365">Knative http proxy sample</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1954">istio-statsd-prom-bridge pod crash due to unknown short flag</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1971">Configuration is waiting for a Revision to become ready</a></p>
+<p>to be cont …</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b5fa504c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b5fa504c.html" class="post-title-link" itemprop="url">kubelet workflow</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-25 14:38:42" itemprop="dateCreated datePublished" datetime="2018-08-25T14:38:42Z">2018-08-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 06:47:12" itemprop="dateModified" datetime="2020-11-22T06:47:12Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>kubelet 为运行在 node 上的主要组件</p>
+<p>其一方面 list-watch kube-apiserver pod 资源的变化</p>
+<p>另一方面调用 docker 接口获取当前实际存在的 container 来 SyncLoop (PLEG)</p>
+<p>所以下面分两条路线来分析 kubelet 的一些细节 (仅关注 pod/container，略去其他无关资源)</p>
+<h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><ul>
+<li>Run<ul>
+<li>start a goroutine, one second trigger once podKiller method</li>
+<li>call kl.statusManager.Start()</li>
+<li>call kl.probeManager.Start()</li>
+<li>call kl.pleg.Start()<ul>
+<li>start a goroutine, one second trigger once relist method</li>
+</ul>
+</li>
+<li>call kubelet main loop kl.syncLoop(updates, kl)<ul>
+<li>syncLoopIteration</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>注意到 kubelet main loop 传递的 updates channel 为从 kube-apiserver list-watch 到的 pod 变化数据，当 kubelet 重启时，会收到当前 node 上的所有 pod 数据</p>
+<p>syncLoopIteration 是 kubelet 的 main loop，其主要处理</p>
+<ul>
+<li>configCh channel: pod info with ADD / Update / Delete …, this channel’s data comes from kube-apiserver</li>
+<li>plegCh channel: pod life cycle generator event, such as ContainerStart / ContainerDied …, this channel’s data comes from docker</li>
+<li>syncCh channel: a one-second period time ticker</li>
+<li>livenessManager.Updates() channel</li>
+<li>housekeepingCh channel: a two-second period time ticker</li>
+</ul>
+<p>当 kubelet 启动时指定 -v=2 的情况下</p>
+<p>kubelet 处理 configCh 数据时，会显示如下日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, api): podName_podNamespace(podUID),...</span><br><span class="line"></span><br><span class="line">or </span><br><span class="line"></span><br><span class="line">SyncLoop (UPDATE, api): podName_podNamespace(podUID),...</span><br><span class="line"></span><br><span class="line">and REMOVE / RECONCILE / DELETE / RESTORE type</span><br></pre></td></tr></table></figure>
+
+<p>具体如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, &quot;api&quot;): &quot;nginx-deployment-6c54bd5869-wppm8_default(1336f9f0-a898-11e8-b01b-000d3a362518)&quot;</span><br></pre></td></tr></table></figure>
+
+<p>kubelet 处理 plegCh 数据时，会显示如下日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): podName_podNamespace(podUID),..., event:</span><br></pre></td></tr></table></figure>
+
+<p>具体如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): &quot;nginx-deployment-6c54bd5869-9jsp5_default(1336d6cf-a898-11e8-b01b-000d3a362518)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;1336d6cf-a898-11e8-b01b-000d3a362518&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;7e06e4ce8ab3a4a0b8bbb84f35ac8ac078bb5ec9db4ce765e35a235664cb3dd7&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Data 为 ContainerID 与 docker ps 看到的相同</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hzs@kubernetes:~/work/src/k8s.io/kubernetes$ docker ps | grep 7e06e4ce8ab3</span><br><span class="line">7e06e4ce8ab3        nginx                                      &quot;nginx -g &#x27;daemon of…&quot;   3 minutes ago       Up 3 minutes                            k8s_nginx_nginx-deployment-6c54bd5869-9jsp5_default_1336d6cf-a898-11e8-b01b-000d3a362518_0</span><br></pre></td></tr></table></figure>
+
+<p>经过上述分析，大概对 kubelet 的工作原理及数据来源有了个基本认识，下面详细看一下 kubelet 对 configCh 及 plegCh 的数据处理</p>
+<h1 id="configCh"><a href="#configCh" class="headerlink" title="configCh"></a>configCh</h1><p>list-watch from kube-apiserver in a independant goroutine, once there is events about pods, then these pod data will be put into configCh</p>
+<p>syncLoopIteration -&gt; handle the pod data from list-watch from kube-apiserver pod resource -&gt; HandlePodAdditions/… -&gt; dispatchWork -&gt; podWorkers.UpdatePod</p>
+<p>UpdatePod</p>
+<ul>
+<li>如果之前未处理该 pod，则为该 pod 创建一个大小为 1 的 UpdatePodOptions channel，并启动一个协程调用 managePodLoop(podUpdates)</li>
+<li>如果处理过了，判断 isWorking<ul>
+<li>若 false，则置为 true，并将 *options 置入 UpdatePodOptions channel，以供 managePodLoop 处理</li>
+<li>若 true，则进一步判断 lastUndeliveredWorkUpdate 未被记录或者 UpdateType 不等于 kubetypes.SyncPodKill，则更新 lastUndeliveredWorkUpdate 为本次 UpdatePod *options</li>
+</ul>
+</li>
+</ul>
+<p>managePodLoop -&gt; syncPodFn -&gt; kubelet.syncPod</p>
+<h1 id="plegCh"><a href="#plegCh" class="headerlink" title="plegCh"></a>plegCh</h1><p>one second trigger once time relist -&gt; generate container event (Started/…) -&gt; put the event into eventChannel channel</p>
+<p>syncLoopIteration -&gt; handle the event from eventChannel -&gt; HandlePodSyncs -&gt; dispatchWork -&gt; podWorkers.UpdatePod</p>
+<p>看到这，简单总结一下，两条更新的路，最终得到统一，即来自于 kube-apiserver pod 更新，又亦或是来自于节点上 container status 的变化 (pleg)，最终均会调用 syncPod</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, &quot;api&quot;): &quot;nginx-deployment-6c54bd5869-wppm8_default(1336f9f0-a898-11e8-b01b-000d3a362518)&quot;</span><br><span class="line">SyncLoop (PLEG): &quot;nginx-deployment-6c54bd5869-9jsp5_default(1336d6cf-a898-11e8-b01b-000d3a362518)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;1336d6cf-a898-11e8-b01b-000d3a362518&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;7e06e4ce8ab3a4a0b8bbb84f35ac8ac078bb5ec9db4ce765e35a235664cb3dd7&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="syncPod"><a href="#syncPod" class="headerlink" title="syncPod"></a>syncPod</h1><p>举几个典型的例子吧</p>
+<h2 id="create-a-deployment-with-replica-1"><a href="#create-a-deployment-with-replica-1" class="headerlink" title="create a deployment with replica 1"></a>create a deployment with replica 1</h2><p>kubelet 的响应流程</p>
+<h3 id="configCh-1"><a href="#configCh-1" class="headerlink" title="configCh"></a>configCh</h3><ul>
+<li>SyncLoop (ADD, “api”): “podName_namespace(podUID)”</li>
+<li>HandlePodAdditions</li>
+</ul>
+<p>从 podManager 中获取已存在的 pod，并将新的 pod 添加至其中。从已存在的 pod 中过滤出 activePods，并判断新的 pod canAdmitPod。例如亲和性、反亲和性的判断</p>
+<ul>
+<li>dispatchWork</li>
+</ul>
+<p>调用 podWorkers.UpdatePod</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">kl.podWorkers.UpdatePod(&amp;UpdatePodOptions&#123;</span><br><span class="line">    Pod:        pod,</span><br><span class="line">    MirrorPod:  mirrorPod,</span><br><span class="line">    UpdateType: syncType, <span class="comment">// SyncPodCreate</span></span><br><span class="line">    OnCompleteFunc: <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            metrics.PodWorkerLatency.WithLabelValues(syncType.String()).Observe(metrics.SinceInMicroseconds(start))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>UpdatePod</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">初始化 podUID -&gt; UpdatePodOptions channel (<span class="number">1</span>)，并启动协程执行 p.managePodLoop(podUpdates)。p.isWorking[pod.UID] 为 <span class="literal">false</span>，随后设置其为 <span class="literal">true</span>，并将 *options 置入 UpdatePodOptions channel</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>managePodLoop</li>
+</ul>
+<p>循环处理 UpdatePodOptions channel</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This is a blocking call that would return only if the cache</span></span><br><span class="line"><span class="comment">// has an entry for the pod that is newer than minRuntimeCache</span></span><br><span class="line"><span class="comment">// Time. This ensures the worker doesn&#x27;t start syncing until</span></span><br><span class="line"><span class="comment">// after the cache is at least newer than the finished time of</span></span><br><span class="line"><span class="comment">// the previous sync.</span></span><br><span class="line">status, err := p.podCache.GetNewerThan(podUID, lastSyncTime)</span><br><span class="line">err = p.syncPodFn(syncPodOptions&#123;</span><br><span class="line">    mirrorPod:      update.MirrorPod,</span><br><span class="line">    pod:            update.Pod,</span><br><span class="line">    podStatus:      status,</span><br><span class="line">    killPodOptions: update.KillPodOptions,</span><br><span class="line">    updateType:     update.UpdateType,</span><br><span class="line">&#125;)</span><br><span class="line">lastSyncTime = time.Now()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>syncPodFn(kubelet.syncPod)</li>
+</ul>
+<p>mkdir dir</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/lib/kubelet/pods/[podUID]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>volumeManager.WaitForAttachAndMount(pod)</li>
+</ul>
+<p>获取 imagePullSecrets</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fetch the pull secrets for the pod</span></span><br><span class="line">pullSecrets := kl.getPullSecretsForPod(pod)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>containerRuntime.SyncPod</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Call the container runtime&#x27;s SyncPod callback</span><br><span class="line">result := kl.containerRuntime.SyncPod(pod, apiPodStatus, podStatus, pullSecrets, kl.backOff)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>createPodSandBox</li>
+</ul>
+<p>mkdir logs dir</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/log/pods/[podUID]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>run init container</li>
+<li>run container</li>
+</ul>
+<h1 id="pleg"><a href="#pleg" class="headerlink" title="pleg"></a>pleg</h1><p>relist 的时候，先从 docker 获取一把全量的 pod 数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Get all the pods.</span><br><span class="line">podList, err := g.runtime.GetPods(true)</span><br></pre></td></tr></table></figure>
+
+<p>当前状态与之前的状态一比，生成每个 container 的 PLE (pod life cycle event)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): &quot;podName_Namespace(podUID)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;podUID&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;ContainerID&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是 ContainerDied 就是容器退出的意思</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">generateEvents</span><span class="params">(podID types.UID, cid <span class="keyword">string</span>, oldState, newState plegContainerState)</span> []*<span class="title">PodLifecycleEvent</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> newState == oldState &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;GenericPLEG: %v/%v: %v -&gt; %v&quot;</span>, podID, cid, oldState, newState)</span><br><span class="line">    <span class="keyword">switch</span> newState &#123;</span><br><span class="line">    <span class="keyword">case</span> plegContainerRunning:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerStarted, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerExited:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerDied, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerUnknown:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerChanged, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerNonExistent:</span><br><span class="line">        <span class="keyword">switch</span> oldState &#123;</span><br><span class="line">        <span class="keyword">case</span> plegContainerExited:</span><br><span class="line">            <span class="comment">// We already reported that the container died before.</span></span><br><span class="line">            <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerRemoved, Data: cid&#125;&#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerDied, Data: cid&#125;, &#123;ID: podID, Type: ContainerRemoved, Data: cid&#125;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;unrecognized container state: %v&quot;</span>, newState))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>plegCh</li>
+</ul>
+<p>plegCh 有数据后，调用 HandlePodSyncs 处理之</p>
+<ul>
+<li>UpdatePod</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if a request to kill a pod is pending, we do not let anything overwrite that request.</span></span><br><span class="line">update, found := p.lastUndeliveredWorkUpdate[pod.UID]</span><br><span class="line"><span class="keyword">if</span> !found || update.UpdateType != kubetypes.SyncPodKill &#123;</span><br><span class="line">    p.lastUndeliveredWorkUpdate[pod.UID] = *options</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即更新 lastUndeliveredWorkUpdate</p>
+<p>HandlePodSyncs 执行结束之后（同步）</p>
+<p>如果容器挂掉，则执行清理动作</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> e.Type == pleg.ContainerDied &#123;</span><br><span class="line">    <span class="keyword">if</span> containerID, ok := e.Data.(<span class="keyword">string</span>); ok &#123;</span><br><span class="line">        kl.cleanUpContainersInPod(e.ID, containerID)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认配置，只保留最新一个。若 pod 被 evicted，或者是 DeletionTimestamp != nil &amp;&amp; notRunning(apiPodStatus.ContainerStatuses)，那么它的所有容器将会被删除</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MaxPerPodContainerCount: 1</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1244,341 +1663,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b8d588f2.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/b8d588f2.html" class="post-title-link" itemprop="url">k8s minikube setup</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-06-24 12:09:06" itemprop="dateCreated datePublished" datetime="2018-06-24T12:09:06Z">2018-06-24</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-06 04:17:12" itemprop="dateModified" datetime="2020-12-06T04:17:12Z">2020-12-06</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>最近在着手实现 Console k8s workload upgrade 相关的任务，然而 mock 数据不直观，使用完整的集成环境，又存在不稳定性，经常与其他任务冲突（比如测试要开始搞破坏了）。遂重新开始折腾 k8s cluster setup</p>
-<p>当然 k8s 发展到今天 local up 已经做的相对简单（可能对于自由的网络环境来说，不自由的就求爷爷告奶奶了）</p>
-<p>这里 local up k8s cluster 使用的是 minikube 方案 <a target="_blank" rel="noopener" href="https://v1-9.docs.kubernetes.io/docs/getting-started-guides/minikube/">https://v1-9.docs.kubernetes.io/docs/getting-started-guides/minikube/</a></p>
-<p>此篇适用下述两条背景</p>
-<ul>
-<li>非阿里 minikube 版本</li>
-<li>解决 minikube docker proxy not work 问题</li>
-</ul>
-<h1 id="Environment"><a href="#Environment" class="headerlink" title="Environment"></a>Environment</h1><ul>
-<li>OS: macOS Sierra 10.12.6</li>
-<li>minikube: v0.25.0</li>
-<li>VM Driver: virtualbox</li>
-<li>ISO version: minikube-v0.25.1.iso</li>
-</ul>
-<h1 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h1><p>macOS 安装 minikube 可以说很简单了</p>
-<blockquote>
-<p>已安装 homebrew</p>
-</blockquote>
-<p>homebrew install minikube</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew cask install minikube</span><br></pre></td></tr></table></figure>
-
-<h1 id="Network"><a href="#Network" class="headerlink" title="Network"></a>Network</h1><p>国内的困难主要是这个</p>
-<p>我使用的方案是 Shadowsocks + privoxy，相关的资料非常多，不赘述了</p>
-<p>privoxy 的配置如下 cat /usr/local/etc/privoxy/config</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">listen-address 0.0.0.0:1081</span><br><span class="line">forward-socks5 / 127.0.0.1:1080 .</span><br></pre></td></tr></table></figure>
-
-<p>1080 端口为 socks5 的监听端口（即 Shadowsocks），privoxy 监听 1081 端口，将 1081 端口的 http 请求转发至 1080 socks5 监听端口上，这样就能让 http 请求也经过 socks5 转发了</p>
-<p>测试一下 privoxy 是否正常工作</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check process</span></span><br><span class="line">ps -ef | grep privoxy</span><br><span class="line"><span class="comment"># curl port</span></span><br><span class="line">curl http://127.0.0.0:1081</span><br><span class="line"><span class="comment"># netstat (recommended)</span></span><br><span class="line">netstat -an | grep 1081</span><br><span class="line"><span class="comment"># lsof</span></span><br><span class="line">lsof -i:1081</span><br></pre></td></tr></table></figure>
-
-<h1 id="Minikube-start"><a href="#Minikube-start" class="headerlink" title="Minikube start"></a>Minikube start</h1><p>使用上一步搭建好的 privoxy http 代理</p>
-<p>我使用的终端为 iTerm，理论上系统自带 Terminal 也 ok</p>
-<p>设置 http / https 代理</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> https_proxy=https://127.0.0.1:1081</span><br></pre></td></tr></table></figure>
-
-<p>启动 minikube</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start</span><br></pre></td></tr></table></figure>
-
-<h1 id="Docker-proxy"><a href="#Docker-proxy" class="headerlink" title="Docker proxy"></a>Docker proxy</h1><p>minikube 下载完成 iso 后，再 bootstrap k8s cluster，cluster 起来之后，会启动一些 system 组件，比如 kube-addon-manager-minikube/ dashboard / dns 等，然而不幸的是这些 pod 会一直处于 ContainerCreating 的状态</p>
-<h2 id="查看-events"><a href="#查看-events" class="headerlink" title="查看 events"></a>查看 events</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe po kube-addon-manager-minikube -nkube-system</span><br></pre></td></tr></table></figure>
-
-<p>None</p>
-<h2 id="查看-kubelet-日志"><a href="#查看-kubelet-日志" class="headerlink" title="查看 kubelet 日志"></a>查看 kubelet 日志</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube logs kubelet</span><br></pre></td></tr></table></figure>
-
-<p>发现端倪</p>
-<p>gcr.io/google_containers/pause-amd64:3.0，pause 容器无法 pull 下来</p>
-<p>继续搜索得知 minikube 可配置 docker proxy <a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md">https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md</a></p>
-<p>遂停止 minikube 并以新参数启动之</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://127.0.0.1:1081 --docker-env HTTPS_PROXY=https://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br></pre></td></tr></table></figure>
-
-<p>呃，然而事实证明并不 work，遂登陆 vm</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br></pre></td></tr></table></figure>
-
-<p>尝试 curl 该 1081 端口</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl http://127.0.0.1:1081</span><br><span class="line">&gt;&gt; curl: (7) Failed to connect to 127.0.0.1 port 1081: Connection refused</span><br></pre></td></tr></table></figure>
-
-<p>可见 vm 中该端口并不通</p>
-<p>稍加思索，解决的思路应为在 virtualbox vm 中如何 connect back to host，因为 privoxy 实际上监听的是 host 的 1081 端口。几番搜索后，发现在 virtualbox vm 中可通过 10.0.2.2 IP connect back to host <a target="_blank" rel="noopener" href="https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os%EF%BC%8C%E7%99%BB%E9%99%86">https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os，登陆</a> vm</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
-
-<p>果然能通了</p>
-<p>于是再次尝试修改 minikube 启动命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://10.0.2.2:1081 --docker-env HTTPS_PROXY=https://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
-
-<p>糟糕的是，仍然不 work …，所以问题集中到了 http_proxy 未生效上</p>
-<p>登陆 vm 查看 docker version / info，希望能获取到一些线索</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># version</span></span><br><span class="line">docker version</span><br><span class="line">Client:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:39:28 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line">Server:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32 (minimum version 1.12)</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:45:38 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line"> Experimental: <span class="literal">false</span></span><br><span class="line"><span class="comment"># info</span></span><br><span class="line">docker info</span><br><span class="line">Containers: 0</span><br><span class="line">Running: 0</span><br><span class="line">Paused: 0</span><br><span class="line">Stopped: 0</span><br><span class="line">Images: 0</span><br><span class="line">Server Version: 17.09.0-ce</span><br><span class="line">Storage Driver: overlay2</span><br><span class="line"> Backing Filesystem: extfs</span><br><span class="line"> Supports d_type: <span class="literal">true</span></span><br><span class="line"> Native Overlay Diff: <span class="literal">true</span></span><br><span class="line">Logging Driver: json-file</span><br><span class="line">Cgroup Driver: cgroupfs</span><br><span class="line">Plugins:</span><br><span class="line"> Volume: <span class="built_in">local</span></span><br><span class="line"> Network: bridge host macvlan null overlay</span><br><span class="line"> Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog</span><br><span class="line">Swarm: inactive</span><br><span class="line">Runtimes: runc</span><br><span class="line">Default Runtime: runc</span><br><span class="line">Init Binary: docker-init</span><br><span class="line">containerd version: 06b9cb35161009dcb7123345749fef02f7cea8e0</span><br><span class="line">runc version: 3f2f8b84a77f73d38244dd690525642a72156c64</span><br><span class="line">init version: N/A (expected: )</span><br><span class="line">Security Options:</span><br><span class="line"> seccomp</span><br><span class="line">  Profile: default</span><br><span class="line">Kernel Version: 4.9.64</span><br><span class="line">Operating System: Buildroot 2017.11</span><br><span class="line">OSType: linux</span><br><span class="line">Architecture: x86_64</span><br><span class="line">CPUs: 2</span><br><span class="line">Total Memory: 1.953GiB</span><br><span class="line">Name: minikube</span><br><span class="line">ID: 6RR3:WAF4:FIGA:TTEG:5UE6:V3RD:JNQV:WQQ4:ER3T:ETKJ:ZVP4:2Z7M</span><br><span class="line">Docker Root Dir: /var/lib/docker</span><br><span class="line">Debug Mode (client): <span class="literal">false</span></span><br><span class="line">Debug Mode (server): <span class="literal">false</span></span><br><span class="line">Registry: https://index.docker.io/v1/</span><br><span class="line">Labels:</span><br><span class="line"> provider=virtualbox</span><br><span class="line">Experimental: <span class="literal">false</span></span><br><span class="line">Insecure Registries:</span><br><span class="line"> 10.96.0.0/12</span><br><span class="line"> 127.0.0.0/8</span><br><span class="line">Live Restore Enabled: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
-
-<p>然而似乎和问题并没有什么关联，http_proxy 和 docker daemon 有关，和 docker 没啥关系，所以在 version / info 中都未见 http_proxy 相关配置 <a target="_blank" rel="noopener" href="https://github.com/docker/distribution/issues/2397#issuecomment-330079118">https://github.com/docker/distribution/issues/2397#issuecomment-330079118</a></p>
-<p>追溯到这里，只能看看 minikube 代码中是如何使用 docker-env 这个传入参数的了</p>
-<h1 id="how-does-minikube-start"><a href="#how-does-minikube-start" class="headerlink" title="how does minikube start"></a>how does minikube start</h1><p>overall</p>
-<ul>
-<li>startHost</li>
-<li>startK8S</li>
-</ul>
-<p>startHost</p>
-<ul>
-<li>create virtualbox driver with boot2docker iso</li>
-<li>waiting docker set up</li>
-</ul>
-<p>step by step 的过程省略，最后找到如下代码片段，显示 docker-env 实际上并不会生效</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157">https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">start := <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    host, err = cluster.StartHost(api, config)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        glog.Errorf(<span class="string">&quot;Error starting host: %s.\n\n Retrying.\n&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &amp;host.Host&#123;</span><br><span class="line">    ConfigVersion: version.ConfigVersion,</span><br><span class="line">    Name:          driver.GetMachineName(),</span><br><span class="line">    Driver:        driver,</span><br><span class="line">    DriverName:    driver.DriverName(),</span><br><span class="line">    HostOptions: &amp;host.Options&#123;</span><br><span class="line">        AuthOptions: &amp;auth.Options&#123;</span><br><span class="line">            CertDir:          api.certsDir,</span><br><span class="line">            CaCertPath:       filepath.Join(api.certsDir, <span class="string">&quot;ca.pem&quot;</span>),</span><br><span class="line">            CaPrivateKeyPath: filepath.Join(api.certsDir, <span class="string">&quot;ca-key.pem&quot;</span>),</span><br><span class="line">            ClientCertPath:   filepath.Join(api.certsDir, <span class="string">&quot;cert.pem&quot;</span>),</span><br><span class="line">            ClientKeyPath:    filepath.Join(api.certsDir, <span class="string">&quot;key.pem&quot;</span>),</span><br><span class="line">            ServerCertPath:   filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server.pem&quot;</span>),</span><br><span class="line">            ServerKeyPath:    filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server-key.pem&quot;</span>),</span><br><span class="line">        &#125;,</span><br><span class="line">        EngineOptions: &amp;engine.Options&#123;</span><br><span class="line">            StorageDriver: <span class="string">&quot;aufs&quot;</span>,</span><br><span class="line">            TLSVerify:     <span class="literal">true</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        SwarmOptions: &amp;swarm.Options&#123;&#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
-
-<p>可见默认 SwarmOptions 是个空对象，其中值得注意的是 IsSwarm 的值为 false</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h, err := api.NewHost(config.VMDriver, data)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, errors.Wrap(err, <span class="string">&quot;Error creating new host&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">h.HostOptions.AuthOptions.CertDir = constants.GetMinipath()</span><br><span class="line">h.HostOptions.AuthOptions.StorePath = constants.GetMinipath()</span><br><span class="line">h.HostOptions.EngineOptions = engineOptions(config)</span><br></pre></td></tr></table></figure>
-
-<p>将 docker-env 赋值与 h.HostOptions.EngineOptions.Env</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232">https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">provisioner.SwarmOptions = swarmOptions</span><br><span class="line">provisioner.AuthOptions = authOptions</span><br><span class="line">provisioner.EngineOptions = engineOptions</span><br><span class="line">swarmOptions.Env = engineOptions.Env</span><br></pre></td></tr></table></figure>
-
-<p>最后将 docker-env 传与 swarmOptions.Env，而我们又知道 IsSwarm 的值为 false，因此实际上该配置并不会生效 … 社区真是给处于不自由网络地区的童鞋埋了个大坑 …</p>
-<h1 id="Back-to-Docker-proxy"><a href="#Back-to-Docker-proxy" class="headerlink" title="Back to Docker proxy"></a>Back to Docker proxy</h1><p>回到如何在 minikube 中配置 Docker proxy 的问题，实际上可以参考 Docker 官方的文档配置，使用 systemd</p>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy">https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br><span class="line">sudo mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line">sudo vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure>
-
-<p>输入如下内容并保存退出</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">&quot;HTTP_PROXY=http://10.0.2.2:1081&quot;</span> <span class="string">&quot;HTTPS_PROXY=https://10.0.2.2:1081&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>Flush changes &amp; Restart Docker</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
-
-<p>Verify that the configuration has been loaded</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show --property=Environment docker</span><br></pre></td></tr></table></figure>
-
-<p>执行结束之后，此时在 vm 中</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
-
-<p>终于可以正常 pull image 了，system pod 也可以正常 running 起来了</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                                    READY     STATUS    RESTARTS   AGE</span><br><span class="line">kube-addon-manager-minikube             1/1       Running   4          12h</span><br><span class="line">kube-dns-54cccfbdf8-wfnxm               3/3       Running   3          12h</span><br><span class="line">kubernetes-dashboard-77d8b98585-t59gj   1/1       Running   1          12h</span><br><span class="line">storage-provisioner                     1/1       Running   1          12h</span><br></pre></td></tr></table></figure>
-
-<p>不过因为该改动并未固化到 iso 中，因此 minikube stop 之后改动会丢失 … 另外一个折中的办法</p>
-<h1 id="Another-method-for-Docker-proxy-recommended"><a href="#Another-method-for-Docker-proxy-recommended" class="headerlink" title="Another method for Docker proxy (recommended)"></a>Another method for Docker proxy (recommended)</h1><blockquote>
-<p>workaround</p>
-</blockquote>
-<p>之前我们知道，在 terminal 中 export http_proxy 之后，minikube 即可使用 proxy 访问网络资源，而在 minikube –help 中发现 minikube 可以 cache image，所以我们可以 cache 需要使用的 image 资源，如</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br><span class="line">minikube cache add gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
-
-<p>也可以解决问题，比如我目前 cache 的 image</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">minikube cache list</span><br><span class="line">gcr.io/google-containers/kube-addon-manager:v6.5</span><br><span class="line">gcr.io/google_containers/pause-amd64:3.0</span><br><span class="line">gcr.io/k8s-minikube/storage-provisioner:v1.8.1</span><br><span class="line">k8s.gcr.io/k8s-dns-dnsmasq-nanny-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-kube-dns-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-sidecar-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.1</span><br></pre></td></tr></table></figure>
-
-<p>cache 这些 image 之后，就可以使得 kube-system 下面的 pod 都 running 了</p>
-<h1 id="minikube-logs-healthcheck-error"><a href="#minikube-logs-healthcheck-error" class="headerlink" title="minikube logs healthcheck error"></a>minikube logs healthcheck error</h1><p>使用 minikube 过程中发现其 logs 中一直有如下错误日志</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jun 23 18:15:15 minikube localkube[3034]: E0623 18:15:15.392453    3034 healthcheck.go:317] Failed to start node healthz on 0: listen tcp: address 0: missing port <span class="keyword">in</span> address</span><br></pre></td></tr></table></figure>
-
-<p>查看了相关代码，似乎是正常现象，不过这个实现也是太奇怪了 … 可参考如下 issue，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288">https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b40cf9b.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/b40cf9b.html" class="post-title-link" itemprop="url">k8s annotation of storage</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-06-24 12:06:44" itemprop="dateCreated datePublished" datetime="2018-06-24T12:06:44Z">2018-06-24</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-06 04:08:29" itemprop="dateModified" datetime="2020-12-06T04:08:29Z">2020-12-06</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>k8s 1.7.6</p>
-<p>kubernetes/pkg/controller/volume/persistentvolume/pv_controller.go</p>
-</blockquote>
-<p>claim.Spec.VolumeName == nil 时</p>
-<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 volume.beta.kubernetes.io/storage-class 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
-<ul>
-<li>volume.beta.kubernetes.io/storage-class</li>
-<li>Spec.StorageClassName</li>
-</ul>
-<p>在允许动态提供存储（enableDynamicProvisioning）的情况下，尝试去提供一个 volume</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newClaim, err := ctrl.setClaimProvisioner(claim, storageClass)</span><br></pre></td></tr></table></figure>
-
-<p>动态的 pvc 会增加如下 annotation</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">volume.beta.kubernetes.io/storage-provisioner: class.Provisioner</span><br><span class="line">pv.kubernetes.io/bound-by-controller: yes</span><br><span class="line">pv.kubernetes.io/provisioned-by: plugin.GetPluginName()</span><br></pre></td></tr></table></figure>
-
-<p>从存储提供服务获取 volume 的过程是异步的，当获取完成时，设置如下 annotation</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pv.kubernetes.io/bind-completed: yes</span><br></pre></td></tr></table></figure>
-
-<p>如果是其他可以直接 bind 的情况，在 bind 的方法中也会设置上述 annotation</p>
-<p>所以可以通过 pvc annotation</p>
-<ul>
-<li>pv.kubernetes.io/bound-by-controller: yes</li>
-</ul>
-<p>确认该 pvc 为动态创建还是直接使用</p>
-<p>不过该字段还有一种情况下可能被设置</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> claim.Name != volume.Spec.ClaimRef.Name || claim.Namespace != volume.Spec.ClaimRef.Namespace &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef.UID != <span class="string">&quot;&quot;</span> &amp;&amp; claim.UID != volume.Spec.ClaimRef.UID &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>volume 和 claim binding 时，发现 volume 与 claim 的字段不匹配</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Check if the claim was already bound (either by controller or by user)</span></span><br><span class="line">shouldBind := <span class="literal">false</span></span><br><span class="line"><span class="keyword">if</span> volume.Name != claim.Spec.VolumeName &#123;</span><br><span class="line">    shouldBind = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>clain 和 volume binding 时，也会出现这种情况，当 volume 与 claim 的字段不匹配时</p>
-<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 pv.kubernetes.io/bound-by-controller: yes 判断动态创建是否准确?</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1603,13 +1687,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">254k</span>
+    <span title="站点总字数">261k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:51</span>
+    <span title="站点阅读时长">3:57</span>
   </span>
 </div>
 

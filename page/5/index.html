@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">112</span>
+          <span class="site-state-item-count">114</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">58</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,269 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e57ea50b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/e57ea50b.html" class="post-title-link" itemprop="url">welcome to hpc</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-19 10:54:39" itemprop="dateCreated datePublished" datetime="2019-01-19T10:54:39Z">2019-01-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 03:00:26" itemprop="dateModified" datetime="2020-11-22T03:00:26Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念</p>
+<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><h2 id="MPI"><a href="#MPI" class="headerlink" title="MPI"></a>MPI</h2><p>Message passing interface</p>
+<p>消息传递接口，可以理解为分布式消息传递框架</p>
+<h2 id="OpenMPI"><a href="#OpenMPI" class="headerlink" title="OpenMPI"></a>OpenMPI</h2><p>MPI 的一种开源实现</p>
+<h2 id="RDMA"><a href="#RDMA" class="headerlink" title="RDMA"></a>RDMA</h2><p>remote direct memory access</p>
+<h2 id="Infiniband"><a href="#Infiniband" class="headerlink" title="Infiniband"></a>Infiniband</h2><p>IB</p>
+<p>网络设备，支持 RDMA</p>
+<h1 id="OpenMPI-1"><a href="#OpenMPI-1" class="headerlink" title="OpenMPI"></a>OpenMPI</h1><p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=developers#ompi-terminology">Terminology</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#mca-def">MCA</a></p>
+<ul>
+<li>framework</li>
+<li>components</li>
+<li>module</li>
+</ul>
+<blockquote>
+<p>An easy example framework to discuss is the MPI framework named “btl”, or the Byte Transfer Layer. It is used to send and receive data on different kinds of networks. Hence, Open MPI has btl components for shared memory, TCP, Infiniband, Myrinet, etc.</p>
+</blockquote>
+<p>不同的 MCA 支持不同的参数，我们可以参考如下查询支持的 MCA 参数</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#available-mca-params">available-mca-params</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ompi_info --param all all --level 9</span><br><span class="line"><span class="comment"># only btl</span></span><br><span class="line">ompi_info --param btl all --level 9</span><br><span class="line"><span class="comment"># only tcp of btl</span></span><br><span class="line">ompi_info --param btl tcp --level 9</span><br></pre></td></tr></table></figure>
+
+<p>可以通过 MCA 参数选择 Components</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#selecting-components">selecting-components</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl ^tcp,openib</span><br></pre></td></tr></table></figure>
+
+<p>不使用 btl framework 中的 tcp component，使用其中的 openib</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/doc/v3.1/man1/mpirun.1.php">mpirun</a></p>
+<p>mpirun 的常用参数</p>
+<ul>
+<li>-H: List of hosts on which to invoke processes.</li>
+<li>-np: Run this many copies of the program on the given nodes. This option indicates that the specified file is an executable program and not an application context. If no value is provided for the number of copies to execute (i.e., neither the “-np” nor its synonyms are provided on the command line), Open MPI will automatically execute a copy of the program on each process slot (see below for description of a “process slot”). This feature, however, can only be used in the SPMD model and will return an error (without beginning execution of the application) otherwise.</li>
+<li>–bind-to: Bind processes to the specified object, defaults to core. Supported options include slot, hwthread, core, l1cache, l2cache, l3cache, socket, numa, board, and none.</li>
+<li>-x: Export the specified environment variables to the remote nodes before executing the program. Only one environment variable can be specified per -x option. Existing environment variables can be specified or new variable names specified with corresponding values. For example: % mpirun -x DISPLAY -x OFILE=/tmp/out … The parser for the -x option is not very sophisticated; it does not even understand quoted values. Users are advised to set variables in the environment, and then use -x to export (not define) them.</li>
+<li>-mca: Send arguments to various MCA modules. See the “MCA” section, below.</li>
+</ul>
+<p><code>--mca btl self</code> 的作用</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=openfabrics#ib-btl">ib-btl</a></p>
+<p>self 用于本地进程通信 (可能使用 lo 设备，也可能不用，例如可以使用内存共享)</p>
+<p>openmpi，假设多机同一个地址族的地址可通，如果主机上有多个网络，openmpi 参考如下链接进行网络选择</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-selection">tcp-selection</a></p>
+<p>注意到 openmpi 会使用所见的所有网络，如果你不想其使用 ip network，你可以显式的禁用之，然而</p>
+<blockquote>
+<p>Note that Open MPI will still use TCP for control messages, such as data between mpirun and the MPI processes, rendezvous information during MPI_INIT, etc. To disable TCP altogether, you also need to disable the tcp component from the OOB framework.</p>
+</blockquote>
+<p>这句话比较有意思，一般来说 mpirun 要求 node 间可以 ssh 免密登录，而 ssh 是应用层协议，依赖 TCP</p>
+<p>openmpi 会选择最优的网络</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability">tcp-routability</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability-1.3">tcp-routability-1.3</a></p>
+<p>如何查看 mpirun 连接的过程</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl self,vader,tcp --mca btl_base_verbose 30 -np 2 -host NodeA,NodeB a.out</span><br></pre></td></tr></table></figure>
+
+<p>a.out 为可执行程序</p>
+<p>如果有 ib 卡，tcp component 会自动下线</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-auto-disable">tcp-auto-disable</a></p>
+<p>openmpi build default option</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#default-build">default-build</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--with-openib(=DIR) and --with-openib-libdir=DIR</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2e8d2c8b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/2e8d2c8b.html" class="post-title-link" itemprop="url">mpi operator</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-19 10:51:00" itemprop="dateCreated datePublished" datetime="2019-01-19T10:51:00Z">2019-01-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:54:17" itemprop="dateModified" datetime="2020-11-22T02:54:17Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>967</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ol>
+<li>计算 Replica 及 Slot 数</li>
+<li>创建 ConfigMap</li>
+</ol>
+<ul>
+<li>hostfile</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[mpiJobName]-worker-i slots=[8]</span><br></pre></td></tr></table></figure>
+
+<p>[mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod</p>
+<p>kubexec.sh</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line">POD_NAME=<span class="variable">$1</span></span><br><span class="line"><span class="built_in">shift</span></span><br><span class="line">/opt/kube/kubectl <span class="built_in">exec</span> <span class="variable">$&#123;POD_NAME&#125;</span> -- /bin/sh -c <span class="string">&quot;$*&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>创建 Statefulset</li>
+</ol>
+<p>Container Command: Sleep</p>
+<ol start="2">
+<li>创建 Launcher (Job)</li>
+</ol>
+<p>Statefulset ready 后，创建 Launcher (Job)</p>
+<p>设置 env OMPI_MCA_plm_rsh_agent 为 kubexec.sh</p>
+<p>即使用 <code>kubectl exec $&#123;POD_NAME&#125; -- /bin/sh -c &quot;$*&quot;</code> 作为 ssh_agent</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=rsh#rsh-not-ssh">rsh-not-ssh</a></p>
+<p>所以 openmpi 是有个潜在要求的，要么是支持 IPoIB，or 要有 IP 网络，纯 IB 网络不行</p>
+<p>当然 SDP (Socket Direct Protocol) 能加速 Socket 又是另外一个话题了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># server side</span></span><br><span class="line">/etc/init.d/sshd stop</span><br><span class="line">env LD_PRELOAD=/usr/lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/u/etc/libsdp.conf /etc/init.d/sshd start</span><br><span class="line"><span class="comment"># client side</span></span><br><span class="line">LD_PRELOAD=/usr//lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/etc/libsdp.conf scp &lt;file&gt; &lt;user&gt;@&lt;IPoIBaddr&gt;:&lt;dir&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Running ssh, scp over SDP</p>
+<p><code>lsmod | grep sdp</code></p>
+<p><code>sdpnetstat -S</code></p>
+<p>设置 env OMPI_MCA_orte_default_hostfile 为 hostfile</p>
+<p>Container Command: mpirun</p>
+<p>综上，mpi-operator 使用 kube-dns 获得 pod ip，mpirun 使用 <code>kubectl exec</code> 远程登录 container</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1304,425 +1567,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/bed8f754.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/bed8f754.html" class="post-title-link" itemprop="url">knative startup</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-09-01 14:26:45" itemprop="dateCreated datePublished" datetime="2018-09-01T14:26:45Z">2018-09-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 06:37:30" itemprop="dateModified" datetime="2020-11-22T06:37:30Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>也许 kubernetes 对于开发者来说仍然过于复杂，另外现实系统中，又对服务发布后的流量管理有诸多需求</p>
-<p>Knative 的出现，似乎是要真正实现 PAAS on the kubernetes</p>
-<p>开发者仅需要关心如何编写代码 (write code) ，其他的所有，交给 Knative 吧（Maybe）</p>
-<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=F4_2gxTtLaQ&t=849s">One Platform for Your Functions, Applications, and Containers (Cloud Next ‘18)</a></p>
-<h1 id="Knative-serving"><a href="#Knative-serving" class="headerlink" title="Knative serving"></a>Knative serving</h1><h2 id="controller"><a href="#controller" class="headerlink" title="controller"></a>controller</h2><ul>
-<li>revision</li>
-<li>configuration</li>
-<li>services</li>
-<li>routes</li>
-</ul>
-<p>抽象了一套统一的框架去实现四个 controller，不过当前命名的不是很理想，虽然都在 controller package 下面，然而文件名仅为 revision.go … 不如 kubernetes 的 job_controller.go 来的直接，也便于搜索</p>
-<p>controller 的主要方法均为 Reconsile，即从 kube-apiserver list-watch CRD 的增量更新后，调用 Reconsile 执行相应操作，使得最终状态与用户期望的一致</p>
-<p>提到 list-watch 而又不能不提到 kubernetes 中的杰出 api sdk 实现——informer</p>
-<p>基于已日渐稳定的 kubernetes，knative 目前实现的简洁直接</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctrlr.Run(threadsPerController, stopCh)</span><br></pre></td></tr></table></figure>
-
-<p>每个 controller 启动 2 (threadsPerController) 个 goroutine 处理 list-watch 获得的 CRD 更新信息</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; threadiness; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> c.processNextWorkItem(syncHandler) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>syncHandler 由各个不同的 controller 传入</p>
-<p>下面简单分析 knative serving 模块的几个 controller</p>
-<h3 id="services"><a href="#services" class="headerlink" title="services"></a>services</h3><p>根据 knative 的 simple demo app，开始的时候，我们需要使用 yaml 创建一个 service，这是所有 knative 奇妙之旅的开端 getting-started-knative-app</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">serving.knative.dev/v1alpha1</span> <span class="comment"># Current version of Knative</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloworld-go</span> <span class="comment"># The name of the app</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span> <span class="comment"># The namespace the app will use</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">runLatest:</span></span><br><span class="line">    <span class="attr">configuration:</span></span><br><span class="line">      <span class="attr">revisionTemplate:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">container:</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">gcr.io/knative-samples/helloworld-go</span> <span class="comment"># The URL to the image of the app</span></span><br><span class="line">            <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">TARGET</span> <span class="comment"># The environment variable printed out by the sample app</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&quot;Go Sample v1&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>services 的 reconcile 首先会查询</p>
-<p>service 对应的 configuration (its name is the same with service-name) 是否存在</p>
-<ul>
-<li>不存在，创建之</li>
-<li>存在，reconcile 之</li>
-</ul>
-<p>service 对应的 routes (its name is the same with service-name) 是否存在</p>
-<ul>
-<li>不存在，创建之</li>
-<li>存在，reconcile 之</li>
-</ul>
-<h3 id="configuration"><a href="#configuration" class="headerlink" title="configuration"></a>configuration</h3><p>获取对应的 rev</p>
-<p>[config-name]-[config.spec.Generation]: helloworld-go-00001</p>
-<ul>
-<li>不存在，创建之</li>
-</ul>
-<p>随后更新 configuration 的 status</p>
-<p>所以可以看到在 configuration 中其实实现了 app 的多版本管理，每次 configuration 的修改（Generation + 1）均会生成一个新的 revision</p>
-<h3 id="revision"><a href="#revision" class="headerlink" title="revision"></a>revision</h3><p>revision 关注下述几种资源，在下述资源有变化时，将变化加入 queue 中，等待 revision 2 个 goroutine 处理之</p>
-<ul>
-<li>revisionInformer</li>
-<li>deploymentInformer</li>
-</ul>
-<p>暂时仅关注 revisionInformer，endpointsInformer 及 deploymentInformer</p>
-<p>revision controller 获取到 revision 之后</p>
-<p>若未找到其对应的 deployment</p>
-<p>[rev-name]-deployment</p>
-<p>将其 revision 的 status 更新为</p>
-<ul>
-<li>ResourcesAvailable [status: Unknown, reason: Deploying]</li>
-<li>ContainerHealthy [status: Unknown, reason: Deploying]</li>
-<li>Ready [status: Unknown, reason: Deploying]</li>
-</ul>
-<p>并调用 kube-apiserver api 创建 deployment</p>
-<p>注意到在创建 deployment 时，revision controller 需要连接至该 deployment 的镜像仓库，获取其 digest，因此如果 revision controller 所在节点的网络受限的话，revision 的 status 可能会提示如下信息</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:03:43Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Deploying</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>即连接镜像仓库（如示例中的连接 gcr.io 超时），导致 revision notReady，正常工作的 revision 状态如下</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>非 active 的 revision 状态如下</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Inactive</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>若找到其对应的 deployment</p>
-<p>则根据 rev 的状态，决定 deployment replica 的数量</p>
-<ul>
-<li>rev.spec.servingState 状态为 Active，且 deployment replica = 0 时，需将其调整为 1</li>
-<li>rev.spec.servingState 状态为 Reserve，且 deployment replica != 0 时，需将其调整为 0</li>
-</ul>
-<p>如果期望的 deployment replica 与实际的 replica 相同，那么将 rev 的 status 更新为</p>
-<ul>
-<li>ResourcesAvailable [status: Unknown, reason: Updating]</li>
-<li>ContainerHealthy [status: Unknown, reason: Updating]</li>
-<li>Ready [status: Unknown, reason: Updating]</li>
-</ul>
-<p>如果不相同，调用 kube-apiserver api 更新 deployment</p>
-<h3 id="routes"><a href="#routes" class="headerlink" title="routes"></a>routes</h3><p>routes 获取其对应的 kubernetes svc</p>
-<p>[route-name] 例如 helloworld-go</p>
-<ul>
-<li>不存在，创建之</li>
-<li>否则，更新之</li>
-</ul>
-<p>随后通过 istio CRD Istio VirtualService 配置流量</p>
-<ul>
-<li>不存在，创建之</li>
-<li>否则，更新之</li>
-</ul>
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>controller of serving</p>
-<ul>
-<li>services controller</li>
-<li>configuration controller</li>
-<li>routes controller</li>
-<li>revision controller</li>
-</ul>
-<p>数据源均来自 list-watch 相应的 CRD，实现相应的 reconcile 方法</p>
-<p>services controller 负责创建 configuration 和 routes 资源</p>
-<p>configuration controller 负责创建 revision 资源</p>
-<p>routes controller 负责创建 Istio VirtualService 资源</p>
-<h1 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h1><p>Knative 还处于较为年轻的阶段，花了两天时间最后成功在内网环境上成功运行了其 simple demo app。目前在需要使用 proxy 访问公网网络的情况下，如何配置 knative，其文档中还没有相关的说明</p>
-<p>目前为止尝试 knative 的一些 debug 经历，可参看下述 issues</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/knative/docs/issues/365">Knative http proxy sample</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1954">istio-statsd-prom-bridge pod crash due to unknown short flag</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1971">Configuration is waiting for a Revision to become ready</a></p>
-<p>to be cont …</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b5fa504c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/b5fa504c.html" class="post-title-link" itemprop="url">kubelet workflow</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-08-25 14:38:42" itemprop="dateCreated datePublished" datetime="2018-08-25T14:38:42Z">2018-08-25</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 06:47:12" itemprop="dateModified" datetime="2020-11-22T06:47:12Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>kubelet 为运行在 node 上的主要组件</p>
-<p>其一方面 list-watch kube-apiserver pod 资源的变化</p>
-<p>另一方面调用 docker 接口获取当前实际存在的 container 来 SyncLoop (PLEG)</p>
-<p>所以下面分两条路线来分析 kubelet 的一些细节 (仅关注 pod/container，略去其他无关资源)</p>
-<h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><ul>
-<li>Run<ul>
-<li>start a goroutine, one second trigger once podKiller method</li>
-<li>call kl.statusManager.Start()</li>
-<li>call kl.probeManager.Start()</li>
-<li>call kl.pleg.Start()<ul>
-<li>start a goroutine, one second trigger once relist method</li>
-</ul>
-</li>
-<li>call kubelet main loop kl.syncLoop(updates, kl)<ul>
-<li>syncLoopIteration</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>注意到 kubelet main loop 传递的 updates channel 为从 kube-apiserver list-watch 到的 pod 变化数据，当 kubelet 重启时，会收到当前 node 上的所有 pod 数据</p>
-<p>syncLoopIteration 是 kubelet 的 main loop，其主要处理</p>
-<ul>
-<li>configCh channel: pod info with ADD / Update / Delete …, this channel’s data comes from kube-apiserver</li>
-<li>plegCh channel: pod life cycle generator event, such as ContainerStart / ContainerDied …, this channel’s data comes from docker</li>
-<li>syncCh channel: a one-second period time ticker</li>
-<li>livenessManager.Updates() channel</li>
-<li>housekeepingCh channel: a two-second period time ticker</li>
-</ul>
-<p>当 kubelet 启动时指定 -v=2 的情况下</p>
-<p>kubelet 处理 configCh 数据时，会显示如下日志</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, api): podName_podNamespace(podUID),...</span><br><span class="line"></span><br><span class="line">or </span><br><span class="line"></span><br><span class="line">SyncLoop (UPDATE, api): podName_podNamespace(podUID),...</span><br><span class="line"></span><br><span class="line">and REMOVE / RECONCILE / DELETE / RESTORE type</span><br></pre></td></tr></table></figure>
-
-<p>具体如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, &quot;api&quot;): &quot;nginx-deployment-6c54bd5869-wppm8_default(1336f9f0-a898-11e8-b01b-000d3a362518)&quot;</span><br></pre></td></tr></table></figure>
-
-<p>kubelet 处理 plegCh 数据时，会显示如下日志</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): podName_podNamespace(podUID),..., event:</span><br></pre></td></tr></table></figure>
-
-<p>具体如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): &quot;nginx-deployment-6c54bd5869-9jsp5_default(1336d6cf-a898-11e8-b01b-000d3a362518)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;1336d6cf-a898-11e8-b01b-000d3a362518&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;7e06e4ce8ab3a4a0b8bbb84f35ac8ac078bb5ec9db4ce765e35a235664cb3dd7&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Data 为 ContainerID 与 docker ps 看到的相同</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hzs@kubernetes:~/work/src/k8s.io/kubernetes$ docker ps | grep 7e06e4ce8ab3</span><br><span class="line">7e06e4ce8ab3        nginx                                      &quot;nginx -g &#x27;daemon of…&quot;   3 minutes ago       Up 3 minutes                            k8s_nginx_nginx-deployment-6c54bd5869-9jsp5_default_1336d6cf-a898-11e8-b01b-000d3a362518_0</span><br></pre></td></tr></table></figure>
-
-<p>经过上述分析，大概对 kubelet 的工作原理及数据来源有了个基本认识，下面详细看一下 kubelet 对 configCh 及 plegCh 的数据处理</p>
-<h1 id="configCh"><a href="#configCh" class="headerlink" title="configCh"></a>configCh</h1><p>list-watch from kube-apiserver in a independant goroutine, once there is events about pods, then these pod data will be put into configCh</p>
-<p>syncLoopIteration -&gt; handle the pod data from list-watch from kube-apiserver pod resource -&gt; HandlePodAdditions/… -&gt; dispatchWork -&gt; podWorkers.UpdatePod</p>
-<p>UpdatePod</p>
-<ul>
-<li>如果之前未处理该 pod，则为该 pod 创建一个大小为 1 的 UpdatePodOptions channel，并启动一个协程调用 managePodLoop(podUpdates)</li>
-<li>如果处理过了，判断 isWorking<ul>
-<li>若 false，则置为 true，并将 *options 置入 UpdatePodOptions channel，以供 managePodLoop 处理</li>
-<li>若 true，则进一步判断 lastUndeliveredWorkUpdate 未被记录或者 UpdateType 不等于 kubetypes.SyncPodKill，则更新 lastUndeliveredWorkUpdate 为本次 UpdatePod *options</li>
-</ul>
-</li>
-</ul>
-<p>managePodLoop -&gt; syncPodFn -&gt; kubelet.syncPod</p>
-<h1 id="plegCh"><a href="#plegCh" class="headerlink" title="plegCh"></a>plegCh</h1><p>one second trigger once time relist -&gt; generate container event (Started/…) -&gt; put the event into eventChannel channel</p>
-<p>syncLoopIteration -&gt; handle the event from eventChannel -&gt; HandlePodSyncs -&gt; dispatchWork -&gt; podWorkers.UpdatePod</p>
-<p>看到这，简单总结一下，两条更新的路，最终得到统一，即来自于 kube-apiserver pod 更新，又亦或是来自于节点上 container status 的变化 (pleg)，最终均会调用 syncPod</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (ADD, &quot;api&quot;): &quot;nginx-deployment-6c54bd5869-wppm8_default(1336f9f0-a898-11e8-b01b-000d3a362518)&quot;</span><br><span class="line">SyncLoop (PLEG): &quot;nginx-deployment-6c54bd5869-9jsp5_default(1336d6cf-a898-11e8-b01b-000d3a362518)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;1336d6cf-a898-11e8-b01b-000d3a362518&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;7e06e4ce8ab3a4a0b8bbb84f35ac8ac078bb5ec9db4ce765e35a235664cb3dd7&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="syncPod"><a href="#syncPod" class="headerlink" title="syncPod"></a>syncPod</h1><p>举几个典型的例子吧</p>
-<h2 id="create-a-deployment-with-replica-1"><a href="#create-a-deployment-with-replica-1" class="headerlink" title="create a deployment with replica 1"></a>create a deployment with replica 1</h2><p>kubelet 的响应流程</p>
-<h3 id="configCh-1"><a href="#configCh-1" class="headerlink" title="configCh"></a>configCh</h3><ul>
-<li>SyncLoop (ADD, “api”): “podName_namespace(podUID)”</li>
-<li>HandlePodAdditions</li>
-</ul>
-<p>从 podManager 中获取已存在的 pod，并将新的 pod 添加至其中。从已存在的 pod 中过滤出 activePods，并判断新的 pod canAdmitPod。例如亲和性、反亲和性的判断</p>
-<ul>
-<li>dispatchWork</li>
-</ul>
-<p>调用 podWorkers.UpdatePod</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">kl.podWorkers.UpdatePod(&amp;UpdatePodOptions&#123;</span><br><span class="line">    Pod:        pod,</span><br><span class="line">    MirrorPod:  mirrorPod,</span><br><span class="line">    UpdateType: syncType, <span class="comment">// SyncPodCreate</span></span><br><span class="line">    OnCompleteFunc: <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            metrics.PodWorkerLatency.WithLabelValues(syncType.String()).Observe(metrics.SinceInMicroseconds(start))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>UpdatePod</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">初始化 podUID -&gt; UpdatePodOptions channel (<span class="number">1</span>)，并启动协程执行 p.managePodLoop(podUpdates)。p.isWorking[pod.UID] 为 <span class="literal">false</span>，随后设置其为 <span class="literal">true</span>，并将 *options 置入 UpdatePodOptions channel</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>managePodLoop</li>
-</ul>
-<p>循环处理 UpdatePodOptions channel</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This is a blocking call that would return only if the cache</span></span><br><span class="line"><span class="comment">// has an entry for the pod that is newer than minRuntimeCache</span></span><br><span class="line"><span class="comment">// Time. This ensures the worker doesn&#x27;t start syncing until</span></span><br><span class="line"><span class="comment">// after the cache is at least newer than the finished time of</span></span><br><span class="line"><span class="comment">// the previous sync.</span></span><br><span class="line">status, err := p.podCache.GetNewerThan(podUID, lastSyncTime)</span><br><span class="line">err = p.syncPodFn(syncPodOptions&#123;</span><br><span class="line">    mirrorPod:      update.MirrorPod,</span><br><span class="line">    pod:            update.Pod,</span><br><span class="line">    podStatus:      status,</span><br><span class="line">    killPodOptions: update.KillPodOptions,</span><br><span class="line">    updateType:     update.UpdateType,</span><br><span class="line">&#125;)</span><br><span class="line">lastSyncTime = time.Now()</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>syncPodFn(kubelet.syncPod)</li>
-</ul>
-<p>mkdir dir</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/lib/kubelet/pods/[podUID]</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>volumeManager.WaitForAttachAndMount(pod)</li>
-</ul>
-<p>获取 imagePullSecrets</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fetch the pull secrets for the pod</span></span><br><span class="line">pullSecrets := kl.getPullSecretsForPod(pod)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>containerRuntime.SyncPod</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Call the container runtime&#x27;s SyncPod callback</span><br><span class="line">result := kl.containerRuntime.SyncPod(pod, apiPodStatus, podStatus, pullSecrets, kl.backOff)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>createPodSandBox</li>
-</ul>
-<p>mkdir logs dir</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/log/pods/[podUID]</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>run init container</li>
-<li>run container</li>
-</ul>
-<h1 id="pleg"><a href="#pleg" class="headerlink" title="pleg"></a>pleg</h1><p>relist 的时候，先从 docker 获取一把全量的 pod 数据</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// Get all the pods.</span><br><span class="line">podList, err := g.runtime.GetPods(true)</span><br></pre></td></tr></table></figure>
-
-<p>当前状态与之前的状态一比，生成每个 container 的 PLE (pod life cycle event)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SyncLoop (PLEG): &quot;podName_Namespace(podUID)&quot;, event: &amp;pleg.PodLifecycleEvent&#123;ID:&quot;podUID&quot;, Type:&quot;ContainerStarted&quot;, Data:&quot;ContainerID&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>值得注意的是 ContainerDied 就是容器退出的意思</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">generateEvents</span><span class="params">(podID types.UID, cid <span class="keyword">string</span>, oldState, newState plegContainerState)</span> []*<span class="title">PodLifecycleEvent</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> newState == oldState &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;GenericPLEG: %v/%v: %v -&gt; %v&quot;</span>, podID, cid, oldState, newState)</span><br><span class="line">    <span class="keyword">switch</span> newState &#123;</span><br><span class="line">    <span class="keyword">case</span> plegContainerRunning:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerStarted, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerExited:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerDied, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerUnknown:</span><br><span class="line">        <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerChanged, Data: cid&#125;&#125;</span><br><span class="line">    <span class="keyword">case</span> plegContainerNonExistent:</span><br><span class="line">        <span class="keyword">switch</span> oldState &#123;</span><br><span class="line">        <span class="keyword">case</span> plegContainerExited:</span><br><span class="line">            <span class="comment">// We already reported that the container died before.</span></span><br><span class="line">            <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerRemoved, Data: cid&#125;&#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> []*PodLifecycleEvent&#123;&#123;ID: podID, Type: ContainerDied, Data: cid&#125;, &#123;ID: podID, Type: ContainerRemoved, Data: cid&#125;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;unrecognized container state: %v&quot;</span>, newState))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>plegCh</li>
-</ul>
-<p>plegCh 有数据后，调用 HandlePodSyncs 处理之</p>
-<ul>
-<li>UpdatePod</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if a request to kill a pod is pending, we do not let anything overwrite that request.</span></span><br><span class="line">update, found := p.lastUndeliveredWorkUpdate[pod.UID]</span><br><span class="line"><span class="keyword">if</span> !found || update.UpdateType != kubetypes.SyncPodKill &#123;</span><br><span class="line">    p.lastUndeliveredWorkUpdate[pod.UID] = *options</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>即更新 lastUndeliveredWorkUpdate</p>
-<p>HandlePodSyncs 执行结束之后（同步）</p>
-<p>如果容器挂掉，则执行清理动作</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> e.Type == pleg.ContainerDied &#123;</span><br><span class="line">    <span class="keyword">if</span> containerID, ok := e.Data.(<span class="keyword">string</span>); ok &#123;</span><br><span class="line">        kl.cleanUpContainersInPod(e.ID, containerID)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>默认配置，只保留最新一个。若 pod 被 evicted，或者是 DeletionTimestamp != nil &amp;&amp; notRunning(apiPodStatus.ContainerStatuses)，那么它的所有容器将会被删除</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MaxPerPodContainerCount: 1</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1747,13 +1591,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">254k</span>
+    <span title="站点总字数">261k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:51</span>
+    <span title="站点阅读时长">3:57</span>
   </span>
 </div>
 
