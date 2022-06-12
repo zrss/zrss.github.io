@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-count">61</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,453 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/724944fd.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/724944fd.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 2)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-06 20:28:07" itemprop="dateCreated datePublished" datetime="2018-07-06T20:28:07Z">2018-07-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 03:18:54" itemprop="dateModified" datetime="2020-12-06T03:18:54Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>接着上一篇，来分析一下 Tomcat 7 中 WebSocket 的实现</p>
+<h1 id="WsFilter"><a href="#WsFilter" class="headerlink" title="WsFilter"></a>WsFilter</h1><p>WebSocket 的实现入口处为 WsFilter，该 Filter 检查 HTTP header 中是否包含下述字段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket</span><br></pre></td></tr></table></figure>
+
+<p>且为 HTTP GET 请求。若符合 WebSocket Handshake 要求，则从 WebSocketContainer 中查找请求路径是否有 filter 拦截，若没有则继续后续的 filter，若有则进入 UpgradeUtil.doUpgrade 方法</p>
+<h1 id="WsServerContainer"><a href="#WsServerContainer" class="headerlink" title="WsServerContainer"></a>WsServerContainer</h1><p>回头来看 WsServerContainer 的初始化，当然最为重要的是注册了 WsFilter</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">FilterRegistration.Dynamic fr = servletContext.addFilter(</span><br><span class="line">        <span class="string">&quot;Tomcat WebSocket (JSR356) Filter&quot;</span>, <span class="keyword">new</span> WsFilter());</span><br><span class="line">fr.setAsyncSupported(<span class="keyword">true</span>);</span><br><span class="line">EnumSet&lt;DispatcherType&gt; types = EnumSet.of(DispatcherType.REQUEST,</span><br><span class="line">        DispatcherType.FORWARD);</span><br><span class="line">fr.addMappingForUrlPatterns(types, <span class="keyword">true</span>, <span class="string">&quot;/*&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>可见 WsFilter 拦截所有请求，当遇到 HTTP Upgrade to websocket 协议的请求时执行 doUpgrade 逻辑</p>
+<h1 id="UpgradeUtil-doUpgrade"><a href="#UpgradeUtil-doUpgrade" class="headerlink" title="UpgradeUtil.doUpgrade"></a>UpgradeUtil.doUpgrade</h1><p>doUpgrade 在各种检查后，可以接受 Client Upgrade 请求时，需向 Client 端返回的 HTTP 报文头中添加如下字段（Sec-WebSocket-Protocol / Sec-WebSocket-Extensions 可选）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket</span><br><span class="line">Connection: upgrade</span><br><span class="line">Sec-WebSocket-Accept: [key]</span><br><span class="line">Sec-WebSocket-Protocol: [subProtocol]</span><br><span class="line">Sec-WebSocket-Extensions: [extensions]</span><br></pre></td></tr></table></figure>
+
+<p>当然还需要初始化 ServerEndpoint 实例（@ServerEndpoint 注解）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Endpoint ep;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    Class&lt;?&gt; clazz = sec.getEndpointClass();</span><br><span class="line">    <span class="keyword">if</span> (Endpoint.class.isAssignableFrom(clazz)) &#123;</span><br><span class="line">        ep = (Endpoint) sec.getConfigurator().getEndpointInstance(</span><br><span class="line">                clazz);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ep = <span class="keyword">new</span> PojoEndpointServer();</span><br><span class="line">        <span class="comment">// Need to make path params available to POJO</span></span><br><span class="line">        perSessionServerEndpointConfig.getUserProperties().put(</span><br><span class="line">                PojoEndpointServer.POJO_PATH_PARAM_KEY, pathParams);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (InstantiationException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ServletException(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后向 Client 返回 HTTP Response</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">WsHttpUpgradeHandler wsHandler =</span><br><span class="line">        ((RequestFacade) inner).upgrade(WsHttpUpgradeHandler.class);</span><br><span class="line">wsHandler.preInit(ep, perSessionServerEndpointConfig, sc, wsRequest,</span><br><span class="line">        negotiatedExtensionsPhase2, subProtocol, transformation, pathParams,</span><br><span class="line">        req.isSecure());</span><br></pre></td></tr></table></figure>
+
+<p>而 WsHttpUpgradeHandler 则会用于处理</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The handler for all further incoming data on the current connection.</span><br></pre></td></tr></table></figure>
+
+<h1 id="WsHttpUpgradeHandler"><a href="#WsHttpUpgradeHandler" class="headerlink" title="WsHttpUpgradeHandler"></a>WsHttpUpgradeHandler</h1><p>WsHttpUpgradeHandler init 方法中干了很多事情</p>
+<ul>
+<li>首先从 WebConnection 中获取输入流/输出流</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.connection = connection;</span><br><span class="line">AbstractServletInputStream sis;</span><br><span class="line">AbstractServletOutputStream sos;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    sis = connection.getInputStream();</span><br><span class="line">    sos = connection.getOutputStream();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>实例化 WsSession，注意 SessionId 使用一个 static AtomicLong 维护，每次增加 1</li>
+<li>实例化 WsFrameServer，用于读写 Message</li>
+<li>在 sos 上注册 WsWriteListener</li>
+<li>调用 ServerEndpoint onOpen 方法</li>
+<li>在 sis 上注册 WsReadListener</li>
+</ul>
+<h2 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h2><p>所以综上所述，每一次 HTTP Upgrade 请求均会创建一个新的 ServerEndpoint 实例，因此定义于 ServerEndpoint 中的 static 变量需注意确保线程安全</p>
+<p>另外 ServerEndpoint 中 onOpen 和 onMessage 的执行顺序为 onOpen 必然首先执行，若 onOpen 执行时间过长，则就算 sis 中有数据等待处理，也不会触发 onMessage，因为从 WsHttpUpgradeHandler init 方法中可以看出 onOpen 调用结束后，才会在 sis 上注册 WsReadListener。接下来继续分析，如何触发 WsReadListener</p>
+<h1 id="Connector"><a href="#Connector" class="headerlink" title="Connector"></a>Connector</h1><p>AbstractServiceInputStream.onDataAvailable() 方法中调用 listener.onDataAvailable(); 即 WsReadListener.onDataAvailable()</p>
+<p>而 AbstractServiceInputStream.onDataAvailable() 又由 AbstractProcessor.upgradeDispatch(SocketStatus status) 调用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> SocketState <span class="title">upgradeDispatch</span><span class="params">(SocketStatus status)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (status == SocketStatus.OPEN_READ) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletInputStream.onDataAvailable();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            <span class="comment">// The error handling within the ServletInputStream should have</span></span><br><span class="line">            <span class="comment">// marked the stream for closure which will get picked up below,</span></span><br><span class="line">            <span class="comment">// triggering the clean-up of this processor.</span></span><br><span class="line">            getLog().debug(sm.getString(<span class="string">&quot;abstractProcessor.onDataAvailableFail&quot;</span>), ioe);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == SocketStatus.OPEN_WRITE) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletOutputStream.onWritePossible();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            <span class="comment">// The error handling within the ServletOutputStream should have</span></span><br><span class="line">            <span class="comment">// marked the stream for closure which will get picked up below,</span></span><br><span class="line">            <span class="comment">// triggering the clean-up of this processor.</span></span><br><span class="line">            getLog().debug(sm.getString(<span class="string">&quot;abstractProcessor.onWritePossibleFail&quot;</span>), ioe);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == SocketStatus.STOP) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletInputStream.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            getLog().debug(sm.getString(</span><br><span class="line">                    <span class="string">&quot;abstractProcessor.isCloseFail&quot;</span>, ioe));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletOutputStream.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            getLog().debug(sm.getString(</span><br><span class="line">                    <span class="string">&quot;abstractProcessor.osCloseFail&quot;</span>, ioe));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Unexpected state</span></span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (upgradeServletInputStream.isCloseRequired() ||</span><br><span class="line">            upgradeServletOutputStream.isCloseRequired()) &#123;</span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> SocketState.UPGRADED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Tomcat 7 默认使用 BIO，Http11Protocol.createUpgradeProcessor，其中将 socket 超时时间设置为不超时，并返回一个 Processor</p>
+<p>因此 Tomcat 处理 WebSocket 请求的大致流程为</p>
+<ul>
+<li>JIOEndpoint accept socket and new a thread to handle it</li>
+<li>Worker wait for the next socket to be assigned and call handler to process socket</li>
+<li>Http11ConnectionHandler</li>
+<li>Http11Processor</li>
+</ul>
+<p>客户端首先打开一个 connection，connection 建立后，向服务器端发起 WebSocket Handshake 请求，服务器接受后，返回 101 status code，双方可在当前 connection 上双工通信</p>
+<p>当 SocketStatus 为 OPEN_READ 时，回调 readListener 的 onDataAvailable 方法，此处逻辑有 trick 的地方，值得注意的是如果 SocketStatus.OPEN_READ 时，仍未完成注册 readListener，则不会触发 listener.onDataAvailable() … 显然，因为 listener 为 null</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">onDataAvailable</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (listener == <span class="keyword">null</span>) &#123; <span class="comment">// it doesn&#x27;t have a listener</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ready = Boolean.TRUE;</span><br><span class="line">    Thread thread = Thread.currentThread();</span><br><span class="line">    ClassLoader originalClassLoader = thread.getContextClassLoader();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        thread.setContextClassLoader(applicationLoader);</span><br><span class="line">        listener.onDataAvailable();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        thread.setContextClassLoader(originalClassLoader);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 WsFrameServer 的 onDataAvailable 方法中首先尝试获取对象锁，获取成功后，for loop 监听 Servlet 输入流，当有数据时读取数据供 WsFrameServer 处理，处理 okay 后，回调 ServerEndpoint 的 onMessage 方法，业务层即感知到从 ws 连接中获取到数据</p>
+<p>另外 ServerEndpoint onOpen 是在 WsHttpUpgradeHandler init 方法中被回调，看看官方文档对 handler 的 init 方法的描述</p>
+<blockquote>
+<p>This method is called once the request/response pair where the upgrade is initiated has completed processing and is the point where control of the connection passes from the container to the HttpUpgradeHandler.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-7.0-doc/api/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.html">https://tomcat.apache.org/tomcat-7.0-doc/api/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.html</a></p>
+<p>so 理论上要想使得 Tomcat 7 WebSocket 能正常工作的前提为</p>
+<ul>
+<li>WsHttpUpgradeHandler init 方法被调用 —— WsHttpUpgradeHandler</li>
+<li>在 sos 上注册 WsWriteListener 方法结束 —— WsHttpUpgradeHandler</li>
+<li>SocketStatus.OPEN_WRITE —— AbstractProcessor</li>
+<li>onOpen 方法回调结束 —— ServerEndpoint</li>
+<li>在 sis 上注册 WsReadListener 方法结束 —— WsHttpUpgradeHandler</li>
+<li>SocketStatus.OPEN_READ —— AbstractProcessor</li>
+</ul>
+<p>接下来需要搞清楚一个问题，上述这些逻辑是单线程在跑，还是多线程，单线程的话，时序问题不大，但是多线程的情况下，就很有讲究了</p>
+<p>To be cont. 下一遍回答上述时序问题</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5964173e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/5964173e.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 1)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-06 20:22:57" itemprop="dateCreated datePublished" datetime="2018-07-06T20:22:57Z">2018-07-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 12:27:16" itemprop="dateModified" datetime="2020-11-22T12:27:16Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>又是一部折腾史</p>
+</blockquote>
+<p>之前提到了最近在基于 WebSocket 协议实现 WebTerminal 特性，无奈生产环境遇到了一个 weired bug，百思不得其解，只好看看 WebSocket 在 Tomcat 7 中是如何实现的</p>
+<blockquote>
+<p>环境/版本信息</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OS: macOS Sierra 10.12.6</span><br><span class="line">Tomcat: 7.0.88</span><br><span class="line">Intellij: 2016.2</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>jenv 管理 java 版本</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; jenv versions</span><br><span class="line">  system</span><br><span class="line">* 1.6.0.65 (set by /Users/zrss/.jenv/version)</span><br><span class="line">  1.7.0.181</span><br><span class="line">  1.8.0.172</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>当前 java 版本</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; jenv global</span><br><span class="line">1.6.0.65</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>ant 版本</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; ant -version</span><br><span class="line">Apache Ant(TM) version 1.9.12 compiled on June 19 2018</span><br></pre></td></tr></table></figure>
+
+<h1 id="Set-up-Tomcat-src-code-in-Intellij"><a href="#Set-up-Tomcat-src-code-in-Intellij" class="headerlink" title="Set up Tomcat src code in Intellij"></a>Set up Tomcat src code in Intellij</h1><p>参考如下官方构建指南即可</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://tomcat.apache.org/tomcat-7.0-doc/building.html">http://tomcat.apache.org/tomcat-7.0-doc/building.html</a></p>
+</blockquote>
+<p>第一步当然是下载源码 <a target="_blank" rel="noopener" href="http://tomcat.apache.org/download-70.cgi#7.0.88">http://tomcat.apache.org/download-70.cgi#7.0.88</a><br>，当前源码地址 <a target="_blank" rel="noopener" href="http://mirrors.hust.edu.cn/apache/tomcat/tomcat-7/v7.0.88/src/apache-tomcat-7.0.88-src.tar.gz">http://mirrors.hust.edu.cn/apache/tomcat/tomcat-7/v7.0.88/src/apache-tomcat-7.0.88-src.tar.gz</a></p>
+<p>解压后目录结论如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">apache-tomcat-7.0.88-src</span><br><span class="line">├── BUILDING.txt</span><br><span class="line">├── CONTRIBUTING.md</span><br><span class="line">├── KEYS</span><br><span class="line">├── LICENSE</span><br><span class="line">├── NOTICE</span><br><span class="line">├── README.md</span><br><span class="line">├── RELEASE-NOTES</span><br><span class="line">├── RUNNING.txt</span><br><span class="line">├── STATUS.txt</span><br><span class="line">├── bin</span><br><span class="line">├── build.properties.default</span><br><span class="line">├── build.xml</span><br><span class="line">├── conf</span><br><span class="line">├── java</span><br><span class="line">├── modules</span><br><span class="line">├── res</span><br><span class="line">├── test</span><br><span class="line">└── webapps</span><br></pre></td></tr></table></figure>
+
+<p>Tomcat 诞生的年代比较久远，还是用的比较古老的构建工具 ant，复制 build.properties.default 至 build.properties</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp build.properties.default build.properties</span><br></pre></td></tr></table></figure>
+
+<p>Tomcat7 WebSocket 依赖 java7，因此需要设置 build.properties 中的 java7 path。取消该文件中的下述定义注释（54行），并填写相应 jdk 路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.7.home=/Library/Java/JavaVirtualMachines/zulu-7.jdk/Contents/Home</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果使用 jenv 管理 java 版本，可使用如下命令查看当前 java 的 java_home path<br>/usr/libexec/java_home -v $(jenv version-name)</p>
+</blockquote>
+<p>确认当前 java 版本为 1.6</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; java -version</span><br><span class="line">java version &quot;1.6.0_65&quot;</span><br><span class="line">Java(TM) SE Runtime Environment (build 1.6.0_65-b14-468)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 20.65-b04-468, mixed mode)</span><br></pre></td></tr></table></figure>
+
+<p>设置 JAVA_HOME（make sure it is a 1.6 java’s home）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; export JAVA_HOME=$(/usr/libexec/java_home -v $(jenv version-name))</span><br><span class="line">&gt; echo $JAVA_HOME</span><br><span class="line">/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home</span><br></pre></td></tr></table></figure>
+
+<p>当然国内的小伙伴还要多做一件事儿，那就是配置 proxy</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">proxy.use=on</span><br><span class="line">proxy.host=127.0.0.1</span><br><span class="line">proxy.port=1081</span><br></pre></td></tr></table></figure>
+
+<p>这个 proxy 方案也是非常常见的了，shadowsocks (socks5) + privoxy (http)</p>
+<p>最后进入 Tomcat 源码目录执行 ant 命令构建</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src</span><br><span class="line">ant</span><br></pre></td></tr></table></figure>
+
+<p>jar 包下载顺利的话，无问题</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUILD SUCCESSFUL</span><br><span class="line">Total time: 23 seconds</span><br></pre></td></tr></table></figure>
+
+<h1 id="Import-Tomcat-src-to-Intellij"><a href="#Import-Tomcat-src-to-Intellij" class="headerlink" title="Import Tomcat src to Intellij"></a>Import Tomcat src to Intellij</h1><p>在 Tomcat 源码目录执行，如若遇到因为 SSL 无法下载的依赖，手动下载之，并放入 testexist 路径（讲真，是个体力活儿，得有六七个包吧）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ant ide-eclipse</span><br></pre></td></tr></table></figure>
+
+<p>最后终于成功了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUILD SUCCESSFUL</span><br><span class="line">Total time: 1 second</span><br></pre></td></tr></table></figure>
+
+<p>构建 websocket eclipse</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ant ide-eclipse-websocket</span><br></pre></td></tr></table></figure>
+
+<p>顺利成功</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUILD SUCCESSFUL</span><br><span class="line">Total time: 1 second</span><br></pre></td></tr></table></figure>
+
+<p>到此可以开始导入 IntelliJ 了</p>
+<p>IntelliJ 欢迎页面选择 Import Project，在弹出框中选择 Tomcat 源码根路径，一路 Next 至 Select Eclipse projects to import，勾选上 tomcat-7.0.x 继续 Next，最后 Project SDK 选择 1.6 即可</p>
+<p>WebSocket 代码在如下路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src/java/org/apache/tomcat/websocket</span><br></pre></td></tr></table></figure>
+
+<p>最后查看 Tomcat version 信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt; cd output/build/bin</span><br><span class="line">&gt; ./version.sh</span><br><span class="line">Using CATALINA_BASE:   /Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src/output/build</span><br><span class="line">Using CATALINA_HOME:   /Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src/output/build</span><br><span class="line">Using CATALINA_TMPDIR: /Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src/output/build/temp</span><br><span class="line">Using JRE_HOME:        /Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home</span><br><span class="line">Using CLASSPATH:       /Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src/output/build/bin/bootstrap.jar:/Users/zrss/Documents/Code/Java/apache-tomcat-7.0.88-src/output/build/bin/tomcat-juli.jar</span><br><span class="line">Server version: Apache Tomcat/7.0.88</span><br><span class="line">Server built:   Jul 6 2018 14:30:23 UTC</span><br><span class="line">Server number:  7.0.88.0</span><br><span class="line">OS Name:        Mac OS X</span><br><span class="line">OS Version:     10.12.6</span><br><span class="line">Architecture:   x86_64</span><br><span class="line">JVM Version:    1.6.0_65-b14-468</span><br><span class="line">JVM Vendor:     Apple Inc.</span><br></pre></td></tr></table></figure>
+
+<p>至此 Tomcat 7 导入 IntelliJ 中 okay，可以愉快的查看代码了。当然查看 WebSocket 相关的实现时，在 IntelliJ Project Structure 中切换 SDK 至 1.7 即可</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/8e645281.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/8e645281.html" class="post-title-link" itemprop="url">a weired bug of job workload</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-06 11:05:29" itemprop="dateCreated datePublished" datetime="2018-07-06T11:05:29Z">2018-07-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:50:58" itemprop="dateModified" datetime="2020-12-12T07:50:58Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>又要开始分析一个疑难杂症了</p>
+<p>现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出</p>
+<h1 id="job-controller-的工作原理"><a href="#job-controller-的工作原理" class="headerlink" title="job-controller 的工作原理"></a>job-controller 的工作原理</h1><p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> job.NewJobController(</span><br><span class="line">    ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">    ctx.InformerFactory.Batch().V1().Jobs(),</span><br><span class="line">    ctx.ClientBuilder.ClientOrDie(<span class="string">&quot;job-controller&quot;</span>),</span><br><span class="line">).Run(<span class="keyword">int</span>(ctx.Options.ConcurrentJobSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
+
+<p>从启动代码中可以看出 job-controller 关注 pod 与 job 这两种资源的变化情况</p>
+<ul>
+<li>ctx.InformerFactory.Core().V1().Pods()</li>
+<li>ctx.InformerFactory.Batch().V1().Jobs()</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentJobSyncs=5</span><br></pre></td></tr></table></figure>
+
+<p>启动 5 个 worker goroutine</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(jm.worker, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 worker 协程中，1s 执行一次 worker 方法</p>
+<p>worker 方法，实现从 queue 中获取待处理的对象（key），并调用 syncJob 方法处理之</p>
+<ul>
+<li>syncJob 处理成功</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jobInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc: jm.enqueueController,</span><br><span class="line">    UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> job := cur.(*batch.Job); !IsJobFinished(job) &#123;</span><br><span class="line">            jm.enqueueController(job)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    DeleteFunc: jm.enqueueController,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc:    jm.addPod,</span><br><span class="line">    UpdateFunc: jm.updatePod,</span><br><span class="line">    DeleteFunc: jm.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h1 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h1><p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
+<p>我们知道 kubelet 通过 PLEG 来感知节点上 container 的状态，另外 job pod 的 restart policy 目前仅支持两种 Never / onFailure，一般来说默认选择 onFailure 比较合适</p>
+<p>这样业务容器在正常退出后（exit 0），kubelet pleg 感知到后，再加上 onFailure 的策略，正常情况下会 killing pod，job-controller 感知到 pod 减少后，即完成数又增加了 1，即可成功结束</p>
+<p>看下 kubelet 的代码确认逻辑</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Get all the pods.</span></span><br><span class="line">podList, err := g.runtime.GetPods(<span class="literal">true</span>)</span><br><span class="line">ShouldContainerBeRestarted</span><br><span class="line"></span><br><span class="line"><span class="comment">// Check RestartPolicy for dead container</span></span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyNever &#123;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure &#123;</span><br><span class="line">    <span class="comment">// Check the exit code.</span></span><br><span class="line">    <span class="keyword">if</span> status.ExitCode == <span class="number">0</span> &#123;</span><br><span class="line">        glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already successfully ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>如此情况下需要 KillPod</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> keepCount == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(changes.ContainersToStart) == <span class="number">0</span> &#123;</span><br><span class="line">    changes.KillPod = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以正常情况下 job 控制的 pod，重启策略为 RestartPolicyOnFailure，如是正常退出的情况，则该 container 无需重启，而再加上述的判断，则当前 pod 需要被删除</p>
+<p>调用该 killPodWithSyncResult 方法</p>
+<p>经过如此分析，可能出现的问题原因及疑点</p>
+<ul>
+<li>2 个 pod 处于 running 状态，而对应的 container 却没有了，尝试从 relist: g.runtime.GetPods(true) 寻找可能原因</li>
+<li>使用命令行如何获取节点上的 container 容器，如果 container 正常获取，且 pod 对应的 container 已正常退出，那么为何未看到 SyncLoop(PLEG) ContainerDied 事件</li>
+<li>pod 状态也是持续 running，而我们知道在 syncPod 中会调用 statusManager 设置新的 pod status，如果能获取到正确的 container info，pod status 也会被正确的更新至 kube-apiserver</li>
+<li>正常情况下，至多为一个 pod 保留一个 container 记录，其余均会被 clean。为何当时 docker ps -a 无一相关的 container，全都被 clear 了？那意味着 node evicted，或者是 pod 被 delete 了。evicted 的可能性较小，而 pod 被 delete 的话，除了人为，job-controller activeDeadline 超了也会设置</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1314,336 +1761,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/4ab1fcf6.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/4ab1fcf6.html" class="post-title-link" itemprop="url">ETCD 链接建立</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-12-03 16:48:36" itemprop="dateCreated datePublished" datetime="2017-12-03T16:48:36Z">2017-12-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:49:22" itemprop="dateModified" datetime="2020-11-22T08:49:22Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>521</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>机缘巧合，在测试的引导下，读了下 etcd 连接建立方面的代码</p>
-<p>etcd 启动后监听 peer url</p>
-<p>peer url 通过 mux 绑定 handler，关于 raft 的 url 的请求绑定到 streamHandler 上，这玩意会 hold 住一个连接，除非遇到错误，&lt;-c.closeNotify()，连接 close</p>
-<p>啥时候重新 p.attachOutgoingConn(conn) 回来，当然是该成员又请求连接到 url 上来时，即 streamReader 重新连接回来时</p>
-<p>streamWriter 使用长链</p>
-<p>streamReader 持续读，与 streamWriter 匹配，streamWriter 不遇到错误，不 close 连接；streamReader 断了之后，100ms 重新 dial 一次，重连上后，对端 streamWriter 能 hold 住新的连接</p>
-<p>etcd 对其每一个 peer 都会启动 streamReader 和 streamWriter，reader 建立连接后，writer 使用不关闭，reader 有数据时读，writer 有写入时写，保持着连接</p>
-<p>所以 etcd peer 间是建立着长链的，可以使用 netstat -anp | grep {etcd_peer_port} 查看 peer 之间的连接建立情况</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b3b02fd2.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/b3b02fd2.html" class="post-title-link" itemprop="url">ssl tls and https</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-12-03 16:46:00" itemprop="dateCreated datePublished" datetime="2017-12-03T16:46:00Z">2017-12-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:47:28" itemprop="dateModified" datetime="2020-11-22T08:47:28Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>安全方面的姿势，掌握略有不足，趁着空闲；另外也是为了不仅仅知道，curl 命令访问 https 接口的时候，需要携带三个证书，如此模糊的解释而努力<br>to be cont.</p>
-</blockquote>
-<p>搜索了一下网上已有很多现有资料，这里就重新回顾一下，当做我自己的姿势了</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/denji/golang-tls">https://github.com/denji/golang-tls</a></p>
-<p>首先看下 go 语言中，如何实现 server 端 HTTPS/TLS</p>
-<p><a target="_blank" rel="noopener" href="http://tonybai.com/2015/04/30/go-and-https/">http://tonybai.com/2015/04/30/go-and-https/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="comment">// &quot;fmt&quot;</span></span><br><span class="line">    <span class="comment">// &quot;io&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">HelloServer</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/plain&quot;</span>)</span><br><span class="line">    w.Write([]<span class="keyword">byte</span>(<span class="string">&quot;This is an example server.\n&quot;</span>))</span><br><span class="line">    <span class="comment">// fmt.Fprintf(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">    <span class="comment">// io.WriteString(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">&quot;/hello&quot;</span>, HelloServer)</span><br><span class="line">    err := http.ListenAndServeTLS(<span class="string">&quot;:443&quot;</span>, <span class="string">&quot;server.crt&quot;</span>, <span class="string">&quot;server.key&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">&quot;ListenAndServe: &quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>443 为知名的 HTTPS 服务端口，那么 server.crt、server.key 这两个文件又是如何作用，哪来的呢？</p>
-<p>首先解释哪来的问题</p>
-<p>使用 openssl 生成私钥</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;RSA&quot; ≥ 2048-bit</span></span><br><span class="line">openssl genrsa -out server.key 2048</span><br></pre></td></tr></table></figure>
-
-<p>or 使用另外一种算法生成的私钥</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;ECDSA&quot; ≥ secp384r1</span></span><br><span class="line"><span class="comment"># List ECDSA the supported curves (openssl ecparam -list_curves)</span></span><br><span class="line">openssl ecparam -genkey -name secp384r1 -out server.key</span><br></pre></td></tr></table></figure>
-
-<p>私钥生成好之后，使用私钥生成公钥（x509 自签发 crt）</p>
-<blockquote>
-<p>Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650</span><br></pre></td></tr></table></figure>
-
-<p>所以呢，server.key 是私钥，server.crt 是公钥，生成之后，就可以用来初始化 TLS server 了</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9bd3bd71.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/9bd3bd71.html" class="post-title-link" itemprop="url">angularjs and webpack</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-12-03 15:58:34" itemprop="dateCreated datePublished" datetime="2017-12-03T15:58:34Z">2017-12-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:03:53" itemprop="dateModified" datetime="2020-11-22T08:03:53Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在给 ETCD cluster on k8s 写 FE (front end)，此篇总结一下框架性的东西</p>
-<p>很久之前在实验室的时候，曾经蹚水过一段时间 fe 开发，深知 fe 领域目前 一天涌现 100 个开发工具 的节奏，从 angularjs (google) 到 react (facebook)，都是 SPA (single page application) 的实践</p>
-<p>使用这两框架，对于 fe 小白开发来说，最大好处是省去了大部分 jQuery 手工操作 DOM 的繁杂代码，都由框架代为更新 DOM 元素了。当然也引入了比服务器端渲染页面的经典设计模式 MVC (model view controller)，更进一步的 MVVM (model view viewModel) 模式，支持视图到模型，模型到视图的双向数据更新特性。由此 fe 的代码得到极大净化</p>
-<p>然而无奈 fe 仍然是个劳动密集型的方向，毕竟是眼见为实，与用户距离最近的东西，一言不合就有需求，就有改动了。因此代码一开始可能是规整的，过了一段时间后，就直接起飞了 …</p>
-<p>现实不讨论了，先进入正题</p>
-<h2 id="找轮子"><a href="#找轮子" class="headerlink" title="找轮子"></a>找轮子</h2><p>不重复造轮子，github 上搜索一把，可以得到很多 startup 项目，找一个 star 比较多的，例如 <a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack%EF%BC%8C%E7%9B%B4%E6%8E%A5%E7%94%A8%E8%AF%A5%E9%A1%B9%E7%9B%AE%E6%9D%A5%E5%BC%80%E5%A7%8B%E5%A5%BD%E4%BA%86">https://github.com/preboot/angularjs-webpack，直接用该项目来开始好了</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/preboot/angularjs-webpack.git</span><br></pre></td></tr></table></figure>
-
-<h2 id="分析轮子"><a href="#分析轮子" class="headerlink" title="分析轮子"></a>分析轮子</h2><p>该项目为 node + angularjs + webpack 的一个极简 demo</p>
-<p>node 就不说了，fe 的革命，很大程度由 node 引发</p>
-<p>angularjs 呢，mvvm 框架</p>
-<p>webpack 简单理解的话，在 java / c++ 等语言中，可以通过 include or import 关键字导入依赖的库，进而在当前模块中使用已实现的方法，避免重复的开发工作。那么在 fe 中 import 依赖的组件，如当前模块依赖的 js / css 代码，webpack 的作用就是理解这些 import 指令，最后将所有代码 打包 成可实际执行的代码</p>
-<h2 id="用轮子造车子"><a href="#用轮子造车子" class="headerlink" title="用轮子造车子"></a>用轮子造车子</h2><h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── LICENSE</span><br><span class="line">├── README.md</span><br><span class="line">├── karma.conf.js</span><br><span class="line">├── node_modules</span><br><span class="line">├── package.json</span><br><span class="line">├── postcss.config.js</span><br><span class="line">├── src</span><br><span class="line">└── webpack.config.js</span><br></pre></td></tr></table></figure>
-
-<p>package.json 定义了 node 项目的依赖</p>
-<p>通过 npm install 安装 package.json 中定义的依赖到项目下的 node_modules 文件夹下</p>
-<p>国内的网络环境一般，需要一些手段加速依赖下载，如淘宝的 npm 镜像站</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装淘宝定义的 cnpm</span></span><br><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br><span class="line"><span class="comment"># 安装项目依赖</span></span><br><span class="line">cnpm install</span><br></pre></td></tr></table></figure>
-
-<p>速度可以说是很快了，秒装</p>
-<p>webpack.config.js 为 webpack 的配置文件，其中比较重要的配置有</p>
-<p>SPA 应用 js 入口</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">config.entry = isTest ? <span class="keyword">void</span> <span class="number">0</span> : &#123;</span><br><span class="line">  <span class="attr">app</span>: <span class="string">&#x27;./src/app/app.js&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>SPA 应用 page 入口</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> HtmlWebpackPlugin(&#123;</span><br><span class="line">  <span class="attr">template</span>: <span class="string">&#x27;./src/public/index.html&#x27;</span>,</span><br><span class="line">  <span class="attr">inject</span>: <span class="string">&#x27;body&#x27;</span></span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
-
-<p>base 路径</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config.devServer = &#123;</span><br><span class="line">  <span class="attr">contentBase</span>: <span class="string">&#x27;./src/public&#x27;</span>,</span><br><span class="line">  <span class="attr">stats</span>: <span class="string">&#x27;minimal&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>即在该路径下有一文件，如 ./src/public/hello.png，那么在浏览器中 url/hello.png 能访问到</p>
-<p>本地开发时 dev server 的访问地址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// Output path from the view of the page</span><br><span class="line">// Uses webpack-dev-server in development</span><br><span class="line">publicPath: isProd ? &#x27;/&#x27; : &#x27;http://localhost:8080/&#x27;,</span><br></pre></td></tr></table></figure>
-
-<h3 id="本地开发"><a href="#本地开发" class="headerlink" title="本地开发"></a>本地开发</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 启动 webpack dev server</span><br><span class="line">npm start</span><br><span class="line">// 浏览器访问 pulicPath 地址即可，如</span><br><span class="line">// http://localhost:8080/</span><br></pre></td></tr></table></figure>
-
-<p>其他的不多说了，此篇质量一般，也是我现在开发 fe 的一个无奈吧，这里增加几句话，那里增加几句话，okay it works，细节不清楚，只是为了完成业务逻辑，当然也因为目前兴趣不在此。详细的可看看 参考 (3)</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack">https://github.com/preboot/angularjs-webpack</a></p>
-<p><a target="_blank" rel="noopener" href="https://npm.taobao.org/">https://npm.taobao.org/</a></p>
-<p><a target="_blank" rel="noopener" href="http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/">http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1668,13 +1785,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">261k</span>
+    <span title="站点总字数">266k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:57</span>
+    <span title="站点阅读时长">4:02</span>
   </span>
 </div>
 

@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-count">61</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,386 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2e8f7f88.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/2e8f7f88.html" class="post-title-link" itemprop="url">Cluster ID 和 Member ID 的生成规则</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-03 00:00:00" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:00Z">2017-10-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:39:52" itemprop="dateModified" datetime="2020-12-12T07:39:52Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>etcd v3.1.9</p>
+</blockquote>
+<h1 id="从-etcd-启动参数中生成-Cluster-ID-和-Member-ID"><a href="#从-etcd-启动参数中生成-Cluster-ID-和-Member-ID" class="headerlink" title="从 etcd 启动参数中生成 Cluster ID 和 Member ID"></a>从 etcd 启动参数中生成 Cluster ID 和 Member ID</h1><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cl, err = membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)</span><br></pre></td></tr></table></figure>
+
+<p>上述方法从 –initial-cluster-token and –initial-cluster 这个两个启动参数中生成 Cluster ID 和各个 Member ID</p>
+<p>NewClusterFromURLsMap 这个方法中调用 NewMember 生成 Member ID</p>
+<p>首先来看 NewMember 方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func NewMember(name string, peerURLs types.URLs, clusterName string, now *time.Time) *Member</span><br></pre></td></tr></table></figure>
+
+<p>核心思路</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b []<span class="keyword">byte</span>: peerUrls + clusterName + time</span><br><span class="line">hash := sha1.Sum(b)</span><br><span class="line">memberID: binary.BigEndian.Uint64(hash[:<span class="number">8</span>])</span><br></pre></td></tr></table></figure>
+
+<p>Member ID 根据 peerUrls / clusterName / current_time 的 sha1 sum 值，取其前 8 个 bytes，为 16 位的 hex 数</p>
+<p>回到 NewClusterFromURLsMap 方法中的 NewMember（代码如下）可见最后一个参数为 nil，即不加入时间因素，因此 NewClusterFromURLsMap 生成的 Member ID 是固定的</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m := NewMember(name, urls, token, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="Member-Add-生成的-Member-ID"><a href="#Member-Add-生成的-Member-ID" class="headerlink" title="Member Add 生成的 Member ID"></a>Member Add 生成的 Member ID</h1><p>直接从 server 端看起 —— etcdserver/api/v3rpc/member.go 中的 MemberAdd 方法</p>
+<p>可见如下代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">urls, err := types.NewURLs(r.PeerURLs)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, rpctypes.ErrGRPCMemberBadURLs</span><br><span class="line">&#125;</span><br><span class="line">now := time.Now()</span><br><span class="line">m := membership.NewMember(<span class="string">&quot;&quot;</span>, urls, <span class="string">&quot;&quot;</span>, &amp;now)</span><br><span class="line"><span class="keyword">if</span> err = cs.server.AddMember(ctx, *m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, togRPCError(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>m := membership.NewMember(“”, urls, “”, &amp;now) 加入了当前时间，因此 Member ID 是不确定的</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>cluster ID 仅生成一次，此后不会变化</p>
+<p>通过 etcd 启动参数生成 (initial-cluster) 的 Member ID 固定</p>
+<p>通过 Member add 生成的 Member ID 不确定</p>
+<p>Member add 的时候，没有传递 member 的 name，因此 member add 成功时，member list 出来的 member item，新加入的 member 其 name 为空，且没有 client url，因该 member 尚未 publish 其 client url 到集群中</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/d220c1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/d220c1.html" class="post-title-link" itemprop="url">ETCD V3 中的 .snap 文件</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-02 00:00:00" itemprop="dateCreated datePublished" datetime="2017-10-02T00:00:00Z">2017-10-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:40:09" itemprop="dateModified" datetime="2020-12-12T07:40:09Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>etcd v3.1.9</p>
+</blockquote>
+<h1 id="什么时候生成"><a href="#什么时候生成" class="headerlink" title="什么时候生成"></a>什么时候生成</h1><p>etcd 启动时设置了参数 –snapshot-count 即 index 变化 达到该值时，会生成 .snap 文件</p>
+<p>相关代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">triggerSnapshot</span><span class="params">(ep *etcdProgress)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> ep.appliedi-ep.snapi &lt;= s.snapCount &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	plog.Infof(<span class="string">&quot;start to snapshot (applied: %d, lastsnap: %d)&quot;</span>, ep.appliedi, ep.snapi)</span><br><span class="line">	s.snapshot(ep.appliedi, ep.confState)</span><br><span class="line">	ep.snapi = ep.appliedi</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="文件名规则"><a href="#文件名规则" class="headerlink" title="文件名规则"></a>文件名规则</h1><p>snap 的全称呢 snapshot，是快照的意思，在 etcd v3 里面呢，是把 v2 的内存数据存储到磁盘上，生成 [Term]-[Index].snap 一类的文件</p>
+<blockquote>
+<p>snap 文件名生成规则</p>
+<p>fname := fmt.Sprintf(“%016x-%016x%s”, snapshot.Metadata.Term, snapshot.Metadata.Index, snapSuffix)</p>
+</blockquote>
+<h1 id="是否可以删除"><a href="#是否可以删除" class="headerlink" title="是否可以删除"></a>是否可以删除</h1><p>说到 v2 的存储，全部在内存中，而且是一个非常直接的实现，看着就是个多叉树</p>
+<p>那么是否 .snap 文件就可以删除掉了呢</p>
+<ol>
+<li>如果存储了 v2 的数据，显然不能删除，否则 etcd 重启之后，就无法从 .snap 文件中恢复出 v2 的数据了；当然恢复也不会是全量的数据，因为有 —snapshot-count 控制，会丢这个数的 Index</li>
+<li>如果没存储 v2 的数据，都是存的 v3 的数据，这种情况下，能否删除？<br>这就要看 .snap 文件除了存储 v2 的数据还存了什么东东；以及存的这东东，还有什么其他重要的用途了</li>
+</ol>
+<p>看了 etcd v3 的 restore 代码之后，我们知道 restore 会在 snap 文件下生成 v3 的存储 db 文件，以及一个 .snap 文件，这个 .snap 文件存储了啥东西嘞</p>
+<p>相关代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// first snapshot</span></span><br><span class="line">raftSnap := raftpb.Snapshot&#123;</span><br><span class="line">  Data: b,</span><br><span class="line">  Metadata: raftpb.SnapshotMetadata&#123;</span><br><span class="line">    Index: commit,</span><br><span class="line">    Term:  term,</span><br><span class="line">    ConfState: raftpb.ConfState&#123;</span><br><span class="line">      Nodes: nodeIDs,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的 Data 并不重要，只是存储了两个 namespace，其实就是两路径</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">st := store.New(etcdserver.StoreClusterPrefix, etcdserver.StoreKeysPrefix)</span><br></pre></td></tr></table></figure>
+
+<p>重要的是 Metadata 中的 Index 和 Term</p>
+<p><strong>显然也不能删除</strong></p>
+<p>etcd 在启动时，会读取 .snap 文件，获取其中的 Metadata.Index，使用这个值去搜索应该从哪个 wal 文件开始继续处理</p>
+<p>回忆一下 .wal 文件名的第二段，正是当时 wal 存储中的 index</p>
+<p>wal 的搜索代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nameIndex, ok := searchIndex(names, snap.Index)</span><br><span class="line"><span class="keyword">if</span> !ok || !isValidSeq(names[nameIndex:]) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, ErrFileNotFound</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从最旧的 wal 搜索到最新的 wal <code>sort.Strings(names)</code>，直到搜索到</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> index &gt;= curIndex &#123;</span><br><span class="line">    <span class="keyword">return</span> i, <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 .snap 文件不存在，那么会从 index = 0 开始搜索 wal 文件，也就是说 .snap 文件不存在的时候，必须存在 0000000000000000-0000000000000000.wal 文件，否则 etcd 启动时会报如下错误</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2017-10-02 13:49:08.313573 C | etcdserver: open wal error: wal: file not found</span><br></pre></td></tr></table></figure>
+
+<p>wal 中存储了 raft MemoryStorage 的 entries / raft HardState，etcd member id 和集群 id</p>
+<h1 id="构造一个异常情况"><a href="#构造一个异常情况" class="headerlink" title="构造一个异常情况"></a>构造一个异常情况</h1><p>purge 保留 1，snapshot count 设置的超大，重启 etcd 会发生什么？</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/etcd --max-snapshots <span class="string">&#x27;1&#x27;</span> --max-wals <span class="string">&#x27;1&#x27;</span> --snapshot-count <span class="string">&#x27;20000000&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个异常意义在于 snapshot 文件并未生成，而此时 wal 被 purge 之后，第一个 wal 被删掉了，那么重启 etcd 后会出现前述 wal: file not found 的错误。</p>
+<p>持续往 etcd 写入数据，直到生成新的 wal 文件，然而不幸的是，并没有观察到 purge 的动作。 那么问题来了，etcd 是在哪儿做了保护？</p>
+<p>查看 purge 的代码发现了如下的轨迹</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">l, err := TryLockFile(f, os.O_WRONLY, PrivateFileMode)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说 TryLockFile 成功才可以被 purge 掉，那么我们可以进一步推测没生成 .snap 文件之前，etcd 不会释放 LockFile，阻止仍然有用的 wal 文件被 purge 掉</p>
+<p>为了验证我们的猜想，查看 wal/wal.go 的 ReleaseLockTo 方法，直接贴该方法的注释吧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ReleaseLockTo releases the locks, which has smaller index than the given index except the largest one among them.</span><br><span class="line">For example, if WAL is holding lock 1,2,3,4,5,6, ReleaseLockTo(4) will release lock 1,2 but keep 3. ReleaseLockTo(5) will release 1,2,3 but keep 4.</span><br></pre></td></tr></table></figure>
+
+<p>继续看，ReleaseLockTo 方法被谁调用，即什么时候释放 wal 文件的 lock，什么时候允许 wal 被 purge</p>
+<p>okay，答案符合我们的预期。ReleaseLockTo 在 etcdserver/storage.go 的 SaveSnap 方法中被调用，还是直接贴该方法的注释吧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SaveSnap saves the snapshot to disk and release the locked wal files since they will not be used.</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/248b0a97.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/248b0a97.html" class="post-title-link" itemprop="url">岁月无可回头(10)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-11 12:53:16" itemprop="dateCreated datePublished" datetime="2017-06-11T12:53:16Z">2017-06-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:37:28" itemprop="dateModified" datetime="2020-12-12T07:37:28Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>685</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>忙了一周 + 1 天，又是一个全员加班的周六</p>
+<p>从上周六开始，独立维护了一套平台环境，验证服务升级部署</p>
+<p>只能说进一步熟悉了业务</p>
+<p>支撑了另外一个部门的服务部署，对面那哥们问我来多久了，我曰一个半月，对方回感觉都要成 xx 专家了，我曰怎么会，术业有专攻，对方回之前在哪儿待的，我曰啊，在学校呀，对方回天将降大任于斯人也</p>
+<p>工作呀，对我来说，最需要成就感，哎，果然是个骄傲的不行的人，老师评价的不错，是得改改了，没必要和自己过不去</p>
+<p>刚看了一个文档，终于理解了 etcd 的神逻辑。Disaster recovery 的时候，需要使用旧的数据 force-start-new 一个单节点集群，该集群正常启动后，将其 peer url 更新为对外 url，后继可正常添加成员</p>
+<p>在 cluster-health 的情况下才可以 Member add。Member add 之前，删除其 data-dir，避免数据不一致</p>
+<p>从 snapshot 恢复时，不用 force-start-new，因为 snapshot 没有集群 metadata，只有 key 数据</p>
+<p>如果是数据从 v2 迁移至 v3，对 data-dir 执行 migrate 之后只是将 key data 转成了 mvcc 格式，而 cluster meta data 还是旧的，因此需要走 force new start 流程</p>
+<p>如果是全新的集群启动，则所有 etcd 以 new 状态启动即可</p>
+<p>这样就覆盖了所有流程</p>
+<p>终于要去见来杭的 Gloria 了，据说为了见人，还特意剪了个发型，不过被剪成 SB 了，笑，等会儿看看有多惊艳</p>
+<p>杭州应该进入了梅雨季节，一言不合就下雨，天气略闷热，而我的工作略忙</p>
+<p>这篇在地铁，公交上写完</p>
+<p>2017年06月11日12:53:16 杭州</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -897,333 +1277,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/7f85baff.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/7f85baff.html" class="post-title-link" itemprop="url">岁月无可回头(2)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-14 23:31:47" itemprop="dateCreated datePublished" datetime="2017-04-14T23:31:47Z">2017-04-14</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:40:46" itemprop="dateModified" datetime="2020-12-12T07:40:46Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>753</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>有很多想写的话，待付诸笔端之时，又不知从何下手。断断续续的写了这些，但愿长相思忆。</p>
-<p>《时间煮雨》</p>
-<p>这些天连着下了两天雨，接着半天阴天，到下午才有阳光的影子。开心的是晾了三天的鞋子可算有了要干的迹象。雨水充沛，四处绿色，是这座城市的一大观感。</p>
-<p>室友 A 前几天匆匆买了去北京的票，心里想着五一、端午过后，就只有十一了，中间隔着好几个月，还是回去看看 TA 吧。A 就职网易云音乐前端部门，平均下班时间九点到九点半。下班回来后，偶尔会在客厅的沙发上闲聊一二，而后到点回屋歇着。</p>
-<p>沙县小吃（特别多，感觉到哪儿都有），黄焖鸡米饭（也是一样，哪儿都有），周边小店已然吃腻。待室友 B 锅碗瓢盆、菜米油盐买齐了，我们涮火锅 or 煮面条 or 有闲心的时候做饭吃。室友 B 在阿里 B2B 部门从事后台开发工作，平均下班时间八点，热爱生活。</p>
-<p>室友 A 和 B 都是之前实验室的同学了，彼此熟悉，以后很长时间会互相帮助的。</p>
-<p>偶然间看到微信订阅号上显示的标题《是你们见证了破壳的生命之光》，点进去看了下，惊奇的发现这不就是刘晓晔和王印么，不就是上次去看的《两只狗的生活意见》的主演么。再往后翻，扫到了新话剧的名字《蛋》。回想起当时出剧场时，对着墙上的宣传画拍照，画上宣传的应该就是这剧了。杭州也有蜂巢剧场呢，不知道会发生怎么样的故事。</p>
-<p>啊，刚回屋的路上，突然一个语音进来。之前老打架的学妹开心的说，居然收到了阿里的 offer，喜极而泣。据她自己说的，面完二面觉得自己挂了，没想到还是收到了 offer，并且是核心部门。不过真不太敢想象她过来的样子，希望她还有更好的去处。</p>
-<p>另外体检的地方离西湖好近，所以体检结束后又去西湖走了走。哎，抱歉，美得有点腻了，绿水雾天，直接上图吧。</p>
-<p>(图去了吧，今天想起来自己看一眼，发现加载速度很慢 …)</p>
-<p>《青空》</p>
-<p>2017年04月14日23:31:47 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/54a8e93c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/54a8e93c.html" class="post-title-link" itemprop="url">岁月无可回头(1)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-07 23:27:31" itemprop="dateCreated datePublished" datetime="2017-04-07T23:27:31Z">2017-04-07</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:40:48" itemprop="dateModified" datetime="2020-12-12T07:40:48Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>523</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>来杭七天，安坐下来用文字消磨时光。</p>
-<p>头一天到的时候已经晚上 10 点，独自一人一路地铁再打车到下榻的地方，已然快 11 点半了，只能匆匆休息。回想起当时在列车上的心情，有点惆怅，又有点无奈，不过更多的是平静吧。毕竟做了很多自己想做的事情，没有遗憾。</p>
-<p>“很幸福而不完美”，觉得很完美了，纠结到最后还是能见了你一面，深感上天待我不薄。还有很多小细节了；你说杭州妹纸比较美，还很多记不清了，时间要能停留在水果先生店里待着，发呆，也挺好的，可惜不能。</p>
-<p>完事开头难，何况是初来到一个没有人脉积累的城市。</p>
-<p>租房的事情忙了几天。后面这些天都是一些琐事，购置各种物品，办各种手续，包括和中介扯皮。真心不出来混，不当家，不自己过日子，不知道生活中的各种细节，不知道人心。</p>
-<p>住的小区距离华为1.7KM、网易1.1KM、阿里1.3KM，不太远，可以步行上下班就是了。杭州滨江区这边还算是开发区，公司集中，非上下班高峰期，路上车少人少，空旷。南方城市，绿化都很好。在这待了七年的同学表妹说是很小资的一座城市，当然应该指杭州核心西湖区那边的情况了。</p>
-<p>其实还有很多可写的，不过都太过于细节，就不记录了，不然岂不成老太婆了，啥事情都要说。</p>
-<p>好梦，晚安世界。</p>
-<p>2017年04月07日23:27:31 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2085299337.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2085299337.html" class="post-title-link" itemprop="url">读书(1)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-21T00:00:00Z">2017-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>615</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>均有一定程度的剧透<br>个人观点，难免偏颇，欢迎讨论，挑事者不送</p>
-</blockquote>
-<h1 id="巨人的陨落（三册）"><a href="#巨人的陨落（三册）" class="headerlink" title="巨人的陨落（三册）"></a>巨人的陨落（三册）</h1><p>很有意思，别样的“历史”书</p>
-<p>构筑了，在一战爆发前后的大背景下，各种各样人物的故事，间接说明了那个时代的新老代思想冲击，谴责了发动一战的罪恶动机</p>
-<p>当然其中人物的爱恨情仇也很精彩</p>
-<h1 id="从你的全世界路过"><a href="#从你的全世界路过" class="headerlink" title="从你的全世界路过"></a>从你的全世界路过</h1><p>恕我直言，忍痛读完，觉得十分没有营养</p>
-<p>文字表达一般，一言不合就我有一个朋友，尴尬症都犯了</p>
-<p>故事矫情，一言不合就离婚，不明真相的以为这个社会已然如此狂躁了</p>
-<h1 id="挪威的森林"><a href="#挪威的森林" class="headerlink" title="挪威的森林"></a>挪威的森林</h1><p>渡，爱着直子，被绿子爱着</p>
-<p>看的很压抑，并不是很能体会书中的各种结束生命</p>
-<h1 id="解忧杂货店"><a href="#解忧杂货店" class="headerlink" title="解忧杂货店"></a>解忧杂货店</h1><p>故事开始的时候，觉得有点懵，后来才慢慢读懂，原来是一个跨时间对话的剧情</p>
-<p>故事的大框架是</p>
-<p>现在的人告诫过去的人该如何生活，过去人看到了穿越时空的建议，并听从这些建议后，改变了他们的生活，也使得生命更有意义</p>
-<p>大框架下容纳了好几个人物的小故事，印象比较深的</p>
-<p>为了追寻音乐梦想，忤逆父亲的期待，而又在追梦的途中不得志的音乐人，最后为了救出陷于火灾之中的孤儿，献出了自己的生命</p>
-<p>起先家境优越，后因种种情况，债台高筑的家庭，父母决定出逃，而“我”并不理解父母，毅然逃离，长大后，才发现父母为了保护自己，双双投海的事实</p>
-<p>作品构思很严密，故事最后形成了一个闭环</p>
-<p>白纸的寓意很震撼，跨时间通信无疑幻想，把握现在，为自己的人生手绘风景</p>
-<h1 id="嫌疑人X的献身"><a href="#嫌疑人X的献身" class="headerlink" title="嫌疑人X的献身"></a>嫌疑人X的献身</h1><p>侦探类的书，看过阿加莎克里斯蒂的几本，《尼罗河上的惨案》、《东方快车》、《无人生还》和《三幕悲剧》等</p>
-<p>情节设计的出人意料</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1248,13 +1301,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">261k</span>
+    <span title="站点总字数">266k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:57</span>
+    <span title="站点阅读时长">4:02</span>
   </span>
 </div>
 
