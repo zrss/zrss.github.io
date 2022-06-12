@@ -23,7 +23,7 @@ mkdir -p context
 
 ### 1.1.1. pip.conf
 
-> 使用华为云开源镜像站 pypi 配置
+> 使用华为开源镜像站 pypi 配置
 > 
 > https://mirrors.huaweicloud.com/home
 
@@ -110,7 +110,7 @@ RUN cd /tmp && \
 # 构建最终容器镜像
 FROM nvidia/cuda:10.2-runtime-ubuntu18.04
 
-# 安装 vim / curl 工具（依旧使用华为开源镜像站）
+# 安装 vim / curl 工具（依然使用华为开源镜像站）
 RUN cp -a /etc/apt/sources.list /etc/apt/sources.list.bak && \
     sed -i "s@http://.*archive.ubuntu.com@http://repo.huaweicloud.com@g" /etc/apt/sources.list && \
     sed -i "s@http://.*security.ubuntu.com@http://repo.huaweicloud.com@g" /etc/apt/sources.list && \
