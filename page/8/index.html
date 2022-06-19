@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-count">118</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-count">63</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,113 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/64e2c768.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/64e2c768.html" class="post-title-link" itemprop="url">boltdb init bucket</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-02-20 16:50:50" itemprop="dateCreated datePublished" datetime="2018-02-20T16:50:50Z">2018-02-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:52:19" itemprop="dateModified" datetime="2020-11-22T08:52:19Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>how to create a bucket in bbolt</p>
+<p>fresh new db file</p>
+<p>page 3 (start from 0) is a leaf page, it will be used as a root bucket</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    root     pgid   <span class="comment">// page id of the bucket&#x27;s root-level page</span></span><br><span class="line">    sequence <span class="keyword">uint64</span> <span class="comment">// monotonically incrementing, used by NextSequence()</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>bucket 结构表示存储于文件中的 bucket</p>
+<p>另外 tx 会关联一个 Bucket 结构体</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    *bucket</span><br><span class="line">    tx       *Tx                <span class="comment">// the associated transaction</span></span><br><span class="line">    buckets  <span class="keyword">map</span>[<span class="keyword">string</span>]*Bucket <span class="comment">// subbucket cache</span></span><br><span class="line">    page     *page              <span class="comment">// inline page reference</span></span><br><span class="line">    rootNode *node              <span class="comment">// materialized node for the root page.</span></span><br><span class="line">    nodes    <span class="keyword">map</span>[pgid]*node     <span class="comment">// node cache</span></span><br><span class="line">    <span class="comment">// Sets the threshold for filling nodes when they split. By default,</span></span><br><span class="line">    <span class="comment">// the bucket will fill to 50% but it can be useful to increase this</span></span><br><span class="line">    <span class="comment">// amount if you know that your write workloads are mostly append-only.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// This is non-persisted across transactions so it must be set in every Tx.</span></span><br><span class="line">    FillPercent <span class="keyword">float64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见其中组合了 bucket 结构体</p>
+<p>写事务在初始化时，会使用 meta 锁，锁定住 meta 页的修改；随后将 meta 页拷贝至写事务内部存储；而实际上写事务开启时，会使用 rwlock，因此写事务并不会并发，另仅有写事务会修改 meta 页，所以此处的 meta 页拷贝存疑，似乎没必要</p>
+<p>init 方法为 beginTX 内部执行，读写事务都会执行，因此虽然写事务无需 copy meta page 然而读事务需要，因为写事务 commit 之后，会修改 meta page</p>
+<p>完成 meta 页的拷贝后，将 tx 的 root (Bucket) 初始化，并设置其 root bucket 为 meta 中的 root bucket; 第一个写事务的 txid 为 2，0、1 用于设置两个 meta 页</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">    p := db.pageInBuffer(buf[:], pgid(i))</span><br><span class="line">    p.id = pgid(i)</span><br><span class="line">    p.flags = metaPageFlag</span><br><span class="line">    <span class="comment">// Initialize the meta page.</span></span><br><span class="line">    m := p.meta()</span><br><span class="line">    m.magic = magic</span><br><span class="line">    m.version = version</span><br><span class="line">    m.pageSize = <span class="keyword">uint32</span>(db.pageSize)</span><br><span class="line">    m.freelist = <span class="number">2</span></span><br><span class="line">    m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br><span class="line">    m.pgid = <span class="number">4</span></span><br><span class="line">    m.txid = txid(i) <span class="comment">// 0 1 txid used</span></span><br><span class="line">    m.checksum = m.sum64()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>create bucket 时 cursor 从 root bucket page 开始遍历 bucket name 应存放的适当位置</p>
+<p>branch page 节点 / leaf page 节点</p>
+<p>数据存放于 leaf page 节点中</p>
+<p>存储于文件中的为 page，内存中的为 node，从文件中读取到的 page 会 materialed 为内存中的 node</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1234,97 +1341,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2121ff68.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2121ff68.html" class="post-title-link" itemprop="url">something-about-golang</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-15 23:17:02" itemprop="dateCreated datePublished" datetime="2017-10-15T23:17:02Z">2017-10-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 15:18:24" itemprop="dateModified" datetime="2020-11-21T15:18:24Z">2020-11-21</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>120</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Intellij-golang"><a href="#Intellij-golang" class="headerlink" title="Intellij golang"></a>Intellij golang</h1><p>用来记录一些 golang 的神奇语法及碎碎念</p>
-<p>step over: 单步调试</p>
-<p><strong>删除数组中的一个元素</strong></p>
-<p>删除 index 元素</p>
-<p>n.inodes = append(n.inodes[:index], n.inodes[index+1:]…)</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1349,13 +1365,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">266k</span>
+    <span title="站点总字数">268k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:02</span>
+    <span title="站点阅读时长">4:04</span>
   </span>
 </div>
 

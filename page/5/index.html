@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-count">118</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-count">63</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,112 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ee6e3d9f.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/ee6e3d9f.html" class="post-title-link" itemprop="url">conda-dl</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-06-02 10:33:37" itemprop="dateCreated datePublished" datetime="2019-06-02T10:33:37Z">2019-06-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:36:13" itemprop="dateModified" datetime="2020-11-22T02:36:13Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>617</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-python">managing python version</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create --name dl python=3.6</span><br></pre></td></tr></table></figure>
+
+<p>activate your env [dl]</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda info --envs</span><br><span class="line">conda activate dl</span><br></pre></td></tr></table></figure>
+
+<p>PyCharm with anaconda</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#easy-build">build the latest openmpi</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># download the openmpi-v4.0.0.tar.gz from the official website</span></span><br><span class="line"><span class="comment"># untar and run configure</span></span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/openmpi --enable-orterun-prefix-by-default</span><br><span class="line"><span class="comment"># make and install</span></span><br><span class="line">make -j $(nproc) all</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>verify openmpi</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun -np 4 --bind-to none --map-by slot hostname</span><br></pre></td></tr></table></figure>
+
+<p>install tensorflow</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/anaconda3/envs/dl/bin/pip --proxy http://127.0.0.1:1081 install tensorflow==1.13.1</span><br></pre></td></tr></table></figure>
+
+<p>install horovod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HOROVOD_WITH_TENSORFLOW=1 /anaconda3/envs/dl/bin/pip install -v --no-cache-dir horovod==0.16.2</span><br></pre></td></tr></table></figure>
+
+<p>ref <a target="_blank" rel="noopener" href="https://github.com/horovod/horovod/blob/master/Dockerfile">horovod Dockerfile</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1290,140 +1396,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9d1faa5.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/9d1faa5.html" class="post-title-link" itemprop="url">docker load tar archive</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-11-17 13:58:45" itemprop="dateCreated datePublished" datetime="2018-11-17T13:58:45Z">2018-11-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 06:07:05" itemprop="dateModified" datetime="2020-11-22T06:07:05Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>在上一遍文章中我们 get 到了 crane pull 的过程，然而好奇的我仍然有个疑问，那就是 tar archive 中并未定义了 layer 的 stack 关系，如此 docker load 如何能正确组织 image 的 fs changeset 呢 ？</p>
-</blockquote>
-<p>docker load</p>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/load/">https://docs.docker.com/engine/reference/commandline/load/</a></p>
-<p>docker (moby)</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby">https://github.com/moby/moby</a></p>
-<p>Layer 是如何串联起来的</p>
-<p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/44544.html">https://www.hi-linux.com/posts/44544.html</a></p>
-<h1 id="Study"><a href="#Study" class="headerlink" title="Study"></a>Study</h1><p>按说理论上每层，应有镜像层 id，并且有指向 parent layer 的指针，当然基础镜像没有 parent layer</p>
-<p>否则无法将 layer 组织起来</p>
-<p>既然如此那在 image tar archive 中，是如何体现这种 layer stack 关系的 ?</p>
-<p>docker save</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── 2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de</span><br><span class="line">│   ├── VERSION</span><br><span class="line">│   ├── json</span><br><span class="line">│   └── layer.tar</span><br><span class="line">├── 9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831</span><br><span class="line">│   ├── VERSION</span><br><span class="line">│   ├── json</span><br><span class="line">│   └── layer.tar</span><br><span class="line">├── e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a.json</span><br><span class="line">├── ecfed8505473c79ab6831d6272a1adff68a42cd102e9992e60b2f8925df01927</span><br><span class="line">│   ├── VERSION</span><br><span class="line">│   ├── json</span><br><span class="line">│   └── layer.tar</span><br><span class="line">├── manifest.json</span><br><span class="line">└── repositories</span><br><span class="line">3 directories, 12 files</span><br></pre></td></tr></table></figure>
-
-<p>可见 docker save 时会将 layer 的 metadata 文件输出，查看 json 文件后发现其的确有 parent 的定义</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;id&quot;: &quot;2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de&quot;,</span><br><span class="line">    &quot;parent&quot;: &quot;9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831&quot;,</span><br><span class="line">    &quot;created&quot;: &quot;2018-11-16T13:32:10.147294787Z&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我还做了个实验，将每层的 json, VERSION 及 repositories 文件删除，检查是否仍然能继续 docker load，呃当然是肯定的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── 2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de</span><br><span class="line">│   └── layer.tar --- Layer File</span><br><span class="line">├── 9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831</span><br><span class="line">│   └── layer.tar --- Layer File</span><br><span class="line">├── e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a.json --- Config file</span><br><span class="line">├── ecfed8505473c79ab6831d6272a1adff68a42cd102e9992e60b2f8925df01927</span><br><span class="line">│   └── layer.tar --- Layer File</span><br><span class="line">└── manifest.json --- Image Tar Archive Description</span><br><span class="line">3 directories, 5 files</span><br></pre></td></tr></table></figure>
-
-<p>docker load 一把</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tar -cf nginx-new.tar *</span><br><span class="line">&gt; docker load -i nginx-new.tar</span><br><span class="line">ef68f6734aa4: Loading layer [==================================================&gt;]  58.44MB/58.44MB</span><br><span class="line">876456b96423: Loading layer [==================================================&gt;]  54.38MB/54.38MB</span><br><span class="line">9a8f339aeebe: Loading layer [==================================================&gt;]  3.584kB/3.584kB</span><br><span class="line">Loaded image: nginx:latest</span><br></pre></td></tr></table></figure>
-
-<p>docker load 各 layer, 其中左侧的 hex 值为 layer sha256 hash value</p>
-<p>可见的确未受影响，所以 docker load 并未依赖 docker save 时保留的 layer metadata 信息</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&quot;os&quot;: &quot;linux&quot;,</span><br><span class="line">&quot;rootfs&quot;: &#123;</span><br><span class="line">    &quot;type&quot;: &quot;layers&quot;,</span><br><span class="line">    &quot;diff_ids&quot;: [</span><br><span class="line">        &quot;sha256:ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3&quot;,</span><br><span class="line">        &quot;sha256:876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795&quot;,</span><br><span class="line">        &quot;sha256:9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>另外对于镜像 Config file 中说明的 rootfs.diff_ids, 其中的 sha256 hash 值均为各 layer 的 sha256 hash 值</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3  ecfed8505473c79ab6831d6272a1adff68a42cd102e9992e60b2f8925df01927/layer.tar</span><br><span class="line">876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795  9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831/layer.tar</span><br><span class="line">9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b  2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de/layer.tar</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://www.huweihuang.com/article/docker/docker-commands-principle/">https://www.huweihuang.com/article/docker/docker-commands-principle/</a></p>
-<blockquote>
-<p>如果你要持久化一个镜像，可以使用 docker save 指令<br>它与 docker export 的区别在于其保留了所有元数据和历史层<br>另外 docker export 用于容器，而不是镜像</p>
-</blockquote>
-<p>docker inspect 用于查看镜像最顶层的 metadata</p>
-<p>docker images -a 该指令用作列出镜像的所有镜像层。镜像层的排序以每个顶层镜像 ID 为首，依次列出每个镜像下的所有镜像层</p>
-<p>docker history 查看该镜像 ID 下的所有历史镜像</p>
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>对比发现，其实在 Image Tar Archive 中，layer 的 parent-child 关系实际上就是定义于镜像 Config file 中的 rootfs.diff_ids 顺序</p>
-<p>[0] &lt;- [1] &lt;- [2] &lt;- …</p>
-<p>以 nginx:latest 为例</p>
-<ol>
-<li>ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3 (base layer)</li>
-<li>876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795</li>
-<li>9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b</li>
-<li>…</li>
-</ol>
-<p>这下就恍然大悟了</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1448,13 +1420,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">266k</span>
+    <span title="站点总字数">268k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:02</span>
+    <span title="站点阅读时长">4:04</span>
   </span>
 </div>
 

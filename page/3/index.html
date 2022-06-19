@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-count">118</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-count">63</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,103 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/485f6ed4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/485f6ed4.html" class="post-title-link" itemprop="url">rsync</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-05-30 14:03:15 / 修改时间：17:00:14" itemprop="dateCreated datePublished" datetime="2021-05-30T14:03:15Z">2021-05-30</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>766</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Download"><a href="#Download" class="headerlink" title="Download"></a>Download</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/">https://rsync.samba.org/</a></p>
+<p>最新版本：<code>Rsync version 3.2.3 released</code></p>
+<h1 id="How-rsync-works"><a href="#How-rsync-works" class="headerlink" title="How rsync works"></a>How rsync works</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/how-rsync-works.html">https://rsync.samba.org/how-rsync-works.html</a></p>
+<h1 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h1><p><a target="_blank" rel="noopener" href="https://download.samba.org/pub/rsync/rsync.html">https://download.samba.org/pub/rsync/rsync.html</a></p>
+<ul>
+<li><code>--recursive</code>: recurse into directories</li>
+<li><code>--append</code>: append data onto shorter files</li>
+<li><code>--filter</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/Cellar/rsync/3.2.3/bin/rsync --verbose --no-whole-file --recursive --append --include=&#x27;*.log&#x27; --include=&#x27;*/&#x27; --exclude=&#x27;*&#x27; --prune-empty-dirs dir1/ dir2/</span><br></pre></td></tr></table></figure>
+
+<p>注意 rsync 本地目录的特殊之处</p>
+<p><a target="_blank" rel="noopener" href="https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files">https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files</a></p>
+<blockquote>
+<p>–whole-file, This is the default when both the source and destination are specified as local paths, but only if no batch-writing option is in effect.</p>
+</blockquote>
+<h1 id="High-Availability"><a href="#High-Availability" class="headerlink" title="High Availability"></a>High Availability</h1><p><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted">https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1160,130 +1257,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5a3d0ab7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/5a3d0ab7.html" class="post-title-link" itemprop="url">install PyTorch 1.8 from source</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-15 11:47:00" itemprop="dateCreated datePublished" datetime="2020-11-15T11:47:00Z">2020-11-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Issues/" itemprop="url" rel="index"><span itemprop="name">Issues</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本地复现一个 <code>TcpStore</code> 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch</p>
-<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
-<li>macOS 10.15.7</li>
-<li>XCode 12.2 (12B45b)</li>
-</ul>
-<h1 id="源码信息"><a href="#源码信息" class="headerlink" title="源码信息"></a>源码信息</h1><p>master latest commit (2020-11-14): <code>f8248543a13b0144a6f5d0a549f72b1e470d88aa</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit f8248543a13b0144a6f5d0a549f72b1e470d88aa (github/master, github/gh/ljk53/194/base, github/HEAD, master)</span><br><span class="line">Author: Rohan Varma &lt;rvarm1@fb.com&gt;</span><br><span class="line">Date:   Sat Nov 14 13:36:31 2020 -0800</span><br></pre></td></tr></table></figure>
-
-<h1 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h1><blockquote>
-<p>(1) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch#from-source">https://github.com/pytorch/pytorch#from-source</a></p>
-<p>(2) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips">https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips</a></p>
-</blockquote>
-<h2 id="glog"><a href="#glog" class="headerlink" title="glog"></a>glog</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install glog</span><br></pre></td></tr></table></figure>
-
-<h2 id="conda"><a href="#conda" class="headerlink" title="conda"></a>conda</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.6</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add these packages if torch.distributed is needed</span></span><br><span class="line">conda install pkg-config libuv</span><br></pre></td></tr></table></figure>
-
-<h2 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h2><p>uninstall </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda uninstall torch</span><br><span class="line">pip uninstall torch</span><br><span class="line"></span><br><span class="line">rm -rf build/</span><br></pre></td></tr></table></figure>
-
-<p>then reinstall</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CMAKE_PREFIX_PATH=<span class="variable">$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))/../&quot;&#125;</span></span><br><span class="line">MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ MAX_JOBS=8 BUILD_CAFFE2=0 BUILD_CAFFE2_OPS=0 USE_GLOG=1 USE_DISTRIBUTED=1 USE_MKLDNN=0 USE_CUDA=0 USE_FBGEMM=0 USE_NNPACK=0 USE_QNNPACK=0 USE_XNNPACK=0 python setup.py develop</span><br></pre></td></tr></table></figure>
-
-<p>Quad-Core Intel Core i7 ~ 45min</p>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; torch.__version__</span><br><span class="line">&#x27;1.8.0a0+f1a8a82&#x27;</span><br></pre></td></tr></table></figure>
-
-<h2 id="TcpStore"><a href="#TcpStore" class="headerlink" title="TcpStore"></a>TcpStore</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python test/distributed/test_c10d.py</span><br><span class="line"></span><br><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch.distributed as dist</span><br><span class="line">&gt;&gt;&gt; server_store = dist.TCPStore(&quot;127.0.0.1&quot;, 18668, 1, True)</span><br></pre></td></tr></table></figure>
-
-<p>or</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./build/bin/TCPStoreTest</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1308,13 +1281,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">266k</span>
+    <span title="站点总字数">268k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:02</span>
+    <span title="站点阅读时长">4:04</span>
   </span>
 </div>
 
