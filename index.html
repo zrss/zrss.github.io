@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">118</span>
+          <span class="site-state-item-count">119</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,121 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/52d00230.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/52d00230.html" class="post-title-link" itemprop="url">Docker container -i -t</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-08-14 02:56:55 / 修改时间：08:43:57" itemprop="dateCreated datePublished" datetime="2022-08-14T02:56:55Z">2022-08-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/run/#foreground">https://docs.docker.com/engine/reference/run/#foreground</a></p>
+<p>-t : Allocate a pseudo-tty<br>-i : Keep STDIN open even if not attached</p>
+</blockquote>
+<p><code>docker run -t</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:bionic-20200713</span><br><span class="line"></span><br><span class="line">docker run -t --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">root@9a7a115ff8d2:/# ls</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>启动容器无 <code>-i</code> 参数时，执行 <code>ls</code> 等命令无回显，执行 <code>exit</code> 命令无法退出 container terminal</p>
+<p><code>docker run -i</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -i --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">echo hello</span><br><span class="line">hello</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
+
+<p>启动容器无 <code>-t</code> 参数时，缺少常用的 terminal 功能，例如无当前登陆用户提示；但执行 <code>ls</code> 等命令正常有回显，且执行 <code>exit</code> 命令可退出</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag">https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag</a></p>
+<p>Without <code>-t</code> tag one can still interact with the container, but with it, you’ll have a nicer, more features terminal.</p>
+</blockquote>
+<h1 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core</a></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Variables for interactive containers, these have very specialized use-cases (e.g. debugging)</span></span><br><span class="line"><span class="comment">// and shouldn&#x27;t be used for general purpose containers.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Whether this container should allocate a buffer for stdin in the container runtime. If this</span></span><br><span class="line"><span class="comment">// is not set, reads from stdin in the container will always result in EOF.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">Stdin <span class="keyword">bool</span> <span class="string">`json:&quot;stdin,omitempty&quot; protobuf:&quot;varint,16,opt,name=stdin&quot;`</span></span><br><span class="line"><span class="comment">// Whether the container runtime should close the stdin channel after it has been opened by</span></span><br><span class="line"><span class="comment">// a single attach. When stdin is true the stdin stream will remain open across multiple attach</span></span><br><span class="line"><span class="comment">// sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the</span></span><br><span class="line"><span class="comment">// first client attaches to stdin, and then remains open and accepts data until the client disconnects,</span></span><br><span class="line"><span class="comment">// at which time stdin is closed and remains closed until the container is restarted. If this</span></span><br><span class="line"><span class="comment">// flag is false, a container processes that reads from stdin will never receive an EOF.</span></span><br><span class="line"><span class="comment">// Default is false</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">StdinOnce <span class="keyword">bool</span> <span class="string">`json:&quot;stdinOnce,omitempty&quot; protobuf:&quot;varint,17,opt,name=stdinOnce&quot;`</span></span><br><span class="line"><span class="comment">// Whether this container should allocate a TTY for itself, also requires &#x27;stdin&#x27; to be true.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">TTY <span class="keyword">bool</span> <span class="string">`json:&quot;tty,omitempty&quot; protobuf:&quot;varint,18,opt,name=tty&quot;`</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config := &amp;runtimeapi.ContainerConfig&#123;</span><br><span class="line">	Metadata: &amp;runtimeapi.ContainerMetadata&#123;</span><br><span class="line">		Name:    container.Name,</span><br><span class="line">		Attempt: restartCountUint32,</span><br><span class="line">	&#125;,</span><br><span class="line">	Image:       &amp;runtimeapi.ImageSpec&#123;Image: imageRef&#125;,</span><br><span class="line">	Command:     command,</span><br><span class="line">	Args:        args,</span><br><span class="line">	WorkingDir:  container.WorkingDir,</span><br><span class="line">	Labels:      newContainerLabels(container, pod),</span><br><span class="line">	Annotations: newContainerAnnotations(container, pod, restartCount, opts),</span><br><span class="line">	Devices:     makeDevices(opts),</span><br><span class="line">	Mounts:      m.makeMounts(opts, container),</span><br><span class="line">	LogPath:     containerLogsPath,</span><br><span class="line">	Stdin:       container.Stdin,</span><br><span class="line">	StdinOnce:   container.StdinOnce,</span><br><span class="line">	Tty:         container.TTY,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="use-conda-env-in-docker"><a href="#use-conda-env-in-docker" class="headerlink" title="use conda env in docker"></a>use conda env in docker</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://pythonspeed.com/articles/activate-conda-dockerfile/">https://pythonspeed.com/articles/activate-conda-dockerfile/</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda/en/latest/commands/run.html">https://docs.conda.io/projects/conda/en/latest/commands/run.html</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda run --no-capture-output -n my-python-env python --version</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1413,113 +1528,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/dfdab12d.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/dfdab12d.html" class="post-title-link" itemprop="url">golang memory model</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-12-26 21:39:00 / 修改时间：13:39:59" itemprop="dateCreated datePublished" datetime="2021-12-26T21:39:00Z">2021-12-26</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://go.dev/ref/mem">https://go.dev/ref/mem</a></p>
-<blockquote>
-<p>Note that a read <em>r</em> may observe the value written by a write <em>w</em> that happens concurrently with <em>r</em>. Even if this occurs, it does not imply that reads happening after <em>r</em> will observe writes that happened before <em>w</em>.</p>
-</blockquote>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a, b <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="number">1</span></span><br><span class="line">	b = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">g</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="built_in">print</span>(b)</span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	g()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>it can happen that g prints 2 and then 0.</p>
-<blockquote>
-<p>A send on a channel happens before the corresponding receive from that channel completes.</p>
-</blockquote>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)</span><br><span class="line"><span class="keyword">var</span> a <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="string">&quot;hello, world&quot;</span></span><br><span class="line">	c &lt;- <span class="number">0</span> <span class="comment">// send on c</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	&lt;-c</span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>is guaranteed to print “hello, world”. The write to <em>a</em> happens before the send on <em>c</em>, which happens before the corresponding receive on <em>c</em> completes, which happens before the <em>print</em>.</p>
-<p>The closing of a channel happens before a receive that returns a zero value because the channel is closed.</p>
-<p>In the previous example, replacing <code>c &lt;- 0</code> with <code>close(c)</code> yields a program with the same guaranteed behavior.</p>
-<blockquote>
-<p>A receive from an unbuffered channel happens before the send on that channel completes.</p>
-</blockquote>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"><span class="keyword">var</span> a <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="string">&quot;hello, world&quot;</span></span><br><span class="line">	&lt;-c</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	c &lt;- <span class="number">0</span></span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>is also guaranteed to print “hello, world”. The write to a happens before the receive on <em>c</em>, which happens before the corresponding send on <em>c</em> completes, which happens before the <em>print</em>.</p>
-<p>If the channel were buffered (e.g., c = make(chan int, 1)) then the program would not be guaranteed to print “hello, world”. (It might print the empty string, crash, or do something else.)</p>
-<blockquote>
-<p>The kth receive on a channel with capacity C happens before the k+Cth send from that channel completes.</p>
-</blockquote>
-<p>This program starts a goroutine for every entry in the work list, but the goroutines coordinate using the limit channel to ensure that at most three are running work functions at a time.</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> limit = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> _, w := <span class="keyword">range</span> work &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(w <span class="keyword">func</span>()</span>)</span> &#123;</span><br><span class="line">			limit &lt;- <span class="number">1</span></span><br><span class="line">			w()</span><br><span class="line">			&lt;-limit</span><br><span class="line">		&#125;(w)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">select</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1544,13 +1552,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">268k</span>
+    <span title="站点总字数">271k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:04</span>
+    <span title="站点阅读时长">4:06</span>
   </span>
 </div>
 

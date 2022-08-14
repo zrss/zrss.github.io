@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">118</span>
+          <span class="site-state-item-count">119</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,113 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/dfdab12d.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/dfdab12d.html" class="post-title-link" itemprop="url">golang memory model</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-26 21:39:00 / 修改时间：13:39:59" itemprop="dateCreated datePublished" datetime="2021-12-26T21:39:00Z">2021-12-26</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://go.dev/ref/mem">https://go.dev/ref/mem</a></p>
+<blockquote>
+<p>Note that a read <em>r</em> may observe the value written by a write <em>w</em> that happens concurrently with <em>r</em>. Even if this occurs, it does not imply that reads happening after <em>r</em> will observe writes that happened before <em>w</em>.</p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a, b <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="number">1</span></span><br><span class="line">	b = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">g</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="built_in">print</span>(b)</span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	g()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>it can happen that g prints 2 and then 0.</p>
+<blockquote>
+<p>A send on a channel happens before the corresponding receive from that channel completes.</p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)</span><br><span class="line"><span class="keyword">var</span> a <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="string">&quot;hello, world&quot;</span></span><br><span class="line">	c &lt;- <span class="number">0</span> <span class="comment">// send on c</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	&lt;-c</span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>is guaranteed to print “hello, world”. The write to <em>a</em> happens before the send on <em>c</em>, which happens before the corresponding receive on <em>c</em> completes, which happens before the <em>print</em>.</p>
+<p>The closing of a channel happens before a receive that returns a zero value because the channel is closed.</p>
+<p>In the previous example, replacing <code>c &lt;- 0</code> with <code>close(c)</code> yields a program with the same guaranteed behavior.</p>
+<blockquote>
+<p>A receive from an unbuffered channel happens before the send on that channel completes.</p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"><span class="keyword">var</span> a <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="string">&quot;hello, world&quot;</span></span><br><span class="line">	&lt;-c</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	c &lt;- <span class="number">0</span></span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>is also guaranteed to print “hello, world”. The write to a happens before the receive on <em>c</em>, which happens before the corresponding send on <em>c</em> completes, which happens before the <em>print</em>.</p>
+<p>If the channel were buffered (e.g., c = make(chan int, 1)) then the program would not be guaranteed to print “hello, world”. (It might print the empty string, crash, or do something else.)</p>
+<blockquote>
+<p>The kth receive on a channel with capacity C happens before the k+Cth send from that channel completes.</p>
+</blockquote>
+<p>This program starts a goroutine for every entry in the work list, but the goroutines coordinate using the limit channel to ensure that at most three are running work functions at a time.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> limit = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> _, w := <span class="keyword">range</span> work &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(w <span class="keyword">func</span>()</span>)</span> &#123;</span><br><span class="line">			limit &lt;- <span class="number">1</span></span><br><span class="line">			w()</span><br><span class="line">			&lt;-limit</span><br><span class="line">		&#125;(w)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">select</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1220,130 +1327,6 @@ InitContainer --&gt; SidecarContainer
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/cd7f3948.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/cd7f3948.html" class="post-title-link" itemprop="url">golang logrus</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-04 07:24:06 / 修改时间：07:58:38" itemprop="dateCreated datePublished" datetime="2021-07-04T07:24:06Z">2021-07-04</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="log-output-format-sample"><a href="#log-output-format-sample" class="headerlink" title="log output format sample"></a>log output format sample</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO[2021-07-04 15:26:26]main.go:28 have a nice day                               zs=log</span><br><span class="line">INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                     zs=log</span><br></pre></td></tr></table></figure>
-
-<h1 id="code-sample"><a href="#code-sample" class="headerlink" title="code sample"></a>code sample</h1><p>show timestamp</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/415">https://github.com/Sirupsen/logrus/issues/415</a></li>
-</ul>
-<p>the meaning of [0000]</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/163">https://github.com/Sirupsen/logrus/issues/163</a></li>
-</ul>
-<p>add common prefix</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/773">https://github.com/sirupsen/logrus/issues/773</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#default-fields">https://github.com/sirupsen/logrus#default-fields</a></li>
-</ul>
-<p>have a little overhead, add filename and line number</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922">https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922</a> </li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#logging-method-name">https://github.com/sirupsen/logrus#logging-method-name</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go">https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go</a> </li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;path&quot;</span></span><br><span class="line">	<span class="string">&quot;runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/sirupsen/logrus&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;logrus.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   <span class="literal">true</span>,</span><br><span class="line">		TimestampFormat: <span class="string">&quot;2006-01-02 15:04:05&quot;</span>,</span><br><span class="line">		CallerPrettyfier: <span class="function"><span class="keyword">func</span><span class="params">(f *runtime.Frame)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">			_, filename := path.Split(f.File)</span><br><span class="line">			<span class="comment">// do not log func name</span></span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, filename + <span class="string">&quot;:&quot;</span> + strconv.Itoa(f.Line)</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.SetFormatter(formatter)</span><br><span class="line">	log.SetReportCaller(<span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(<span class="string">&quot;zs&quot;</span>, <span class="string">&quot;log&quot;</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(<span class="string">&quot;have a nice day&quot;</span>)</span><br><span class="line">	contextLogger.Infof(<span class="string">&quot;%s gogogo&quot;</span>, <span class="string">&quot;zs&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="third-party-formatter"><a href="#third-party-formatter" class="headerlink" title="third-party formatter"></a>third-party formatter</h1><p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#formatters">https://github.com/sirupsen/logrus#formatters</a></p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/x-cray/logrus-prefixed-formatter">https://github.com/x-cray/logrus-prefixed-formatter</a></li>
-</ul>
-<h2 id="log-output-format-sample-1"><a href="#log-output-format-sample-1" class="headerlink" title="log output format sample"></a>log output format sample</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[2021-07-04 15:50:26]  INFO log: have a nice day</span><br><span class="line">[2021-07-04 15:50:26]  INFO log: zs gogogo</span><br></pre></td></tr></table></figure>
-
-<h2 id="code-sample-1"><a href="#code-sample-1" class="headerlink" title="code sample"></a>code sample</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;github.com/sirupsen/logrus&quot;</span><br><span class="line">	prefixed &quot;github.com/x-cray/logrus-prefixed-formatter&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;prefixed.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   true,</span><br><span class="line">		TimestampFormat: &quot;2006-01-02 15:04:05&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.Formatter = formatter</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(&quot;have a nice day&quot;)</span><br><span class="line">	contextLogger.Infof(&quot;%s gogogo&quot;, &quot;zs&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>as previous code show</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contextLogger := log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br></pre></td></tr></table></figure>
-
-<p>u can prefix a <em>log</em> key and colon before the msg output</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1368,13 +1351,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">268k</span>
+    <span title="站点总字数">271k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:04</span>
+    <span title="站点阅读时长">4:06</span>
   </span>
 </div>
 
