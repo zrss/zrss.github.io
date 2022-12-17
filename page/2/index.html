@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">119</span>
+          <span class="site-state-item-count">120</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-count">65</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,193 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ab861e1f.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/ab861e1f.html" class="post-title-link" itemprop="url">kubelet mount gpu</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-03-27 12:48:00 / 修改时间：14:45:42" itemprop="dateCreated datePublished" datetime="2022-03-27T12:48:00Z">2022-03-27</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>相关问题: <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/72486">https://github.com/kubernetes/kubernetes/issues/72486</a>, init container 申请 devices 资源时，似乎会锁定资源，导致 container 无法申请到足够的 devices 资源</p>
+<p>讨论目的: 探索 k8s init container 挂载 gpu 的实现逻辑</p>
+<p>k8s release-1.19 分支代码</p>
+</blockquote>
+<h1 id="kubelet-sync-pod"><a href="#kubelet-sync-pod" class="headerlink" title="kubelet sync pod"></a>kubelet sync pod</h1><p>pkg/kubelet/kubelet_pods.go</p>
+<p>大致的调用顺序</p>
+<ol>
+<li>syncPod</li>
+<li>SyncPod</li>
+<li>startContainer</li>
+<li>generateContainerConfig</li>
+<li>GenerateRunContainerOptions</li>
+<li>GetResources</li>
+<li>GetDeviceRunContainerOptions</li>
+<li>Allocate</li>
+</ol>
+<blockquote>
+<p>// syncPod is the transaction script for the sync of a single pod.</p>
+</blockquote>
+<p><strong>SyncPod</strong></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Step 6: start the init container.</span></span><br><span class="line"><span class="keyword">if</span> container := podContainerChanges.NextInitContainerToStart; container != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="comment">// Start the next init container.</span></span><br><span class="line">	<span class="keyword">if</span> err := start(<span class="string">&quot;init container&quot;</span>, containerStartSpec(container)); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Successfully started the container; clear the entry in the failure</span></span><br><span class="line">	klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Completed init container %q for pod %q&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Step 7: start containers in podContainerChanges.ContainersToStart.</span></span><br><span class="line"><span class="keyword">for</span> _, idx := <span class="keyword">range</span> podContainerChanges.ContainersToStart &#123;</span><br><span class="line">	start(<span class="string">&quot;container&quot;</span>, containerStartSpec(&amp;pod.Spec.Containers[idx]))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>pod 状态有变化时，大致的调用顺序</p>
+<ol>
+<li>dispatchWork</li>
+<li>UpdatePod</li>
+<li>managePodLoop (goroutine)</li>
+</ol>
+<blockquote>
+<p>// Creating a new pod worker either means this is a new pod, or that the kubelet just restarted.</p>
+</blockquote>
+<p><code>managePodLoop</code> 循环从 <code>podUpdates</code> channel 中，调用 <code>syncPod</code></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *podWorkers)</span> <span class="title">managePodLoop</span><span class="params">(podUpdates &lt;-<span class="keyword">chan</span> UpdatePodOptions)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> lastSyncTime time.Time</span><br><span class="line">	<span class="keyword">for</span> update := <span class="keyword">range</span> podUpdates &#123;</span><br><span class="line">		err := <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">			podUID := update.Pod.UID</span><br><span class="line">			<span class="comment">// This is a blocking call that would return only if the cache</span></span><br><span class="line">			<span class="comment">// has an entry for the pod that is newer than minRuntimeCache</span></span><br><span class="line">			<span class="comment">// Time. This ensures the worker doesn&#x27;t start syncing until</span></span><br><span class="line">			<span class="comment">// after the cache is at least newer than the finished time of</span></span><br><span class="line">			<span class="comment">// the previous sync.</span></span><br><span class="line">			status, err := p.podCache.GetNewerThan(podUID, lastSyncTime)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="comment">// This is the legacy event thrown by manage pod loop</span></span><br><span class="line">				<span class="comment">// all other events are now dispatched from syncPodFn</span></span><br><span class="line">				p.recorder.Eventf(update.Pod, v1.EventTypeWarning, events.FailedSync, <span class="string">&quot;error determining status: %v&quot;</span>, err)</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">			err = p.syncPodFn(syncPodOptions&#123;</span><br><span class="line">				mirrorPod:      update.MirrorPod,</span><br><span class="line">				pod:            update.Pod,</span><br><span class="line">				podStatus:      status,</span><br><span class="line">				killPodOptions: update.KillPodOptions,</span><br><span class="line">				updateType:     update.UpdateType,</span><br><span class="line">			&#125;)</span><br><span class="line">			lastSyncTime = time.Now()</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;()</span><br><span class="line">		<span class="comment">// notify the call-back function if the operation succeeded or not</span></span><br><span class="line">		<span class="keyword">if</span> update.OnCompleteFunc != <span class="literal">nil</span> &#123;</span><br><span class="line">			update.OnCompleteFunc(err)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// IMPORTANT: we do not log errors here, the syncPodFn is responsible for logging errors</span></span><br><span class="line">			klog.Errorf(<span class="string">&quot;Error syncing pod %s (%q), skipping: %v&quot;</span>, update.Pod.UID, format.Pod(update.Pod), err)</span><br><span class="line">		&#125;</span><br><span class="line">		p.wrapUp(update.Pod.UID, err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>综上可知，kubelet 可以并发处理多个 pod 变化事件（syncPod in goroutine），但是处理单个 pod 的不同事件时（syncPod），为串行处理</p>
+<h1 id="kubelet-admit-pod"><a href="#kubelet-admit-pod" class="headerlink" title="kubelet admit pod"></a>kubelet admit pod</h1><p>那么设备资源分配，如何保证不同 pod 之间无冲突呢？</p>
+<p>kubelet 在 pod Admit 时，会调用 deviceManger Allocate api 分配设备资源</p>
+<p>kubelet 处理 pod 新增大致顺序如下</p>
+<ol>
+<li>syncLoopIteration</li>
+<li>kubetypes.ADD</li>
+<li>HandlePodAdditions</li>
+<li>canAdmitPod</li>
+</ol>
+<p>for loop pod canAdminPod</p>
+<p>即 kubelet 处理 pod add 时，是没有并发的，逐一处理</p>
+<p>resourceAllocator admit handler，注意到分配顺序为 init container, containers</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *resourceAllocator)</span> <span class="title">Admit</span><span class="params">(attrs *lifecycle.PodAdmitAttributes)</span> <span class="title">lifecycle</span>.<span class="title">PodAdmitResult</span></span> &#123;</span><br><span class="line">	pod := attrs.Pod</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, container := <span class="keyword">range</span> <span class="built_in">append</span>(pod.Spec.InitContainers, pod.Spec.Containers...) &#123;</span><br><span class="line">		err := m.deviceManager.Allocate(pod, &amp;container)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> lifecycle.PodAdmitResult&#123;</span><br><span class="line">				Message: fmt.Sprintf(<span class="string">&quot;Allocate failed due to %v, which is unexpected&quot;</span>, err),</span><br><span class="line">				Reason:  <span class="string">&quot;UnexpectedAdmissionError&quot;</span>,</span><br><span class="line">				Admit:   <span class="literal">false</span>,</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> m.cpuManager != <span class="literal">nil</span> &#123;</span><br><span class="line">			err = m.cpuManager.Allocate(pod, &amp;container)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> lifecycle.PodAdmitResult&#123;</span><br><span class="line">					Message: fmt.Sprintf(<span class="string">&quot;Allocate failed due to %v, which is unexpected&quot;</span>, err),</span><br><span class="line">					Reason:  <span class="string">&quot;UnexpectedAdmissionError&quot;</span>,</span><br><span class="line">					Admit:   <span class="literal">false</span>,</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> lifecycle.PodAdmitResult&#123;Admit: <span class="literal">true</span>&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>继续往下看 deviceManger Allocate</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate is the call that you can use to allocate a set of devices</span></span><br><span class="line"><span class="comment">// from the registered device plugins.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">Allocate</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, ok := m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]; !ok &#123;</span><br><span class="line">		m.devicesToReuse[<span class="keyword">string</span>(pod.UID)] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sets.String)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// If pod entries to m.devicesToReuse other than the current pod exist, delete them.</span></span><br><span class="line">	<span class="keyword">for</span> podUID := <span class="keyword">range</span> m.devicesToReuse &#123;</span><br><span class="line">		<span class="keyword">if</span> podUID != <span class="keyword">string</span>(pod.UID) &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.devicesToReuse, podUID)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Allocate resources for init containers first as we know the caller always loops</span></span><br><span class="line">	<span class="comment">// through init containers before looping through app containers. Should the caller</span></span><br><span class="line">	<span class="comment">// ever change those semantics, this logic will need to be amended.</span></span><br><span class="line">	<span class="keyword">for</span> _, initContainer := <span class="keyword">range</span> pod.Spec.InitContainers &#123;</span><br><span class="line">		<span class="keyword">if</span> container.Name == initContainer.Name &#123;</span><br><span class="line">			<span class="keyword">if</span> err := m.allocateContainerResources(pod, container, m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">			m.podDevices.addContainerAllocatedResources(<span class="keyword">string</span>(pod.UID), container.Name, m.devicesToReuse[<span class="keyword">string</span>(pod.UID)])</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err := m.allocateContainerResources(pod, container, m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	m.podDevices.removeContainerAllocatedResources(<span class="keyword">string</span>(pod.UID), container.Name, m.devicesToReuse[<span class="keyword">string</span>(pod.UID)])</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意到先为 init container 分配 device 资源，且分配后的 device 资源被 <code>addContainerAllocatedResources</code> 加入到 devicesToReuse 中；假设在下一个循环，是为 container 分配资源，则会优先使用 <code>devicesToReuse</code> 去分配，分配完成后，再使用 <code>removeContainerAllocatedResources</code> 从 <code>devicesToReuse</code> 中减去已分配的 device 资源</p>
+<p>devicesToAllocate</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocates from reusableDevices list first.</span></span><br><span class="line"><span class="keyword">if</span> allocateRemainingFrom(reusableDevices) &#123;</span><br><span class="line">	<span class="keyword">return</span> allocated, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><blockquote>
+<p>相关问题: <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/72486#issuecomment-482554372">https://github.com/kubernetes/kubernetes/issues/72486#issuecomment-482554372</a></p>
+</blockquote>
+<p>回到相关问题，从上述的分配逻辑可知，init container 申请 device，导致 container 无法继续申请 device 的 bug 已经被 fixed</p>
+<p>从代码实现上也可知，假若如 issue 中的 pod yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">args:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">sleep</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;10&quot;</span></span><br><span class="line">    <span class="attr">resources:</span></span><br><span class="line">      <span class="attr">requests:</span></span><br><span class="line">        <span class="attr">alpha.kubernetes.io/nvidia-gpu:</span> <span class="number">4</span></span><br><span class="line">        <span class="attr">cpu:</span> <span class="string">&quot;2&quot;</span></span><br><span class="line">        <span class="attr">memory:</span> <span class="string">4Gi</span></span><br><span class="line">      <span class="attr">limits:</span></span><br><span class="line">        <span class="attr">alpha.kubernetes.io/nvidia-gpu:</span> <span class="number">4</span></span><br><span class="line">        <span class="attr">cpu:</span> <span class="string">&quot;2&quot;</span></span><br><span class="line">        <span class="attr">memory:</span> <span class="string">4Gi</span></span><br><span class="line">  <span class="attr">initContainers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">init-myservice</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">command:</span> [<span class="string">&#x27;sh&#x27;</span>, <span class="string">&#x27;-c&#x27;</span>, <span class="string">&#x27;sleep 200&#x27;</span>]</span><br><span class="line">    <span class="attr">resources:</span></span><br><span class="line">      <span class="attr">requests:</span></span><br><span class="line">        <span class="attr">alpha.kubernetes.io/nvidia-gpu:</span> <span class="number">4</span></span><br><span class="line">        <span class="attr">cpu:</span> <span class="string">&quot;2&quot;</span></span><br><span class="line">        <span class="attr">memory:</span> <span class="string">4Gi</span></span><br><span class="line">      <span class="attr">limits:</span></span><br><span class="line">        <span class="attr">alpha.kubernetes.io/nvidia-gpu:</span> <span class="number">4</span></span><br><span class="line">        <span class="attr">cpu:</span> <span class="string">&quot;2&quot;</span></span><br><span class="line">        <span class="attr">memory:</span> <span class="string">4Gi</span></span><br><span class="line">  <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
+
+<p>从 k8s 的实现逻辑上看，init container 申请的 device，实际上会与 container 申请的 device 相同；原因如下</p>
+<ol>
+<li>device 分配（admit）逐一 pod 进行，因此没有 pod 并发分配约束</li>
+<li>pod 内部按先 init container 后 container 的顺序依次分配 device</li>
+<li>init container 已分配的 device 作为 devicesToReuse</li>
+<li>在后续的 container 分配时，优先使用 devicesToReuse 分配 device</li>
+</ol>
+<p>不过在 syncPod 内部也有一个 workaround 的 case</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">GetDeviceRunContainerOptions</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="params">(*DeviceRunContainerOptions, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> container.Resources.Limits &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">		<span class="comment">// This is a device plugin resource yet we don&#x27;t have cached</span></span><br><span class="line">		<span class="comment">// resource state. This is likely due to a race during node</span></span><br><span class="line">		<span class="comment">// restart. We re-issue allocate request to cover this race.</span></span><br><span class="line">		<span class="keyword">if</span> m.podDevices.containerDevices(podUID, contName, resource) == <span class="literal">nil</span> &#123;</span><br><span class="line">			needsReAllocate = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> needsReAllocate &#123;</span><br><span class="line">		klog.V(<span class="number">2</span>).Infof(<span class="string">&quot;needs re-allocate device plugin resources for pod %s, container %s&quot;</span>, podUID, container.Name)</span><br><span class="line">		<span class="keyword">if</span> err := m.Allocate(pod, container); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>19/11/10 的 commit</p>
+<blockquote>
+<p>Checks whether we have cached runtime state before starting a container that requests any device plugin resource. If not, re-issue Allocate grpc calls. This allows us to handle the edge case that a pod got assigned to a node even before it populates its extended resource capacity.</p>
+</blockquote>
+<p>注释说明这种情况出现在 node 重启，pod 又被分配到了一个 node 上，但是这个 node 的 extended resource capacity 又并未 polulates 的情况</p>
+<p>回到 deviceManger Allocate 方法</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Allocate is the call that you can use to allocate a set of devices</span></span><br><span class="line"><span class="comment">// from the registered device plugins.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ManagerImpl)</span> <span class="title">Allocate</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, ok := m.devicesToReuse[<span class="keyword">string</span>(pod.UID)]; !ok &#123;</span><br><span class="line">		m.devicesToReuse[<span class="keyword">string</span>(pod.UID)] = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]sets.String)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// If pod entries to m.devicesToReuse other than the current pod exist, delete them.</span></span><br><span class="line">	<span class="keyword">for</span> podUID := <span class="keyword">range</span> m.devicesToReuse &#123;</span><br><span class="line">		<span class="keyword">if</span> podUID != <span class="keyword">string</span>(pod.UID) &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.devicesToReuse, podUID)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见其中使用了 map，并不是并发安全的；因此上述 workaround 代码，假若触发条件非单一 pod 的情况下，是有并发问题的；既然提交了如此久，未被修复，那么我也认为该处 workaround 代码无多 pod 并发冲突 … :) 当然啦，这不是乱说的，找到上边代码合入的 PR 讨论，也可以佐证是 serialized 的</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/87759">https://github.com/kubernetes/kubernetes/pull/87759</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/87759#pullrequestreview-364185345">https://github.com/kubernetes/kubernetes/pull/87759#pullrequestreview-364185345</a></p>
+<p>其实大佬们也注意到了这个实现的诡异之处，只是 leave it behind，因为之前就有，此次重构并未修改原来的逻辑</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/87759#pullrequestreview-353195106">https://github.com/kubernetes/kubernetes/pull/87759#pullrequestreview-353195106</a></p>
+<p>设计思路呢，其实就是 init container 的资源，继续分配给 container</p>
+<blockquote>
+<p>I’d need to look closer at this, but is the idea to:</p>
+<ol>
+<li><p>Unconditionally allocate CPUs to the container from the pool of available CPUs</p>
+</li>
+<li><p>Check if the container we just allocated to is an init container</p>
+</li>
+<li><p>if it IS an init container, reset the pool of available CPUs to re-include the CPUs just assigned to the init container (but <strong>keep them assigned to the init container in the process</strong>).</p>
+</li>
+<li><p>If it is NOT an init container, just return (leaving the CPUs removed from the pool of available CPUs).</p>
+</li>
+</ol>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/87759#discussion_r383888297">https://github.com/kubernetes/kubernetes/pull/87759#discussion_r383888297</a></p>
+<blockquote>
+<p>This would only work if Pod admission is serialized. @derekwaynecarr can you confirm that this is the case?</p>
+</blockquote>
+<p>总之呢，最后是确认了是 work 的</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/784148">https://developer.aliyun.com/article/784148</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1210,123 +1397,6 @@ InitContainer --&gt; SidecarContainer
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/7cb1245f.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/7cb1245f.html" class="post-title-link" itemprop="url">get pid of pipeline command in background</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-11 07:58:30 / 修改时间：10:30:11" itemprop="dateCreated datePublished" datetime="2021-07-11T07:58:30Z">2021-07-11</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="get-exit-code-of-pipeline-command-in-background"><a href="#get-exit-code-of-pipeline-command-in-background" class="headerlink" title="get exit code of pipeline command in background"></a>get exit code of pipeline command in background</h1><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process">https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process</a></p>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0">https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">  $</span><span class="bash">&#123;someCommand&#125; 2&gt;&amp;1 | tee -a training.log</span></span><br><span class="line">  exit $&#123;PIPESTATUS[0]&#125;</span><br><span class="line">&#125; &amp;</span><br><span class="line"></span><br><span class="line">wait $!</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
-
-<p>回显</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127</span><br></pre></td></tr></table></figure>
-
-<p>综上 wait 即使指定的是 pid，然而内部代码实现依然会 wait pid 对应的 job，这点 wait 的文档里边说的比较隐晦</p>
-<p><a target="_blank" rel="noopener" href="https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html">https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html</a></p>
-<blockquote>
-<p>Wait until the child process specified by each process ID pid or job specification jobspec exits and return the exit status of the last command waited for.</p>
-</blockquote>
-<p>注意 <strong>return the exit status of the last command waited for</strong></p>
-<p>所以上述代码，wait 命令实际上获取到的是 tee 命令的退出码</p>
-<p>在 shell 中获取 pipeline command status 的简易方法似乎只能通过 <code>$&#123;PIPESTATUS[0]&#125;</code></p>
-<h1 id="get-pid-of-pipeline-command-in-background"><a href="#get-pid-of-pipeline-command-in-background" class="headerlink" title="get pid of pipeline command in background"></a>get pid of pipeline command in background</h1><p>进一步的，我们想获取 someCommand 的 pid，有办法么，尝试做如下改造</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    $&#123;someCommand&#125; 2&gt;&amp;1 &amp;</span><br><span class="line">    pid_someCommand=$!</span><br><span class="line">    wait $&#123;pid_someCommand&#125;</span><br><span class="line">    exit $?</span><br><span class="line">&#125; | tee -a training.log &amp;</span><br><span class="line"></span><br><span class="line">wait $!</span><br><span class="line">echo $&#123;PIPESTATUS[0]&#125;</span><br></pre></td></tr></table></figure>
-
-<p>回显</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0</span><br></pre></td></tr></table></figure>
-
-<p>but not work</p>
-<p>最后只能使用 <code>ps -ef | grep someCommand</code> 的终极大法，加上通过 subshell pid 作为 parent id 过滤</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">  $</span><span class="bash">&#123;someCommand&#125; 2&gt;&amp;1 | tee -a training.log</span></span><br><span class="line">  exit $&#123;PIPESTATUS[0]&#125;</span><br><span class="line">&#125; &amp;</span><br><span class="line">someCommand_job_pid=$!</span><br><span class="line"></span><br><span class="line">someCommand_pid=`ps -efj | awk -v parent_pid=$&#123;someCommand_job_pid&#125; &#x27;$3==parent_pid &#123; print $0 &#125;&#x27; | grep &quot;$&#123;someCommand&#125;&quot; | awk &#x27;&#123; print $2 &#125;&#x27;`</span><br><span class="line">echo someCommand_pid $&#123;someCommand_pid&#125;</span><br><span class="line"></span><br><span class="line">wait $&#123;someCommand_job_pid&#125;</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
-
-<p>回显</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">someCommand_pid 55863</span><br><span class="line">127</span><br></pre></td></tr></table></figure>
-
-<h1 id="test-py"><a href="#test-py" class="headerlink" title="test.py"></a>test.py</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">time.sleep(<span class="number">5</span>)</span><br><span class="line">sys.exit(<span class="number">127</span>)</span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1351,13 +1421,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">271k</span>
+    <span title="站点总字数">273k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:06</span>
+    <span title="站点阅读时长">4:08</span>
   </span>
 </div>
 
