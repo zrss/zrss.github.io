@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">120</span>
+          <span class="site-state-item-count">121</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,112 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/fee9442e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/fee9442e.html" class="post-title-link" itemprop="url">golang handle signals</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-12-25 15:00:00 / 修改时间：07:42:38" itemprop="dateCreated datePublished" datetime="2022-12-25T15:00:00Z">2022-12-25</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/signal#hdr-Default_behavior_of_signals_in_Go_programs">https://pkg.go.dev/os/signal#hdr-Default_behavior_of_signals_in_Go_programs</a></p>
+<p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/signal#hdr-Changing_the_behavior_of_signals_in_Go_programs">https://pkg.go.dev/os/signal#hdr-Changing_the_behavior_of_signals_in_Go_programs</a></p>
+<blockquote>
+<p>By default, a synchronous signal is converted into a run-time panic. A SIGHUP, SIGINT, or SIGTERM signal causes the program to exit. </p>
+<p>Notify disables the default behavior for a given set of asynchronous signals and instead delivers them over one or more registered channels. Specifically, it applies to the signals SIGHUP, SIGINT, SIGQUIT, SIGABRT, and SIGTERM. </p>
+</blockquote>
+<p>但是别忘了会有 race 的情况, 下边通过 bash shell 脚本来启动 golang 进程做一个示例</p>
+<p>test-signal</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	signalCh := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;notify signals\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		sig := &lt;- signalCh</span><br><span class="line">		fmt.Printf(<span class="string">&quot;receive signal %v\n&quot;</span>, sig)</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	fmt.Printf(<span class="string">&quot;wait signal\n&quot;</span>)</span><br><span class="line">	time.Sleep(time.Minute)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>test1.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">./test-signal &amp;</span><br><span class="line">pid=$!</span><br><span class="line"></span><br><span class="line">echo &quot;test-signal pid: $pid&quot;</span><br><span class="line"></span><br><span class="line">kill $pid</span><br><span class="line">wait $pid</span><br><span class="line"></span><br><span class="line">exit_code=$?</span><br><span class="line">echo &quot;test-signal exit_code: $exit_code&quot;</span><br></pre></td></tr></table></figure>
+
+<p>test2.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">./test-signal &amp;</span><br><span class="line">pid=$!</span><br><span class="line"></span><br><span class="line">echo &quot;test-signal pid: $pid&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> important</span></span><br><span class="line">sleep 1</span><br><span class="line"><span class="meta">#</span><span class="bash"></span></span><br><span class="line"><span class="bash"></span></span><br><span class="line">kill $pid</span><br><span class="line">wait $pid</span><br><span class="line"></span><br><span class="line">exit_code=$?</span><br><span class="line">echo &quot;test-signal exit_code: $exit_code&quot;</span><br></pre></td></tr></table></figure>
+
+<p>test1.sh 的执行结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test-signal pid: 4878</span><br><span class="line">test1.sh: line 7:  4878 Terminated: 15          ./test-signal</span><br><span class="line">test-signal exit_code: 143</span><br></pre></td></tr></table></figure>
+
+<p>test2.sh 的执行结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">test-signal pid: 4880</span><br><span class="line">notify signals</span><br><span class="line">wait signal</span><br><span class="line">receive signal terminated</span><br></pre></td></tr></table></figure>
+
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><ol>
+<li>golang 程序处理 TERM 信号的默认行为是退出, 且退出码为 143 (128 + 15), 15 为 TERM</li>
+<li>使用 signal.Notify 可以修改 golang 程序处理 TERM 信号的默认行为; 但是如果 golang 程序启动后过快接收到 TERM 信号 (在 signal.Notify 执行完成之前), 则会导致程序直接退出 (默认行为)</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1339,116 +1445,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/926bc5d1.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/926bc5d1.html" class="post-title-link" itemprop="url">gpu device plugin</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-04-05 10:06:00 / 修改时间：15:47:07" itemprop="dateCreated datePublished" datetime="2022-04-05T10:06:00Z">2022-04-05</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="device-plugin-init-and-list-watch"><a href="#device-plugin-init-and-list-watch" class="headerlink" title="device plugin init and list-watch"></a>device plugin init and list-watch</h1><h2 id="init"><a href="#init" class="headerlink" title="init"></a>init</h2><p>device plugin 启动时</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *NvidiaDevicePlugin)</span> <span class="title">initialize</span><span class="params">()</span></span> &#123;</span><br><span class="line">	m.cachedDevices = m.Devices()</span><br><span class="line">	m.server = grpc.NewServer([]grpc.ServerOption&#123;&#125;...)</span><br><span class="line">	m.health = <span class="built_in">make</span>(<span class="keyword">chan</span> *Device)</span><br><span class="line">	m.stop = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用 <code>m.Devices()</code> 获取当前节点上的 gpu 设备列表信息</p>
-<h2 id="list-watch"><a href="#list-watch" class="headerlink" title="list-watch"></a>list-watch</h2><p>返回 gpu 设备详情，注意到不健康的设备 <code>health</code> 字段会被设置 <code>Unhealthy</code> 值</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-m.stop:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	<span class="keyword">case</span> d := &lt;-m.health:</span><br><span class="line">		<span class="comment">// <span class="doctag">FIXME:</span> there is no way to recover from the Unhealthy state.</span></span><br><span class="line">		d.Health = pluginapi.Unhealthy</span><br><span class="line">		log.Printf(<span class="string">&quot;&#x27;%s&#x27; device marked unhealthy: %s&quot;</span>, m.resourceName, d.ID)</span><br><span class="line">		s.Send(&amp;pluginapi.ListAndWatchResponse&#123;Devices: m.apiDevices()&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="device-plugin-health-check"><a href="#device-plugin-health-check" class="headerlink" title="device plugin health check"></a>device plugin health check</h1><p>health 检测的实现也比较直接</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> m.CheckHealth(m.stop, m.cachedDevices, m.health)</span><br></pre></td></tr></table></figure>
-
-<p>使用 <code>nvml</code> go lib API 将已发现的每个设备注册到 <code>eventSet</code>，假若不支持该 API 的设备，则直接标记为 <code>Unhealthy</code></p>
-<p>注册 ok 后，开启 for loop 等待 event</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http://docs.nvidia.com/deploy/xid-errors/index.html#topic_4</span></span><br><span class="line"><span class="comment">// Application errors: the GPU should still be healthy</span></span><br><span class="line">applicationErrorXids := []<span class="keyword">uint64</span>&#123;</span><br><span class="line">	<span class="number">13</span>, <span class="comment">// Graphics Engine Exception</span></span><br><span class="line">	<span class="number">31</span>, <span class="comment">// GPU memory page fault</span></span><br><span class="line">	<span class="number">43</span>, <span class="comment">// GPU stopped processing</span></span><br><span class="line">	<span class="number">45</span>, <span class="comment">// Preemptive cleanup, due to previous errors</span></span><br><span class="line">	<span class="number">68</span>, <span class="comment">// Video processor exception</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">skippedXids := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">uint64</span>]<span class="keyword">bool</span>)</span><br><span class="line"><span class="keyword">for</span> _, id := <span class="keyword">range</span> applicationErrorXids &#123;</span><br><span class="line">	skippedXids[id] = <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-stop:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	e, err := nvml.WaitForEvent(eventSet, <span class="number">5000</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &amp;&amp; e.Etype != nvml.XidCriticalError &#123;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> skippedXids[e.Edata] &#123;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> e.UUID == <span class="literal">nil</span> || <span class="built_in">len</span>(*e.UUID) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="comment">// All devices are unhealthy</span></span><br><span class="line">		log.Printf(<span class="string">&quot;XidCriticalError: Xid=%d, All devices will go unhealthy.&quot;</span>, e.Edata)</span><br><span class="line">		<span class="keyword">for</span> _, d := <span class="keyword">range</span> devices &#123;</span><br><span class="line">			unhealthy &lt;- d</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">continue</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, d := <span class="keyword">range</span> devices &#123;</span><br><span class="line">		<span class="comment">// Please see https://github.com/NVIDIA/gpu-monitoring-tools/blob/148415f505c96052cb3b7fdf443b34ac853139ec/bindings/go/nvml/nvml.h#L1424</span></span><br><span class="line">		<span class="comment">// for the rationale why gi and ci can be set as such when the UUID is a full GPU UUID and not a MIG device UUID.</span></span><br><span class="line">		gpu, gi, ci, err := nvml.ParseMigDeviceUUID(d.ID)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			gpu = d.ID</span><br><span class="line">			gi = <span class="number">0xFFFFFFFF</span></span><br><span class="line">			ci = <span class="number">0xFFFFFFFF</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> gpu == *e.UUID &amp;&amp; gi == *e.GpuInstanceId &amp;&amp; ci == *e.ComputeInstanceId &#123;</span><br><span class="line">			log.Printf(<span class="string">&quot;XidCriticalError: Xid=%d on Device=%s, the device will go unhealthy.&quot;</span>, e.Edata, d.ID)</span><br><span class="line">			unhealthy &lt;- d</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意到 gpu device plugin 会忽略特定 <code>Xid</code>，因为这些 <code>Xid</code> 明确不是硬件故障</p>
-<h1 id="NVIDIA-Health-amp-Diagnostic"><a href="#NVIDIA-Health-amp-Diagnostic" class="headerlink" title="NVIDIA Health &amp; Diagnostic"></a>NVIDIA Health &amp; Diagnostic</h1><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deploy/index.html">https://docs.nvidia.com/deploy/index.html</a></p>
-<h2 id="xid"><a href="#xid" class="headerlink" title="xid"></a>xid</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deploy/xid-errors/index.html#topic_4">https://docs.nvidia.com/deploy/xid-errors/index.html#topic_4</a></p>
-<blockquote>
-<p>The Xid message is an error report from the NVIDIA driver that is printed to the operating system’s kernel log or event log. Xid messages indicate that a general GPU error occurred, most often due to the driver programming the GPU incorrectly or to corruption of the commands sent to the GPU. The messages can be indicative of a hardware problem, an NVIDIA software problem, or a user application problem.</p>
-<p>Under Linux, the Xid error messages are placed in the location /var/log/messages. Grep for “NVRM: Xid” to find all the Xid messages.</p>
-</blockquote>
-<h2 id="NVVS-NVIDIA-Validation-Suite"><a href="#NVVS-NVIDIA-Validation-Suite" class="headerlink" title="NVVS (NVIDIA Validation Suite)"></a>NVVS (NVIDIA Validation Suite)</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deploy/nvvs-user-guide/index.html">https://docs.nvidia.com/deploy/nvvs-user-guide/index.html</a></p>
-<blockquote>
-<p>Easily integrate into Cluster Scheduler and Cluster Management applications</p>
-</blockquote>
-<h1 id="k8s-device"><a href="#k8s-device" class="headerlink" title="k8s device"></a>k8s device</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListAndWatchResponse <span class="keyword">struct</span> &#123;</span><br><span class="line">	Devices              []*Device <span class="string">`protobuf:&quot;bytes,1,rep,name=devices,...`</span></span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// E.g:</span></span><br><span class="line"><span class="comment">// struct Device &#123;</span></span><br><span class="line"><span class="comment">//    ID: &quot;GPU-fef8089b-4820-abfc-e83e-94318197576e&quot;,</span></span><br><span class="line"><span class="comment">//    Health: &quot;Healthy&quot;,</span></span><br><span class="line"><span class="comment">//    Topology:</span></span><br><span class="line"><span class="comment">//      Node:</span></span><br><span class="line"><span class="comment">//        ID: 1</span></span><br></pre></td></tr></table></figure>
-
-<p>结合 Health 信息，k8s 调度器就可以忽略 <code>UnHealthy</code> 的 GPU 设备了</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
@@ -1471,13 +1469,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">273k</span>
+    <span title="站点总字数">274k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:08</span>
+    <span title="站点阅读时长">4:09</span>
   </span>
 </div>
 

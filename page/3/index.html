@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">120</span>
+          <span class="site-state-item-count">121</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,126 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e9a26fdf.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/e9a26fdf.html" class="post-title-link" itemprop="url">golang cli context</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-12 16:44:12" itemprop="dateCreated datePublished" datetime="2021-07-12T16:44:12Z">2021-07-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-18 03:26:20" itemprop="dateModified" datetime="2021-07-18T03:26:20Z">2021-07-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li><a target="_blank" rel="noopener" href="https://www.sohamkamani.com/golang/context-cancellation-and-values/">https://www.sohamkamani.com/golang/context-cancellation-and-values/</a></li>
+<li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine">https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine</a></li>
+</ul>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them">https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them</a>.</p>
+<p>A Context is safe for simultaneous use by multiple goroutines. Code can pass a single Context to any number of goroutines and cancel that Context to signal all of them.</p>
+</blockquote>
+<h1 id="project-structure"><a href="#project-structure" class="headerlink" title="project structure"></a>project structure</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── cmd</span><br><span class="line">│   └── command.go</span><br><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── main.go</span><br><span class="line">└── pkg</span><br><span class="line">    └── run</span><br><span class="line">        └── long_run_cli.go</span><br><span class="line"></span><br><span class="line">3 directories, 5 files</span><br></pre></td></tr></table></figure>
+
+<h1 id="main-go"><a href="#main-go" class="headerlink" title="main.go"></a>main.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/cmd&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)</span><br><span class="line"></span><br><span class="line">	ctx := context.Background()</span><br><span class="line">	ctx, cancel := context.WithCancel(ctx)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-c:</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	cmd.Execute(ctx)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="command-go"><a href="#command-go" class="headerlink" title="command.go"></a>command.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cmd</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/spf13/cobra&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/pkg/run&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> rootCmd = &amp;cobra.Command&#123;</span><br><span class="line">	Use:   <span class="string">&quot;long run cli&quot;</span>,</span><br><span class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">		cli := run.New()</span><br><span class="line">		err := cli.LongRun(cmd.Context())</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;cli run err: %v\n&quot;</span>, err)</span><br><span class="line">			<span class="keyword">if</span> exitError, ok := err.(*exec.ExitError); ok &#123;</span><br><span class="line">				fmt.Printf(<span class="string">&quot;exit code: %d\n&quot;</span>, exitError.ExitCode())</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Execute</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := rootCmd.ExecuteContext(ctx); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;err: %v\n&quot;</span>, err)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="long-run-cli-go"><a href="#long-run-cli-go" class="headerlink" title="long_run_cli.go"></a>long_run_cli.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> run</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> CLI <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cli CLI)</span> <span class="title">LongRun</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	cmd := exec.CommandContext(ctx, <span class="string">&quot;sleep&quot;</span>, <span class="string">&quot;30&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> cmd.Run()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> *<span class="title">CLI</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;CLI&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/exec#CommandContext">https://pkg.go.dev/os/exec#CommandContext</a></p>
+<blockquote>
+<p>The provided context is used to kill the process (by calling os.Process.Kill) if the context becomes done before the command completes on its own.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/issues/21135">https://github.com/golang/go/issues/21135</a></p>
+<blockquote>
+<p>proposal: os/exec: allow user of CommandContext to specify the kill signal when context is done</p>
+</blockquote>
+<p>commandContext will trigger SIGKILL when the ctx is done …</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1137,158 +1257,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ec17aa10.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/ec17aa10.html" class="post-title-link" itemprop="url">GPUDirect RDMA</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-28 04:16:07" itemprop="dateCreated datePublished" datetime="2021-02-28T04:16:07Z">2021-02-28</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-02 15:59:58" itemprop="dateModified" datetime="2021-03-02T15:59:58Z">2021-03-02</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/gpudirect">https://developer.nvidia.com/gpudirect</a></p>
-</blockquote>
-<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
-<li>Kernel: 3.10.0-514.44.5.10.h254.x86_64 (<code>uname -r</code>)</li>
-<li>Nvidia Driver: 440.33.01 (<code>nvidia-smi</code>)</li>
-<li>MLNX OFED: 4.3-1.0.1.0 (<code>ofed_info</code>)</li>
-<li>Mellanox/nv_peer_memory: Tag 1.1-0</li>
-</ul>
-<h1 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h1><p>容器化安装 NVIDIA Driver 看起来会出现 <code>lsmod | grep nvidia</code> 能找到，然而 <code>modinfo nvidia</code> 会提示找不到 Module 的错误</p>
-<p>需要修改 <code>nv_peer_memory</code> 代码库的构建脚本，workaround 上述问题</p>
-<h1 id="DIY-nv-peer-memory-编译"><a href="#DIY-nv-peer-memory-编译" class="headerlink" title="DIY nv_peer_memory 编译"></a>DIY nv_peer_memory 编译</h1><p>准备空目录</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /root/nv_peer_memory</span><br><span class="line">cd /root/nv_peer_memory</span><br></pre></td></tr></table></figure>
-
-<h2 id="NVIDIA-Driver"><a href="#NVIDIA-Driver" class="headerlink" title="NVIDIA Driver"></a>NVIDIA Driver</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://us.download.nvidia.com/tesla/440.33.01/NVIDIA-Linux-x86_64-440.33.01.run">https://us.download.nvidia.com/tesla/440.33.01/NVIDIA-Linux-x86_64-440.33.01.run</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 下载 `NVIDIA-Linux-x86_64-440.33.01.run`</span><br><span class="line">curl -o NVIDIA-Linux-x86_64-440.33.01.run &#x27;https://us.download.nvidia.com/tesla/440.33.01/NVIDIA-Linux-x86_64-440.33.01.run&#x27;</span><br><span class="line"></span><br><span class="line"># 解压至当前目录</span><br><span class="line">./NVIDIA-Linux-x86_64-440.33.01.run -x</span><br></pre></td></tr></table></figure>
-
-<h2 id="nv-peer-memory"><a href="#nv-peer-memory" class="headerlink" title="nv_peer_memory"></a>nv_peer_memory</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/nv_peer_memory/tree/1.1-0">https://github.com/Mellanox/nv_peer_memory/tree/1.1-0</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.mellanox.com/products/GPUDirect-RDMA">https://www.mellanox.com/products/GPUDirect-RDMA</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -o nv_peer_memory-1.1-0.tar.gz &#x27;https://github.com/Mellanox/nv_peer_memory/archive/1.1-0.tar.gz&#x27;</span><br><span class="line">tar xzf nv_peer_memory-1.1-0.tar.gz</span><br></pre></td></tr></table></figure>
-
-<h2 id="DIY-编译"><a href="#DIY-编译" class="headerlink" title="DIY 编译"></a>DIY 编译</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd nv_peer_memory-1.1-0</span><br></pre></td></tr></table></figure>
-
-<p>修改 <code>Makefile</code> 中的 <code>nv_sources</code> 为 NVIDIA Driver 源码位置</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nv_sources=/root/nv_peer_memory/NVIDIA-Linux-x86_64-440.33.01/kernel</span><br></pre></td></tr></table></figure>
-
-<p>修改 <code>create_nv.symvers.sh</code> 中的 <code>nvidia_mod</code> 为主机上安装的 NVIDIA Driver .ko 位置，例如</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvidia_mod=/var/k8s/nvidia/drivers/nvidia.ko</span><br></pre></td></tr></table></figure>
-
-<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><blockquote>
-<p>参考 nv_peer_memory README.md</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./build_module.sh</span><br><span class="line"></span><br><span class="line">rpmbuild --rebuild /tmp/nvidia_peer_memory-1.1-0.src.rpm</span><br></pre></td></tr></table></figure>
-
-<h2 id="安装-rpm"><a href="#安装-rpm" class="headerlink" title="安装 rpm"></a>安装 rpm</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh /root/rpmbuild/RPMS/x86_64/nvidia_peer_memory-1.1-0.x86_64.rpm</span><br></pre></td></tr></table></figure>
-
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep nv_peer_mem</span><br></pre></td></tr></table></figure>
-
-<p><code>NCCL_DEBUG=INFO</code>，例如</p>
-<blockquote>
-<p>NCCL version 2.4.8+cuda10.1</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NCCL INFO Ring 00 : 3 -&gt; 10 [send] via NET/IB/0/GDRDMA</span><br></pre></td></tr></table></figure>
-
-<h1 id="Trick"><a href="#Trick" class="headerlink" title="Trick"></a>Trick</h1><ul>
-<li><p>nvidia_peer_memory 代码中的 <code>create_nv.symvers.sh</code> 可独立执行，由于容器化安装 NVIDIA Driver 场景，<code>modinfo nvidia</code> 会报找不到 mod 的错，可找一台直接在主机侧安装了 <code>NVIDIA driver</code> 的机器，<code>bash -x create_nv.symvers.sh</code> 确认执行过程，以及相关变量取值</p>
-</li>
-<li><p>如下命令可显示 mod 对应的 ko 文件位置</p>
-</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$/sbin/modinfo -F filename -k 3.10.0-514.44.5.10.h142.x86_64 nvidia</span><br><span class="line">/lib/modules/3.10.0-514.44.5.10.h142.x86_64/kernel/drivers/video/nvidia.ko</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
@@ -1311,13 +1281,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">273k</span>
+    <span title="站点总字数">274k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:08</span>
+    <span title="站点阅读时长">4:09</span>
   </span>
 </div>
 

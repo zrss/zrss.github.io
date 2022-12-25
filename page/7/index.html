@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">120</span>
+          <span class="site-state-item-count">121</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,102 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/d41c4586.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/d41c4586.html" class="post-title-link" itemprop="url">Memory of Tomcat</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-07 15:27:27" itemprop="dateCreated datePublished" datetime="2018-08-07T15:27:27Z">2018-08-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:29:08" itemprop="dateModified" datetime="2020-11-22T07:29:08Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>201</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="top"><a href="#top" class="headerlink" title="top"></a>top</h1><p>top 按 CPU 排序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">top</span><br><span class="line"><span class="built_in">shift</span> + P</span><br></pre></td></tr></table></figure>
+
+<p>top 按 MEM 排序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">top</span><br><span class="line"><span class="built_in">shift</span> + M</span><br></pre></td></tr></table></figure>
+
+<h1 id="java-utils"><a href="#java-utils" class="headerlink" title="java utils"></a>java utils</h1><p>为 jdk 设置 JAVA_HOME<br>设置 jdk bin 至 PATH 中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 查看 java 进程堆及 GC 情况</span><br><span class="line">jstat</span><br><span class="line">// 查看 java 进程中的线程情况</span><br><span class="line">jstack</span><br></pre></td></tr></table></figure>
+
+<p>最后一顿排查，jstat 查看了堆内存情况，发现是 tomcat 启动参数 <code>-Xms -Xmx</code> 设置过大了，同一节点上还有其他进程，其他进程占用内存比较猛</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1537,146 +1633,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e830320c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/e830320c.html" class="post-title-link" itemprop="url">the cache of request</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-05-13 14:09:52" itemprop="dateCreated datePublished" datetime="2018-05-13T14:09:52Z">2018-05-13</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 06:13:03" itemprop="dateModified" datetime="2020-12-12T06:13:03Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>最近遇到个意外的情况：在未知情况下，Chrome 浏览器会对部分 GET 请求缓存，即该请求的 SIZE 指示为 from disk cache，且 cache 返回的状态码为 410</p>
-<p>查看 MDN 上对 HTTP 410 的解释为，Gone 服务器返回该状态码，指示该请求资源在服务器上已不可用，而且这个不可用可能是永久的。如果服务器不清楚该资源的丢失是临时的或者是永久的，那么应返回 404，即 Not Found</p>
-<p>另外 410 response 是可被缓存的</p>
-<p>考虑到实际我们项目中的开发流程，有 Dev / Alpha / Production 环境，各个环境的访问需要切换 proxy 访问，可能存在 CORS (Cross-Origin-Resource-Sharing) 问题，具体如</p>
-<p>Alpha 环境域名为 A，因此若访问 Alpha 环境，则将 A domain 配置至主机 hosts 文件中，静态解析 A domain，使其对应 IP 为 Alpha 环境 IP</p>
-<p>Production 环境域名也为 A，访问 Production 环境，可以直接公网访问</p>
-<p>对于浏览器来说，访问 Alpha / Production 环境的最大不同，为 Remote Address 不同 (域名实际相同)</p>
-<p>那么是否有可能为成功的请求访问的 Alpha 环境，而不成功的请求 (被 cache 410 的请求) 访问的为 Production 环境？</p>
-<p>顺着这个可疑点开始搜索相关资料，了解到</p>
-<h1 id="Prefight-request"><a href="#Prefight-request" class="headerlink" title="Prefight request"></a>Prefight request</h1><p>客户端在发起 COR 请求时，会首先发起 prefight 请求，检查是否对端 Server 接受 COR 请求</p>
-<p>client option request</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">OPTIONS /resource/foo </span><br><span class="line">Access-Control-Request-Method: DELETE </span><br><span class="line">Access-Control-Request-Headers: origin, x-requested-with</span><br><span class="line">Origin: https://foo.bar.org</span><br></pre></td></tr></table></figure>
-
-<p>if server accept this request then it will response a reponse body like</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Content-Length: 0</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Access-Control-Allow-Origin: https://foo.bar.org</span><br><span class="line">Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE</span><br><span class="line">Access-Control-Max-Age: 86400</span><br></pre></td></tr></table></figure>
-
-<p>好了，看到这，发现调查的方向有点偏了，切换 proxy 并不会导致 CORS 问题。切换代理之后，会导致后续请求由代理 A 切换至代理 B 转发，仅此而已</p>
-<h1 id="Can-it-be-cache-by-accidently"><a href="#Can-it-be-cache-by-accidently" class="headerlink" title="Can it be cache by accidently ?"></a>Can it be cache by accidently ?</h1><p>查看代码后，发现后端部分请求在某一时段，的确返回了 410 错误，而 410 错误时，会返回一个 html 页面结果，是否 nginx 对这个结果，设置了有效的 cache-control 导致，浏览器缓存了发生该错误时的请求？</p>
-<p>查看 Nginx 的文档后发现，Nginx add_header 仅在特定的 http status code 生效</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Adds the specified field to a response header provided that the response code equals 200, 201 (1.3.10), 204, 206, 301, 302, 303, 304, 307 (1.1.16, 1.0.13), or 308 (1.13.0). The value can contain variables.</span><br></pre></td></tr></table></figure>
-
-<p>所以如果特定 http 请求，本应返回正常的 json 结构体，然而后台报错，抛出异常，而该异常又未被捕获，因此 http 请求最后获取到的是 tomcat 的 exception 页面，比如 410 的错误页面</p>
-<p>又因为未指定默认的 cache 方式，因此该返回没有 cache 相关的 http header，因此全凭浏览器的启发式 cache 策略，意外将该错误的 http 请求返回结果缓存下来</p>
-<p>为解决这个问题，可以在 <code>conf/web.xml</code> 中配置</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">security-constraint</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">web-resource-collection</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">web-resource-name</span>&gt;</span>HTTPSOnly<span class="tag">&lt;/<span class="name">web-resource-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">web-resource-collection</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">user-data-constraint</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">transport-guarantee</span>&gt;</span>CONFIDENTIAL<span class="tag">&lt;/<span class="name">transport-guarantee</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">user-data-constraint</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">security-constraint</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>即可，这样默认每个请求的返回头都会加上</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: private</span><br><span class="line">Expires: Thu, 01 Jan 1970 00:00:00 GMT</span><br></pre></td></tr></table></figure>
-
-<p>至于为何后端会概率性返回 410，那又是另外一个问题了，后续有机会再说</p>
-<h1 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h1><p>因此问题是这样的，对于返回“正常”的请求 Nginx 设置了如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: no-cache, no-store, must-revalidate</span><br><span class="line">Pragma: no-cache</span><br><span class="line">X-Content-Type-Options: nosniff</span><br><span class="line">X-Download-Options: noopen</span><br><span class="line">X-Frame-Options: SAMEORIGIN</span><br><span class="line">X-XSS-Protection: 1; mode=block;</span><br><span class="line">Strict-Transport-Security: max-age=31536000; includeSubdomains;</span><br></pre></td></tr></table></figure>
-
-<p>请求头</p>
-<p>对于静态资源文件，如 .html/.css/.js 等，Nginx 使用了 Expires 指令</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: max-age=604800</span><br><span class="line">Expires: Sun, 27 May 2018 10:28:04 GMT</span><br><span class="line">X-Content-Type-Options: nosniff</span><br><span class="line">X-Download-Options: noopen</span><br><span class="line">X-Frame-Options: SAMEORIGIN</span><br><span class="line">X-XSS-Protection: 1; mode=block;</span><br><span class="line">Strict-Transport-Security: max-age=31536000; includeSubdomains;</span><br></pre></td></tr></table></figure>
-
-<p>因此增加或修改了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: max-age=604800</span><br><span class="line">Expires: Sun, 27 May 2018 10:28:04 GMT</span><br></pre></td></tr></table></figure>
-
-<p>返回请求头</p>
-<p>对于非“正常”的请求，使用 Tomcat CONFIDENTIAL 配置，使其返回请求头中默认携带</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: private</span><br><span class="line">Expires: Thu, 01 Jan 1970 00:00:00 GMT</span><br></pre></td></tr></table></figure>
-
-<p>因此浏览器不会缓存错误的返回结果。当然这么配置之后，实际上是所有返回头均有上述字段，一般来说 Tomcat 前端会有 LB，最常见的如 Nginx，Nginx 对资源文件默认设置了 Expires，该指令会修改 Cache-Control / Expires，因此从通用的角度来说，足以解决缓存带来的各种烦人问题，又不至于太影响性能</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/410">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/410</a></p>
-<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Glossary/cacheable">https://developer.mozilla.org/en-US/docs/Glossary/cacheable</a></p>
-<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request">https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request</a></p>
-<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS</a></p>
-<p><a target="_blank" rel="noopener" href="https://lists.w3.org/Archives/Public/www-archive/2017Aug/0000.html">https://lists.w3.org/Archives/Public/www-archive/2017Aug/0000.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://bugs.chromium.org/p/chromium/issues/detail?id=260239">https://bugs.chromium.org/p/chromium/issues/detail?id=260239</a></p>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/21829553/tomcat-security-constraint-impact-cache">https://stackoverflow.com/questions/21829553/tomcat-security-constraint-impact-cache</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
@@ -1699,13 +1657,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">273k</span>
+    <span title="站点总字数">274k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:08</span>
+    <span title="站点阅读时长">4:09</span>
   </span>
 </div>
 
