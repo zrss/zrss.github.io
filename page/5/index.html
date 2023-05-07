@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">121</span>
+          <span class="site-state-item-count">124</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-count">66</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,351 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/f68a955a.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/f68a955a.html" class="post-title-link" itemprop="url">spark-cluster-mode-on-k8s</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-12-08 10:16:51" itemprop="dateCreated datePublished" datetime="2019-12-08T10:16:51Z">2019-12-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:20:00" itemprop="dateModified" datetime="2020-11-22T07:20:00Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cluster-overview.html">https://spark.apache.org/docs/latest/cluster-overview.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cluster-overview.html#glossary">https://spark.apache.org/docs/latest/cluster-overview.html#glossary</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-pi.yaml">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-pi.yaml</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-py-pi.yaml">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/examples/spark-py-pi.yaml</a></p>
+<p><code>KUBERNETES_SERVICE_HOST</code></p>
+<p><code>KUBERNETES_SERVICE_PORT</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--class=...</span><br><span class="line">--master k8s://https://%s:%s</span><br><span class="line">--deploy-mode cluster/client</span><br><span class="line">--conf spark.kubernetes.namespace=default</span><br><span class="line">--conf spark.app.name=spark-pi</span><br><span class="line">SparkPi.jar (MainApplicationFile: MainFile is the path to a bundled JAR, Python, or R file of the application.)</span><br></pre></td></tr></table></figure>
+
+<p>SPARK_HOME/bin/spark-submit args</p>
+<p>Spark-on-k8s-operator controller run the <code>spark-submit</code> scripts</p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ bin/spark-submit \</span><br><span class="line">    --master k8s://https://&lt;k8s-apiserver-host&gt;:&lt;k8s-apiserver-port&gt; \</span><br><span class="line">    --deploy-mode cluster</span><br><span class="line">    --name spark-pi \</span><br><span class="line">    --class org.apache.spark.examples.SparkPi \</span><br><span class="line">    --conf spark.executor.instances=5 \</span><br><span class="line">    --conf spark.kubernetes.container.image=&lt;spark-image&gt; \</span><br><span class="line">    <span class="built_in">local</span>:///path/to/examples.jar</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management</a></p>
+<p>client mode is not supported in 2.3.1 (cluster manager)</p>
+<p>but it seems work in 2.4</p>
+<p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/running-on-kubernetes.html">https://spark.apache.org/docs/latest/running-on-kubernetes.html</a></p>
+<p>Dependencies Jars and Files</p>
+<p>logs</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n=&lt;namespace&gt; logs -f &lt;driver-pod-name&gt;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/cda86f18.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/cda86f18.html" class="post-title-link" itemprop="url">raft</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-09 10:20:59" itemprop="dateCreated datePublished" datetime="2019-11-09T10:20:59Z">2019-11-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:22:31" itemprop="dateModified" datetime="2020-11-22T02:22:31Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>852</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>CP</p>
+<p>先写 log</p>
+<p>再复制 log</p>
+<p>一致性协议确保大多数都已成功复制 log 后，这个时候 log 也称为被 committed 了</p>
+<p>执行状态机</p>
+<p>三种角色</p>
+<p>Leader / Follower / Candidate</p>
+<p>Leader 负责周期性发起心跳</p>
+<p>Follower 接收心跳</p>
+<p>Follower 选举超时后，发起 Vote，状态转变为 Candidate</p>
+<p>ETCD 的流程</p>
+<p>写 WAL; raft 协议 ok; apply data to boltdb</p>
+<p>使用 raft 来同步 WAL;</p>
+<p>选举的限制</p>
+<p>A candidate must contact a majority of the cluster in order to be elected, which means that every committed entry must be present in at least one of those servers</p>
+<p>Raft determines which of two logs is more up-to-date by comparing the index and term of the last entries in the logs</p>
+<p>简单来说，在发起选举投票时，需要携带最新的 log 信息，包括 index 及 term；term 越大越新，如果 term 相同，则 log 的长度越长越新；这可以保证新选举出来的 leader 包含了之前所有 commited 的信息</p>
+<p>网络分区需要特殊考虑 (2PC)</p>
+<blockquote>
+<p>第一阶段先征求其他节点是否同意选举，如果同意选举则发起真正的选举操作，否则降为 Follower 角色</p>
+</blockquote>
+<p>例如当有 follow 被隔离时，其 term 会不断增大，当其重新加入集群时，会触发选举，影响集群稳定性；为避免如此情况，增加 preVote 阶段，即发起 vote 的前提为</p>
+<ul>
+<li>没有收到有效领导的心跳，至少有一次选举超时</li>
+<li>Candidate的日志足够新（Term更大，或者Term相同raft index更大）</li>
+</ul>
+<p>才开始选举，避免网络隔离后，恢复加入的节点 term 较高，触发集群选举</p>
+<p>客户端也需要考虑，网络分区，无法完成写入，需要 server 端返回特定的错误时，直接切换后端</p>
+<p>Summary</p>
+<ul>
+<li>2PC 两阶段</li>
+<li>Leader 一致性算法</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6722211e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/6722211e.html" class="post-title-link" itemprop="url">aws sagemaker</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-10-20 10:23:09" itemprop="dateCreated datePublished" datetime="2019-10-20T10:23:09Z">2019-10-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:42:19" itemprop="dateModified" datetime="2020-12-12T07:42:19Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>800</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>没实际玩儿过 … 家里一直登陆不上 … 以下全凭看文档与代码</p>
+<p>以 EC2 为基石设计，以镜像作为运行环境，完全面向镜像的设计</p>
+<p>支持的 EC2 实例类型</p>
+<p><a target="_blank" rel="noopener" href="https://amazonaws-china.com/sagemaker/pricing/instance-types/">https://amazonaws-china.com/sagemaker/pricing/instance-types/</a></p>
+<p>性能最好的实例类型当前为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ml.p3dn.24xlarge</span><br><span class="line">vCPU: 96  </span><br><span class="line">GPUs: 8xV100  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
+
+<p>EC2 对应的实例类型为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">p3dn.24xlarge   </span><br><span class="line">GPUs: 8   </span><br><span class="line">vCPU: 96  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">GPU P2P: NVLink  </span><br><span class="line">Storage(GB): 2 x 900 NVMe SSD    </span><br><span class="line">Dedicated EBS Bandwidth: 14 Gbps </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
+
+<p>100 Gigabit 由 AWS efa 提供，提供 OS-bypass 通信能力，应该就是 Infiniband 网络</p>
+<p>启动训练过程 (Script Mode)</p>
+<ul>
+<li>上传本地代码至 S3</li>
+<li>调用 Sagemaker 创建训练作业接口<ul>
+<li>创建 EC2 实例</li>
+<li>在 EC2 实例上启动 Sagemaker 系统进程</li>
+<li>下载数据集</li>
+<li>启动容器 (镜像)</li>
+<li>下载训练代码</li>
+<li>启动训练代码</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-containers">https://github.com/aws/sagemaker-containers</a></p>
+<p>下载</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-containers/blob/master/src/sagemaker_containers/_files.py#L112">https://github.com/aws/sagemaker-containers/blob/master/src/sagemaker_containers/_files.py#L112</a></p>
+<p>上传</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/fw_utils.py#L322">https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/fw_utils.py#L322</a></p>
+<p>因此完整流程</p>
+<p>创建作业/版本</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -984,401 +1329,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e57ea50b.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/e57ea50b.html" class="post-title-link" itemprop="url">welcome to hpc</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-01-19 10:54:39" itemprop="dateCreated datePublished" datetime="2019-01-19T10:54:39Z">2019-01-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 03:00:26" itemprop="dateModified" datetime="2020-11-22T03:00:26Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念</p>
-<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><h2 id="MPI"><a href="#MPI" class="headerlink" title="MPI"></a>MPI</h2><p>Message passing interface</p>
-<p>消息传递接口，可以理解为分布式消息传递框架</p>
-<h2 id="OpenMPI"><a href="#OpenMPI" class="headerlink" title="OpenMPI"></a>OpenMPI</h2><p>MPI 的一种开源实现</p>
-<h2 id="RDMA"><a href="#RDMA" class="headerlink" title="RDMA"></a>RDMA</h2><p>remote direct memory access</p>
-<h2 id="Infiniband"><a href="#Infiniband" class="headerlink" title="Infiniband"></a>Infiniband</h2><p>IB</p>
-<p>网络设备，支持 RDMA</p>
-<h1 id="OpenMPI-1"><a href="#OpenMPI-1" class="headerlink" title="OpenMPI"></a>OpenMPI</h1><p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=developers#ompi-terminology">Terminology</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#mca-def">MCA</a></p>
-<ul>
-<li>framework</li>
-<li>components</li>
-<li>module</li>
-</ul>
-<blockquote>
-<p>An easy example framework to discuss is the MPI framework named “btl”, or the Byte Transfer Layer. It is used to send and receive data on different kinds of networks. Hence, Open MPI has btl components for shared memory, TCP, Infiniband, Myrinet, etc.</p>
-</blockquote>
-<p>不同的 MCA 支持不同的参数，我们可以参考如下查询支持的 MCA 参数</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#available-mca-params">available-mca-params</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ompi_info --param all all --level 9</span><br><span class="line"><span class="comment"># only btl</span></span><br><span class="line">ompi_info --param btl all --level 9</span><br><span class="line"><span class="comment"># only tcp of btl</span></span><br><span class="line">ompi_info --param btl tcp --level 9</span><br></pre></td></tr></table></figure>
-
-<p>可以通过 MCA 参数选择 Components</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#selecting-components">selecting-components</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl ^tcp,openib</span><br></pre></td></tr></table></figure>
-
-<p>不使用 btl framework 中的 tcp component，使用其中的 openib</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/doc/v3.1/man1/mpirun.1.php">mpirun</a></p>
-<p>mpirun 的常用参数</p>
-<ul>
-<li>-H: List of hosts on which to invoke processes.</li>
-<li>-np: Run this many copies of the program on the given nodes. This option indicates that the specified file is an executable program and not an application context. If no value is provided for the number of copies to execute (i.e., neither the “-np” nor its synonyms are provided on the command line), Open MPI will automatically execute a copy of the program on each process slot (see below for description of a “process slot”). This feature, however, can only be used in the SPMD model and will return an error (without beginning execution of the application) otherwise.</li>
-<li>–bind-to: Bind processes to the specified object, defaults to core. Supported options include slot, hwthread, core, l1cache, l2cache, l3cache, socket, numa, board, and none.</li>
-<li>-x: Export the specified environment variables to the remote nodes before executing the program. Only one environment variable can be specified per -x option. Existing environment variables can be specified or new variable names specified with corresponding values. For example: % mpirun -x DISPLAY -x OFILE=/tmp/out … The parser for the -x option is not very sophisticated; it does not even understand quoted values. Users are advised to set variables in the environment, and then use -x to export (not define) them.</li>
-<li>-mca: Send arguments to various MCA modules. See the “MCA” section, below.</li>
-</ul>
-<p><code>--mca btl self</code> 的作用</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=openfabrics#ib-btl">ib-btl</a></p>
-<p>self 用于本地进程通信 (可能使用 lo 设备，也可能不用，例如可以使用内存共享)</p>
-<p>openmpi，假设多机同一个地址族的地址可通，如果主机上有多个网络，openmpi 参考如下链接进行网络选择</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-selection">tcp-selection</a></p>
-<p>注意到 openmpi 会使用所见的所有网络，如果你不想其使用 ip network，你可以显式的禁用之，然而</p>
-<blockquote>
-<p>Note that Open MPI will still use TCP for control messages, such as data between mpirun and the MPI processes, rendezvous information during MPI_INIT, etc. To disable TCP altogether, you also need to disable the tcp component from the OOB framework.</p>
-</blockquote>
-<p>这句话比较有意思，一般来说 mpirun 要求 node 间可以 ssh 免密登录，而 ssh 是应用层协议，依赖 TCP</p>
-<p>openmpi 会选择最优的网络</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability">tcp-routability</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability-1.3">tcp-routability-1.3</a></p>
-<p>如何查看 mpirun 连接的过程</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl self,vader,tcp --mca btl_base_verbose 30 -np 2 -host NodeA,NodeB a.out</span><br></pre></td></tr></table></figure>
-
-<p>a.out 为可执行程序</p>
-<p>如果有 ib 卡，tcp component 会自动下线</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-auto-disable">tcp-auto-disable</a></p>
-<p>openmpi build default option</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#default-build">default-build</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--with-openib(=DIR) and --with-openib-libdir=DIR</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2e8d2c8b.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2e8d2c8b.html" class="post-title-link" itemprop="url">mpi operator</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-01-19 10:51:00" itemprop="dateCreated datePublished" datetime="2019-01-19T10:51:00Z">2019-01-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:54:17" itemprop="dateModified" datetime="2020-11-22T02:54:17Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>967</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ol>
-<li>计算 Replica 及 Slot 数</li>
-<li>创建 ConfigMap</li>
-</ol>
-<ul>
-<li>hostfile</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[mpiJobName]-worker-i slots=[8]</span><br></pre></td></tr></table></figure>
-
-<p>[mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod</p>
-<p>kubexec.sh</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line">POD_NAME=<span class="variable">$1</span></span><br><span class="line"><span class="built_in">shift</span></span><br><span class="line">/opt/kube/kubectl <span class="built_in">exec</span> <span class="variable">$&#123;POD_NAME&#125;</span> -- /bin/sh -c <span class="string">&quot;$*&quot;</span></span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>创建 Statefulset</li>
-</ol>
-<p>Container Command: Sleep</p>
-<ol start="2">
-<li>创建 Launcher (Job)</li>
-</ol>
-<p>Statefulset ready 后，创建 Launcher (Job)</p>
-<p>设置 env OMPI_MCA_plm_rsh_agent 为 kubexec.sh</p>
-<p>即使用 <code>kubectl exec $&#123;POD_NAME&#125; -- /bin/sh -c &quot;$*&quot;</code> 作为 ssh_agent</p>
-<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=rsh#rsh-not-ssh">rsh-not-ssh</a></p>
-<p>所以 openmpi 是有个潜在要求的，要么是支持 IPoIB，or 要有 IP 网络，纯 IB 网络不行</p>
-<p>当然 SDP (Socket Direct Protocol) 能加速 Socket 又是另外一个话题了</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># server side</span></span><br><span class="line">/etc/init.d/sshd stop</span><br><span class="line">env LD_PRELOAD=/usr/lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/u/etc/libsdp.conf /etc/init.d/sshd start</span><br><span class="line"><span class="comment"># client side</span></span><br><span class="line">LD_PRELOAD=/usr//lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/etc/libsdp.conf scp &lt;file&gt; &lt;user&gt;@&lt;IPoIBaddr&gt;:&lt;dir&gt;</span><br></pre></td></tr></table></figure>
-
-<p>Running ssh, scp over SDP</p>
-<p><code>lsmod | grep sdp</code></p>
-<p><code>sdpnetstat -S</code></p>
-<p>设置 env OMPI_MCA_orte_default_hostfile 为 hostfile</p>
-<p>Container Command: mpirun</p>
-<p>综上，mpi-operator 使用 kube-dns 获得 pod ip，mpirun 使用 <code>kubectl exec</code> 远程登录 container</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ac75c7e9.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/ac75c7e9.html" class="post-title-link" itemprop="url">docker network</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-12-02 11:31:11" itemprop="dateCreated datePublished" datetime="2018-12-02T11:31:11Z">2018-12-02</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 03:39:04" itemprop="dateModified" datetime="2020-11-22T03:39:04Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Docker-Network"><a href="#Docker-Network" class="headerlink" title="Docker Network"></a>Docker Network</h1><p>IBM 的几篇 Blog overall 的讲了一下</p>
-<p><strong>容器如何访问外部网络</strong></p>
-<p>通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip</p>
-<p><strong>外部网络如何访问容器</strong></p>
-<p>容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，指定映射到 host 的特定端口</p>
-<p>至于实现上也较为直接，若容器有 expose 端口，则 docker 会相应启动一个 docker-proxy 监听 host 上的 host 端口 (如上述例子中的 host-port)，外部流量到达 host-port 时，由 docker-proxy 转发至最终容器</p>
-<p>当然上述只是 docker network 的原生实现，docker 原生实现的不同 host 的 container 略去</p>
-<h1 id="Flannel"><a href="#Flannel" class="headerlink" title="Flannel"></a>Flannel</h1><p>如果在 k8s 生态中，docker container 跨 host 通信，早期版本多使用 Flannel 完成</p>
-<p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/30481.html">Flannel 原理</a></p>
-<p>Flannel 实现的是 overlay network，即基于已有的 underlay network，在其之上扩展报文字段，完成报文转发</p>
-<p>原理也比较好理解</p>
-<ul>
-<li>在 ETCD 中设置 Flannel 网段及子网范围</li>
-<li>多个 Host 上运行 Flannel daemon</li>
-<li>Flannel daemon 根据 ETCD 中记录的已分配子网，确定自己的子网，并注册至 ETCD 中</li>
-<li>Docker 根据 Flannel 划分的子网启动，docker0 地址从 Flannel 子网中分配得到，一般来说 Flannel0 地址为子网的第一个地址 (10.0.2.0)，docker0 地址为子网的第二个地址 (10.0.2.1)</li>
-</ul>
-<p>VM1 Container 1 至 VM2 Container 2 的报文转发过程</p>
-<p><a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">可参看该作者的一篇详细分析</a></p>
-<p>看上述链接吧，讲的非常好，图文并茂，下面我只是自我温习 😆 努力积累</p>
-<p><strong>VM1 Container 1</strong></p>
-<ul>
-<li>Container 1 报文中 src ip 为容器 ip，假设为 10.1.15.2/24，dst ip 为对端容器 ip，假设为 10.1.20.3/24</li>
-<li>报文从容器中的 veth0 发往 host 上的 veth pair (veth_XXX)</li>
-<li>kernel 根据 route 表将报文转发至 Flannel0 TUN</li>
-<li>Flannel0 接收到之后 overlay 的作用体现了，首先根据目的 ip 查询其所在 host 的 ip，封装一层 IP 报文，随后封装一层 UDP 报文，投递到对端 Flannel daemon 监听端口 8285。这个时候报文就能通过 underlay network 转发至对端 host 了</li>
-</ul>
-<p><strong>VM2 Container 2</strong></p>
-<ul>
-<li>报文到达当前 host 后，UDP 报文交由 Flannel daemon 处理</li>
-<li>Flannel daemon 交由 Flannel0 TUN 处理</li>
-<li>kernel 直接根据 route 表处理，转发至 docker0</li>
-<li>docker0 是网桥设备，所有 docker container 均连接在其之上，因此最后根据 container dst ip 转发至 dst container</li>
-</ul>
-<p>当然这是 Flannel 早期的版本，使用了 UDP 的报文封装，这样会有一些 packet 来回拷贝的开销</p>
-<p>Flannel 还支持 VxLan 的模式，看下它的原理，网络这块还是比较有意思</p>
-<p>这篇也很 nice <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-2-13fdc6c4e24c">An illustrated guide to Kubernetes Networking [Part 2]</a></p>
-<p>nice shot <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-1-d1ede3322727">An illustrated guide to Kubernetes Networking [Part 1]</a></p>
-<p>这篇非常详细 … 蛤蛤</p>
-<p>ARP 协议</p>
-<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/computer-network-arp-works/">ARP</a></p>
-<p>Flannel <a target="_blank" rel="noopener" href="https://www.slideshare.net/enakai/how-vxlan-works-on-linux">VxLan</a></p>
-<h1 id="Term"><a href="#Term" class="headerlink" title="Term"></a>Term</h1><p>ref <a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">Han’s blog</a></p>
-<ul>
-<li>TUN is a software interface implemented in linux kernel, it can pass raw ip packet between user program and the kernel</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1392,7 +1342,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1403,13 +1353,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">274k</span>
+    <span title="站点总字数">282k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:09</span>
+    <span title="站点阅读时长">4:16</span>
   </span>
 </div>
 

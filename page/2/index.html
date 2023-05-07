@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">121</span>
+          <span class="site-state-item-count">124</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-count">66</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,474 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/da36620.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/da36620.html" class="post-title-link" itemprop="url">k8s docker image cache</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-05-04 13:33:00 / 修改时间：08:43:57" itemprop="dateCreated datePublished" datetime="2022-05-04T13:33:00Z">2022-05-04</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>k8s 1.19</p>
+</blockquote>
+<h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/0OLdyVwg4Nsw0Xvvg8if5w">https://mp.weixin.qq.com/s/0OLdyVwg4Nsw0Xvvg8if5w</a></p>
+</blockquote>
+<p>阿里巴巴云原生这篇 pod 创建效率优化不错，e2e 分析了 docker pull 的加速技术</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://qiankunli.github.io/2015/09/22/docker_image.html">https://qiankunli.github.io/2015/09/22/docker_image.html</a></p>
+</blockquote>
+<p><img src="https://qiankunli.github.io/public/upload/container/image_push_pull.png" alt="docker pull phase"></p>
+<p>上图可见 docker pull 的几个阶段</p>
+<ol>
+<li>下载</li>
+<li>解压</li>
+<li>将文件 union 为 rootfs (图中没写)</li>
+</ol>
+<p>所以 docker pull 加速也从上述几个阶段入手</p>
+<h1 id="下载加速"><a href="#下载加速" class="headerlink" title="下载加速"></a>下载加速</h1><h2 id="p2p-powered-docker-registry"><a href="#p2p-powered-docker-registry" class="headerlink" title="p2p powered docker registry"></a>p2p powered docker registry</h2><p><a target="_blank" rel="noopener" href="https://d7y.io/">https://d7y.io/</a></p>
+<blockquote>
+<p>Dragonfly is an intelligent P2P based image and file distribution system</p>
+<p>Originally it was born to solve all kinds of distribution at very large scales, such as application distribution, cache distribution, log distribution, image distribution, and so on</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/uber/kraken">https://github.com/uber/kraken</a></p>
+<blockquote>
+<p>Kraken is a P2P-powered Docker registry that focuses on scalability and availability. It is designed for Docker image management, replication, and distribution in a hybrid cloud environment</p>
+<p>all participants can reach a minimum of 80% max upload/download speed in theory (60% with current implementation), and performance doesn’t degrade much as the blob size and cluster size increase</p>
+</blockquote>
+<p>提升 docker image 分发到节点（大规模）的速度，适合容器化服务发布/更新的场景</p>
+<h2 id="docker-registry-mirror"><a href="#docker-registry-mirror" class="headerlink" title="docker registry mirror"></a>docker registry mirror</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/registry/recipes/mirror/">https://docs.docker.com/registry/recipes/mirror/</a></p>
+<h1 id="解压加速"><a href="#解压加速" class="headerlink" title="解压加速"></a>解压加速</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">https://kubernetes.io/docs/setup/production-environment/container-runtimes/</a></p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd">https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd</a></p>
+<blockquote>
+<p>gzip/gunzip 是单线程的压缩/解压工具，可考虑采用 pigz/unpigz 进行多线程的压缩/解压，充分利用多核优势。</p>
+<p>containerd 从 1.2 版本开始支持 pigz，节点上安装 unpigz 工具后，会优先用其进行解压。通过这种方法，可通过节点多核能力提升镜像解压效率。</p>
+</blockquote>
+<h1 id="k8s-加速"><a href="#k8s-加速" class="headerlink" title="k8s 加速"></a>k8s 加速</h1><h2 id="docker-images-pull-policy"><a href="#docker-images-pull-policy" class="headerlink" title="docker images pull policy"></a>docker images pull policy</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy">https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy</a></p>
+<ol>
+<li>Never</li>
+<li>IfNotPresent</li>
+<li>Always</li>
+</ol>
+<p>Never，kubelet 会直接启动容器镜像；路径最短</p>
+<p>IfNotPresent，local docker image list 查询是否命中，命中则启动容器镜像；未命中，走 docker pull；路径中等</p>
+<p>Always，即使镜像没有变化，也会多一次 remote docker registry query 的查询时间；未命中，走 docker pull；路径最长</p>
+<blockquote>
+<p>every time the kubelet launches a container, the kubelet queries the container image registry to resolve the name to an image digest. If the kubelet has a container image with that exact digest cached locally, the kubelet uses its cached image; otherwise, the kubelet pulls the image with the resolved digest, and uses that image to launch the container.</p>
+</blockquote>
+<h2 id="docker-images-pre-pulled"><a href="#docker-images-pre-pulled" class="headerlink" title="docker images pre-pulled"></a>docker images pre-pulled</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images">https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images</a></p>
+<h2 id="schedule-imagelocality"><a href="#schedule-imagelocality" class="headerlink" title="schedule imagelocality"></a>schedule imagelocality</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/scheduling/config/#scheduling-plugins">https://kubernetes.io/docs/reference/scheduling/config/#scheduling-plugins</a></p>
+<ul>
+<li>imagelocality</li>
+</ul>
+<p>注意到仅对 containers 生效，对 init containers 不生效；在 k8s sche 的 score 阶段有效，使用镜像大小作为 base score，即镜像大小越大，imagelocality 调度权重越高；当然为了避免 <em>node heating problem</em>，即由于 imagelocality 的策略，很可能 pod 的多个副本被调度到同一个节点，而其他节点没有有效利用上；因此最终 imagelocality score 的计算，还乘以了 image spread 的比例</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// scaledImageScore returns an adaptively scaled score for the given state of an image.</span></span><br><span class="line"><span class="comment">// The size of the image is used as the base score, scaled by a factor which considers how much nodes the image has &quot;spread&quot; to.</span></span><br><span class="line"><span class="comment">// This heuristic aims to mitigate the undesirable &quot;node heating problem&quot;, i.e., pods get assigned to the same or</span></span><br><span class="line"><span class="comment">// a few nodes due to image locality.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">scaledImageScore</span><span class="params">(imageState *framework.ImageStateSummary, totalNumNodes <span class="keyword">int</span>)</span> <span class="title">int64</span></span> &#123;</span><br><span class="line">	spread := <span class="keyword">float64</span>(imageState.NumNodes) / <span class="keyword">float64</span>(totalNumNodes)</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">int64</span>(<span class="keyword">float64</span>(imageState.Size) * spread)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 k8s cluster 中只有少量节点缓存了指定 image，则 spread 比例就会低，相应的 imagelocality score 得分也会低；反之，假若大多数 cluster nodes 都缓存了指定 image，则 spread 比例就会高，相应的 imagelocality score 得分也高</p>
+<p>可见 k8s 设计之初还是侧重在服务管理，上述的调度策略也是对服务的高可用性友好的</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// calculatePriority returns the priority of a node. Given the sumScores of requested images on the node, the node&#x27;s</span></span><br><span class="line"><span class="comment">// priority is obtained by scaling the maximum priority value with a ratio proportional to the sumScores.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">calculatePriority</span><span class="params">(sumScores <span class="keyword">int64</span>, numContainers <span class="keyword">int</span>)</span> <span class="title">int64</span></span> &#123;</span><br><span class="line">	maxThreshold := maxContainerThreshold * <span class="keyword">int64</span>(numContainers)</span><br><span class="line">	<span class="keyword">if</span> sumScores &lt; minThreshold &#123;</span><br><span class="line">		sumScores = minThreshold</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> sumScores &gt; maxThreshold &#123;</span><br><span class="line">		sumScores = maxThreshold</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">int64</span>(framework.MaxNodeScore) * (sumScores - minThreshold) / (maxThreshold - minThreshold)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后 imagelocality score 经过修正后，得到 image 在调度中的 priority；注意到 &lt; minThreshold 的 score 都是一样的，物理意义上，就是说没有一个节点有缓存，和有少量节点有镜像缓存，在调度上的 priority 都是一样的，这样就避免了 node heating problem</p>
+<blockquote>
+<p>node heating problem</p>
+<p><a target="_blank" rel="noopener" href="https://oracle.github.io/weblogic-kubernetes-operator/faq/node-heating/">https://oracle.github.io/weblogic-kubernetes-operator/faq/node-heating/</a></p>
+<p>this often results in Kubernetes running many of the Pods for WebLogic Server instances on the same Node while other Nodes are not fairly utilized. This is commonly known as the “Node heating problem.”</p>
+</blockquote>
+<h2 id="k8s-gc-unused-docker-images"><a href="#k8s-gc-unused-docker-images" class="headerlink" title="k8s gc unused docker images"></a>k8s gc unused docker images</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/architecture/garbage-collection/#containers-images">https://kubernetes.io/docs/concepts/architecture/garbage-collection/#containers-images</a></p>
+<p>Kubernetes manages the lifecycle of <strong>all images</strong> through its image manager</p>
+<p>The kubelet considers the following disk usage limits when making garbage collection decisions:</p>
+<ul>
+<li>HighThresholdPercent</li>
+<li>LowThresholdPercent</li>
+</ul>
+<p>Disk usage above the configured <strong>HighThresholdPercent</strong> value triggers garbage collection, which deletes images in order based on <strong>the last time they were used, starting with the oldest first</strong>. The kubelet deletes images until disk usage reaches the <strong>LowThresholdPercent</strong> value.</p>
+<h2 id="docker-image-cache-management"><a href="#docker-image-cache-management" class="headerlink" title="docker image cache management"></a>docker image cache management</h2><p><a target="_blank" rel="noopener" href="https://github.com/senthilrch/kube-fledged">https://github.com/senthilrch/kube-fledged</a></p>
+<blockquote>
+<p>kube-fledged is a kubernetes operator for creating and managing a cache of container images directly on the worker nodes of a kubernetes cluster</p>
+<p>kube-fledged provides CRUD APIs to manage the lifecycle of the image cache</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/senthilrch/kube-fledged/blob/master/docs/design-proposal.md">https://github.com/senthilrch/kube-fledged/blob/master/docs/design-proposal.md</a></p>
+<h1 id="按需加载文件"><a href="#按需加载文件" class="headerlink" title="按需加载文件"></a>按需加载文件</h1><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/0OLdyVwg4Nsw0Xvvg8if5w">https://mp.weixin.qq.com/s/0OLdyVwg4Nsw0Xvvg8if5w</a></p>
+<blockquote>
+<p>当前节点上创建容器时，是需要先把镜像全部数据拉取到本地，然后才能启动容器。再考虑下启动虚拟机的过程，即使是几百 GB 的虚拟机镜像，启动虚拟机也通常是在秒级别，几乎感受不到虚拟机镜像大小带来的影响。</p>
+<p>《Slacker: Fast Distribution with Lazy Docker Containers》</p>
+<p>该 paper 分析，在镜像启动耗时中，拉取镜像占比 76%，但是在启动时，仅有 6.4% 的数据被使用到，即镜像启动时需要的镜像数据量很少，需要考虑在镜像启动阶段按需加载镜像，改变对镜像的使用方式。</p>
+<p>对于「Image 所有 layers 下载完后才能启动镜像」，需要改为启动容器时按需加载镜像，类似启动虚拟机的方式，仅对启动阶段需要的数据进行网络传输。</p>
+</blockquote>
+<p>这个对现有架构的改动是很大了 …</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/742103">https://developer.aliyun.com/article/742103</a></p>
+<p>2020/01/08</p>
+<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><h2 id="容器镜像启动加速技术"><a href="#容器镜像启动加速技术" class="headerlink" title="容器镜像启动加速技术"></a>容器镜像启动加速技术</h2><h3 id="容器镜像"><a href="#容器镜像" class="headerlink" title="容器镜像"></a>容器镜像</h3><ol>
+<li>镜像文件下载加速<ol>
+<li>docker registry mirror，本地 mirror，路程更近</li>
+<li>p2p (Dragonfly, Kraken)，分发加速</li>
+</ol>
+</li>
+<li>镜像文件解压加速<ol>
+<li>container runtime: containerd, unpigz，多线程解压</li>
+</ol>
+</li>
+<li>镜像文件按需加载<ol>
+<li><em>Slacker: Fast Distribution with Lazy Docker Containers: Our analysis shows that pulling packages accounts for 76% of container start time, but only 6.4% of that data is read.</em></li>
+</ol>
+</li>
+</ol>
+<h3 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h3><ol>
+<li>imagePullPolicy<ol>
+<li>Never，路径最短，依赖镜像预下载</li>
+<li>IfNotPresent</li>
+<li>Always</li>
+</ol>
+</li>
+<li>schedule imagelocality: 调度优化，当集群中大多数节点均有缓存时，优先将 pod 调度到已有缓存的节点</li>
+<li>docker images pre-pulled + docker image cache management: 集群 docker image cache 管理</li>
+</ol>
+<p>k8s 属于业务逻辑层面的优化</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/dc51ca39.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/dc51ca39.html" class="post-title-link" itemprop="url">ps-worker-paper</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-05-03 10:00:00" itemprop="dateCreated datePublished" datetime="2022-05-03T10:00:00Z">2022-05-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-05-04 08:44:04" itemprop="dateModified" datetime="2022-05-04T08:44:04Z">2022-05-04</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1YA4y197G8?spm_id_from=333.337.search-card.all.click">https://www.bilibili.com/video/BV1YA4y197G8?spm_id_from=333.337.search-card.all.click</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-li_mu.pdf">https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-li_mu.pdf</a></p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/dmlc/ps-lite">https://github.com/dmlc/ps-lite</a></p>
+<p>总结李沐大神 ps-worker 的论文实现要点如下</p>
+<h1 id="server-高可用"><a href="#server-高可用" class="headerlink" title="server 高可用"></a>server 高可用</h1><ol>
+<li>多副本复制: 例如每次对 server 的修改或写入，均会复制到两个其他副本后再回复 ok。当然这会增加延迟，以及要求客户端错误重试</li>
+<li>一致性哈希: key-value datastore, improve load balancing and recovery</li>
+</ol>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://memcached.org/">https://memcached.org/</a> 也采用了类似的高可用策略</p>
+</blockquote>
+<h1 id="server-一致性"><a href="#server-一致性" class="headerlink" title="server 一致性"></a>server 一致性</h1><ol>
+<li>vector clock，记录时间点 (t) 发出的权重 (w) 的数据，使用 vector clock 便于实现各种一致性模型，given the potentially complex task dependency graph and<br>the need for fast recovery</li>
+</ol>
+<h1 id="worker-高可用"><a href="#worker-高可用" class="headerlink" title="worker 高可用"></a>worker 高可用</h1><p>论文中提到</p>
+<ul>
+<li>一般而言 worker 仅负责部分数据的计算，而部分数据往往不至于对模型的最终效果有很大影响</li>
+<li>假若每个 worker 数据量较大，恢复 worker 的代价较高，还不如恢复 server</li>
+</ul>
+<p>所以 worker 的高可用，还是交由算法设计者控制。可能算法设计者更愿意实现即使 worker 挂了，模型训练依然能够运行下去的算法</p>
+<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><p>parameter server 综合利用了现有技术（交叉），是领域型的 memcached/redis (这两都是 kv datastore)。当然 ps 是面向机器学习算法设计的，通过优化机器学习算法，使其适应 ps api，，解决了机器学习领域大规模训练的实际（工业界）问题</p>
+<blockquote>
+<p>The novelty of the proposed system lies in the synergy achieved by picking the right systems techniques, adapting them to the machine learning algorithms, and modifying the machine learning algorithms to be more systemsfriendly. In particular, we can relax a number of otherwise hard systems constraints since the associated machine learning algorithms are quite tolerant to perturbations. The consequence is the first general purpose ML system capable of scaling to industrial scale sizes</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/467ab0db.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/467ab0db.html" class="post-title-link" itemprop="url">conda activate</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-06 20:42:00" itemprop="dateCreated datePublished" datetime="2022-04-06T20:42:00Z">2022-04-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-10 13:49:22" itemprop="dateModified" datetime="2022-04-10T13:49:22Z">2022-04-10</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<ul>
+<li>conda 4.12.0</li>
+<li>macOS 10.15.7</li>
+</ul>
+</blockquote>
+<p>示例为个人 PC 环境下的回显</p>
+<blockquote>
+<p>Conda makes environments first-class citizens, making it easy to create independent environments even for C libraries. Conda is written entirely in Python</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># conda environments:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">base                     /Users/huangzhesi/miniconda</span><br><span class="line">conda-dev             *  /Users/huangzhesi/miniconda/envs/conda-dev</span><br><span class="line">pandas                   /Users/huangzhesi/miniconda/envs/pandas</span><br><span class="line">pytorch-1.8              /Users/huangzhesi/miniconda/envs/pytorch-1.8</span><br><span class="line">pytorch-dev              /Users/huangzhesi/miniconda/envs/pytorch-dev</span><br><span class="line">tensorflow-1.x           /Users/huangzhesi/miniconda/envs/tensorflow-1.x</span><br></pre></td></tr></table></figure>
+
+<p>今天来探索下我们输入 <code>conda activate conda-dev</code> 命令后，实际上 conda 为了我们做什么</p>
+<p>先说结论</p>
+<ol>
+<li>设置了 conda env bin 到环境变量 PATH（替换 <em>old</em> conda env 值，比如 base conda env）</li>
+<li>未修改环境变量 <code>LD_LIBRARY_PATH</code>，原因如下</li>
+</ol>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda-build/en/latest/resources/use-shared-libraries.html#shared-libraries-in-macos-and-linux">https://docs.conda.io/projects/conda-build/en/latest/resources/use-shared-libraries.html#shared-libraries-in-macos-and-linux</a></p>
+<p><a target="_blank" rel="noopener" href="https://conda.io/projects/conda-build/en/latest/concepts/recipe.html#prefix-replacement">https://conda.io/projects/conda-build/en/latest/concepts/recipe.html#prefix-replacement</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/issues/308#issuecomment-36058087">https://github.com/conda/conda/issues/308#issuecomment-36058087</a></p>
+<p>the problem with activate setting LD_LIBRARY_PATH (even when conda packages themselves don’t need it) is that it might break other things on the users system.</p>
+</blockquote>
+<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/tree/4.12.0">https://github.com/conda/conda/tree/4.12.0</a></p>
+<p><code>conda activate</code> 命令在 conda/activate.py 文件里边实现</p>
+<p>调用顺序如下</p>
+<ol>
+<li>activate</li>
+<li>build_activate</li>
+<li>_build_activate_stack</li>
+</ol>
+<p>最终返回一个 structure</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="string">&#x27;unset_vars&#x27;</span>: unset_vars,</span><br><span class="line">    <span class="string">&#x27;set_vars&#x27;</span>: set_vars,</span><br><span class="line">    <span class="string">&#x27;export_vars&#x27;</span>: export_vars,</span><br><span class="line">    <span class="string">&#x27;deactivate_scripts&#x27;</span>: deactivate_scripts,</span><br><span class="line">    <span class="string">&#x27;activate_scripts&#x27;</span>: activate_scripts,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见 <code>conda activate</code> 命令实际上会 <code>unset</code>，<code>set</code>，<code>export</code> vars，以达到激活环境的效果</p>
+<h1 id="激活流程"><a href="#激活流程" class="headerlink" title="激活流程"></a>激活流程</h1><h2 id="查询-conda-env-path"><a href="#查询-conda-env-path" class="headerlink" title="查询 conda env path"></a>查询 conda env path</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conda_prefix</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="keyword">return</span> abspath(sys.prefix)</span><br></pre></td></tr></table></figure>
+
+<p><code>root_prefix</code> case = <code>conda_prefix</code> = <code>/Users/huangzhesi/miniconda</code></p>
+<p>prefix magic file = <code>&#123;conda_prefix&#125;/conda-meta/history</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># path is the prefix magic file</span></span><br><span class="line">        <span class="keyword">if</span> isfile(path):</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                fh = <span class="built_in">open</span>(path, <span class="string">&#x27;a+&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>测试 history file 是否有读写权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ls -alh /Users/huangzhesi/miniconda/conda-meta | grep <span class="built_in">history</span></span><br><span class="line">-rw-r--r--    1 huangzhesi  staff   8.2K 12 19 21:44 <span class="built_in">history</span></span><br></pre></td></tr></table></figure>
+
+<p>(1) 假若 history file 有读写权限，则 context envs dirs 按如下顺序</p>
+<ol>
+<li><code>/Users/huangzhesi/miniconda/envs</code></li>
+<li><code>~/.conda/envs</code></li>
+</ol>
+<p>(2) 若 history file 没有读写权限，则 context envs dirs 按如下顺序</p>
+<ol>
+<li><code>~/.conda/envs</code></li>
+<li><code>/Users/huangzhesi/miniconda/envs</code></li>
+</ol>
+<p>从 context envs dirs 中查询待激活的 env</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name is the conda activate &#123;name&#125;</span></span><br><span class="line">    <span class="keyword">for</span> envs_dir <span class="keyword">in</span> envs_dirs:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isdir(envs_dir):</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        prefix = join(envs_dir, name)</span><br><span class="line">        <span class="keyword">if</span> isdir(prefix):</span><br><span class="line">            <span class="keyword">return</span> abspath(prefix)</span><br></pre></td></tr></table></figure>
+
+<p>到这里 prefix 就确定了 <code>prefix = locate_prefix_by_name(env_name_or_prefix)</code></p>
+<p><code>prefix = /Users/huangzhesi/miniconda/envs/conda-dev</code></p>
+<ul>
+<li>CONDA_SHLVL=1</li>
+<li>CONDA_PREFIX=/Users/huangzhesi/miniconda</li>
+</ul>
+<p>替换 <code>old_conda_prefix</code>，比如 base conda env</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">new_path = self.pathsep_join(</span><br><span class="line">    self._replace_prefix_in_path(old_conda_prefix, prefix))</span><br></pre></td></tr></table></figure>
+
+<p>需要设置的环境变量</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">env_vars_to_export = OrderedDict((</span><br><span class="line">    (<span class="string">&#x27;path&#x27;</span>, new_path),</span><br><span class="line">    (<span class="string">&#x27;conda_prefix&#x27;</span>, prefix),</span><br><span class="line">    (<span class="string">&#x27;conda_shlvl&#x27;</span>, new_conda_shlvl),</span><br><span class="line">    (<span class="string">&#x27;conda_default_env&#x27;</span>, conda_default_env),</span><br><span class="line">    (<span class="string">&#x27;conda_prompt_modifier&#x27;</span>, conda_prompt_modifier)))</span><br></pre></td></tr></table></figure>
+
+<h1 id="set-ld-library-path-inside-python"><a href="#set-ld-library-path-inside-python" class="headerlink" title="set ld_library_path inside python"></a>set ld_library_path inside python</h1><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python">https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python</a></p>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/856116/changing-ld-library-path-at-runtime-for-ctypes">https://stackoverflow.com/questions/856116/changing-ld-library-path-at-runtime-for-ctypes</a></p>
+<p>比较 hack，不优雅 …</p>
+<p>如果 conda env 中安装的非 conda package，其依赖 shared libraries，没太好办法，手动设置 <code>LD_LIBRARY_PATH</code> 环境变量吧</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1080,311 +1548,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/cbf18cae.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/cbf18cae.html" class="post-title-link" itemprop="url">learning lenet5</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-15 03:21:13" itemprop="dateCreated datePublished" datetime="2021-08-15T03:21:13Z">2021-08-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-05 03:22:51" itemprop="dateModified" datetime="2021-09-05T03:22:51Z">2021-09-05</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>389</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ol>
-<li><a target="_blank" rel="noopener" href="https://medium.com/analytics-vidhya/lenet-with-tensorflow-a35da0d503df">https://medium.com/analytics-vidhya/lenet-with-tensorflow-a35da0d503df</a></li>
-<li><a target="_blank" rel="noopener" href="https://medium.com/@mgazar/lenet-5-in-9-lines-of-code-using-keras-ac99294c8086">https://medium.com/@mgazar/lenet-5-in-9-lines-of-code-using-keras-ac99294c8086</a></li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/api_docs/python/tf/pad">https://www.tensorflow.org/api_docs/python/tf/pad</a></p>
-<blockquote>
-<p>paddings is an integer tensor with shape [n, 2], where n is the rank of tensor. </p>
-</blockquote>
-<p>each dimension D</p>
-<ul>
-<li>paddings[D, 0]: add before tensor </li>
-<li>paddings[D, 1]: add after tensor</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/api_docs/python/tf/expand_dims">https://www.tensorflow.org/api_docs/python/tf/expand_dims</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/d2d36a67.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/d2d36a67.html" class="post-title-link" itemprop="url">pod spec of volcano job and sysctl</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-14 03:09:06 / 修改时间：05:09:51" itemprop="dateCreated datePublished" datetime="2021-08-14T03:09:06Z">2021-08-14</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="pod-spec-of-volcano-job"><a href="#pod-spec-of-volcano-job" class="headerlink" title="pod spec of volcano job"></a>pod spec of volcano job</h1><p><a target="_blank" rel="noopener" href="https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go">https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go</a></p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    v1 <span class="string">&quot;k8s.io/api/core/v1&quot;</span></span><br><span class="line">    ...</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// MakePodName append podname,jobname,taskName and index and returns the string.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakePodName</span><span class="params">(jobName <span class="keyword">string</span>, taskName <span class="keyword">string</span>, index <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fmt.Sprintf(jobhelpers.PodNameFmt, jobName, taskName, index)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">createJobPod</span><span class="params">(job *batch.Job, template *v1.PodTemplateSpec, ix <span class="keyword">int</span>)</span> *<span class="title">v1</span>.<span class="title">Pod</span></span> &#123;</span><br><span class="line">	templateCopy := template.DeepCopy()</span><br><span class="line"></span><br><span class="line">	pod := &amp;v1.Pod&#123;</span><br><span class="line">		ObjectMeta: metav1.ObjectMeta&#123;</span><br><span class="line">			Name:      jobhelpers.MakePodName(job.Name, template.Name, ix),</span><br><span class="line">			Namespace: job.Namespace,</span><br><span class="line">			OwnerReferences: []metav1.OwnerReference&#123;</span><br><span class="line">				*metav1.NewControllerRef(job, helpers.JobKind),</span><br><span class="line">			&#125;,</span><br><span class="line">			Labels:      templateCopy.Labels,</span><br><span class="line">			Annotations: templateCopy.Annotations,</span><br><span class="line">		&#125;,</span><br><span class="line">		Spec: templateCopy.Spec,</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="sysctl-of-pod-spec"><a href="#sysctl-of-pod-spec" class="headerlink" title="sysctl of pod spec"></a>sysctl of pod spec</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/">https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/</a></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: sysctl-example</span><br><span class="line">spec:</span><br><span class="line">  securityContext:</span><br><span class="line">    sysctls:</span><br><span class="line">    - name: net.ipv4.ip_local_port_range</span><br><span class="line">      value: &quot;30000 50000&quot;</span><br></pre></td></tr></table></figure>
-
-<p>find out current ip local port range</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/sys/net/ipv4/ip_local_port_range</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://www.thegeekdiary.com/how-to-reserve-a-port-range-for-a-third-party-application-in-centos-rhel/">https://www.thegeekdiary.com/how-to-reserve-a-port-range-for-a-third-party-application-in-centos-rhel/</a></p>
-<blockquote>
-<p>Note: ip_local_port_range and ip_local_reserved_ports settings are independent and both are considered by the kernel when determining which ports are available for <strong>automatic port assignments</strong>.</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/fb311e36.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/fb311e36.html" class="post-title-link" itemprop="url">k8s init and sidecar container</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-18 07:38:28 / 修改时间：08:58:40" itemprop="dateCreated datePublished" datetime="2021-07-18T07:38:28Z">2021-07-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>661</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <pre class="mermaid">
-graph LR
-InitContainer --&gt; TrainingContainer
-InitContainer --&gt; SidecarContainer
-</pre>
-
-<p>InitContainer and SidecarContainer act like system container and they are transparent to the TrainingContainer</p>
-<p>TrainingJob(process) of user is running at TrainingContainer</p>
-<p>we can do the init env action at InitContainer, such as download data, and the upload action can be done at SidecarContainer</p>
-<p>however, there will be an engineering problem, that is, the file read permission problem. The best way is to make the InitC / SidecarC / TrainingC users (uid) the same</p>
-<p>powered by <em>mermaid</em></p>
-<p><a target="_blank" rel="noopener" href="https://mermaid-js.github.io/mermaid/#/flowchart">https://mermaid-js.github.io/mermaid/#/flowchart</a></p>
-<p><a target="_blank" rel="noopener" href="https://theme-next.js.org/docs/tag-plugins/mermaid.html?highlight=mermaid">https://theme-next.js.org/docs/tag-plugins/mermaid.html?highlight=mermaid</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/theme-next/hexo-theme-next/pull/649">https://github.com/theme-next/hexo-theme-next/pull/649</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1398,7 +1561,7 @@ InitContainer --&gt; SidecarContainer
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1409,13 +1572,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">274k</span>
+    <span title="站点总字数">282k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:09</span>
+    <span title="站点阅读时长">4:16</span>
   </span>
 </div>
 

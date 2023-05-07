@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">121</span>
+          <span class="site-state-item-count">124</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-count">66</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,374 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5015bdda.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/5015bdda.html" class="post-title-link" itemprop="url">etcd-raft-follower</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-11-05 16:21:07" itemprop="dateCreated datePublished" datetime="2017-11-05T16:21:07Z">2017-11-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>to be cont 先写部分吧</p>
+</blockquote>
+<h1 id="MsgProp"><a href="#MsgProp" class="headerlink" title="MsgProp"></a>MsgProp</h1><p>Follower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送</p>
+<h1 id="MsgApp"><a href="#MsgApp" class="headerlink" title="MsgApp"></a>MsgApp</h1><p>Follower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；调用 handleAppendEntries 方法处理 MsgApp 消息；handleAppendEntries 方法中向 m.From 发送 MsgAppResp 消息；消息中包含经过处理 MsgApp 后，当前节点的 Index；冲突时额外返回 Reject: true，RejectHint: lastIndex</p>
+<p>maybeAppend: handleAppendEntries 方法中使用到的 maybeAppend 方法分析</p>
+<p>(1)</p>
+<p>firstIndex 会尝试从 unstable 的 snapshot 中获取 snapshot meta Index，如果 snapshot 为 nil（maybeFirstIndex），则从 storage 中获取 ents[0].Index</p>
+<p>(2)</p>
+<p>lastIndex 会尝试从 unstable 的 ents 中获取最后一个 entry 的 index，如果 unstable 的 ents 为空，则获取 unstable 的 snapshot meta index（maybeLastIndex），如果仍然获取不到，则从 storage 中获取最后一个 entry 的 Index</p>
+<p>看明白最基础的方法 firstIndex 和 lastIndex 后，继续往下</p>
+<p>(3)</p>
+<p>term 尝试获取 index 为 i 的 entry 的 term，entries 的第一个 index 为 dummy index，即每次收到 MsgApp 消息时，m.Index 为 dummy entry (index)，后续为真正的 entries (m.Ents)；dummy index &lt;= i &lt;= lastIndex，如果 index i 不位于该范围中，显然无法找到对应的 term；maybeTerm 尝试在 unstable 中获取 index 为 i 的 entry 的 term，unstable 中无法找到的话，从 storage 中查找</p>
+<p>(4)</p>
+<p>matchTerm(i uint64, term Term) 的实现，首先尝试获取 index i 的 term，随后匹配是否等于 term</p>
+<p>(5)</p>
+<p>findConflict 的实现，对 ents 中的每个 entry 调用 matchTerm 方法，Index 升序遍历，遇到 unmatch的 (即遇到相同 Index 不同 Term 的 entry 认为 conflict)，如果这个 unmatch 的 entry 的 Index &lt;= lastIndex，则有 conflict，返回第一个 conflict entry 的 Index；如果这个 unmatch 的 entry 的 Index &gt; lastIndex，则认为是新的未包含的 entry，则返回第一个新的 entry 的 Index；如果均 match 则返回 0</p>
+<p>(6)</p>
+<p>maybeAppend(m.Index, m.LogTerm, m.Commit, m.Entries…) 的实现，内部会首先判断 matchTerm(m.Index, m.LogTerm)，过了之后，会对每个 entry findConflict，没有 confict 则没啥好添加的，有 conflict，可能是真 conlict 也可能是包含了新的 entries，统一调用 append 方法加入到 unstable 中；注意这是 Follower 的行为，Follower 会使用 Leader 发来的 MsgApp 改写自己本地的 entries；Leader 发来的 MsgApp 中包含了其已经 commited 的 Index 信息，Follower 使用 commited 和 MsgApp 中的最后 Index 中小的那个 Index 作为能 committed 的 index</p>
+<blockquote>
+<p>lastnewi = index + uint64(len(ents))</p>
+</blockquote>
+<p>commitTo(min(commited, lastnewi))</p>
+<p>如果 tocommit &gt; l.lastIndex() 会 panic</p>
+<p>(7)</p>
+<p>综上</p>
+<ul>
+<li>接收到 MsgHeartbeat 消息会更新 commited</li>
+<li>接收到 MsgApp 消息可能会更新 commited</li>
+</ul>
+<h2 id="FAQ-unstable-什么时候会-stable？"><a href="#FAQ-unstable-什么时候会-stable？" class="headerlink" title="FAQ: unstable 什么时候会 stable？"></a>FAQ: unstable 什么时候会 stable？</h2><p>在 node 的 main for loop 中，首先会从 raftlog 中获取 ready to apply 的 entries (即 unstable 和 nextEnts)，将其放入 readyc 通道后，等待 advancec 通道消息；当外部 apply 结束后，调用 node.Advance() 方法，node 获取到 advancec 通道中的消息，开始执行 raftlog 的 apply 更新 apply index 和 stable to 将 unstable 变为 stable</p>
+<p>raftlog 的逻辑图如下 (没写 snapshot 部分)</p>
+<p><img src="/images/raftlog.jpeg" alt="raftlog"></p>
+<h1 id="MsgHeartbeat"><a href="#MsgHeartbeat" class="headerlink" title="MsgHeartbeat"></a>MsgHeartbeat</h1><p>Follower 收到 MsgHeartbeat 消息时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；commitTo MsgHeartbeat 中的 commited index，并向 Leader 回复 MsgHeartbeatResp 消息</p>
+<h1 id="MsgReadIndex"><a href="#MsgReadIndex" class="headerlink" title="MsgReadIndex"></a>MsgReadIndex</h1><p>Follower 收到 MsgReadIndex 消息，将请求转发至 Leader；Leader 返回 MsgReadIndexResp 消息，有且仅有 1 Entry，返回已到达一致性的 Index (consistency=l)；线性 / 序列化，貌似是个术语待查</p>
+<p>Follower 收到 MsgReadIndexResp 消息，有且仅有 1 Entry，将其加入 readStates 中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.readStates = <span class="built_in">append</span>(r.readStates, ReadState&#123;Index: m.Index, RequestCtx: m.Entries[<span class="number">0</span>].Data&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="FAQ-那么-msgs-什么时候会被发送"><a href="#FAQ-那么-msgs-什么时候会被发送" class="headerlink" title="FAQ: 那么 msgs 什么时候会被发送"></a>FAQ: 那么 msgs 什么时候会被发送</h2><p>回到 node 的 main forloop，在 rd = newReady(r, prevSoftSt, prevHardSt) 方法中会读取 r.msgs，并设置 n.readyc 通道，后续将 rd 放入 readyc 通道中，等待外部消费；外部通过 node.Ready() 方法获得内部需 apply or 待发送的 Messages</p>
+<p>在 etcdserver/raft.go 的 main forloop 中获取 readyc 通道消息 rd := &lt;-r.Ready()，该 apply Messages 放入到 r.applyc 通道，该发送的 r.Messages，调用 r.sendMessages(rd.Messages) 发送，结束之后调用 r.Advance()</p>
+<p>另外在 etcdserver/server.go 的 main forloop 中获取 ap ap := &lt;-s.r.apply()，将这次 apply 放入 FIFO 中，FIFO 内部协程异步处理 apply job</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/d7e71fec.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/d7e71fec.html" class="post-title-link" itemprop="url">boltdb-cursor</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-29 15:54:07" itemprop="dateCreated datePublished" datetime="2017-10-29T15:54:07Z">2017-10-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:56:04" itemprop="dateModified" datetime="2020-11-22T07:56:04Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中</p>
+<h1 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h1><p>first / prev / next / last 的实现</p>
+<p>first 就是不断搜索 element 的 index = 0 inode，直到 leaf page 为止</p>
+<p>last 是不断搜索 element 的 index = the count of inodes - 1，直到 leaf page 为止</p>
+<p>first 和 last 实现后，可相应实现 prev / next</p>
+<p>prev 当 inode 中可 – 时则直接回退一格，若为开头 inode，则上移，再 last</p>
+<p>next 当 inode 中可 ++ 时则直接前进一格，若为末尾 indoe，则上移，再 first</p>
+<h1 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h1><p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
+<blockquote>
+<p>nsearch(key)</p>
+</blockquote>
+<p>如果搜到了 leaf page / node，那么就在 inodes 中搜索该 key，返回的 index 为第一个大于等于 key 的 index，若不存在返回 inodes 长度</p>
+<blockquote>
+<p>searchNode(key, n)</p>
+</blockquote>
+<p>如果不是 leaf page / node，且 node 不为 nil (n)，则 searchNode；searchNode 中如果 key 相等则从该 inodes[index].pgid，继续 search(key, inodes[index].pgid)；如果 key 不相等且 index &gt; 0，则设置为最后一个小于的 index，从该 index 继续 search</p>
+<blockquote>
+<p>searchPage(key, p)</p>
+</blockquote>
+<p>实现同上述，不过是从 page 中读取</p>
+<h1 id="获取-node"><a href="#获取-node" class="headerlink" title="获取 node"></a>获取 node</h1><p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
+<p>获取到 node 之后就可以 put 和 del key 了</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
+<p>例如看个创建 bucket 的过程</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="keyword">var</span> value = bucket.write()</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, bucketLeafFlag)</span><br></pre></td></tr></table></figure>
+
+<p>例如看个写入 key / value 的过程</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="comment">// Return an error if there is an existing key with a bucket value.</span></span><br><span class="line"><span class="keyword">if</span> bytes.Equal(key, k) &amp;&amp; (flags&amp;bucketLeafFlag) != <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ErrIncompatibleValue</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2a0d5b3c.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/2a0d5b3c.html" class="post-title-link" itemprop="url">warning-log-about-etcd</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-27 15:49:35" itemprop="dateCreated datePublished" datetime="2017-10-27T15:49:35Z">2017-10-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 07:53:52" itemprop="dateModified" datetime="2020-11-22T07:53:52Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="wal-fsync-delay-warning"><a href="#wal-fsync-delay-warning" class="headerlink" title="wal fsync delay warning"></a>wal fsync delay warning</h1><p>对于 leader 来说，可以先行向 follower 发送 messages，再进行 wal 的写入等后续持久化操作，最后 n.advance</p>
+<p>对于 follower 来说，必须进行 wal 的写入等持久化操作后，才能向其他成员发送 messages，最后 n.advance</p>
+<p>wal 的 fsync 调用</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mustSync := mustSync(st, w.state, <span class="built_in">len</span>(ents))</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mustSync</span><span class="params">(st, prevst raftpb.HardState, entsnum <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// Persistent state on all servers:</span></span><br><span class="line">	<span class="comment">// (Updated on stable storage before responding to RPCs)</span></span><br><span class="line">	<span class="comment">// currentTerm</span></span><br><span class="line">	<span class="comment">// votedFor</span></span><br><span class="line">	<span class="comment">// log entries[]</span></span><br><span class="line">	<span class="keyword">return</span> entsnum != <span class="number">0</span> || st.Vote != prevst.Vote || st.Term != prevst.Term</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看的出来 <strong>fsync 调用很频繁</strong>，每次写入都有 fsync 调用，毕竟每次写入时 entsnum 不为 0</p>
+<p>fsync 的对象为最新的 wal 文件</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">start := time.Now()</span><br><span class="line">err := fileutil.Fdatasync(w.tail().File)</span><br><span class="line">duration := time.Since(start)</span><br><span class="line"><span class="keyword">if</span> duration &gt; warnSyncDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;sync duration of %v, expected less than %v&quot;</span>, duration, warnSyncDuration)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>fsync 调用时间超过 1s 会告警</strong>，磁盘 IO 有波动了 or 不满足要求</p>
+<h1 id="boltdb-apply-delay-warning"><a href="#boltdb-apply-delay-warning" class="headerlink" title="boltdb apply delay warning"></a>boltdb apply delay warning</h1><p>wal 写完，raft 协议走通，可同步数据后 apply 数据到本地存储</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">s.applySnapshot(ep, apply)</span><br><span class="line">st := time.Now()</span><br><span class="line">s.applyEntries(ep, apply)</span><br><span class="line">d := time.Since(st)</span><br><span class="line">entriesNum := <span class="built_in">len</span>(apply.entries)</span><br><span class="line"><span class="keyword">if</span> entriesNum != <span class="number">0</span> &amp;&amp; d &gt; time.Duration(entriesNum)*warnApplyDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;apply entries took too long [%v for %d entries]&quot;</span>, d, <span class="built_in">len</span>(apply.entries))</span><br><span class="line">	plog.Warningf(<span class="string">&quot;avoid queries with large range/delete range!&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>平均 apply 一个 entry 耗时 100ms，*<em>如果 apply 总时间超过 n * 100ms 则告警*</em></p>
+<p>比如 put 请求，最后调到 kvstore.go 的 put 方法，kvindex (B tree) 中搜索一把，再用 boltdb tx 写入一把，kvindex 增加一把，有 lease 的加 lease</p>
+<p>当然上述的都是耗时，只不过 boltdb put 的耗时一般而言比其他的操作都大</p>
+<h1 id="leader-send-out-heartbeat-delay-warning"><a href="#leader-send-out-heartbeat-delay-warning" class="headerlink" title="leader send out heartbeat delay warning"></a>leader send out heartbeat delay warning</h1><p>在 r.sendMessages(rd.Messages) 方法中，也会打印延时告警日志</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a heartbeat message</span></span><br><span class="line"><span class="keyword">if</span> ms[i].Type == raftpb.MsgHeartbeat &#123;</span><br><span class="line">	<span class="comment">// exceed maxDuration time</span></span><br><span class="line">	ok, exceed := r.td.Observe(ms[i].To)</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> limit request rate.</span></span><br><span class="line">		plog.Warningf(<span class="string">&quot;failed to send out heartbeat on time (exceeded the %v timeout for %v)&quot;</span>, r.heartbeat, exceed)</span><br><span class="line">		plog.Warningf(<span class="string">&quot;server is likely overloaded&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个地方的算法，是超过 2*hearbeat 时间作为 exceed 时间</p>
+<p>leader 将这些 Message 先行发送给 followers，如果是心跳消息，则计算当前时间 - 上次记录的时间是否超过了 2*hearbeat，如果是，则打印超过的值；需注意该值如果接近或超过了 election timeout 时间，则会引发其他成员发起选举，导致集群不稳定</p>
+<p>一般这个告警，是由 wal fsync delay 诱发的，而 wal fsync delay 又与磁盘 IO 有关；另外 apply 不是也有 delay 的 warning ？为啥它的影响不大，答：因为 apply 会走 fifo 的调度，是异步的；当然也是有影响的，总会影响整体时延</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">	f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">    sched.Schedule(f)</span><br></pre></td></tr></table></figure>
+
+<p>放入队列就跑</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Schedule schedules a job that will be ran in FIFO order sequentially.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *fifo)</span> <span class="title">Schedule</span><span class="params">(j Job)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	f.pendings = <span class="built_in">append</span>(f.pendings, j)</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="the-clock-difference-againset-peer-is-too-high-warning"><a href="#the-clock-difference-againset-peer-is-too-high-warning" class="headerlink" title="the clock difference againset peer is too high warning"></a>the clock difference againset peer is too high warning</h1><p>peer 间计算时差大于 1s 告警，ps: 当前 peer 比对端 peer 时间大</p>
+<p>etcd 会将其每个 peer 加入到 probe 中，定时发起 get 请求，一方面可以探测 peer health 另一方面通过其返回值，计算 peer 之间的时间差；没发现该 warning 会对业务造成影响；还没过代码，和时间相关的实现也就 lease 了，暂且推测 lease 用的是逻辑时钟，所以没影响</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">monitorProbingStatus</span><span class="params">(s probing.Status, id <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">if</span> s.ClockDiff() &gt; time.Second &#123;</span><br><span class="line">		plog.Warningf(<span class="string">&quot;the clock difference against peer %s is too high [%v &gt; %v]&quot;</span>, id, s.ClockDiff(), time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	rtts.WithLabelValues(id).Observe(s.SRTT().Seconds())</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>probe (4s) 及 monit (30s) 周期</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proberInterval           = ConnReadTimeout - time.Second (<span class="number">5</span> - <span class="number">1</span>)</span><br><span class="line">statusMonitoringInterval = <span class="number">30</span> * time.Second</span><br></pre></td></tr></table></figure>
+
+<p>开始记录值，start 为本次开始 probe 的时间，hh.Now 为对端 peer 返回的时间</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">α = <span class="number">0.125</span></span><br><span class="line">s.record(time.Since(start), hh.Now)</span><br></pre></td></tr></table></figure>
+
+<p>时差计算方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// srtt init 0</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *status)</span> <span class="title">record</span><span class="params">(rtt time.Duration, when time.Time)</span></span> &#123;</span><br><span class="line">	s.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> s.mu.Unlock()</span><br><span class="line">	s.total += <span class="number">1</span></span><br><span class="line">	s.health = <span class="literal">true</span></span><br><span class="line">	s.srtt = time.Duration((<span class="number">1</span>-α)*<span class="keyword">float64</span>(s.srtt) + α*<span class="keyword">float64</span>(rtt))</span><br><span class="line">	s.clockdiff = time.Now().Sub(when) - s.srtt/<span class="number">2</span></span><br><span class="line">	s.err = <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大概来说就是 local time 减掉 peer time，再减修正时间</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -972,409 +1340,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/45aaba66.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/45aaba66.html" class="post-title-link" itemprop="url">ETCD V3 中的 Restore</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:07:43" itemprop="dateCreated datePublished" datetime="2017-10-04T23:07:43Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>etcd v3.1.9</p>
-</blockquote>
-<p>数据是如此重要，有必要看下 etcdctl restore 的实现</p>
-<p>etcdctl 的实现均在 etcdctl 目录下，ctlv2 是 v2 的实现，ctlv3 是 v3 的实现，统一入口 main.go，通过环境变量 ETCDCTL_API 指定使用哪个版本的 etcdctl</p>
-<p>查看 etcdctl/ctlv3/command/snapshot_command.go 中的 snapshotRestoreCommandFunc 方法</p>
-<h1 id="Restore-的整体过程"><a href="#Restore-的整体过程" class="headerlink" title="Restore 的整体过程"></a>Restore 的整体过程</h1><ol>
-<li>使用 —initial-cluster / —name / —initial-cluster-token / —initial-advertise-peer-urls 参数生成 etcd 集群及成员参数</li>
-<li>校验参数</li>
-<li>如果 data-dir 已经存在，报错退出</li>
-<li>生成 etcd v3 backend db 文件 (makeDB)</li>
-<li>生成 .wal 和 .snap 文件 (makeWALAndSnap)</li>
-</ol>
-<h1 id="makeDB"><a href="#makeDB" class="headerlink" title="makeDB"></a>makeDB</h1><p>具体查看 makeDB 方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// makeDB copies the database snapshot to the snapshot directory</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeDB</span><span class="params">(snapdir, dbfile <span class="keyword">string</span>, commit <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 打开 db 文件</span></span><br><span class="line">	f, ferr := os.OpenFile(dbfile, os.O_RDONLY, <span class="number">0600</span>)</span><br><span class="line">	<span class="keyword">if</span> ferr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitInvalidInput, ferr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> f.Close()</span><br><span class="line">	<span class="comment">// get snapshot integrity hash</span></span><br><span class="line">	<span class="keyword">if</span> _, err := f.Seek(-sha256.Size, os.SEEK_END); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	sha := <span class="built_in">make</span>([]<span class="keyword">byte</span>, sha256.Size)</span><br><span class="line">	<span class="keyword">if</span> _, err := f.Read(sha); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> _, err := f.Seek(<span class="number">0</span>, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 创建 data-dir/member/snap 目录</span></span><br><span class="line">	<span class="keyword">if</span> err := fileutil.CreateDirAll(snapdir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 拷贝 db 文件至 data-dir/member/snap/db</span></span><br><span class="line">	dbpath := filepath.Join(snapdir, <span class="string">&quot;db&quot;</span>)</span><br><span class="line">	db, dberr := os.OpenFile(dbpath, os.O_RDWR|os.O_CREATE, <span class="number">0600</span>)</span><br><span class="line">	<span class="keyword">if</span> dberr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, dberr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> _, err := io.Copy(db, f); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// truncate away integrity hash, if any.</span></span><br><span class="line">	off, serr := db.Seek(<span class="number">0</span>, os.SEEK_END)</span><br><span class="line">	<span class="keyword">if</span> serr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, serr)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// db 文件中是否存在 hash 值这块有点意思</span></span><br><span class="line">	<span class="comment">// 看着是以 512 chunk 的方式写入的</span></span><br><span class="line">	<span class="comment">// % 512 以后余下的字节数等于 sha256.Size 的话</span></span><br><span class="line">	<span class="comment">// 那么 db 文件存在 hash 值</span></span><br><span class="line">	hasHash := (off % <span class="number">512</span>) == sha256.Size</span><br><span class="line">	<span class="keyword">if</span> hasHash &#123;</span><br><span class="line">		<span class="comment">// 去掉 db 文件末尾的 hash 值</span></span><br><span class="line">		<span class="keyword">if</span> err := db.Truncate(off - sha256.Size); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitIO, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 如果既没有 hash 值，restore 参数又没有指定 --skip-hash-check</span></span><br><span class="line">	<span class="comment">// 那么报错退出</span></span><br><span class="line">	<span class="comment">// 注意此时已经生成了 data-dir/member/snap/db 文件</span></span><br><span class="line">	<span class="keyword">if</span> !hasHash &amp;&amp; !skipHashCheck &#123;</span><br><span class="line">		err := fmt.Errorf(<span class="string">&quot;snapshot missing hash but --skip-hash-check=false&quot;</span>)</span><br><span class="line">		ExitWithError(ExitBadArgs, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> hasHash &amp;&amp; !skipHashCheck &#123;</span><br><span class="line">		<span class="comment">// check for match</span></span><br><span class="line">		<span class="keyword">if</span> _, err := db.Seek(<span class="number">0</span>, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitIO, err)</span><br><span class="line">		&#125;</span><br><span class="line">		h := sha256.New()</span><br><span class="line">		<span class="keyword">if</span> _, err := io.Copy(h, db); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitIO, err)</span><br><span class="line">		&#125;</span><br><span class="line">		dbsha := h.Sum(<span class="literal">nil</span>)</span><br><span class="line">		<span class="keyword">if</span> !reflect.DeepEqual(sha, dbsha) &#123;</span><br><span class="line">			err := fmt.Errorf(<span class="string">&quot;expected sha256 %v, got %v&quot;</span>, sha, dbsha)</span><br><span class="line">			ExitWithError(ExitInvalidInput, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// db hash is OK, can now modify DB so it can be part of a new cluster</span></span><br><span class="line">	db.Close()</span><br><span class="line">	<span class="comment">// update consistentIndex so applies go through on etcdserver despite</span></span><br><span class="line">	<span class="comment">// having a new raft instance</span></span><br><span class="line">	be := backend.NewDefaultBackend(dbpath)</span><br><span class="line">	<span class="comment">// a lessor never timeouts leases</span></span><br><span class="line">	lessor := lease.NewLessor(be, math.MaxInt64)</span><br><span class="line">	s := mvcc.NewStore(be, lessor, (*initIndex)(&amp;commit))</span><br><span class="line">	id := s.TxnBegin()</span><br><span class="line">	btx := be.BatchTx()</span><br><span class="line">	del := <span class="function"><span class="keyword">func</span><span class="params">(k, v []<span class="keyword">byte</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		_, _, err := s.TxnDeleteRange(id, k, <span class="literal">nil</span>)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// db 文件中存储了 member 的信息</span></span><br><span class="line">	<span class="comment">// 此处删除</span></span><br><span class="line">	<span class="comment">// delete stored members from old cluster since using new members</span></span><br><span class="line">	btx.UnsafeForEach([]<span class="keyword">byte</span>(<span class="string">&quot;members&quot;</span>), del)</span><br><span class="line">	<span class="comment">// todo: add back new members when we start to deprecate old snap file.</span></span><br><span class="line">	btx.UnsafeForEach([]<span class="keyword">byte</span>(<span class="string">&quot;members_removed&quot;</span>), del)</span><br><span class="line">	<span class="comment">// trigger write-out of new consistent index</span></span><br><span class="line">	s.TxnEnd(id)</span><br><span class="line">	s.Commit()</span><br><span class="line">	s.Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="makeWALAndSnap"><a href="#makeWALAndSnap" class="headerlink" title="makeWALAndSnap"></a>makeWALAndSnap</h1><p>具体查看 makeWALAndSnap 方法，无图言 x，makeWALAndSnap 生成的 .wal 和 .snap 文件内容如下</p>
-<p><img src="/images/restore_wal.jpeg" alt="restore_wal"></p>
-<p>代码注释如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// makeWAL creates a WAL for the initial cluster</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeWALAndSnap</span><span class="params">(waldir, snapdir <span class="keyword">string</span>, cl *membership.RaftCluster)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 新建 data-dir/member/wal 目录</span></span><br><span class="line">	<span class="keyword">if</span> err := fileutil.CreateDirAll(waldir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// etcd v2 storage</span></span><br><span class="line">	<span class="comment">// add members again to persist them to the store we create.</span></span><br><span class="line">	st := store.New(etcdserver.StoreClusterPrefix, etcdserver.StoreKeysPrefix)</span><br><span class="line">	cl.SetStore(st)</span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> cl.Members() &#123;</span><br><span class="line">		cl.AddMember(m)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// cluster and member metadata</span></span><br><span class="line">	<span class="comment">// write to wal</span></span><br><span class="line">	m := cl.MemberByName(restoreName)</span><br><span class="line">	md := &amp;etcdserverpb.Metadata&#123;NodeID: <span class="keyword">uint64</span>(m.ID), ClusterID: <span class="keyword">uint64</span>(cl.ID())&#125;</span><br><span class="line">	metadata, merr := md.Marshal()</span><br><span class="line">	<span class="keyword">if</span> merr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitInvalidInput, merr)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 生成初始 wal 文件</span></span><br><span class="line">	w, walerr := wal.Create(waldir, metadata)</span><br><span class="line">	<span class="keyword">if</span> walerr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, walerr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> w.Close()</span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// add entries for raft start</span></span><br><span class="line">	peers := <span class="built_in">make</span>([]raft.Peer, <span class="built_in">len</span>(cl.MemberIDs()))</span><br><span class="line">	<span class="keyword">for</span> i, id := <span class="keyword">range</span> cl.MemberIDs() &#123;</span><br><span class="line">		ctx, err := json.Marshal((*cl).Member(id))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitInvalidInput, err)</span><br><span class="line">		&#125;</span><br><span class="line">		peers[i] = raft.Peer&#123;ID: <span class="keyword">uint64</span>(id), Context: ctx&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	ents := <span class="built_in">make</span>([]raftpb.Entry, <span class="built_in">len</span>(peers))</span><br><span class="line">	nodeIDs := <span class="built_in">make</span>([]<span class="keyword">uint64</span>, <span class="built_in">len</span>(peers))</span><br><span class="line">	<span class="keyword">for</span> i, p := <span class="keyword">range</span> peers &#123;</span><br><span class="line">		nodeIDs[i] = p.ID</span><br><span class="line">		cc := raftpb.ConfChange&#123;</span><br><span class="line">			Type:    raftpb.ConfChangeAddNode,</span><br><span class="line">			NodeID:  p.ID,</span><br><span class="line">			Context: p.Context&#125;</span><br><span class="line">		d, err := cc.Marshal()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			ExitWithError(ExitInvalidInput, err)</span><br><span class="line">		&#125;</span><br><span class="line">		e := raftpb.Entry&#123;</span><br><span class="line">			Type:  raftpb.EntryConfChange,</span><br><span class="line">			Term:  <span class="number">1</span>,</span><br><span class="line">			Index: <span class="keyword">uint64</span>(i + <span class="number">1</span>),</span><br><span class="line">			Data:  d,</span><br><span class="line">		&#125;</span><br><span class="line">		ents[i] = e</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// add nodes entries are committed</span></span><br><span class="line">	<span class="comment">// initial term 1</span></span><br><span class="line">	<span class="comment">// save to wal</span></span><br><span class="line">	commit, term := <span class="keyword">uint64</span>(<span class="built_in">len</span>(ents)), <span class="keyword">uint64</span>(<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">if</span> err := w.Save(raftpb.HardState&#123;</span><br><span class="line">		Term:   term,</span><br><span class="line">		Vote:   peers[<span class="number">0</span>].ID,</span><br><span class="line">		Commit: commit&#125;, ents); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">	b, berr := st.Save()</span><br><span class="line">	<span class="keyword">if</span> berr != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitError, berr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// first snapshot</span></span><br><span class="line">	raftSnap := raftpb.Snapshot&#123;</span><br><span class="line">		Data: b,</span><br><span class="line">		Metadata: raftpb.SnapshotMetadata&#123;</span><br><span class="line">			Index: commit,</span><br><span class="line">			Term:  term,</span><br><span class="line">			ConfState: raftpb.ConfState&#123;</span><br><span class="line">				Nodes: nodeIDs,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// save snapshot</span></span><br><span class="line">	<span class="comment">// Term: 1</span></span><br><span class="line">	<span class="comment">// Index: The number of member in cluster</span></span><br><span class="line">	snapshotter := snap.New(snapdir)</span><br><span class="line">	<span class="keyword">if</span> err := snapshotter.SaveSnap(raftSnap); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// write to wal</span></span><br><span class="line">	<span class="keyword">if</span> err := w.SaveSnapshot(walpb.Snapshot&#123;Index: commit, Term: term&#125;); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ExitWithError(ExitIO, err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/3869686e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/3869686e.html" class="post-title-link" itemprop="url">ETCD V3 如何完成一次 put 请求</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:00:55" itemprop="dateCreated datePublished" datetime="2017-10-04T23:00:55Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 15:06:26" itemprop="dateModified" datetime="2020-11-21T15:06:26Z">2020-11-21</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>etcd 完成一次写入需要经过哪些过程？</p>
-<p>implementation of put grpc request</p>
-<p>key.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *kvServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">processInternalRaftRequest</span><span class="params">(ctx context.Context, r pb.InternalRaftRequest)</span> <span class="params">(*applyResult, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>v3_server.go</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func (s *EtcdServer) processInternalRaftRequestOnce(ctx context.Context, r pb.InternalRaftRequest) (*applyResult, error)</span><br></pre></td></tr></table></figure>
-
-<p>注册一个等待 id；完成之后调用 s.w.Trigger 触发完成 or GC<br>ch := s.w.Register(id)</p>
-<p>raft propose (提议写入数据)</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// propose PutRequest</span></span><br><span class="line">s.r.Propose(cctx, data)</span><br></pre></td></tr></table></figure>
-
-<p>node.go</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func (n *node) Propose(ctx context.Context, data []byte) error</span><br></pre></td></tr></table></figure>
-
-<p>n.step 往 propc 通道传入数据</p>
-<p>node run main roop</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span> <span class="title">run</span><span class="params">(r *raft)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">		<span class="keyword">case</span> m := &lt;-propc:</span><br><span class="line">			r.logger.Infof(<span class="string">&quot;handle propc message&quot;</span>)</span><br><span class="line">			m.From = r.id</span><br><span class="line">			r.Step(m)</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>raft/raft.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *raft)</span> <span class="title">Step</span><span class="params">(m pb.Message)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		r.step(r, m)</span><br><span class="line">  </span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r.step(r, m)</p>
-<p>leader 和 follower 行为不同</p>
-<p>对于 follower 来说</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">stepFollower</span><span class="params">(r *raft, m pb.Message)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">case</span> pb.MsgProp:</span><br><span class="line">		<span class="keyword">if</span> r.lead == None &#123;</span><br><span class="line">			r.logger.Infof(<span class="string">&quot;%x no leader at term %d; dropping proposal&quot;</span>, r.id, r.Term)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// forward to leader</span></span><br><span class="line">		m.To = r.lead</span><br><span class="line">		<span class="comment">// just append to raft pb.Message ?</span></span><br><span class="line">		r.send(m)</span><br><span class="line">    </span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>r.send(m) 只是把 message append 到 raft/raft.go 的 msgs []pb.Message 数组中，谁去消费这个 message ？</p>
-<p>node.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newReady</span><span class="params">(r *raft, prevSoftSt *SoftState, prevHardSt pb.HardState)</span> <span class="title">Ready</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    rd := Ready&#123;</span><br><span class="line">		Entries:          r.raftLog.unstableEntries(),</span><br><span class="line">		CommittedEntries: r.raftLog.nextEnts(),</span><br><span class="line">		Messages:         r.msgs,</span><br><span class="line">	&#125;</span><br><span class="line">  	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Ready 又是由谁消费的？</p>
-<p>node.go main roop</p>
-<p>func (n node) run(r raft)</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *node)</span> <span class="title">run</span><span class="params">(r *raft)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">		<span class="keyword">if</span> advancec != <span class="literal">nil</span> &#123;</span><br><span class="line">			readyc = <span class="literal">nil</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			rd = newReady(r, prevSoftSt, prevHardSt)</span><br><span class="line">			<span class="keyword">if</span> rd.containsUpdates() &#123;</span><br><span class="line">				readyc = n.readyc</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				readyc = <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">  </span><br><span class="line">    ...</span><br><span class="line">  </span><br><span class="line">        <span class="keyword">case</span> readyc &lt;- rd:</span><br><span class="line">                  r.logger.Infof(<span class="string">&quot;handle ready&quot;</span>)</span><br><span class="line">                  <span class="keyword">if</span> rd.SoftState != <span class="literal">nil</span> &#123;</span><br><span class="line">                      prevSoftSt = rd.SoftState</span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> <span class="built_in">len</span>(rd.Entries) &gt; <span class="number">0</span> &#123;</span><br><span class="line">                      prevLastUnstablei = rd.Entries[<span class="built_in">len</span>(rd.Entries)<span class="number">-1</span>].Index</span><br><span class="line">                      prevLastUnstablet = rd.Entries[<span class="built_in">len</span>(rd.Entries)<span class="number">-1</span>].Term</span><br><span class="line">                      havePrevLastUnstablei = <span class="literal">true</span></span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> !IsEmptyHardState(rd.HardState) &#123;</span><br><span class="line">                      prevHardSt = rd.HardState</span><br><span class="line">                  &#125;</span><br><span class="line">                  <span class="keyword">if</span> !IsEmptySnap(rd.Snapshot) &#123;</span><br><span class="line">                      prevSnapi = rd.Snapshot.Metadata.Index</span><br><span class="line">                  &#125;</span><br><span class="line">                  r.msgs = <span class="literal">nil</span></span><br><span class="line">                  r.readStates = <span class="literal">nil</span></span><br><span class="line">                  advancec = n.advancec</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>readyc 又由谁消费呢？</p>
-<p>实际上 readyc 是 n.readyc，所以找下 n.readyc 由谁消费即可</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">type node struct &#123;</span><br><span class="line">	...</span><br><span class="line">	readyc     chan Ready</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line">func (n *node) Ready() &lt;-chan Ready &#123; return n.readyc &#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以我们继续追寻哪里取了 Ready() 通道</p>
-<p>终于在</p>
-<p>etcdserver/raft.go 中发现了</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *raftNode)</span> <span class="title">start</span><span class="params">(rh *raftReadyHandler)</span></span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> rd := &lt;-r.Ready():</span><br><span class="line">				<span class="keyword">if</span> rd.SoftState != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="comment">// lead has changed</span></span><br><span class="line">					<span class="keyword">if</span> lead := atomic.LoadUint64(&amp;r.lead); rd.SoftState.Lead != raft.None &amp;&amp; lead != rd.SoftState.Lead &#123;</span><br><span class="line">						r.mu.Lock()</span><br><span class="line">						r.lt = time.Now()</span><br><span class="line">						r.mu.Unlock()</span><br><span class="line">						<span class="comment">// prometheus record the count of leader changes</span></span><br><span class="line">						leaderChanges.Inc()</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">if</span> rd.SoftState.Lead == raft.None &#123;</span><br><span class="line">						hasLeader.Set(<span class="number">0</span>)</span><br><span class="line">					&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">						hasLeader.Set(<span class="number">1</span>)</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// store current seen leader</span></span><br><span class="line">					atomic.StoreUint64(&amp;r.lead, rd.SoftState.Lead)</span><br><span class="line">					islead = rd.RaftState == raft.StateLeader</span><br><span class="line">					<span class="comment">// raft handler</span></span><br><span class="line">					rh.updateLeadership()</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(rd.ReadStates) != <span class="number">0</span> &#123;</span><br><span class="line">					<span class="keyword">select</span> &#123;</span><br><span class="line">					<span class="keyword">case</span> r.readStateC &lt;- rd.ReadStates[<span class="built_in">len</span>(rd.ReadStates)<span class="number">-1</span>]:</span><br><span class="line">					<span class="keyword">case</span> &lt;-time.After(internalTimeout):</span><br><span class="line">						plog.Warningf(<span class="string">&quot;timed out sending read state&quot;</span>)</span><br><span class="line">					<span class="keyword">case</span> &lt;-r.stopped:</span><br><span class="line">						<span class="keyword">return</span></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				raftDone := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">				ap := apply&#123;</span><br><span class="line">					entries:  rd.CommittedEntries,</span><br><span class="line">					snapshot: rd.Snapshot,</span><br><span class="line">					raftDone: raftDone,</span><br><span class="line">				&#125;</span><br><span class="line">				updateCommittedIndex(&amp;ap, rh)</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> r.applyc &lt;- ap:</span><br><span class="line">				<span class="keyword">case</span> &lt;-r.stopped:</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// the leader can write to its disk in parallel with replicating to the followers and them</span></span><br><span class="line">				<span class="comment">// writing to their disks.</span></span><br><span class="line">				<span class="comment">// For more details, check raft thesis 10.2.1</span></span><br><span class="line">				<span class="keyword">if</span> islead &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeLeaderSend struct&#123;&#125;</span></span><br><span class="line">					r.sendMessages(rd.Messages)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// gofail: var raftBeforeSave struct&#123;&#125;</span></span><br><span class="line">				<span class="keyword">if</span> err := r.storage.Save(rd.HardState, rd.Entries); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					plog.Fatalf(<span class="string">&quot;raft save state and entries error: %v&quot;</span>, err)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> !raft.IsEmptyHardState(rd.HardState) &#123;</span><br><span class="line">					proposalsCommitted.Set(<span class="keyword">float64</span>(rd.HardState.Commit))</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// gofail: var raftAfterSave struct&#123;&#125;</span></span><br><span class="line">				<span class="keyword">if</span> !raft.IsEmptySnap(rd.Snapshot) &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeSaveSnap struct&#123;&#125;</span></span><br><span class="line">					<span class="keyword">if</span> err := r.storage.SaveSnap(rd.Snapshot); err != <span class="literal">nil</span> &#123;</span><br><span class="line">						plog.Fatalf(<span class="string">&quot;raft save snapshot error: %v&quot;</span>, err)</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// gofail: var raftAfterSaveSnap struct&#123;&#125;</span></span><br><span class="line">					r.raftStorage.ApplySnapshot(rd.Snapshot)</span><br><span class="line">					plog.Infof(<span class="string">&quot;raft applied incoming snapshot at index %d&quot;</span>, rd.Snapshot.Metadata.Index)</span><br><span class="line">					<span class="comment">// gofail: var raftAfterApplySnap struct&#123;&#125;</span></span><br><span class="line">				&#125;</span><br><span class="line">				r.raftStorage.Append(rd.Entries)</span><br><span class="line">				<span class="keyword">if</span> !islead &#123;</span><br><span class="line">					<span class="comment">// gofail: var raftBeforeFollowerSend struct&#123;&#125;</span></span><br><span class="line">					r.sendMessages(rd.Messages)</span><br><span class="line">				&#125;</span><br><span class="line">				raftDone &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">				r.Advance()</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该部分会将 apply 的 message 放入 applc 通道中，最终由</p>
-<p>server.go</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">run</span><span class="params">()</span></span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">			f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">			sched.Schedule(f)</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>做持久化，并且 trigger 写入结束</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/8cdb9b5c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/8cdb9b5c.html" class="post-title-link" itemprop="url">ETCD V3 中的 .wal 文件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-03 22:50:39" itemprop="dateCreated datePublished" datetime="2017-10-03T22:50:39Z">2017-10-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>etcd v3.1.9</p>
-</blockquote>
-<p>.wal 文件，即 write ahead log，wal 的实现集中在 wal 目录下</p>
-<h1 id="消息类型"><a href="#消息类型" class="headerlink" title="消息类型"></a>消息类型</h1><p>其中 wal/walpb 目录下定义了 wal 中记录的两种消息类型： Record 和 Snapshot</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">message Record &#123;</span><br><span class="line">	optional int64 type  = 1 [(gogoproto.nullable) = false];</span><br><span class="line">	optional uint32 crc  = 2 [(gogoproto.nullable) = false];</span><br><span class="line">	optional bytes data  = 3;</span><br><span class="line">&#125;</span><br><span class="line">message Snapshot &#123;</span><br><span class="line">	optional uint64 index = 1 [(gogoproto.nullable) = false];</span><br><span class="line">	optional uint64 term  = 2 [(gogoproto.nullable) = false];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>用 pb 比较省事儿，不用自己实现对象序列化反序列化的逻辑</p>
-<h1 id="创建方法"><a href="#创建方法" class="headerlink" title="创建方法"></a>创建方法</h1><p>wal 有两个方法会创建 wal 文件，一个是 Create 方法，另一个是 cut 方法<br>Create 方法会创建初始 wal 文件，名称为 0000000000000000-0000000000000000.wal</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p := filepath.Join(tmpdirpath, walName(0, 0))</span><br></pre></td></tr></table></figure>
-
-<p>查看 Create 创建初始 wal 文件的过程</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// keep temporary wal directory so WAL initialization appears atomic</span></span><br><span class="line">tmpdirpath := filepath.Clean(dirpath) + <span class="string">&quot;.tmp&quot;</span></span><br><span class="line"><span class="comment">// 生成初始 wal 文件名</span></span><br><span class="line">p := filepath.Join(tmpdirpath, walName(<span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line"><span class="comment">// 系统调用 LockFile</span></span><br><span class="line"><span class="comment">// 防止被 purge</span></span><br><span class="line">f, err := fileutil.LockFile(p, os.O_WRONLY|os.O_CREATE, fileutil.PrivateFileMode)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 不是很理解这个地方为何要 seek 到文件末尾</span></span><br><span class="line"><span class="keyword">if</span> _, err = f.Seek(<span class="number">0</span>, os.SEEK_END); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 预分配 wal 文件空间</span></span><br><span class="line"><span class="comment">// SegmentSizeBytes = 64 * 1024 * 1024</span></span><br><span class="line"><span class="comment">// 即 64 MB</span></span><br><span class="line"><span class="keyword">if</span> err = fileutil.Preallocate(f.File, SegmentSizeBytes, <span class="literal">true</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// 将 wal 文件加入 locks slice 中</span></span><br><span class="line">w.locks = <span class="built_in">append</span>(w.locks, f)</span><br><span class="line"><span class="comment">// 写入初始信息 ...</span></span><br><span class="line"><span class="keyword">if</span> w, err = w.renameWal(tmpdirpath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>w.renameWal(tmpdirpath) 值得抽出来说下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除原 wal path</span></span><br><span class="line"><span class="keyword">if</span> err := os.RemoveAll(w.dir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将 tmp wal path -&gt; wal path</span></span><br><span class="line"><span class="keyword">if</span> err := os.Rename(tmpdirpath, w.dir); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在这里初始化 FilePipeline</span></span><br><span class="line">w.fp = newFilePipeline(w.dir, SegmentSizeBytes)</span><br><span class="line">df, err := fileutil.OpenDir(w.dir)</span><br><span class="line">w.dirFile = df</span><br><span class="line"><span class="keyword">return</span> w, err</span><br></pre></td></tr></table></figure>
-
-<p>初始写入 wal 内容示意如下</p>
-<p><img src="/images/initial_wal.jpg" alt="initial_wal"></p>
-<h1 id="预分配空间"><a href="#预分配空间" class="headerlink" title="预分配空间"></a>预分配空间</h1><p>在 unix OS 上，首先会使用系统调用 Fallocate 预分配文件空间</p>
-<p>如果 Fallocate 失败，则 fallback 到 preallocExtendTrunc 再次尝试分配</p>
-<p>查看 preallocExtendTrunc 的逻辑</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 移动到文件的当前读写位置，返回 offset</span></span><br><span class="line"><span class="comment">// 一般 curOff = 0</span></span><br><span class="line">curOff, err := f.Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 从当前文件的末尾处，移动至 +sizeInBytes 位置处，返回 offset</span></span><br><span class="line"><span class="comment">// 一般 size = 067108864</span></span><br><span class="line"><span class="comment">// 即 sizeInBytes 的值 64 * 1024 *1024</span></span><br><span class="line">size, err := f.Seek(sizeInBytes, os.SEEK_END)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 移动回文件之前的读写位置，待后续写入</span></span><br><span class="line"><span class="keyword">if</span> _, err = f.Seek(curOff, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 已分配足够空间，返回 nil</span></span><br><span class="line"><span class="comment">// 一般 sizeInBytes == size</span></span><br><span class="line"><span class="keyword">if</span> sizeInBytes &gt; size &#123;</span><br><span class="line">  	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 多分配了空间，以 sizeInBytes 截断文件</span></span><br><span class="line"><span class="comment">// truncate 之后，文件大小才显示为 sizeInBytes 大小</span></span><br><span class="line"><span class="keyword">return</span> f.Truncate(sizeInBytes)</span><br></pre></td></tr></table></figure>
-
-<p>在 darwin OS 上，首先会调用 preallocFixed，该函数中使用了系统调用 SYS_FCNTL 预先分配文件空间</p>
-<p>如果 preallocFixed 失败，则调用 preallocExtendTrunc 再次尝试分配</p>
-<h1 id="编码-解码"><a href="#编码-解码" class="headerlink" title="编码 / 解码"></a>编码 / 解码</h1><p>wal/encoder.go 实现了写入逻辑<br>wal/decoder.go 实现了读取逻辑</p>
-<h1 id="File-Pipeline"><a href="#File-Pipeline" class="headerlink" title="File Pipeline"></a>File Pipeline</h1><p>wal/file_pipeline.go 用来预创建文件，为后续生成新的 wal 文件使用</p>
-<p>fp.Open() 在 cut 方法中被调用，cut 中的调用如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create a temp wal file with name sequence + 1, or truncate the existing one</span></span><br><span class="line">newTail, err := w.fp.Open()</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而 fp.Open() 从 fp.filec 中获取 locks file 返回</p>
-<p>在初始化 file pipeline 方法 newFilePipeline 中启动 fp.run() 协程，查看 fp.run() 实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fp *filePipeline)</span> <span class="title">run</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> <span class="built_in">close</span>(fp.errc)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		f, err := fp.alloc()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fp.errc &lt;- err</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="comment">// fp.filec 大小为 1</span></span><br><span class="line">		<span class="keyword">case</span> fp.filec &lt;- f:</span><br><span class="line">		<span class="keyword">case</span> &lt;-fp.donec:</span><br><span class="line">			os.Remove(f.Name())</span><br><span class="line">			f.Close()</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>查看 fp.alloc() 方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fp *filePipeline)</span> <span class="title">alloc</span><span class="params">()</span> <span class="params">(f *fileutil.LockedFile, err error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// count % 2 so this file isn&#x27;t the same as the one last published</span></span><br><span class="line">	fpath := filepath.Join(fp.dir, fmt.Sprintf(<span class="string">&quot;%d.tmp&quot;</span>, fp.count%<span class="number">2</span>))</span><br><span class="line">	<span class="keyword">if</span> f, err = fileutil.LockFile(fpath, os.O_CREATE|os.O_WRONLY, fileutil.PrivateFileMode); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err = fileutil.Preallocate(f.File, fp.size, <span class="literal">true</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		plog.Errorf(<span class="string">&quot;failed to allocate space when creating new wal file (%v)&quot;</span>, err)</span><br><span class="line">		f.Close()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	fp.count++</span><br><span class="line">	<span class="keyword">return</span> f, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见预生成了 [0-1].tmp 文件，并对该文件加了锁，待调用 fp.Open() 方法获取使用</p>
-<h1 id="Cut-方法"><a href="#Cut-方法" class="headerlink" title="Cut 方法"></a>Cut 方法</h1><p>wal 文件大小上限为 64MB</p>
-<p>因此当写入消息之后， wal 文件大小 &gt; 64MB 时，会调用 cut 方法</p>
-<p>截断之前的 wal 文件，并生成新的 wal 文件用于写入</p>
-<p>cut 的整体思路</p>
-<ol>
-<li>截断当前使用的 wal 文件</li>
-<li>从 file pipeline 中获取 tmp 文件</li>
-<li>向 tmp 文件中写入必要的 headers</li>
-<li>将 tmp 文件 rename to wal 文件，新文件名为 walName(w.seq()+1, w.enti+1)</li>
-<li>将新 wal 文件加入 locks slice 中，并生成 newFileEncoder 用于写入新 wal 文件</li>
-</ol>
-<p>详细阅读 cut 方法（保留了原注释）</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cut closes current file written and creates a new one ready to append.</span></span><br><span class="line"><span class="comment">// cut first creates a temp wal file and writes necessary headers into it.</span></span><br><span class="line"><span class="comment">// Then cut atomically rename temp wal file to a wal file.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *WAL)</span> <span class="title">cut</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">       <span class="comment">// close old wal file; truncate to avoid wasting space if an early cut</span></span><br><span class="line">       <span class="comment">// 从 locks slice 中取最后一个 file</span></span><br><span class="line">       <span class="comment">// seek 到当前读写位置</span></span><br><span class="line">       off, serr := w.tail().Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line">       <span class="keyword">if</span> serr != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> serr</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 截断至当前读写位置</span></span><br><span class="line">       <span class="keyword">if</span> err := w.tail().Truncate(off); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 系统调用 fsync 落盘</span></span><br><span class="line">       <span class="keyword">if</span> err := w.sync(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">	   </span><br><span class="line">       <span class="comment">// 生成新的 wal 文件名</span></span><br><span class="line">       <span class="comment">// seq + 1</span></span><br><span class="line">       <span class="comment">// index + 1</span></span><br><span class="line">       fpath := filepath.Join(w.dir, walName(w.seq()+<span class="number">1</span>, w.enti+<span class="number">1</span>))</span><br><span class="line">       <span class="comment">// create a temp wal file with name sequence + 1, or truncate the existing one</span></span><br><span class="line">       <span class="comment">// 从 filePipeline 中获取预创建好的 [0-1].tmp 文件</span></span><br><span class="line">       newTail, err := w.fp.Open()</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// update writer and save the previous crc</span></span><br><span class="line">       <span class="comment">// 添加至 locks slice 末尾</span></span><br><span class="line">       w.locks = <span class="built_in">append</span>(w.locks, newTail)</span><br><span class="line">       prevCrc := w.encoder.crc.Sum32()</span><br><span class="line">       w.encoder, err = newFileEncoder(w.tail().File, prevCrc)</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">  </span><br><span class="line">       <span class="comment">// 写入之前 wal 的 crc</span></span><br><span class="line">       <span class="keyword">if</span> err = w.saveCrc(prevCrc); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 写入 metadata</span></span><br><span class="line">       <span class="keyword">if</span> err = w.encoder.encode(&amp;walpb.Record&#123;Type: metadataType, Data: w.metadata&#125;); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 写入 raft HardState</span></span><br><span class="line">       <span class="keyword">if</span> err = w.saveState(&amp;w.state); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// atomically move temp wal file to wal file</span></span><br><span class="line">       <span class="comment">// fsync 落盘</span></span><br><span class="line">       <span class="keyword">if</span> err = w.sync(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">		</span><br><span class="line">       <span class="comment">// 获取当前位置 offset</span></span><br><span class="line">       off, err = w.tail().Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// 同一个文件系统相当于 mv</span></span><br><span class="line">       <span class="keyword">if</span> err = os.Rename(newTail.Name(), fpath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// fsync 父目录</span></span><br><span class="line">       <span class="keyword">if</span> err = fileutil.Fsync(w.dirFile); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">	   </span><br><span class="line">       <span class="comment">// 关闭 filePipeline 打开的 newTail</span></span><br><span class="line">       newTail.Close()</span><br><span class="line">		</span><br><span class="line">       <span class="comment">// 重新加锁</span></span><br><span class="line">       <span class="keyword">if</span> newTail, err = fileutil.LockFile(fpath, os.O_WRONLY, fileutil.PrivateFileMode); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// off, err = w.tail().Seek(0, os.SEEK_CUR)</span></span><br><span class="line">       <span class="comment">// 重新设置下次读写位置为当前位置</span></span><br><span class="line">       <span class="keyword">if</span> _, err = newTail.Seek(off, os.SEEK_SET); err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       w.locks[<span class="built_in">len</span>(w.locks)<span class="number">-1</span>] = newTail</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// 莫名，直接使用之前的 prevCrc 不可以么</span></span><br><span class="line">       prevCrc = w.encoder.crc.Sum32()</span><br><span class="line">       w.encoder, err = newFileEncoder(w.tail().File, prevCrc)</span><br><span class="line">       <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> err</span><br><span class="line">       &#125;</span><br><span class="line">       plog.Infof(<span class="string">&quot;segmented wal file %v is created&quot;</span>, fpath)</span><br><span class="line">       <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以 cut 方法初始写入 wal 的内容示意如下</p>
-<p><img src="/images/cut_wal.jpeg" alt="cut_wal"></p>
-<h1 id="Sync-方法"><a href="#Sync-方法" class="headerlink" title="Sync 方法"></a>Sync 方法</h1><p>在 wal 中有如下几个地方使用了 sync 方法</p>
-<ol>
-<li>func (w *WAL) Save(st raftpb.HardState, ents []raftpb.Entry) error {}</li>
-<li>func (w *WAL) cut() error {}</li>
-<li>func (w *WAL) SaveSnapshot(e walpb.Snapshot) error {}</li>
-<li>func (w *WAL) Close() error {}</li>
-</ol>
-<p>sync 直接来说是使用了系统调用 fsync，确保数据写入磁盘持久化</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *WAL)</span> <span class="title">sync</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> w.encoder != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> err := w.encoder.flush(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 记录开始时间</span></span><br><span class="line">	start := time.Now()</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 底层是系统调用</span></span><br><span class="line">	err := fileutil.Fdatasync(w.tail().File)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 计算 fsync 耗时</span></span><br><span class="line">	duration := time.Since(start)</span><br><span class="line">	<span class="comment">// 大于 1s 告警</span></span><br><span class="line">	<span class="keyword">if</span> duration &gt; warnSyncDuration &#123;</span><br><span class="line">		plog.Warningf(<span class="string">&quot;sync duration of %v, expected less than %v&quot;</span>, duration, warnSyncDuration)</span><br><span class="line">	&#125;</span><br><span class="line">	syncDurations.Observe(duration.Seconds())</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重点看下 func (w *WAL) Save(st raftpb.HardState, ents []raftpb.Entry) error 方法，毕竟它调用频率较高</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w *WAL)</span> <span class="title">Save</span><span class="params">(st raftpb.HardState, ents []raftpb.Entry)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	mustSync := mustSync(st, w.state, <span class="built_in">len</span>(ents))</span><br><span class="line">	<span class="comment">//func mustSync(st, prevst raftpb.HardState, entsnum int) bool &#123;</span></span><br><span class="line">	<span class="comment">//	return entsnum != 0 || st.Vote != prevst.Vote || st.Term != prevst.Term</span></span><br><span class="line">	<span class="comment">//&#125;</span></span><br><span class="line">	...</span><br><span class="line">	curOff, err := w.tail().Seek(<span class="number">0</span>, os.SEEK_CUR)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> curOff &lt; SegmentSizeBytes &#123;</span><br><span class="line">		<span class="keyword">if</span> mustSync &#123;</span><br><span class="line">			<span class="keyword">return</span> w.sync()</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> w.cut()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>从上： vote / term 变化，或有 entries 要写入时，调用 w.sync</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1388,7 +1353,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1399,13 +1364,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">274k</span>
+    <span title="站点总字数">282k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:09</span>
+    <span title="站点阅读时长">4:16</span>
   </span>
 </div>
 

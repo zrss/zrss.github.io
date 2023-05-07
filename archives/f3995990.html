@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/Z.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="windows 11 wsl2 ubuntu 18.04 nvidia driver 531.68 cuda 11.6.2    pytorch 1.13.1 docker imagedocker image 1docker pull pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime  view nccl version of pytorch 123d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pytorch 1.13 and nccl">
+<meta property="og:url" content="https://zrss.github.io/archives/f3995990.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="windows 11 wsl2 ubuntu 18.04 nvidia driver 531.68 cuda 11.6.2    pytorch 1.13.1 docker imagedocker image 1docker pull pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime  view nccl version of pytorch 123d">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-03T12:27:15.000Z">
+<meta property="article:modified_time" content="2023-05-07T10:15:47.452Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="tech">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/f3995990.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/f3995990.html","path":"archives/f3995990.html","title":"pytorch 1.13 and nccl"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>pytorch 1.13 and nccl | 随风飘散的记忆</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#pytorch-1-13-1-docker-image"><span class="nav-number">1.</span> <span class="nav-text">pytorch 1.13.1 docker image</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pytorch-1-13-1"><span class="nav-number">2.</span> <span class="nav-text">pytorch 1.13.1</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-v2-14-3-1"><span class="nav-number">3.</span> <span class="nav-text">nccl v2.14.3-1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#vscode-nccl-in-wsl"><span class="nav-number">3.1.</span> <span class="nav-text">vscode nccl in wsl</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">66</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/f3995990.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          pytorch 1.13 and nccl
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-03 12:27:15" itemprop="dateCreated datePublished" datetime="2023-05-03T12:27:15Z">2023-05-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2023-05-07 10:15:47" itemprop="dateModified" datetime="2023-05-07T10:15:47Z">2023-05-07</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>windows 11</li>
+<li>wsl2<ul>
+<li>ubuntu 18.04</li>
+<li>nvidia driver 531.68</li>
+<li>cuda 11.6.2</li>
+</ul>
+</li>
+</ul>
+<h1 id="pytorch-1-13-1-docker-image"><a href="#pytorch-1-13-1-docker-image" class="headerlink" title="pytorch 1.13.1 docker image"></a>pytorch 1.13.1 docker image</h1><p>docker image</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime</span><br></pre></td></tr></table></figure>
+
+<p>view nccl version of pytorch</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run -ti --rm pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime bash</span><br><span class="line"></span><br><span class="line">python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;</span><br></pre></td></tr></table></figure>
+
+<h1 id="pytorch-1-13-1"><a href="#pytorch-1-13-1" class="headerlink" title="pytorch 1.13.1"></a>pytorch 1.13.1</h1><p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1">https://github.com/pytorch/pytorch/tree/v1.13.1</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1#from-source">https://github.com/pytorch/pytorch/tree/v1.13.1#from-source</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging">https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging</a></p>
+<p><a href="https://zrss.github.io/archives/5a3d0ab7.html">https://zrss.github.io/archives/5a3d0ab7.html</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.8</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line">conda install -c pytorch magma-cuda116</span><br><span class="line">conda install mkl mkl-include</span><br><span class="line"></span><br><span class="line">export CMAKE_PREFIX_PATH=$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))/../&quot;&#125;</span><br><span class="line"></span><br><span class="line">CUDACXX=/usr/local/cuda/bin/nvcc MAX_JOBS=8 python setup.py develop</span><br></pre></td></tr></table></figure>
+
+<p>如果 setup 过程中出现如下日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Building wheel torch-1.13.0a0+git49444c3</span><br><span class="line">-- Building version 1.13.0a0+git49444c3</span><br><span class="line">Could not find any of CMakeLists.txt, Makefile, setup.py, LICENSE, LICENSE.md, LICENSE.txt in /root/projects/pytorch/third_party/ios-cmake</span><br><span class="line">Did you run &#x27;git submodule update --init --recursive --jobs 0&#x27;?</span><br></pre></td></tr></table></figure>
+
+<p>可以重新 update submodule，再做尝试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git submodule deinit -f .</span><br><span class="line">git clean -xdf</span><br><span class="line">python setup.py clean</span><br><span class="line">git submodule update --init --recursive --jobs 0</span><br></pre></td></tr></table></figure>
+
+<p>如果 setup 过程中出现如下日志，可以减小 jobs 数（例如上述的 case 为 8），再做尝试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FAILED: third_party/fbgemm/CMakeFiles/fbgemm_avx2.dir/src/FbgemmI8DepthwiseAvx2.cc.o</span><br><span class="line">/usr/bin/c++ -DFBGEMM_STATIC -I/root/projects/pytorch/third_party/cpuinfo/include -I/root/projects/pytorch/third_party/fbgemm/third_party/asmjit/src -I/root/projects/pytorch/third_party/fbgemm/include -I/root/projects/pytorch/third_party/fbgemm -I/root/projects/pytorch/cmake/../third_party/benchmark/include -isystem /root/projects/pytorch/cmake/../third_party/googletest/googlemock/include -isystem /root/projects/pytorch/cmake/../third_party/googletest/googletest/include -isystem /root/projects/pytorch/third_party/protobuf/src -isystem /root/tools/miniconda3/envs/pytorch-dev/include -isystem /root/projects/pytorch/third_party/gemmlowp -isystem /root/projects/pytorch/third_party/neon2sse -isystem /root/projects/pytorch/third_party/XNNPACK/include -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -Wall -Wextra -Werror -Wno-deprecated-declarations -O3 -DNDEBUG -fPIC -fvisibility=hidden -m64 -mavx2 -mf16c -mfma -std=c++14 -Wno-uninitialized -MD -MT third_party/fbgemm/CMakeFiles/fbgemm_avx2.dir/src/FbgemmI8DepthwiseAvx2.cc.o -MF third_party/fbgemm/CMakeFiles/fbgemm_avx2.dir/src/FbgemmI8DepthwiseAvx2.cc.o.d -o third_party/fbgemm/CMakeFiles/fbgemm_avx2.dir/src/FbgemmI8DepthwiseAvx2.cc.o -c /root/projects/pytorch/third_party/fbgemm/src/FbgemmI8DepthwiseAvx2.cc</span><br><span class="line">c++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
+
+<h1 id="nccl-v2-14-3-1"><a href="#nccl-v2-14-3-1" class="headerlink" title="nccl v2.14.3-1"></a>nccl v2.14.3-1</h1><p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/tree/v2.14.3-1">https://github.com/NVIDIA/nccl/tree/v2.14.3-1</a></p>
+<p>make (generate header)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd nccl</span><br><span class="line">make -j 8 src.build</span><br></pre></td></tr></table></figure>
+
+<p>如果 make 过程中出现如下日志，可以减小 make 所使用的核数（例如上述的 case 为 8 核），再做尝试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
+
+<p>将 <code>build/include/nccl.h</code> 文件拷贝至 <code>src</code> 目录下</p>
+<h2 id="vscode-nccl-in-wsl"><a href="#vscode-nccl-in-wsl" class="headerlink" title="vscode nccl in wsl"></a>vscode nccl in wsl</h2><ol>
+<li>config wsl for vscode</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/cpp/config-wsl">https://code.visualstudio.com/docs/cpp/config-wsl</a></p>
+<ol start="2">
+<li>install cuda toolkit in wsl</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2">https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/cuda-11-6-2-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;Distribution=WSL-Ubuntu&amp;target_version=2.0&amp;target_type=deb_local">https://developer.nvidia.com/cuda-11-6-2-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;Distribution=WSL-Ubuntu&amp;target_version=2.0&amp;target_type=deb_local</a></p>
+<ol start="3">
+<li>add includePath for vscode</li>
+</ol>
+<p><code>/usr/local/cuda/targets/x86_64-linux/include/</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/86c16d0a.html" rel="prev" title="roce flow control">
+                  <i class="fa fa-chevron-left"></i> roce flow control
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/50758925.html" rel="next" title="wsl2 docker">
+                  wsl2 docker <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">282k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:16</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":"forest","js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js","integrity":"sha256-sVAx+v/Q7v0Q2xm5vN7h5ccSna6gaLREhG9sF8pKT6I="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

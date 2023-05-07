@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/Z.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="个人理解记录  所谓无损, 也就是不丢包; 通过 global pause, pfc, dcqcn 等不断演进的流控&#x2F;拥塞控制协议, 来保障在丢包之前控制源头降速, 避免丢包  https:&#x2F;&#x2F;enterprise-support.nvidia.com&#x2F;s&#x2F;article&#x2F;howto-configure-dcqcn--roce-cc--values-for-connectx-4--linux-x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="roce flow control">
+<meta property="og:url" content="https://zrss.github.io/archives/86c16d0a.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="个人理解记录  所谓无损, 也就是不丢包; 通过 global pause, pfc, dcqcn 等不断演进的流控&#x2F;拥塞控制协议, 来保障在丢包之前控制源头降速, 避免丢包  https:&#x2F;&#x2F;enterprise-support.nvidia.com&#x2F;s&#x2F;article&#x2F;howto-configure-dcqcn--roce-cc--values-for-connectx-4--linux-x">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-07T10:15:47.477Z">
+<meta property="article:modified_time" content="2023-05-07T10:15:47.477Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="roce">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/86c16d0a.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/86c16d0a.html","path":"archives/86c16d0a.html","title":"roce flow control"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>roce flow control | 随风飘散的记忆</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ifconfig-vs-ethtool"><span class="nav-number">1.</span> <span class="nav-text">ifconfig vs ethtool</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E7%AB%AF%E5%8F%A3%E5%B8%B8%E7%94%A8%E6%9F%A5%E8%AF%A2%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">交换机端口常用查询命令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%98%AF%E5%90%A6%E5%87%BA%E7%8E%B0%E4%B8%A2%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text">查看是否出现丢包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E8%A1%8C%E6%96%B9%E5%90%91%E4%B8%A2%E5%8C%85-Input"><span class="nav-number">2.2.</span> <span class="nav-text">上行方向丢包 Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%A1%8C%E5%87%BA%E7%8E%B0%E4%B8%A2%E5%8C%85-Output"><span class="nav-number">2.3.</span> <span class="nav-text">下行出现丢包 Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%8E%A5%E5%8F%A3%E5%87%BA%E6%96%B9%E5%90%91%E9%98%9F%E5%88%97%E7%9A%84%E7%BC%93%E5%AD%98%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5"><span class="nav-number">2.4.</span> <span class="nav-text">查看接口出方向队列的缓存使用情况</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">66</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/zrss" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/86c16d0a.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          roce flow control
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-07 10:15:47" itemprop="dateCreated datePublished" datetime="2023-05-07T10:15:47Z">2023-05-07</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>个人理解记录</p>
+</blockquote>
+<p>所谓无损, 也就是不丢包; 通过 global pause, pfc, dcqcn 等不断演进的流控/拥塞控制协议, 来保障在丢包之前控制源头降速, 避免丢包</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/howto-configure-dcqcn--roce-cc--values-for-connectx-4--linux-x">https://enterprise-support.nvidia.com/s/article/howto-configure-dcqcn--roce-cc--values-for-connectx-4--linux-x</a></li>
+<li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/dcqcn-parameters">https://enterprise-support.nvidia.com/s/article/dcqcn-parameters</a></li>
+<li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm">https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm</a></li>
+</ul>
+<h1 id="ifconfig-vs-ethtool"><a href="#ifconfig-vs-ethtool" class="headerlink" title="ifconfig vs ethtool"></a>ifconfig vs ethtool</h1><p><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/ibdev2netdev">https://enterprise-support.nvidia.com/s/article/ibdev2netdev</a></p>
+<p><code>ibdev2netdev</code></p>
+<p>执行上述命令可查询得到 <em>it maps the adapter port to the net device</em></p>
+<p>对于 infiniband 类型的 link layer, 一般来说上述命令得到的是 ib0 设备, 即 IPoIB 虚拟网卡; 对于 ethernet 类型的 link layer，一般来说上述命令得到的是 ens[xxx] 网卡设备</p>
+<p>另外注意到 <code>ifconfig ens[xxx]</code> 中显示的 Tx 与 Rx, 实际上与 <code>ethtool -S ens[xxx]</code> 中的如下值一致</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/understanding-mlx5-ethtool-counters">https://enterprise-support.nvidia.com/s/article/understanding-mlx5-ethtool-counters</a></p>
+</blockquote>
+<ul>
+<li>rx_bytes: Representor only: bytes received, that were handled by the hypervisor. supported from kernel 4.18</li>
+<li>tx_bytes: Representor only: bytes transmitted, that were handled by the hypervisor. supported from kernel 4.18</li>
+</ul>
+<p>经过实际测试，在使用 rdma 网卡通信时，上述两值并没有明显的计数增加，而观察到 ethtool counters rx_bytes_phy / tx_bytes_phy 才有与实际流量相当的计数增加。所以可能早期（或者内核？） ifconfig 中获取到的数值，仅是网卡的其中某个计数器，而那个计数器又并不能代表真正的实际情况，所以可能 ifconfig 中的数值会是个误导。我们应使用 <code>ethtool -S ens[xxx]</code> 查看 rdma 网卡的统计信息。</p>
+<blockquote>
+<p>rx_bytes_phy, ConnectX-3 naming : rx_bytes<br>例如在 cx3 网卡时，当前主机安装的 ifconfig，取的的确就是“正确”的；而在 cx4/5/6 网卡，rx_bytes 的物理意义发生了变化，变为了记录 <em>Representor only: bytes received, that were handled by the hypervisor. supported from kernel 4.18</em></p>
+</blockquote>
+<h1 id="交换机端口常用查询命令"><a href="#交换机端口常用查询命令" class="headerlink" title="交换机端口常用查询命令"></a>交换机端口常用查询命令</h1><p><a target="_blank" rel="noopener" href="https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444">https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/o3rnxl2trb1gxemmxdoj">https://www.infoq.cn/article/o3rnxl2trb1gxemmxdoj</a></p>
+<p>egress/ingress port</p>
+<h2 id="查看是否出现丢包"><a href="#查看是否出现丢包" class="headerlink" title="查看是否出现丢包"></a>查看是否出现丢包</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display interface 100GE1/0/1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Input:                                                                      </span><br><span class="line">  Unicast:            11657620879,   Multicast:                     695     </span><br><span class="line">  Broadcast:                    0,   Jumbo:                           0     </span><br><span class="line">  Discard:                      0,   Frames:                          0     </span><br><span class="line">  Pause:                        0                                           </span><br><span class="line"></span><br><span class="line">  Total Error:                  0                                           </span><br><span class="line">  CRC:                          0,   Giants:                          0     </span><br><span class="line">  Jabbers:                      0,   Fragments:                       0     </span><br><span class="line">  Runts:                        0,   DropEvents:                      0     </span><br><span class="line">  Alignments:                   0,   Symbols:                         0     </span><br><span class="line">  Ignoreds:                     0                                           </span><br><span class="line"></span><br><span class="line">Output:                                                                     </span><br><span class="line">  Unicast:              536390526,   Multicast:                     695     </span><br><span class="line">  Broadcast:                    0,   Jumbo:                           0     </span><br><span class="line">  Discard:                      0,   Buffers Purged:                  0     </span><br><span class="line">  Pause:                 18913700</span><br></pre></td></tr></table></figure>
+
+<h2 id="上行方向丢包-Input"><a href="#上行方向丢包-Input" class="headerlink" title="上行方向丢包 Input"></a>上行方向丢包 Input</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer ingress-statistics interface 100GE1/0/1</span><br></pre></td></tr></table></figure>
+
+<p>查看入方向统计值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Interface                   Dropped        Drop Rate   Drop Time                </span><br><span class="line">                     (Packets/Bytes)        (pps/bps)                           </span><br><span class="line">----------------------------------------------------------------                </span><br><span class="line">100GE1/0/1                         0                0          -                </span><br><span class="line">                                   0                0                           </span><br><span class="line">----------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+
+<h2 id="下行出现丢包-Output"><a href="#下行出现丢包-Output" class="headerlink" title="下行出现丢包 Output"></a>下行出现丢包 Output</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos queue statistics interface 100GE1/0/1</span><br></pre></td></tr></table></figure>
+
+<p>查看队列统计情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">----------------------------------------------------------------------------------------------                                           </span><br><span class="line">    4         0                   6             0                   0             0          -                                                                 </span><br><span class="line">      100000000                1092             0                   0             0                                                                            </span><br><span class="line">----------------------------------------------------------------------------------------------                                                                 </span><br></pre></td></tr></table></figure>
+
+<h2 id="查看接口出方向队列的缓存使用情况"><a href="#查看接口出方向队列的缓存使用情况" class="headerlink" title="查看接口出方向队列的缓存使用情况"></a>查看接口出方向队列的缓存使用情况</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer egress-usage interface 100GE1/0/1</span><br></pre></td></tr></table></figure>
+
+<p>可以查看无损队列</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Egress Buffer Usage (KBytes) on single queue: (Current/Total)                   </span><br><span class="line">*: Dynamic threshold                                                            </span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">Interface       Queue   Type        Guaranteed        Shared                    </span><br><span class="line"></span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">100GE1/0/1          0   Lossy              0/1          0/5*                    </span><br><span class="line">                    1   Lossy              0/1          0/5*                    </span><br><span class="line">                    2   Lossy              0/1          0/5*                    </span><br><span class="line">                    3   Lossless           0/1       0/10156                    </span><br><span class="line">                    4   Lossy              0/1          0/5*                    </span><br><span class="line">                    5   Lossy              0/1          0/5*                    </span><br><span class="line">                    6   Lossy              0/1          0/5*                    </span><br><span class="line">                    7   Lossy              0/1          0/5*                    </span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">Lossless Service Pool (cells):  0/0                                             </span><br><span class="line">Lossy    Service Pool (cells):  0/151136                                        </span><br><span class="line">------------------------------------------------------------  </span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/roce/" rel="tag"># roce</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/f3995990.html" rel="next" title="pytorch 1.13 and nccl">
+                  pytorch 1.13 and nccl <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">282k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:16</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":"forest","js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js","integrity":"sha256-sVAx+v/Q7v0Q2xm5vN7h5ccSna6gaLREhG9sF8pKT6I="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

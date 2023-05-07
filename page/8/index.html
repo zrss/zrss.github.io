@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">121</span>
+          <span class="site-state-item-count">124</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-count">66</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,549 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b8d588f2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b8d588f2.html" class="post-title-link" itemprop="url">k8s minikube setup</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-24 12:09:06" itemprop="dateCreated datePublished" datetime="2018-06-24T12:09:06Z">2018-06-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 04:17:12" itemprop="dateModified" datetime="2020-12-06T04:17:12Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>最近在着手实现 Console k8s workload upgrade 相关的任务，然而 mock 数据不直观，使用完整的集成环境，又存在不稳定性，经常与其他任务冲突（比如测试要开始搞破坏了）。遂重新开始折腾 k8s cluster setup</p>
+<p>当然 k8s 发展到今天 local up 已经做的相对简单（可能对于自由的网络环境来说，不自由的就求爷爷告奶奶了）</p>
+<p>这里 local up k8s cluster 使用的是 minikube 方案 <a target="_blank" rel="noopener" href="https://v1-9.docs.kubernetes.io/docs/getting-started-guides/minikube/">https://v1-9.docs.kubernetes.io/docs/getting-started-guides/minikube/</a></p>
+<p>此篇适用下述两条背景</p>
+<ul>
+<li>非阿里 minikube 版本</li>
+<li>解决 minikube docker proxy not work 问题</li>
+</ul>
+<h1 id="Environment"><a href="#Environment" class="headerlink" title="Environment"></a>Environment</h1><ul>
+<li>OS: macOS Sierra 10.12.6</li>
+<li>minikube: v0.25.0</li>
+<li>VM Driver: virtualbox</li>
+<li>ISO version: minikube-v0.25.1.iso</li>
+</ul>
+<h1 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h1><p>macOS 安装 minikube 可以说很简单了</p>
+<blockquote>
+<p>已安装 homebrew</p>
+</blockquote>
+<p>homebrew install minikube</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew cask install minikube</span><br></pre></td></tr></table></figure>
+
+<h1 id="Network"><a href="#Network" class="headerlink" title="Network"></a>Network</h1><p>国内的困难主要是这个</p>
+<p>我使用的方案是 Shadowsocks + privoxy，相关的资料非常多，不赘述了</p>
+<p>privoxy 的配置如下 cat /usr/local/etc/privoxy/config</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">listen-address 0.0.0.0:1081</span><br><span class="line">forward-socks5 / 127.0.0.1:1080 .</span><br></pre></td></tr></table></figure>
+
+<p>1080 端口为 socks5 的监听端口（即 Shadowsocks），privoxy 监听 1081 端口，将 1081 端口的 http 请求转发至 1080 socks5 监听端口上，这样就能让 http 请求也经过 socks5 转发了</p>
+<p>测试一下 privoxy 是否正常工作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check process</span></span><br><span class="line">ps -ef | grep privoxy</span><br><span class="line"><span class="comment"># curl port</span></span><br><span class="line">curl http://127.0.0.0:1081</span><br><span class="line"><span class="comment"># netstat (recommended)</span></span><br><span class="line">netstat -an | grep 1081</span><br><span class="line"><span class="comment"># lsof</span></span><br><span class="line">lsof -i:1081</span><br></pre></td></tr></table></figure>
+
+<h1 id="Minikube-start"><a href="#Minikube-start" class="headerlink" title="Minikube start"></a>Minikube start</h1><p>使用上一步搭建好的 privoxy http 代理</p>
+<p>我使用的终端为 iTerm，理论上系统自带 Terminal 也 ok</p>
+<p>设置 http / https 代理</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> https_proxy=https://127.0.0.1:1081</span><br></pre></td></tr></table></figure>
+
+<p>启动 minikube</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start</span><br></pre></td></tr></table></figure>
+
+<h1 id="Docker-proxy"><a href="#Docker-proxy" class="headerlink" title="Docker proxy"></a>Docker proxy</h1><p>minikube 下载完成 iso 后，再 bootstrap k8s cluster，cluster 起来之后，会启动一些 system 组件，比如 kube-addon-manager-minikube/ dashboard / dns 等，然而不幸的是这些 pod 会一直处于 ContainerCreating 的状态</p>
+<h2 id="查看-events"><a href="#查看-events" class="headerlink" title="查看 events"></a>查看 events</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe po kube-addon-manager-minikube -nkube-system</span><br></pre></td></tr></table></figure>
+
+<p>None</p>
+<h2 id="查看-kubelet-日志"><a href="#查看-kubelet-日志" class="headerlink" title="查看 kubelet 日志"></a>查看 kubelet 日志</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube logs kubelet</span><br></pre></td></tr></table></figure>
+
+<p>发现端倪</p>
+<p>gcr.io/google_containers/pause-amd64:3.0，pause 容器无法 pull 下来</p>
+<p>继续搜索得知 minikube 可配置 docker proxy <a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md">https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md</a></p>
+<p>遂停止 minikube 并以新参数启动之</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://127.0.0.1:1081 --docker-env HTTPS_PROXY=https://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br></pre></td></tr></table></figure>
+
+<p>呃，然而事实证明并不 work，遂登陆 vm</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br></pre></td></tr></table></figure>
+
+<p>尝试 curl 该 1081 端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl http://127.0.0.1:1081</span><br><span class="line">&gt;&gt; curl: (7) Failed to connect to 127.0.0.1 port 1081: Connection refused</span><br></pre></td></tr></table></figure>
+
+<p>可见 vm 中该端口并不通</p>
+<p>稍加思索，解决的思路应为在 virtualbox vm 中如何 connect back to host，因为 privoxy 实际上监听的是 host 的 1081 端口。几番搜索后，发现在 virtualbox vm 中可通过 10.0.2.2 IP connect back to host <a target="_blank" rel="noopener" href="https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os%EF%BC%8C%E7%99%BB%E9%99%86">https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os，登陆</a> vm</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
+
+<p>果然能通了</p>
+<p>于是再次尝试修改 minikube 启动命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://10.0.2.2:1081 --docker-env HTTPS_PROXY=https://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
+
+<p>糟糕的是，仍然不 work …，所以问题集中到了 http_proxy 未生效上</p>
+<p>登陆 vm 查看 docker version / info，希望能获取到一些线索</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># version</span></span><br><span class="line">docker version</span><br><span class="line">Client:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:39:28 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line">Server:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32 (minimum version 1.12)</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:45:38 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line"> Experimental: <span class="literal">false</span></span><br><span class="line"><span class="comment"># info</span></span><br><span class="line">docker info</span><br><span class="line">Containers: 0</span><br><span class="line">Running: 0</span><br><span class="line">Paused: 0</span><br><span class="line">Stopped: 0</span><br><span class="line">Images: 0</span><br><span class="line">Server Version: 17.09.0-ce</span><br><span class="line">Storage Driver: overlay2</span><br><span class="line"> Backing Filesystem: extfs</span><br><span class="line"> Supports d_type: <span class="literal">true</span></span><br><span class="line"> Native Overlay Diff: <span class="literal">true</span></span><br><span class="line">Logging Driver: json-file</span><br><span class="line">Cgroup Driver: cgroupfs</span><br><span class="line">Plugins:</span><br><span class="line"> Volume: <span class="built_in">local</span></span><br><span class="line"> Network: bridge host macvlan null overlay</span><br><span class="line"> Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog</span><br><span class="line">Swarm: inactive</span><br><span class="line">Runtimes: runc</span><br><span class="line">Default Runtime: runc</span><br><span class="line">Init Binary: docker-init</span><br><span class="line">containerd version: 06b9cb35161009dcb7123345749fef02f7cea8e0</span><br><span class="line">runc version: 3f2f8b84a77f73d38244dd690525642a72156c64</span><br><span class="line">init version: N/A (expected: )</span><br><span class="line">Security Options:</span><br><span class="line"> seccomp</span><br><span class="line">  Profile: default</span><br><span class="line">Kernel Version: 4.9.64</span><br><span class="line">Operating System: Buildroot 2017.11</span><br><span class="line">OSType: linux</span><br><span class="line">Architecture: x86_64</span><br><span class="line">CPUs: 2</span><br><span class="line">Total Memory: 1.953GiB</span><br><span class="line">Name: minikube</span><br><span class="line">ID: 6RR3:WAF4:FIGA:TTEG:5UE6:V3RD:JNQV:WQQ4:ER3T:ETKJ:ZVP4:2Z7M</span><br><span class="line">Docker Root Dir: /var/lib/docker</span><br><span class="line">Debug Mode (client): <span class="literal">false</span></span><br><span class="line">Debug Mode (server): <span class="literal">false</span></span><br><span class="line">Registry: https://index.docker.io/v1/</span><br><span class="line">Labels:</span><br><span class="line"> provider=virtualbox</span><br><span class="line">Experimental: <span class="literal">false</span></span><br><span class="line">Insecure Registries:</span><br><span class="line"> 10.96.0.0/12</span><br><span class="line"> 127.0.0.0/8</span><br><span class="line">Live Restore Enabled: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>然而似乎和问题并没有什么关联，http_proxy 和 docker daemon 有关，和 docker 没啥关系，所以在 version / info 中都未见 http_proxy 相关配置 <a target="_blank" rel="noopener" href="https://github.com/docker/distribution/issues/2397#issuecomment-330079118">https://github.com/docker/distribution/issues/2397#issuecomment-330079118</a></p>
+<p>追溯到这里，只能看看 minikube 代码中是如何使用 docker-env 这个传入参数的了</p>
+<h1 id="how-does-minikube-start"><a href="#how-does-minikube-start" class="headerlink" title="how does minikube start"></a>how does minikube start</h1><p>overall</p>
+<ul>
+<li>startHost</li>
+<li>startK8S</li>
+</ul>
+<p>startHost</p>
+<ul>
+<li>create virtualbox driver with boot2docker iso</li>
+<li>waiting docker set up</li>
+</ul>
+<p>step by step 的过程省略，最后找到如下代码片段，显示 docker-env 实际上并不会生效</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157">https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">start := <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    host, err = cluster.StartHost(api, config)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        glog.Errorf(<span class="string">&quot;Error starting host: %s.\n\n Retrying.\n&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &amp;host.Host&#123;</span><br><span class="line">    ConfigVersion: version.ConfigVersion,</span><br><span class="line">    Name:          driver.GetMachineName(),</span><br><span class="line">    Driver:        driver,</span><br><span class="line">    DriverName:    driver.DriverName(),</span><br><span class="line">    HostOptions: &amp;host.Options&#123;</span><br><span class="line">        AuthOptions: &amp;auth.Options&#123;</span><br><span class="line">            CertDir:          api.certsDir,</span><br><span class="line">            CaCertPath:       filepath.Join(api.certsDir, <span class="string">&quot;ca.pem&quot;</span>),</span><br><span class="line">            CaPrivateKeyPath: filepath.Join(api.certsDir, <span class="string">&quot;ca-key.pem&quot;</span>),</span><br><span class="line">            ClientCertPath:   filepath.Join(api.certsDir, <span class="string">&quot;cert.pem&quot;</span>),</span><br><span class="line">            ClientKeyPath:    filepath.Join(api.certsDir, <span class="string">&quot;key.pem&quot;</span>),</span><br><span class="line">            ServerCertPath:   filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server.pem&quot;</span>),</span><br><span class="line">            ServerKeyPath:    filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server-key.pem&quot;</span>),</span><br><span class="line">        &#125;,</span><br><span class="line">        EngineOptions: &amp;engine.Options&#123;</span><br><span class="line">            StorageDriver: <span class="string">&quot;aufs&quot;</span>,</span><br><span class="line">            TLSVerify:     <span class="literal">true</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        SwarmOptions: &amp;swarm.Options&#123;&#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
+
+<p>可见默认 SwarmOptions 是个空对象，其中值得注意的是 IsSwarm 的值为 false</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h, err := api.NewHost(config.VMDriver, data)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, errors.Wrap(err, <span class="string">&quot;Error creating new host&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">h.HostOptions.AuthOptions.CertDir = constants.GetMinipath()</span><br><span class="line">h.HostOptions.AuthOptions.StorePath = constants.GetMinipath()</span><br><span class="line">h.HostOptions.EngineOptions = engineOptions(config)</span><br></pre></td></tr></table></figure>
+
+<p>将 docker-env 赋值与 h.HostOptions.EngineOptions.Env</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232">https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">provisioner.SwarmOptions = swarmOptions</span><br><span class="line">provisioner.AuthOptions = authOptions</span><br><span class="line">provisioner.EngineOptions = engineOptions</span><br><span class="line">swarmOptions.Env = engineOptions.Env</span><br></pre></td></tr></table></figure>
+
+<p>最后将 docker-env 传与 swarmOptions.Env，而我们又知道 IsSwarm 的值为 false，因此实际上该配置并不会生效 … 社区真是给处于不自由网络地区的童鞋埋了个大坑 …</p>
+<h1 id="Back-to-Docker-proxy"><a href="#Back-to-Docker-proxy" class="headerlink" title="Back to Docker proxy"></a>Back to Docker proxy</h1><p>回到如何在 minikube 中配置 Docker proxy 的问题，实际上可以参考 Docker 官方的文档配置，使用 systemd</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy">https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br><span class="line">sudo mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line">sudo vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure>
+
+<p>输入如下内容并保存退出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">&quot;HTTP_PROXY=http://10.0.2.2:1081&quot;</span> <span class="string">&quot;HTTPS_PROXY=https://10.0.2.2:1081&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>Flush changes &amp; Restart Docker</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<p>Verify that the configuration has been loaded</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show --property=Environment docker</span><br></pre></td></tr></table></figure>
+
+<p>执行结束之后，此时在 vm 中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
+
+<p>终于可以正常 pull image 了，system pod 也可以正常 running 起来了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                                    READY     STATUS    RESTARTS   AGE</span><br><span class="line">kube-addon-manager-minikube             1/1       Running   4          12h</span><br><span class="line">kube-dns-54cccfbdf8-wfnxm               3/3       Running   3          12h</span><br><span class="line">kubernetes-dashboard-77d8b98585-t59gj   1/1       Running   1          12h</span><br><span class="line">storage-provisioner                     1/1       Running   1          12h</span><br></pre></td></tr></table></figure>
+
+<p>不过因为该改动并未固化到 iso 中，因此 minikube stop 之后改动会丢失 … 另外一个折中的办法</p>
+<h1 id="Another-method-for-Docker-proxy-recommended"><a href="#Another-method-for-Docker-proxy-recommended" class="headerlink" title="Another method for Docker proxy (recommended)"></a>Another method for Docker proxy (recommended)</h1><blockquote>
+<p>workaround</p>
+</blockquote>
+<p>之前我们知道，在 terminal 中 export http_proxy 之后，minikube 即可使用 proxy 访问网络资源，而在 minikube –help 中发现 minikube 可以 cache image，所以我们可以 cache 需要使用的 image 资源，如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br><span class="line">minikube cache add gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
+
+<p>也可以解决问题，比如我目前 cache 的 image</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">minikube cache list</span><br><span class="line">gcr.io/google-containers/kube-addon-manager:v6.5</span><br><span class="line">gcr.io/google_containers/pause-amd64:3.0</span><br><span class="line">gcr.io/k8s-minikube/storage-provisioner:v1.8.1</span><br><span class="line">k8s.gcr.io/k8s-dns-dnsmasq-nanny-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-kube-dns-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-sidecar-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.1</span><br></pre></td></tr></table></figure>
+
+<p>cache 这些 image 之后，就可以使得 kube-system 下面的 pod 都 running 了</p>
+<h1 id="minikube-logs-healthcheck-error"><a href="#minikube-logs-healthcheck-error" class="headerlink" title="minikube logs healthcheck error"></a>minikube logs healthcheck error</h1><p>使用 minikube 过程中发现其 logs 中一直有如下错误日志</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jun 23 18:15:15 minikube localkube[3034]: E0623 18:15:15.392453    3034 healthcheck.go:317] Failed to start node healthz on 0: listen tcp: address 0: missing port <span class="keyword">in</span> address</span><br></pre></td></tr></table></figure>
+
+<p>查看了相关代码，似乎是正常现象，不过这个实现也是太奇怪了 … 可参考如下 issue，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288">https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b40cf9b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b40cf9b.html" class="post-title-link" itemprop="url">k8s annotation of storage</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-24 12:06:44" itemprop="dateCreated datePublished" datetime="2018-06-24T12:06:44Z">2018-06-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-06 04:08:29" itemprop="dateModified" datetime="2020-12-06T04:08:29Z">2020-12-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>k8s 1.7.6</p>
+<p>kubernetes/pkg/controller/volume/persistentvolume/pv_controller.go</p>
+</blockquote>
+<p>claim.Spec.VolumeName == nil 时</p>
+<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 volume.beta.kubernetes.io/storage-class 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
+<ul>
+<li>volume.beta.kubernetes.io/storage-class</li>
+<li>Spec.StorageClassName</li>
+</ul>
+<p>在允许动态提供存储（enableDynamicProvisioning）的情况下，尝试去提供一个 volume</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newClaim, err := ctrl.setClaimProvisioner(claim, storageClass)</span><br></pre></td></tr></table></figure>
+
+<p>动态的 pvc 会增加如下 annotation</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">volume.beta.kubernetes.io/storage-provisioner: class.Provisioner</span><br><span class="line">pv.kubernetes.io/bound-by-controller: yes</span><br><span class="line">pv.kubernetes.io/provisioned-by: plugin.GetPluginName()</span><br></pre></td></tr></table></figure>
+
+<p>从存储提供服务获取 volume 的过程是异步的，当获取完成时，设置如下 annotation</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pv.kubernetes.io/bind-completed: yes</span><br></pre></td></tr></table></figure>
+
+<p>如果是其他可以直接 bind 的情况，在 bind 的方法中也会设置上述 annotation</p>
+<p>所以可以通过 pvc annotation</p>
+<ul>
+<li>pv.kubernetes.io/bound-by-controller: yes</li>
+</ul>
+<p>确认该 pvc 为动态创建还是直接使用</p>
+<p>不过该字段还有一种情况下可能被设置</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> claim.Name != volume.Spec.ClaimRef.Name || claim.Namespace != volume.Spec.ClaimRef.Namespace &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef.UID != <span class="string">&quot;&quot;</span> &amp;&amp; claim.UID != volume.Spec.ClaimRef.UID &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>volume 和 claim binding 时，发现 volume 与 claim 的字段不匹配</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Check if the claim was already bound (either by controller or by user)</span></span><br><span class="line">shouldBind := <span class="literal">false</span></span><br><span class="line"><span class="keyword">if</span> volume.Name != claim.Spec.VolumeName &#123;</span><br><span class="line">    shouldBind = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>clain 和 volume binding 时，也会出现这种情况，当 volume 与 claim 的字段不匹配时</p>
+<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 pv.kubernetes.io/bound-by-controller: yes 判断动态创建是否准确?</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5679b106.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/5679b106.html" class="post-title-link" itemprop="url">Web Terminal</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-17 13:58:33" itemprop="dateCreated datePublished" datetime="2018-06-17T13:58:33Z">2018-06-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 06:09:03" itemprop="dateModified" datetime="2020-12-12T06:09:03Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>我们知道在 k8s 集群中，可以通过 kubeclt exec -ti 命令远程登录容器，以执行命令。而要在 Console 上实现这个特性的集成，需要依赖 websocket 协议 (<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6455)[https://tools.ietf.org/html/rfc6455]">https://tools.ietf.org/html/rfc6455)[https://tools.ietf.org/html/rfc6455]</a></p>
+<p>下面全面回顾一下集成过程中涉及到的方方面面知识</p>
+<ul>
+<li>kube-apiserver</li>
+<li>nginx</li>
+<li>tomcat</li>
+<li>webpack-dev-server</li>
+</ul>
+<h1 id="exec-in-kube-apiserver"><a href="#exec-in-kube-apiserver" class="headerlink" title="exec in kube-apiserver"></a>exec in kube-apiserver</h1><blockquote>
+<p>to be cont.</p>
+</blockquote>
+<h1 id="404-nginx"><a href="#404-nginx" class="headerlink" title="404 nginx"></a>404 nginx</h1><p>Problem: websocket 404 through nginx</p>
+<p>遇到的问题，本地开发完成之后，部署到环境中，websocket 请求在直接用 IP 访问时 okay，而经过了二级域名则不 okay。二级域名是由 Nginx 配置转发的。查看 Nginx 的配置</p>
+<p>Nginx 配置为通用的配置，即 upstream / server 的配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">upstream console &#123;</span><br><span class="line">    ip_hash;</span><br><span class="line">    server IP:PORT;</span><br><span class="line">    server IP:PORT;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    location /serviceName &#123;</span><br><span class="line">        proxy_pass https://console;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>http 模块有如下配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    map $http_upgrade $connection_upgrade &#123;</span><br><span class="line">        default upgrade;</span><br><span class="line">        &#x27;&#x27;      close;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>参考该文档 <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_map_module.html">http://nginx.org/en/docs/http/ngx_http_map_module.html</a> 解读 map 的语义</p>
+<p>上述语句的语义为，动态设置 $connection_upgrade 变量的值，当请求头中 upgrade 值为 ‘’ 时，则 $connection_upgrade 值为 close，当 upgrade 值非空时，其值为 upgrade</p>
+<p>对于 websocket 请求来说，其第一个请求中会携带请求头</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Connection: upgrade</span><br><span class="line">Upgrade: websocket</span><br></pre></td></tr></table></figure>
+
+<p>根据 <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/websocket.html">http://nginx.org/en/docs/http/websocket.html</a> 文档说明</p>
+<blockquote>
+<p>As noted above, hop-by-hop headers including “Upgrade” and “Connection” are not passed from a client to proxied server</p>
+</blockquote>
+<p>Upgrade / Connection header 并不会由 client 传递至被代理的 server，因此在 nginx 的 server 配置处需要手动增加这两 header</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    location /serviceName/ws &#123;</span><br><span class="line">        proxy_pass https://console;</span><br><span class="line">        proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">        proxy_set_header Connection $connection_upgrade;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之前 nginx 未这么配置，导致 ws 请求被转发至后端时，缺少了这两请求头，导致 tomcat wsservlet 没识别到这是 ws 请求，又没有其他的 filter 或 servlet 处理，因此返回了 404</p>
+<h1 id="websocket-in-tomcat"><a href="#websocket-in-tomcat" class="headerlink" title="websocket in tomcat"></a>websocket in tomcat</h1><blockquote>
+<p>tomcat 7</p>
+</blockquote>
+<p>上述问题中 nginx 为公共组件，需要更改配置的话，要走流程，为了可以先行调试，所以考虑在 webserver 侧想想办法解决请求头的问题</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>在 WsFilter 中判断请求为 ws 请求的要素</p>
+<ul>
+<li>GET 请求</li>
+<li>header 中包含 Upgrade: websocket 值</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isWebSocketUpgradeRequest</span><span class="params">(ServletRequest request,</span></span></span><br><span class="line"><span class="params"><span class="function">        ServletResponse response)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> ((request <span class="keyword">instanceof</span> HttpServletRequest) &amp;&amp;</span><br><span class="line">            (response <span class="keyword">instanceof</span> HttpServletResponse) &amp;&amp;</span><br><span class="line">            headerContainsToken((HttpServletRequest) request,</span><br><span class="line">                    Constants.UPGRADE_HEADER_NAME,</span><br><span class="line">                    Constants.UPGRADE_HEADER_VALUE) &amp;&amp;</span><br><span class="line">            <span class="string">&quot;GET&quot;</span>.equals(((HttpServletRequest) request).getMethod()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 WsServerContainer 中将该 Filter 加入到 servletContext 中，并设置其拦截所有请求</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fr.addMappingForUrlPatterns(types, <span class="keyword">true</span>, <span class="string">&quot;/*&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>而这个地方的调用在 WsServerContainer 构造函数中发生，继续探寻而上</p>
+<p>WsSci 实现了 ServletContainerInitializer 接口，在 onStartup 接口实现中构造了 WsServerContainer 类</p>
+<p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-8.0-doc/servletapi/javax/servlet/ServletContainerInitializer.html">https://tomcat.apache.org/tomcat-8.0-doc/servletapi/javax/servlet/ServletContainerInitializer.html</a></p>
+<p>回忆在 Tomcat 的 release 版本中 tomcat7-websocket.jar 被放置于 {CATALINA_BASE}/lib 目录下</p>
+<p>tomcat 启动后会加载</p>
+<p>能否实现一个 filter，该 filter 拦截 ws 请求 url，对这个 url 的请求增加特定请求头？</p>
+<p>这么实现的话，得确认 filter 的执行顺序。我们知道</p>
+<blockquote>
+<p>First, the matching filter mappings in the same order that these elements appear in the deployment descriptor.</p>
+<p>Next, the matching filter mappings in the same order that these elements appear in the deployment descriptor.</p>
+</blockquote>
+<p>那么非定义在描述符中的 filter 呢？</p>
+<blockquote>
+<p>to be cont.</p>
+</blockquote>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>实验时发现可行，所以可以认为描述符中的 filter 先于 WsFilter 执行</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/17086712/servlet-filters-order-of-execution">https://stackoverflow.com/questions/17086712/servlet-filters-order-of-execution</a></p>
+<h1 id="神奇的-http-proxy-middleware"><a href="#神奇的-http-proxy-middleware" class="headerlink" title="神奇的 http-proxy-middleware"></a>神奇的 http-proxy-middleware</h1><p>Problem: websocket hangs on pending status</p>
+<p>遇到的问题，本地开发调试时，websocket 一直处于 pending 状态。查看 proxy 的 debug 信息，一直没有 get 请求发送，网上漫天搜索 issue / stackoverflow 无果，遂强行不懂装懂看代码</p>
+<blockquote>
+<p>当然有 issue 是直接关联的，因一开始完全没经验，并未注意到实际上就是该 issue 导致的 ^_^</p>
+</blockquote>
+<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p>团队开发 Console 使用的 dev tool 为</p>
+<ul>
+<li>webpakc-dev-server 2.2.0 (WDS)</li>
+</ul>
+<p>本地开发调试依赖 WDS，该组件集成了 proxy 的功能，可以将本地的请求转发至实际的后端。例如如下的 proxy 配置</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">    <span class="attr">port</span>: <span class="number">8888</span>,</span><br><span class="line">    <span class="attr">proxy</span>: &#123;</span><br><span class="line">        <span class="string">&quot;/api&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">target</span>: <span class="string">&quot;http://127.0.0.1:50545&quot;</span>,</span><br><span class="line">            <span class="attr">changeOrigin</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">secure</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="attr">logLevel</span>: <span class="string">&quot;debug&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按上述配置，本地的 <a target="_blank" rel="noopener" href="http://localhost:8888/api">http://localhost:8888/api</a>… 请求会被转发至 <a target="_blank" rel="noopener" href="http://127.0.0.1:50545/api...%E3%80%82%E5%BD%93%E7%84%B6%E5%9C%A8%E5%AE%9E%E9%99%85%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E8%BF%87%E7%A8%8B%E4%B8%AD%EF%BC%8C%E8%A2%AB%E8%BD%AC%E5%8F%91%E8%87%B3%E7%9A%84%E5%9C%B0%E5%9D%80%E4%B8%80%E8%88%AC%E4%B8%BA%E5%90%8E%E5%8F%B0">http://127.0.0.1:50545/api...。当然在实际开发调试过程中，被转发至的地址一般为后台</a> API 接口地址，或者是后台代理服务器地址，这样也就实现了本地 Console 开发与后端分离</p>
+<p>websocket 协议的 proxy 需要打开 ws option，参考如下配置</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">    <span class="attr">port</span>: <span class="number">8888</span>,</span><br><span class="line">    <span class="attr">proxy</span>: &#123;</span><br><span class="line">        <span class="string">&quot;/api&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">target</span>: <span class="string">&quot;http://127.0.0.1:50545&quot;</span>,</span><br><span class="line">            <span class="attr">changeOrigin</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">secure</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="attr">logLevel</span>: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">            <span class="attr">ws</span>: <span class="literal">true</span> <span class="comment">// proxy websocket</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>WDS 在启动时，会使用 express <a target="_blank" rel="noopener" href="https://expressjs.com/en/4x/api.html">https://expressjs.com/en/4x/api.html</a> 启动一个 web-server</p>
+<p>express 是一个 web framework，类似 java 里的 struts，粗略来看可以定义路由被哪个 middleware 处理，以及处理逻辑</p>
+<p>继续回到 WDS 启动时，如果 WDS 定义了 proxy 配置，则监听所有路由，将路由的处理逻辑交给 proxyMiddleware 负责</p>
+<p>[<a target="_blank" rel="noopener" href="https://github.com/webpack/webpack-dev-server/blob/v2.2.0/lib/Server.js#L196-L228">https://github.com/webpack/webpack-dev-server/blob/v2.2.0/lib/Server.js#L196-L228</a>)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">options.proxy.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">proxyConfigOrCallback</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> proxyConfig;</span><br><span class="line">    <span class="keyword">let</span> proxyMiddleware;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">typeof</span> proxyConfigOrCallback === <span class="string">&quot;function&quot;</span>) &#123;</span><br><span class="line">        proxyConfig = proxyConfigOrCallback();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        proxyConfig = proxyConfigOrCallback;</span><br><span class="line">    &#125;</span><br><span class="line">    proxyMiddleware = getProxyMiddleware(proxyConfig);</span><br><span class="line">    app.use(<span class="function"><span class="keyword">function</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">typeof</span> proxyConfigOrCallback === <span class="string">&quot;function&quot;</span>) &#123;</span><br><span class="line">            <span class="keyword">const</span> newProxyConfig = proxyConfigOrCallback();</span><br><span class="line">            <span class="keyword">if</span>(newProxyConfig !== proxyConfig) &#123;</span><br><span class="line">                proxyConfig = newProxyConfig;</span><br><span class="line">                proxyMiddleware = getProxyMiddleware(proxyConfig);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">const</span> bypass = <span class="keyword">typeof</span> proxyConfig.bypass === <span class="string">&quot;function&quot;</span>;</span><br><span class="line">        <span class="keyword">const</span> bypassUrl = bypass &amp;&amp; proxyConfig.bypass(req, res, proxyConfig) || <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span>(bypassUrl) &#123;</span><br><span class="line">            req.url = bypassUrl;</span><br><span class="line">            next();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span>(proxyMiddleware) &#123;</span><br><span class="line">            <span class="comment">// proxy request at here</span></span><br><span class="line">            <span class="keyword">return</span> proxyMiddleware(req, res, next);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            next();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>实际开发时，proxy 规则往往不仅仅配置一条，可能类似如下存在多条配置，其中第三条是 websocket api 请求的 proxy 配置</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">    <span class="attr">port</span>: <span class="number">8888</span>,</span><br><span class="line">    <span class="attr">proxy</span>: &#123;</span><br><span class="line">        <span class="string">&quot;/api&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">target</span>: <span class="string">&quot;http://api.company.com:50545&quot;</span>,</span><br><span class="line">            <span class="attr">changeOrigin</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">secure</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="attr">logLevel</span>: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;/account&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">target</span>: <span class="string">&quot;http://iam.company.com&quot;</span>,</span><br><span class="line">            <span class="attr">changeOrigin</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">secure</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="attr">logLevel</span>: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="string">&quot;/exec&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">target</span>: <span class="string">&quot;http://api.company.com:50545&quot;</span>,</span><br><span class="line">            <span class="attr">changeOrigin</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="attr">secure</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="attr">logLevel</span>: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">            <span class="attr">ws</span>: <span class="literal">true</span>, <span class="comment">// proxy websocket</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>回顾之前所说 WDS 启动时，proxy 一旦配置，会将所有路由，逐一代理给 proxyMiddleware</p>
+<p>更具体来说对于上述例子，每一条 proxy 规则会创建一个 proxyMiddleware，而所有路由都将按 key 的字典序，逐一代理给 proxyMiddleware</p>
+<p>对于上述 proxy 配置的处理顺序为</p>
+<ol>
+<li>/account proxyMiddleware</li>
+<li>/api proxyMiddleware</li>
+<li>/exec proxyMiddleware</li>
+</ol>
+<p>注意 app.use 中的 next 方法，在当前 proxyMiddleware 不处理该路由后，调用 next 交由下由 middleware 继续处理，有点类似 java servlet 里的 filter</p>
+<p>在 WDS 中这个 proxyMiddleware 是使用 http-proxy-middleware 实现的，而 http-proxy-middleware 最终依赖 http-proxy</p>
+<p>再继续探究 ws: true option 到底干了啥事儿，使得 WDS 可以 proxy websocket 请求？</p>
+<p>答案在 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L38-L50">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L38-L50</a> 中</p>
+<p>可以看到这段代码，如果 proxy 中 ws: true，那么创建该 proxyMiddleware 时会调用 catchUpgradeRequest 方法</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">catchUpgradeRequest</span>(<span class="params">server</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// subscribe once; don&#x27;t subscribe on every request...</span></span><br><span class="line">    <span class="comment">// https://github.com/chimurai/http-proxy-middleware/issues/113</span></span><br><span class="line">    <span class="keyword">if</span> (!wsInitialized) &#123;</span><br><span class="line">        server.on(<span class="string">&#x27;upgrade&#x27;</span>, wsUpgradeDebounced);</span><br><span class="line">        wsInitialized = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 catchUpgradeRequest 方法中，使用 server 对象监听 upgrade 事件，而 wsUpgradeDebounced 调用也很简单</p>
+<p>debounce 直译为节流：即持续操作时，不会触发，停止一段时间后才触发。多用于用户连续输入时，停止一段时间后的回调</p>
+<p>即使用 underscore 的 debounce 方法调用 handleUpgrade</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handleUpgrade</span>(<span class="params">req, socket, head</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// set to initialized when used externally</span></span><br><span class="line">    wsInitialized = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (shouldProxy(config.context, req)) &#123;</span><br><span class="line">        <span class="keyword">var</span> activeProxyOptions = prepareProxyRequest(req);</span><br><span class="line">        proxy.ws(req, socket, head, activeProxyOptions);</span><br><span class="line">        logger.info(<span class="string">&#x27;[HPM] Upgrading to WebSocket&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ok，看到这，基本的逻辑都明白了，全流程走一遍</p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>按 websocket 协议来说，第一个请求为 connect upgrade 的请求，即为 http get 请求 (当然与一般的 http get 请求不同，实际上并不能等同认为是一个 http get 请求)，应能在 proxy debug 信息中看到这个 get 请求，而该 debug 信息是在 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L40">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L40</a> 及 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L66">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L66</a> 处被打印，L40 这处的打印非 websocket 请求，L66为 websocket 请求</p>
+<p>L66 之所以未被打印，是因为未进入 catchUpgradeRequest 方法，而未进入该方法的原因，是因为在配置多条 proxy 规则时，如果按字典序来看，例子中的 /exec 排在最后，而普通 http 请求已被其他 proxyMiddleware 处理，那么就不会调用 next 方法交由下一个 proxyMiddleware 处理，因此 /exec 只有在发起 websocket 请求时才会经过</p>
+<p>而如果 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L56">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L56</a> 未被执行，即 http-server 若未监听 upgrade 请求，则 websocket 的 upgrade 请求一直不会被处理，因此出现了 pending 中的状态</p>
+<blockquote>
+<p>另外 app.use 无法拦截到 connect upgrade 请求</p>
+</blockquote>
+<p>所以需要一个 http request warm up websocket proxy <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/207">https://github.com/chimurai/http-proxy-middleware/issues/207</a></p>
+<h2 id="解决方案-1"><a href="#解决方案-1" class="headerlink" title="解决方案"></a>解决方案</h2><p>对于例子中的 proxy 来说，浏览器中输入一个 404 未被任一 proxyMiddleware 处理的路由即可，比如 <a target="_blank" rel="noopener" href="http://localhost:8888/warmup%EF%BC%8C%E8%BF%99%E6%A0%B7%E8%BF%99%E4%B8%AA%E8%AF%B7%E6%B1%82%E4%BC%9A%E7%BB%8F%E8%BF%87%E6%89%80%E6%9C%89">http://localhost:8888/warmup，这样这个请求会经过所有</a> proxyMiddleware，在经过 websocket proxy 时触发 server listen on upgrade。后续 websocket 发起 connect 请求时，proxy debug 日志中就能看到 websocket http get 的输出，并且有 [HPM] Upgrading to WebSocket 的输出，websocket 本地开发时就能正常连接了</p>
+<h2 id="参考-1"><a href="#参考-1" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/expressjs/express/issues/2594">https://github.com/expressjs/express/issues/2594</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/143">https://github.com/chimurai/http-proxy-middleware/issues/143</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/112">https://github.com/chimurai/http-proxy-middleware/issues/112</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/207">https://github.com/chimurai/http-proxy-middleware/issues/207</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes-ui/container-terminal">https://github.com/kubernetes-ui/container-terminal</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1101,374 +1644,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5015bdda.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/5015bdda.html" class="post-title-link" itemprop="url">etcd-raft-follower</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-11-05 16:21:07" itemprop="dateCreated datePublished" datetime="2017-11-05T16:21:07Z">2017-11-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>to be cont 先写部分吧</p>
-</blockquote>
-<h1 id="MsgProp"><a href="#MsgProp" class="headerlink" title="MsgProp"></a>MsgProp</h1><p>Follower 收到 MsgProp 消息时，有成员发起选举，将该请求转发至 Leader；消息先 append 到 raft.msgs slice 中，注意后续所说的消息发送，均为 append 到 msgs 中，并未产生实际发送</p>
-<h1 id="MsgApp"><a href="#MsgApp" class="headerlink" title="MsgApp"></a>MsgApp</h1><p>Follower 收到 MsgApp 消息时，即有 Entries 写入时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；调用 handleAppendEntries 方法处理 MsgApp 消息；handleAppendEntries 方法中向 m.From 发送 MsgAppResp 消息；消息中包含经过处理 MsgApp 后，当前节点的 Index；冲突时额外返回 Reject: true，RejectHint: lastIndex</p>
-<p>maybeAppend: handleAppendEntries 方法中使用到的 maybeAppend 方法分析</p>
-<p>(1)</p>
-<p>firstIndex 会尝试从 unstable 的 snapshot 中获取 snapshot meta Index，如果 snapshot 为 nil（maybeFirstIndex），则从 storage 中获取 ents[0].Index</p>
-<p>(2)</p>
-<p>lastIndex 会尝试从 unstable 的 ents 中获取最后一个 entry 的 index，如果 unstable 的 ents 为空，则获取 unstable 的 snapshot meta index（maybeLastIndex），如果仍然获取不到，则从 storage 中获取最后一个 entry 的 Index</p>
-<p>看明白最基础的方法 firstIndex 和 lastIndex 后，继续往下</p>
-<p>(3)</p>
-<p>term 尝试获取 index 为 i 的 entry 的 term，entries 的第一个 index 为 dummy index，即每次收到 MsgApp 消息时，m.Index 为 dummy entry (index)，后续为真正的 entries (m.Ents)；dummy index &lt;= i &lt;= lastIndex，如果 index i 不位于该范围中，显然无法找到对应的 term；maybeTerm 尝试在 unstable 中获取 index 为 i 的 entry 的 term，unstable 中无法找到的话，从 storage 中查找</p>
-<p>(4)</p>
-<p>matchTerm(i uint64, term Term) 的实现，首先尝试获取 index i 的 term，随后匹配是否等于 term</p>
-<p>(5)</p>
-<p>findConflict 的实现，对 ents 中的每个 entry 调用 matchTerm 方法，Index 升序遍历，遇到 unmatch的 (即遇到相同 Index 不同 Term 的 entry 认为 conflict)，如果这个 unmatch 的 entry 的 Index &lt;= lastIndex，则有 conflict，返回第一个 conflict entry 的 Index；如果这个 unmatch 的 entry 的 Index &gt; lastIndex，则认为是新的未包含的 entry，则返回第一个新的 entry 的 Index；如果均 match 则返回 0</p>
-<p>(6)</p>
-<p>maybeAppend(m.Index, m.LogTerm, m.Commit, m.Entries…) 的实现，内部会首先判断 matchTerm(m.Index, m.LogTerm)，过了之后，会对每个 entry findConflict，没有 confict 则没啥好添加的，有 conflict，可能是真 conlict 也可能是包含了新的 entries，统一调用 append 方法加入到 unstable 中；注意这是 Follower 的行为，Follower 会使用 Leader 发来的 MsgApp 改写自己本地的 entries；Leader 发来的 MsgApp 中包含了其已经 commited 的 Index 信息，Follower 使用 commited 和 MsgApp 中的最后 Index 中小的那个 Index 作为能 committed 的 index</p>
-<blockquote>
-<p>lastnewi = index + uint64(len(ents))</p>
-</blockquote>
-<p>commitTo(min(commited, lastnewi))</p>
-<p>如果 tocommit &gt; l.lastIndex() 会 panic</p>
-<p>(7)</p>
-<p>综上</p>
-<ul>
-<li>接收到 MsgHeartbeat 消息会更新 commited</li>
-<li>接收到 MsgApp 消息可能会更新 commited</li>
-</ul>
-<h2 id="FAQ-unstable-什么时候会-stable？"><a href="#FAQ-unstable-什么时候会-stable？" class="headerlink" title="FAQ: unstable 什么时候会 stable？"></a>FAQ: unstable 什么时候会 stable？</h2><p>在 node 的 main for loop 中，首先会从 raftlog 中获取 ready to apply 的 entries (即 unstable 和 nextEnts)，将其放入 readyc 通道后，等待 advancec 通道消息；当外部 apply 结束后，调用 node.Advance() 方法，node 获取到 advancec 通道中的消息，开始执行 raftlog 的 apply 更新 apply index 和 stable to 将 unstable 变为 stable</p>
-<p>raftlog 的逻辑图如下 (没写 snapshot 部分)</p>
-<p><img src="/images/raftlog.jpeg" alt="raftlog"></p>
-<h1 id="MsgHeartbeat"><a href="#MsgHeartbeat" class="headerlink" title="MsgHeartbeat"></a>MsgHeartbeat</h1><p>Follower 收到 MsgHeartbeat 消息时，重置 electionElapsed 为 0，设置其 Leader 为消息来的成员的 ID；commitTo MsgHeartbeat 中的 commited index，并向 Leader 回复 MsgHeartbeatResp 消息</p>
-<h1 id="MsgReadIndex"><a href="#MsgReadIndex" class="headerlink" title="MsgReadIndex"></a>MsgReadIndex</h1><p>Follower 收到 MsgReadIndex 消息，将请求转发至 Leader；Leader 返回 MsgReadIndexResp 消息，有且仅有 1 Entry，返回已到达一致性的 Index (consistency=l)；线性 / 序列化，貌似是个术语待查</p>
-<p>Follower 收到 MsgReadIndexResp 消息，有且仅有 1 Entry，将其加入 readStates 中</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.readStates = <span class="built_in">append</span>(r.readStates, ReadState&#123;Index: m.Index, RequestCtx: m.Entries[<span class="number">0</span>].Data&#125;)</span><br></pre></td></tr></table></figure>
-
-<h2 id="FAQ-那么-msgs-什么时候会被发送"><a href="#FAQ-那么-msgs-什么时候会被发送" class="headerlink" title="FAQ: 那么 msgs 什么时候会被发送"></a>FAQ: 那么 msgs 什么时候会被发送</h2><p>回到 node 的 main forloop，在 rd = newReady(r, prevSoftSt, prevHardSt) 方法中会读取 r.msgs，并设置 n.readyc 通道，后续将 rd 放入 readyc 通道中，等待外部消费；外部通过 node.Ready() 方法获得内部需 apply or 待发送的 Messages</p>
-<p>在 etcdserver/raft.go 的 main forloop 中获取 readyc 通道消息 rd := &lt;-r.Ready()，该 apply Messages 放入到 r.applyc 通道，该发送的 r.Messages，调用 r.sendMessages(rd.Messages) 发送，结束之后调用 r.Advance()</p>
-<p>另外在 etcdserver/server.go 的 main forloop 中获取 ap ap := &lt;-s.r.apply()，将这次 apply 放入 FIFO 中，FIFO 内部协程异步处理 apply job</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/d7e71fec.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/d7e71fec.html" class="post-title-link" itemprop="url">boltdb-cursor</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-29 15:54:07" itemprop="dateCreated datePublished" datetime="2017-10-29T15:54:07Z">2017-10-29</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 07:56:04" itemprop="dateModified" datetime="2020-11-22T07:56:04Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中</p>
-<h1 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h1><p>first / prev / next / last 的实现</p>
-<p>first 就是不断搜索 element 的 index = 0 inode，直到 leaf page 为止</p>
-<p>last 是不断搜索 element 的 index = the count of inodes - 1，直到 leaf page 为止</p>
-<p>first 和 last 实现后，可相应实现 prev / next</p>
-<p>prev 当 inode 中可 – 时则直接回退一格，若为开头 inode，则上移，再 last</p>
-<p>next 当 inode 中可 ++ 时则直接前进一格，若为末尾 indoe，则上移，再 first</p>
-<h1 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h1><p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
-<blockquote>
-<p>nsearch(key)</p>
-</blockquote>
-<p>如果搜到了 leaf page / node，那么就在 inodes 中搜索该 key，返回的 index 为第一个大于等于 key 的 index，若不存在返回 inodes 长度</p>
-<blockquote>
-<p>searchNode(key, n)</p>
-</blockquote>
-<p>如果不是 leaf page / node，且 node 不为 nil (n)，则 searchNode；searchNode 中如果 key 相等则从该 inodes[index].pgid，继续 search(key, inodes[index].pgid)；如果 key 不相等且 index &gt; 0，则设置为最后一个小于的 index，从该 index 继续 search</p>
-<blockquote>
-<p>searchPage(key, p)</p>
-</blockquote>
-<p>实现同上述，不过是从 page 中读取</p>
-<h1 id="获取-node"><a href="#获取-node" class="headerlink" title="获取 node"></a>获取 node</h1><p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
-<p>获取到 node 之后就可以 put 和 del key 了</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
-<p>例如看个创建 bucket 的过程</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="keyword">var</span> value = bucket.write()</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, bucketLeafFlag)</span><br></pre></td></tr></table></figure>
-
-<p>例如看个写入 key / value 的过程</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="comment">// Return an error if there is an existing key with a bucket value.</span></span><br><span class="line"><span class="keyword">if</span> bytes.Equal(key, k) &amp;&amp; (flags&amp;bucketLeafFlag) != <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ErrIncompatibleValue</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2a0d5b3c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2a0d5b3c.html" class="post-title-link" itemprop="url">warning-log-about-etcd</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-27 15:49:35" itemprop="dateCreated datePublished" datetime="2017-10-27T15:49:35Z">2017-10-27</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 07:53:52" itemprop="dateModified" datetime="2020-11-22T07:53:52Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="wal-fsync-delay-warning"><a href="#wal-fsync-delay-warning" class="headerlink" title="wal fsync delay warning"></a>wal fsync delay warning</h1><p>对于 leader 来说，可以先行向 follower 发送 messages，再进行 wal 的写入等后续持久化操作，最后 n.advance</p>
-<p>对于 follower 来说，必须进行 wal 的写入等持久化操作后，才能向其他成员发送 messages，最后 n.advance</p>
-<p>wal 的 fsync 调用</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mustSync := mustSync(st, w.state, <span class="built_in">len</span>(ents))</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mustSync</span><span class="params">(st, prevst raftpb.HardState, entsnum <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// Persistent state on all servers:</span></span><br><span class="line">	<span class="comment">// (Updated on stable storage before responding to RPCs)</span></span><br><span class="line">	<span class="comment">// currentTerm</span></span><br><span class="line">	<span class="comment">// votedFor</span></span><br><span class="line">	<span class="comment">// log entries[]</span></span><br><span class="line">	<span class="keyword">return</span> entsnum != <span class="number">0</span> || st.Vote != prevst.Vote || st.Term != prevst.Term</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>看的出来 <strong>fsync 调用很频繁</strong>，每次写入都有 fsync 调用，毕竟每次写入时 entsnum 不为 0</p>
-<p>fsync 的对象为最新的 wal 文件</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">start := time.Now()</span><br><span class="line">err := fileutil.Fdatasync(w.tail().File)</span><br><span class="line">duration := time.Since(start)</span><br><span class="line"><span class="keyword">if</span> duration &gt; warnSyncDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;sync duration of %v, expected less than %v&quot;</span>, duration, warnSyncDuration)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>fsync 调用时间超过 1s 会告警</strong>，磁盘 IO 有波动了 or 不满足要求</p>
-<h1 id="boltdb-apply-delay-warning"><a href="#boltdb-apply-delay-warning" class="headerlink" title="boltdb apply delay warning"></a>boltdb apply delay warning</h1><p>wal 写完，raft 协议走通，可同步数据后 apply 数据到本地存储</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">s.applySnapshot(ep, apply)</span><br><span class="line">st := time.Now()</span><br><span class="line">s.applyEntries(ep, apply)</span><br><span class="line">d := time.Since(st)</span><br><span class="line">entriesNum := <span class="built_in">len</span>(apply.entries)</span><br><span class="line"><span class="keyword">if</span> entriesNum != <span class="number">0</span> &amp;&amp; d &gt; time.Duration(entriesNum)*warnApplyDuration &#123;</span><br><span class="line">	plog.Warningf(<span class="string">&quot;apply entries took too long [%v for %d entries]&quot;</span>, d, <span class="built_in">len</span>(apply.entries))</span><br><span class="line">	plog.Warningf(<span class="string">&quot;avoid queries with large range/delete range!&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>平均 apply 一个 entry 耗时 100ms，*<em>如果 apply 总时间超过 n * 100ms 则告警*</em></p>
-<p>比如 put 请求，最后调到 kvstore.go 的 put 方法，kvindex (B tree) 中搜索一把，再用 boltdb tx 写入一把，kvindex 增加一把，有 lease 的加 lease</p>
-<p>当然上述的都是耗时，只不过 boltdb put 的耗时一般而言比其他的操作都大</p>
-<h1 id="leader-send-out-heartbeat-delay-warning"><a href="#leader-send-out-heartbeat-delay-warning" class="headerlink" title="leader send out heartbeat delay warning"></a>leader send out heartbeat delay warning</h1><p>在 r.sendMessages(rd.Messages) 方法中，也会打印延时告警日志</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a heartbeat message</span></span><br><span class="line"><span class="keyword">if</span> ms[i].Type == raftpb.MsgHeartbeat &#123;</span><br><span class="line">	<span class="comment">// exceed maxDuration time</span></span><br><span class="line">	ok, exceed := r.td.Observe(ms[i].To)</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> limit request rate.</span></span><br><span class="line">		plog.Warningf(<span class="string">&quot;failed to send out heartbeat on time (exceeded the %v timeout for %v)&quot;</span>, r.heartbeat, exceed)</span><br><span class="line">		plog.Warningf(<span class="string">&quot;server is likely overloaded&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个地方的算法，是超过 2*hearbeat 时间作为 exceed 时间</p>
-<p>leader 将这些 Message 先行发送给 followers，如果是心跳消息，则计算当前时间 - 上次记录的时间是否超过了 2*hearbeat，如果是，则打印超过的值；需注意该值如果接近或超过了 election timeout 时间，则会引发其他成员发起选举，导致集群不稳定</p>
-<p>一般这个告警，是由 wal fsync delay 诱发的，而 wal fsync delay 又与磁盘 IO 有关；另外 apply 不是也有 delay 的 warning ？为啥它的影响不大，答：因为 apply 会走 fifo 的调度，是异步的；当然也是有影响的，总会影响整体时延</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">	f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">    sched.Schedule(f)</span><br></pre></td></tr></table></figure>
-
-<p>放入队列就跑</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Schedule schedules a job that will be ran in FIFO order sequentially.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *fifo)</span> <span class="title">Schedule</span><span class="params">(j Job)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	f.pendings = <span class="built_in">append</span>(f.pendings, j)</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="the-clock-difference-againset-peer-is-too-high-warning"><a href="#the-clock-difference-againset-peer-is-too-high-warning" class="headerlink" title="the clock difference againset peer is too high warning"></a>the clock difference againset peer is too high warning</h1><p>peer 间计算时差大于 1s 告警，ps: 当前 peer 比对端 peer 时间大</p>
-<p>etcd 会将其每个 peer 加入到 probe 中，定时发起 get 请求，一方面可以探测 peer health 另一方面通过其返回值，计算 peer 之间的时间差；没发现该 warning 会对业务造成影响；还没过代码，和时间相关的实现也就 lease 了，暂且推测 lease 用的是逻辑时钟，所以没影响</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">monitorProbingStatus</span><span class="params">(s probing.Status, id <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">if</span> s.ClockDiff() &gt; time.Second &#123;</span><br><span class="line">		plog.Warningf(<span class="string">&quot;the clock difference against peer %s is too high [%v &gt; %v]&quot;</span>, id, s.ClockDiff(), time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	rtts.WithLabelValues(id).Observe(s.SRTT().Seconds())</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>probe (4s) 及 monit (30s) 周期</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proberInterval           = ConnReadTimeout - time.Second (<span class="number">5</span> - <span class="number">1</span>)</span><br><span class="line">statusMonitoringInterval = <span class="number">30</span> * time.Second</span><br></pre></td></tr></table></figure>
-
-<p>开始记录值，start 为本次开始 probe 的时间，hh.Now 为对端 peer 返回的时间</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">α = <span class="number">0.125</span></span><br><span class="line">s.record(time.Since(start), hh.Now)</span><br></pre></td></tr></table></figure>
-
-<p>时差计算方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// srtt init 0</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *status)</span> <span class="title">record</span><span class="params">(rtt time.Duration, when time.Time)</span></span> &#123;</span><br><span class="line">	s.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> s.mu.Unlock()</span><br><span class="line">	s.total += <span class="number">1</span></span><br><span class="line">	s.health = <span class="literal">true</span></span><br><span class="line">	s.srtt = time.Duration((<span class="number">1</span>-α)*<span class="keyword">float64</span>(s.srtt) + α*<span class="keyword">float64</span>(rtt))</span><br><span class="line">	s.clockdiff = time.Now().Sub(when) - s.srtt/<span class="number">2</span></span><br><span class="line">	s.err = <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>大概来说就是 local time 减掉 peer time，再减修正时间</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1482,7 +1657,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1493,13 +1668,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">274k</span>
+    <span title="站点总字数">282k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:09</span>
+    <span title="站点阅读时长">4:16</span>
   </span>
 </div>
 
