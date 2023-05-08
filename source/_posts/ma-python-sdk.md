@@ -12,7 +12,7 @@ from modelarts.estimatorV2 import Estimator
 from modelarts.train_params import OutputData
 from modelarts.train_params import InputData
 
-session = Session(access_key='IY7QQFHWAFOHGWTQBVCT',secret_key='uhvyZJW6iMvKcI5KAW6Fue66YhlD7uI7x3tv7mIW', project_id='0579c838010026732f29c01cc63af839', region_name='cn-north-4')
+session = Session(access_key='XXX',secret_key='YYY', project_id='ZZZ', region_name='cn-north-4')
 
 # list job
 # job_list = Estimator.get_job_list(session=session, offset=0, limit=10, sort_by="create_time", order="desc")
