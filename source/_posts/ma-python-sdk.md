@@ -2,6 +2,7 @@
 title: modelarts python sdk job demo
 tags:
   - modelarts
+abbrlink: ab66f1ba
 date: 2023-05-09 01:15:32
 ---
 
