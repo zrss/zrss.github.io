@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-count">125</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">66</span>
+        <span class="site-state-item-count">67</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,93 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ab66f1ba.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/ab66f1ba.html" class="post-title-link" itemprop="url">modelarts python sdk job demo</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-09 01:15:32" itemprop="dateCreated datePublished" datetime="2023-05-09T01:15:32Z">2023-05-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2023-05-08 17:16:00" itemprop="dateModified" datetime="2023-05-08T17:16:00Z">2023-05-08</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> modelarts.session <span class="keyword">import</span> Session</span><br><span class="line"><span class="keyword">from</span> modelarts.estimatorV2 <span class="keyword">import</span> Estimator</span><br><span class="line"><span class="keyword">from</span> modelarts.train_params <span class="keyword">import</span> OutputData</span><br><span class="line"><span class="keyword">from</span> modelarts.train_params <span class="keyword">import</span> InputData</span><br><span class="line"></span><br><span class="line">session = Session(access_key=<span class="string">&#x27;IY7QQFHWAFOHGWTQBVCT&#x27;</span>,secret_key=<span class="string">&#x27;uhvyZJW6iMvKcI5KAW6Fue66YhlD7uI7x3tv7mIW&#x27;</span>, project_id=<span class="string">&#x27;0579c838010026732f29c01cc63af839&#x27;</span>, region_name=<span class="string">&#x27;cn-north-4&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># list job</span></span><br><span class="line"><span class="comment"># job_list = Estimator.get_job_list(session=session, offset=0, limit=10, sort_by=&quot;create_time&quot;, order=&quot;desc&quot;)</span></span><br><span class="line"><span class="comment"># print(job_list)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># create a basic training job</span></span><br><span class="line">estimator = Estimator(session=session,</span><br><span class="line">                      job_description=<span class="string">&#x27;This is a basic training job&#x27;</span>,</span><br><span class="line">                      user_image_url=<span class="string">&quot;deep-learning-demo/mpi:3.0.0-cuda10.2&quot;</span>, <span class="comment"># main container 的容器镜像地址</span></span><br><span class="line">                      user_command=<span class="string">&quot;echo hello-world&quot;</span>,  <span class="comment"># main container 的启动命令</span></span><br><span class="line">                      outputs=[OutputData(obs_path=<span class="string">&quot;obs://zs-modelarts/pytorch/model/&quot;</span>, name=<span class="string">&quot;model&quot;</span>, local_path=<span class="string">&quot;/model&quot;</span>, access_method=<span class="string">&quot;env&quot;</span>)],</span><br><span class="line">                      log_url=<span class="string">&quot;obs://zs-modelarts/pytorch/log/&quot;</span>, <span class="comment"># 训练作业日志转存 obs 路径</span></span><br><span class="line">                      train_instance_type=<span class="string">&quot;modelarts.p3.large.public.free&quot;</span>, <span class="comment"># 公共资源池</span></span><br><span class="line">                      train_instance_count=<span class="number">1</span> <span class="comment"># 训练作业节点个数</span></span><br><span class="line">                      )</span><br><span class="line"></span><br><span class="line">job_instance = estimator.fit(job_name=<span class="string">&quot;job-0&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># get job id in job_instance</span></span><br><span class="line"><span class="built_in">print</span>(job_instance.job_id)</span><br><span class="line"></span><br><span class="line"><span class="comment"># view the training job log</span></span><br><span class="line"><span class="comment"># estimator = Estimator(session=session, job_id=&quot;2bfc13b6-782e-45ad-ae90-476dfa97591a&quot;)</span></span><br><span class="line"><span class="comment"># info = estimator.get_job_log()</span></span><br><span class="line"><span class="comment"># print(info)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># view the training job metrics</span></span><br><span class="line"><span class="comment"># estimator = Estimator(session=session, job_id=&quot;2bfc13b6-782e-45ad-ae90-476dfa97591a&quot;)</span></span><br><span class="line"><span class="comment"># info = estimator.get_job_metrics()</span></span><br><span class="line"><span class="comment"># print(info)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># delete the training job metrics</span></span><br><span class="line"><span class="comment"># Estimator.delete_job_by_id(session=session, job_id=&quot;2bfc13b6-782e-45ad-ae90-476dfa97591a&quot;)</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1254,87 +1341,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ff6309c.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/ff6309c.html" class="post-title-link" itemprop="url">mount s3 bucket with goofys</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-06-12 15:03:00 / 修改时间：07:07:09" itemprop="dateCreated datePublished" datetime="2022-06-12T15:03:00Z">2022-06-12</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>32</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://github.com/kahing/goofys">https://github.com/kahing/goofys</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1359,13 +1365,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">282k</span>
+    <span title="站点总字数">283k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:16</span>
+    <span title="站点阅读时长">4:18</span>
   </span>
 </div>
 

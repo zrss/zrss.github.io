@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-count">125</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">66</span>
+        <span class="site-state-item-count">67</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,116 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/248b0a97.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/248b0a97.html" class="post-title-link" itemprop="url">岁月无可回头(10)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-11 12:53:16" itemprop="dateCreated datePublished" datetime="2017-06-11T12:53:16Z">2017-06-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:37:28" itemprop="dateModified" datetime="2020-12-12T07:37:28Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>685</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>忙了一周 + 1 天，又是一个全员加班的周六</p>
+<p>从上周六开始，独立维护了一套平台环境，验证服务升级部署</p>
+<p>只能说进一步熟悉了业务</p>
+<p>支撑了另外一个部门的服务部署，对面那哥们问我来多久了，我曰一个半月，对方回感觉都要成 xx 专家了，我曰怎么会，术业有专攻，对方回之前在哪儿待的，我曰啊，在学校呀，对方回天将降大任于斯人也</p>
+<p>工作呀，对我来说，最需要成就感，哎，果然是个骄傲的不行的人，老师评价的不错，是得改改了，没必要和自己过不去</p>
+<p>刚看了一个文档，终于理解了 etcd 的神逻辑。Disaster recovery 的时候，需要使用旧的数据 force-start-new 一个单节点集群，该集群正常启动后，将其 peer url 更新为对外 url，后继可正常添加成员</p>
+<p>在 cluster-health 的情况下才可以 Member add。Member add 之前，删除其 data-dir，避免数据不一致</p>
+<p>从 snapshot 恢复时，不用 force-start-new，因为 snapshot 没有集群 metadata，只有 key 数据</p>
+<p>如果是数据从 v2 迁移至 v3，对 data-dir 执行 migrate 之后只是将 key data 转成了 mvcc 格式，而 cluster meta data 还是旧的，因此需要走 force new start 流程</p>
+<p>如果是全新的集群启动，则所有 etcd 以 new 状态启动即可</p>
+<p>这样就覆盖了所有流程</p>
+<p>终于要去见来杭的 Gloria 了，据说为了见人，还特意剪了个发型，不过被剪成 SB 了，笑，等会儿看看有多惊艳</p>
+<p>杭州应该进入了梅雨季节，一言不合就下雨，天气略闷热，而我的工作略忙</p>
+<p>这篇在地铁，公交上写完</p>
+<p>2017年06月11日12:53:16 杭州</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1108,122 +1218,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2085299337.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2085299337.html" class="post-title-link" itemprop="url">读书(1)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-21T00:00:00Z">2017-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>615</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>均有一定程度的剧透<br>个人观点，难免偏颇，欢迎讨论，挑事者不送</p>
-</blockquote>
-<h1 id="巨人的陨落（三册）"><a href="#巨人的陨落（三册）" class="headerlink" title="巨人的陨落（三册）"></a>巨人的陨落（三册）</h1><p>很有意思，别样的“历史”书</p>
-<p>构筑了，在一战爆发前后的大背景下，各种各样人物的故事，间接说明了那个时代的新老代思想冲击，谴责了发动一战的罪恶动机</p>
-<p>当然其中人物的爱恨情仇也很精彩</p>
-<h1 id="从你的全世界路过"><a href="#从你的全世界路过" class="headerlink" title="从你的全世界路过"></a>从你的全世界路过</h1><p>恕我直言，忍痛读完，觉得十分没有营养</p>
-<p>文字表达一般，一言不合就我有一个朋友，尴尬症都犯了</p>
-<p>故事矫情，一言不合就离婚，不明真相的以为这个社会已然如此狂躁了</p>
-<h1 id="挪威的森林"><a href="#挪威的森林" class="headerlink" title="挪威的森林"></a>挪威的森林</h1><p>渡，爱着直子，被绿子爱着</p>
-<p>看的很压抑，并不是很能体会书中的各种结束生命</p>
-<h1 id="解忧杂货店"><a href="#解忧杂货店" class="headerlink" title="解忧杂货店"></a>解忧杂货店</h1><p>故事开始的时候，觉得有点懵，后来才慢慢读懂，原来是一个跨时间对话的剧情</p>
-<p>故事的大框架是</p>
-<p>现在的人告诫过去的人该如何生活，过去人看到了穿越时空的建议，并听从这些建议后，改变了他们的生活，也使得生命更有意义</p>
-<p>大框架下容纳了好几个人物的小故事，印象比较深的</p>
-<p>为了追寻音乐梦想，忤逆父亲的期待，而又在追梦的途中不得志的音乐人，最后为了救出陷于火灾之中的孤儿，献出了自己的生命</p>
-<p>起先家境优越，后因种种情况，债台高筑的家庭，父母决定出逃，而“我”并不理解父母，毅然逃离，长大后，才发现父母为了保护自己，双双投海的事实</p>
-<p>作品构思很严密，故事最后形成了一个闭环</p>
-<p>白纸的寓意很震撼，跨时间通信无疑幻想，把握现在，为自己的人生手绘风景</p>
-<h1 id="嫌疑人X的献身"><a href="#嫌疑人X的献身" class="headerlink" title="嫌疑人X的献身"></a>嫌疑人X的献身</h1><p>侦探类的书，看过阿加莎克里斯蒂的几本，《尼罗河上的惨案》、《东方快车》、《无人生还》和《三幕悲剧》等</p>
-<p>情节设计的出人意料</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/10/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/12/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1248,13 +1242,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">282k</span>
+    <span title="站点总字数">283k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:16</span>
+    <span title="站点阅读时长">4:18</span>
   </span>
 </div>
 

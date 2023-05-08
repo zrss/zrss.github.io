@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-count">125</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">66</span>
+        <span class="site-state-item-count">67</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,132 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9bd3bd71.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/9bd3bd71.html" class="post-title-link" itemprop="url">angularjs and webpack</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 15:58:34" itemprop="dateCreated datePublished" datetime="2017-12-03T15:58:34Z">2017-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:03:53" itemprop="dateModified" datetime="2020-11-22T08:03:53Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在给 ETCD cluster on k8s 写 FE (front end)，此篇总结一下框架性的东西</p>
+<p>很久之前在实验室的时候，曾经蹚水过一段时间 fe 开发，深知 fe 领域目前 一天涌现 100 个开发工具 的节奏，从 angularjs (google) 到 react (facebook)，都是 SPA (single page application) 的实践</p>
+<p>使用这两框架，对于 fe 小白开发来说，最大好处是省去了大部分 jQuery 手工操作 DOM 的繁杂代码，都由框架代为更新 DOM 元素了。当然也引入了比服务器端渲染页面的经典设计模式 MVC (model view controller)，更进一步的 MVVM (model view viewModel) 模式，支持视图到模型，模型到视图的双向数据更新特性。由此 fe 的代码得到极大净化</p>
+<p>然而无奈 fe 仍然是个劳动密集型的方向，毕竟是眼见为实，与用户距离最近的东西，一言不合就有需求，就有改动了。因此代码一开始可能是规整的，过了一段时间后，就直接起飞了 …</p>
+<p>现实不讨论了，先进入正题</p>
+<h2 id="找轮子"><a href="#找轮子" class="headerlink" title="找轮子"></a>找轮子</h2><p>不重复造轮子，github 上搜索一把，可以得到很多 startup 项目，找一个 star 比较多的，例如 <a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack%EF%BC%8C%E7%9B%B4%E6%8E%A5%E7%94%A8%E8%AF%A5%E9%A1%B9%E7%9B%AE%E6%9D%A5%E5%BC%80%E5%A7%8B%E5%A5%BD%E4%BA%86">https://github.com/preboot/angularjs-webpack，直接用该项目来开始好了</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/preboot/angularjs-webpack.git</span><br></pre></td></tr></table></figure>
+
+<h2 id="分析轮子"><a href="#分析轮子" class="headerlink" title="分析轮子"></a>分析轮子</h2><p>该项目为 node + angularjs + webpack 的一个极简 demo</p>
+<p>node 就不说了，fe 的革命，很大程度由 node 引发</p>
+<p>angularjs 呢，mvvm 框架</p>
+<p>webpack 简单理解的话，在 java / c++ 等语言中，可以通过 include or import 关键字导入依赖的库，进而在当前模块中使用已实现的方法，避免重复的开发工作。那么在 fe 中 import 依赖的组件，如当前模块依赖的 js / css 代码，webpack 的作用就是理解这些 import 指令，最后将所有代码 打包 成可实际执行的代码</p>
+<h2 id="用轮子造车子"><a href="#用轮子造车子" class="headerlink" title="用轮子造车子"></a>用轮子造车子</h2><h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── LICENSE</span><br><span class="line">├── README.md</span><br><span class="line">├── karma.conf.js</span><br><span class="line">├── node_modules</span><br><span class="line">├── package.json</span><br><span class="line">├── postcss.config.js</span><br><span class="line">├── src</span><br><span class="line">└── webpack.config.js</span><br></pre></td></tr></table></figure>
+
+<p>package.json 定义了 node 项目的依赖</p>
+<p>通过 npm install 安装 package.json 中定义的依赖到项目下的 node_modules 文件夹下</p>
+<p>国内的网络环境一般，需要一些手段加速依赖下载，如淘宝的 npm 镜像站</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装淘宝定义的 cnpm</span></span><br><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br><span class="line"><span class="comment"># 安装项目依赖</span></span><br><span class="line">cnpm install</span><br></pre></td></tr></table></figure>
+
+<p>速度可以说是很快了，秒装</p>
+<p>webpack.config.js 为 webpack 的配置文件，其中比较重要的配置有</p>
+<p>SPA 应用 js 入口</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">config.entry = isTest ? <span class="keyword">void</span> <span class="number">0</span> : &#123;</span><br><span class="line">  <span class="attr">app</span>: <span class="string">&#x27;./src/app/app.js&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>SPA 应用 page 入口</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> HtmlWebpackPlugin(&#123;</span><br><span class="line">  <span class="attr">template</span>: <span class="string">&#x27;./src/public/index.html&#x27;</span>,</span><br><span class="line">  <span class="attr">inject</span>: <span class="string">&#x27;body&#x27;</span></span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+
+<p>base 路径</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config.devServer = &#123;</span><br><span class="line">  <span class="attr">contentBase</span>: <span class="string">&#x27;./src/public&#x27;</span>,</span><br><span class="line">  <span class="attr">stats</span>: <span class="string">&#x27;minimal&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>即在该路径下有一文件，如 ./src/public/hello.png，那么在浏览器中 url/hello.png 能访问到</p>
+<p>本地开发时 dev server 的访问地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// Output path from the view of the page</span><br><span class="line">// Uses webpack-dev-server in development</span><br><span class="line">publicPath: isProd ? &#x27;/&#x27; : &#x27;http://localhost:8080/&#x27;,</span><br></pre></td></tr></table></figure>
+
+<h3 id="本地开发"><a href="#本地开发" class="headerlink" title="本地开发"></a>本地开发</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 启动 webpack dev server</span><br><span class="line">npm start</span><br><span class="line">// 浏览器访问 pulicPath 地址即可，如</span><br><span class="line">// http://localhost:8080/</span><br></pre></td></tr></table></figure>
+
+<p>其他的不多说了，此篇质量一般，也是我现在开发 fe 的一个无奈吧，这里增加几句话，那里增加几句话，okay it works，细节不清楚，只是为了完成业务逻辑，当然也因为目前兴趣不在此。详细的可看看 参考 (3)</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack">https://github.com/preboot/angularjs-webpack</a></p>
+<p><a target="_blank" rel="noopener" href="https://npm.taobao.org/">https://npm.taobao.org/</a></p>
+<p><a target="_blank" rel="noopener" href="http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/">http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1196,150 +1322,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/77fa05dc.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/77fa05dc.html" class="post-title-link" itemprop="url">ETCD V3 中的 db 文件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-04 23:11:15" itemprop="dateCreated datePublished" datetime="2017-10-04T23:11:15Z">2017-10-04</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:12:41" itemprop="dateModified" datetime="2020-12-12T07:12:41Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>7.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>etcd v3.1.9</p>
-</blockquote>
-<p>to be cont.</p>
-<p>boltdb 原哥们，不维护了貌似，coreos 的人继续维护 <a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt">https://github.com/coreos/bbolt</a></p>
-<p>另外这个 issues 和 free page 相关，即能解决部分 boltdb 内存碎片问题</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/coreos/bbolt/pull/3">https://github.com/coreos/bbolt/pull/3</a></p>
-<h1 id="boltdb"><a href="#boltdb" class="headerlink" title="boltdb"></a>boltdb</h1><p>bolt_unix.go 几个工具方法，如 flock / funlock / mmap / munmap</p>
-<p>bolt_linux.go fsync db 文件</p>
-<p>入口处在 db.go 的 Open 方法，通过 Open 方法初始化一个 db 文件；对应 etcd 中 mvcc/backend/backend.go 中的 newBackend 方法的调用</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newBackend</span><span class="params">(path <span class="keyword">string</span>, d time.Duration, limit <span class="keyword">int</span>)</span> *<span class="title">backend</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">// bolt db</span></span><br><span class="line">	db, err := bolt.Open(path, <span class="number">0600</span>, boltOpenOptions)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		plog.Panicf(<span class="string">&quot;cannot open database at %s (%v)&quot;</span>, path, err)</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Open 方法中，如果是新建的 db 文件，则调用 db.init() 写入 metadata 信息，boltdb 的注释写的很赞，感觉就是个工业又学术的艺术品，赞！</p>
-<p>查看 db.init() 干了什么，直接上图吧，往 db 文件中写了四个 page （size 一般是 4096 字节） 的内容</p>
-<p><img src="/images/initial_db.jpeg" alt="initial_db"></p>
-<p>然后就是各种初始化了，初始化 pagePool，mmap the data file as a byte slice，初始化 freelist</p>
-<p>etcd 的 InitialMmapSize 设置为 10 1024 1024 * 1024，吓人，那是否 etcd 一启动，就会占用这么大的实际内存？并不是的哈，在 mac 上实测 top 命令看到的是 314MB，ps aux 看到的 vsz 556879888，rss 476460，很好奇，按理来说 vsz 的单位应该是 kb 呀，但是这个数字有点儿大的吓人，实际应该是字节，也就是 500 多 MB，那么 rss 又怎么理解呢？rss 的单位又是 kb，实际使用了 470 多 MB？神奇，总之并不是启动之后立马占用 10 G内存</p>
-<p>开头写两个一样的 meta page 貌似是为了做保护，看到 mmap 的方法中有这段注释</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Validate the meta pages. We only return an error if both meta pages fail</span></span><br><span class="line"><span class="comment">// validation, since meta0 failing validation means that it wasn&#x27;t saved</span></span><br><span class="line"><span class="comment">// properly -- but we can recover using meta1. And vice-versa.</span></span><br><span class="line">err0 := db.meta0.validate()</span><br><span class="line">err1 := db.meta1.validate()</span><br><span class="line"><span class="keyword">if</span> err0 != <span class="literal">nil</span> &amp;&amp; err1 != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> err0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>说直接一点儿，boltdb 使用 mmap 把一个名为 db 的文件映射到内存中的 []byte 数组，然后直接操作内存，但是不管怎么说是外部存储，最终还是要落盘的，所以呢推测是用了 B+ tree，然后把写入的内容组织成 page，使用指针操作，这块代码有点像 C 其实</p>
-<p>freelist allocate 的逻辑是从 freelist 记录的所有 free page 中分配 n 个连续的 page</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// allocate returns the starting page id of a contiguous list of pages of a given size.</span></span><br><span class="line"><span class="comment">// If a contiguous block cannot be found then 0 is returned.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">allocate</span><span class="params">(n <span class="keyword">int</span>)</span> <span class="title">pgid</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(f.ids) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> initial, previd pgid</span><br><span class="line">	<span class="keyword">for</span> i, id := <span class="keyword">range</span> f.ids &#123;</span><br><span class="line">		<span class="keyword">if</span> id &lt;= <span class="number">1</span> &#123;</span><br><span class="line">			<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;invalid page allocation: %d&quot;</span>, id))</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Reset initial page if this is not contiguous.</span></span><br><span class="line">		<span class="keyword">if</span> previd == <span class="number">0</span> || id-previd != <span class="number">1</span> &#123;</span><br><span class="line">			initial = id</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// If we found a contiguous block then remove it and return it.</span></span><br><span class="line">		<span class="keyword">if</span> (id-initial)+<span class="number">1</span> == pgid(n) &#123;</span><br><span class="line">			<span class="comment">// If we&#x27;re allocating off the beginning then take the fast path</span></span><br><span class="line">			<span class="comment">// and just adjust the existing slice. This will use extra memory</span></span><br><span class="line">			<span class="comment">// temporarily but the append() in free() will realloc the slice</span></span><br><span class="line">			<span class="comment">// as is necessary.</span></span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 将已分配的连续页移出 free list 记录表 (ids)</span></span><br><span class="line">			<span class="comment">// 并释放 ids 空间</span></span><br><span class="line">			<span class="keyword">if</span> (i + <span class="number">1</span>) == n &#123;</span><br><span class="line">				f.ids = f.ids[i+<span class="number">1</span>:]</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="built_in">copy</span>(f.ids[i-n+<span class="number">1</span>:], f.ids[i+<span class="number">1</span>:])</span><br><span class="line">				f.ids = f.ids[:<span class="built_in">len</span>(f.ids)-n]</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// Remove from the free cache.</span></span><br><span class="line">			<span class="comment">// 移出 free list cache</span></span><br><span class="line">			<span class="keyword">for</span> i := pgid(<span class="number">0</span>); i &lt; pgid(n); i++ &#123;</span><br><span class="line">				<span class="built_in">delete</span>(f.cache, initial+i)</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 返回起始页</span></span><br><span class="line">			<span class="keyword">return</span> initial</span><br><span class="line">		&#125;</span><br><span class="line">		previd = id</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>freelist 的 write 实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// read initializes the freelist from a freelist page.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">read</span><span class="params">(p *page)</span></span> &#123;</span><br><span class="line">	<span class="comment">// If the page.count is at the max uint16 value (64k) then it&#x27;s considered</span></span><br><span class="line">	<span class="comment">// an overflow and the size of the freelist is stored as the first element.</span></span><br><span class="line">	idx, count := <span class="number">0</span>, <span class="keyword">int</span>(p.count)</span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0xFFFF</span> &#123;</span><br><span class="line">		idx = <span class="number">1</span></span><br><span class="line">		count = <span class="keyword">int</span>(((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[<span class="number">0</span>])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Copy the list of page ids from the freelist.</span></span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0</span> &#123;</span><br><span class="line">		f.ids = <span class="literal">nil</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ids := ((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[idx:count]</span><br><span class="line">		f.ids = <span class="built_in">make</span>([]pgid, <span class="built_in">len</span>(ids))</span><br><span class="line">		<span class="built_in">copy</span>(f.ids, ids)</span><br><span class="line">		<span class="comment">// Make sure they&#x27;re sorted.</span></span><br><span class="line">		sort.Sort(pgids(f.ids))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Rebuild the page cache.</span></span><br><span class="line">	f.reindex()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>freelist 的 read 实现，对应 write；如何 write 的，就如何 read</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// read initializes the freelist from a freelist page.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">read</span><span class="params">(p *page)</span></span> &#123;</span><br><span class="line">	<span class="comment">// If the page.count is at the max uint16 value (64k) then it&#x27;s considered</span></span><br><span class="line">	<span class="comment">// an overflow and the size of the freelist is stored as the first element.</span></span><br><span class="line">	<span class="comment">// page 中的 count 怎么理解 ？</span></span><br><span class="line">	<span class="comment">// 看着像是 page 下面维护着一系列 pgid</span></span><br><span class="line">	idx, count := <span class="number">0</span>, <span class="keyword">int</span>(p.count)</span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0xFFFF</span> &#123;</span><br><span class="line">		idx = <span class="number">1</span></span><br><span class="line">		count = <span class="keyword">int</span>(((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[<span class="number">0</span>])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Copy the list of page ids from the freelist.</span></span><br><span class="line">	<span class="keyword">if</span> count == <span class="number">0</span> &#123;</span><br><span class="line">		f.ids = <span class="literal">nil</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ids := ((*[maxAllocSize]pgid)(unsafe.Pointer(&amp;p.ptr)))[idx:count]</span><br><span class="line">		f.ids = <span class="built_in">make</span>([]pgid, <span class="built_in">len</span>(ids))</span><br><span class="line">		<span class="built_in">copy</span>(f.ids, ids)</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// copy 结束之后，是否可以设置 ids = nil，帮助 gc ?</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">// Make sure they&#x27;re sorted.</span></span><br><span class="line">		sort.Sort(pgids(f.ids))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Rebuild the page cache.</span></span><br><span class="line">	f.reindex()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>freelist 的 reindex 实现，其实就是构造 cache，很直接的实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// reindex rebuilds the free cache based on available and pending free lists.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">reindex</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 既然已知大小的话，make 的时候为啥不指定 capacity</span></span><br><span class="line">	<span class="comment">// 好吧，我晕了，这个是 map，怎么指定大小？naive</span></span><br><span class="line">	f.cache = <span class="built_in">make</span>(<span class="keyword">map</span>[pgid]<span class="keyword">bool</span>)</span><br><span class="line">	<span class="keyword">for</span> _, id := <span class="keyword">range</span> f.ids &#123;</span><br><span class="line">		f.cache[id] = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// pending 记录了 tx 中使用过，未被释放的 page id</span></span><br><span class="line">	<span class="keyword">for</span> _, pendingIDs := <span class="keyword">range</span> f.pending &#123;</span><br><span class="line">		<span class="keyword">for</span> _, pendingID := <span class="keyword">range</span> pendingIDs &#123;</span><br><span class="line">			f.cache[pendingID] = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>boltdb 在 beginRWTx 中释放空间</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">beginRWTx</span><span class="params">()</span> <span class="params">(*Tx, error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// If the database was opened with Options.ReadOnly, return an error.</span></span><br><span class="line">	<span class="keyword">if</span> db.readOnly &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, ErrDatabaseReadOnly</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Obtain writer lock. This is released by the transaction when it closes.</span></span><br><span class="line">	<span class="comment">// This enforces only one writer transaction at a time.</span></span><br><span class="line">	db.rwlock.Lock()</span><br><span class="line">	<span class="comment">// Once we have the writer lock then we can lock the meta pages so that</span></span><br><span class="line">	<span class="comment">// we can set up the transaction.</span></span><br><span class="line">	db.metalock.Lock()</span><br><span class="line">	<span class="keyword">defer</span> db.metalock.Unlock()</span><br><span class="line">	<span class="comment">// Exit if the database is not open yet.</span></span><br><span class="line">	<span class="keyword">if</span> !db.opened &#123;</span><br><span class="line">		db.rwlock.Unlock()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, ErrDatabaseNotOpen</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Create a transaction associated with the database.</span></span><br><span class="line">	t := &amp;Tx&#123;writable: <span class="literal">true</span>&#125;</span><br><span class="line">	t.init(db)</span><br><span class="line">	db.rwtx = t</span><br><span class="line">	<span class="comment">// Free any pages associated with closed read-only transactions.</span></span><br><span class="line">	<span class="comment">// 获取当前事务中的最小 txid</span></span><br><span class="line">	<span class="keyword">var</span> minid txid = <span class="number">0xFFFFFFFFFFFFFFFF</span></span><br><span class="line">	<span class="keyword">for</span> _, t := <span class="keyword">range</span> db.txs &#123;</span><br><span class="line">		<span class="keyword">if</span> t.meta.txid &lt; minid &#123;</span><br><span class="line">			minid = t.meta.txid</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 释放该 txid 之前的 page</span></span><br><span class="line">	<span class="keyword">if</span> minid &gt; <span class="number">0</span> &#123;</span><br><span class="line">		db.freelist.release(minid - <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> t, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>查看 db.freelist.release 的实现</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// release moves all page ids for a transaction id (or older) to the freelist.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *freelist)</span> <span class="title">release</span><span class="params">(txid txid)</span></span> &#123;</span><br><span class="line">	m := <span class="built_in">make</span>(pgids, <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">for</span> tid, ids := <span class="keyword">range</span> f.pending &#123;</span><br><span class="line">		<span class="keyword">if</span> tid &lt;= txid &#123;</span><br><span class="line">			<span class="comment">// Move transaction&#x27;s pending pages to the available freelist.</span></span><br><span class="line">			<span class="comment">// Don&#x27;t remove from the cache since the page is still free.</span></span><br><span class="line">			m = <span class="built_in">append</span>(m, ids...)</span><br><span class="line">			<span class="built_in">delete</span>(f.pending, tid)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	sort.Sort(m)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 可重新使用的 pending page 与当前可使用的 page merge sort</span></span><br><span class="line">	f.ids = pgids(f.ids).merge(m)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>leafPageElement 结构</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> leafPageElement <span class="keyword">struct</span> &#123;</span><br><span class="line">	flags <span class="keyword">uint32</span> <span class="comment">// 4 bytes; 2 leafElement / 1 branchElement / 4 meta / </span></span><br><span class="line">	pos   <span class="keyword">uint32</span> <span class="comment">// 4 bytes</span></span><br><span class="line">	ksize <span class="keyword">uint32</span> <span class="comment">// 4 bytes</span></span><br><span class="line">	vsize <span class="keyword">uint32</span> <span class="comment">// 4 bytes</span></span><br><span class="line">	<span class="comment">// pos = 16 that remain space to store key and value</span></span><br><span class="line">	<span class="comment">// for example ksize = 8 that 64 bytes for key</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如图所示</p>
-<p><img src="/images/leafPageElement.jpeg" alt="leafPageElement"></p>
-<p>即叶子节点中存储了 key 和 value</p>
-<h1 id="etcd"><a href="#etcd" class="headerlink" title="etcd"></a>etcd</h1><p>查看 mvcc/kvstore.go 的 func (s *store) put(key, value []byte, leaseID lease.LeaseID) 方法</p>
-<p>查看如下</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *store)</span> <span class="title">put</span><span class="params">(key, value []<span class="keyword">byte</span>, leaseID lease.LeaseID)</span></span> &#123;</span><br><span class="line">	s.txnModify = <span class="literal">true</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 每次 put revision + 1</span></span><br><span class="line">	rev := s.currentRev.main + <span class="number">1</span></span><br><span class="line">	c := rev</span><br><span class="line">	oldLease := lease.NoLease</span><br><span class="line">	<span class="comment">// if the key exists before, use its previous created and</span></span><br><span class="line">	<span class="comment">// get its previous leaseID</span></span><br><span class="line">	_, created, ver, err := s.kvindex.Get(key, rev)</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		c = created.main</span><br><span class="line">		oldLease = s.le.GetLease(lease.LeaseItem&#123;Key: <span class="keyword">string</span>(key)&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// revision to bytes</span></span><br><span class="line">	ibytes := newRevBytes()</span><br><span class="line">	revToBytes(revision&#123;main: rev, sub: s.currentRev.sub&#125;, ibytes)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// </span></span><br><span class="line">	ver = ver + <span class="number">1</span></span><br><span class="line">	kv := mvccpb.KeyValue&#123;</span><br><span class="line">		Key:            key,</span><br><span class="line">		Value:          value,</span><br><span class="line">		CreateRevision: c,</span><br><span class="line">		ModRevision:    rev,</span><br><span class="line">		Version:        ver,</span><br><span class="line">		Lease:          <span class="keyword">int64</span>(leaseID),</span><br><span class="line">	&#125;</span><br><span class="line">	d, err := kv.Marshal()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		plog.Fatalf(<span class="string">&quot;cannot marshal event: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// boltdb 中的 key 为 revision</span></span><br><span class="line">	<span class="comment">// value 为 mvccpb.KeyValue</span></span><br><span class="line">	<span class="comment">// 存入 boltdb 即 db 文件</span></span><br><span class="line">	s.tx.UnsafeSeqPut(keyBucketName, ibytes, d)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 存入 key -&gt; revision 的索引</span></span><br><span class="line">	s.kvindex.Put(key, revision&#123;main: rev, sub: s.currentRev.sub&#125;)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 这个是啥</span></span><br><span class="line">	<span class="comment">// s.changes 什么时候释放，不然内存不会爆？</span></span><br><span class="line">	s.changes = <span class="built_in">append</span>(s.changes, kv)</span><br><span class="line">	s.currentRev.sub += <span class="number">1</span></span><br><span class="line">	<span class="comment">// lease 相关代码先略去不表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>查看 kvindex 的实现，实际上为 newTreeIndex()，即 mvcc/index.go，摘抄一句 package 注释</p>
-<p>Package btree implements in-memory B-Trees of arbitrary degree.</p>
-<p>okay, index 底层是 B tree</p>
-<p>查看 kvindex.put 方法</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ti *treeIndex)</span> <span class="title">Put</span><span class="params">(key []<span class="keyword">byte</span>, rev revision)</span></span> &#123;</span><br><span class="line">	keyi := &amp;keyIndex&#123;key: key&#125;</span><br><span class="line">	ti.Lock()</span><br><span class="line">	<span class="keyword">defer</span> ti.Unlock()</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// B tree get</span></span><br><span class="line">	item := ti.tree.Get(keyi)</span><br><span class="line">	<span class="keyword">if</span> item == <span class="literal">nil</span> &#123;</span><br><span class="line">		keyi.put(rev.main, rev.sub)</span><br><span class="line">		ti.tree.ReplaceOrInsert(keyi)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// update value in B tree</span></span><br><span class="line">	okeyi := item.(*keyIndex)</span><br><span class="line">	okeyi.put(rev.main, rev.sub)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>kvindex 是个完全在内存中的索引，如果 etcd 重启了之后，需要恢复 kvindex 么？答案是需要的</p>
-<p>etcdserver/server.go -&gt; s.kv.Restore(newbe) -&gt; func (s store) Restore(b backend.Backend) error {} -&gt; func (s store) restore() error {}</p>
-<p>在最后这个方法中从 db 文件恢复 kvindex</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1364,13 +1346,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">282k</span>
+    <span title="站点总字数">283k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:16</span>
+    <span title="站点阅读时长">4:18</span>
   </span>
 </div>
 

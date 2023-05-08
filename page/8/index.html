@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-count">125</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -126,7 +126,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">66</span>
+        <span class="site-state-item-count">67</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -158,6 +158,134 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/8e645281.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/8e645281.html" class="post-title-link" itemprop="url">a weired bug of job workload</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-06 11:05:29" itemprop="dateCreated datePublished" datetime="2018-07-06T11:05:29Z">2018-07-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:50:58" itemprop="dateModified" datetime="2020-12-12T07:50:58Z">2020-12-12</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>又要开始分析一个疑难杂症了</p>
+<p>现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出</p>
+<h1 id="job-controller-的工作原理"><a href="#job-controller-的工作原理" class="headerlink" title="job-controller 的工作原理"></a>job-controller 的工作原理</h1><p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> job.NewJobController(</span><br><span class="line">    ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">    ctx.InformerFactory.Batch().V1().Jobs(),</span><br><span class="line">    ctx.ClientBuilder.ClientOrDie(<span class="string">&quot;job-controller&quot;</span>),</span><br><span class="line">).Run(<span class="keyword">int</span>(ctx.Options.ConcurrentJobSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
+
+<p>从启动代码中可以看出 job-controller 关注 pod 与 job 这两种资源的变化情况</p>
+<ul>
+<li>ctx.InformerFactory.Core().V1().Pods()</li>
+<li>ctx.InformerFactory.Batch().V1().Jobs()</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentJobSyncs=5</span><br></pre></td></tr></table></figure>
+
+<p>启动 5 个 worker goroutine</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(jm.worker, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 worker 协程中，1s 执行一次 worker 方法</p>
+<p>worker 方法，实现从 queue 中获取待处理的对象（key），并调用 syncJob 方法处理之</p>
+<ul>
+<li>syncJob 处理成功</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jobInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc: jm.enqueueController,</span><br><span class="line">    UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> job := cur.(*batch.Job); !IsJobFinished(job) &#123;</span><br><span class="line">            jm.enqueueController(job)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    DeleteFunc: jm.enqueueController,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc:    jm.addPod,</span><br><span class="line">    UpdateFunc: jm.updatePod,</span><br><span class="line">    DeleteFunc: jm.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h1 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h1><p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
+<p>我们知道 kubelet 通过 PLEG 来感知节点上 container 的状态，另外 job pod 的 restart policy 目前仅支持两种 Never / onFailure，一般来说默认选择 onFailure 比较合适</p>
+<p>这样业务容器在正常退出后（exit 0），kubelet pleg 感知到后，再加上 onFailure 的策略，正常情况下会 killing pod，job-controller 感知到 pod 减少后，即完成数又增加了 1，即可成功结束</p>
+<p>看下 kubelet 的代码确认逻辑</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Get all the pods.</span></span><br><span class="line">podList, err := g.runtime.GetPods(<span class="literal">true</span>)</span><br><span class="line">ShouldContainerBeRestarted</span><br><span class="line"></span><br><span class="line"><span class="comment">// Check RestartPolicy for dead container</span></span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyNever &#123;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure &#123;</span><br><span class="line">    <span class="comment">// Check the exit code.</span></span><br><span class="line">    <span class="keyword">if</span> status.ExitCode == <span class="number">0</span> &#123;</span><br><span class="line">        glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already successfully ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>如此情况下需要 KillPod</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> keepCount == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(changes.ContainersToStart) == <span class="number">0</span> &#123;</span><br><span class="line">    changes.KillPod = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以正常情况下 job 控制的 pod，重启策略为 RestartPolicyOnFailure，如是正常退出的情况，则该 container 无需重启，而再加上述的判断，则当前 pod 需要被删除</p>
+<p>调用该 killPodWithSyncResult 方法</p>
+<p>经过如此分析，可能出现的问题原因及疑点</p>
+<ul>
+<li>2 个 pod 处于 running 状态，而对应的 container 却没有了，尝试从 relist: g.runtime.GetPods(true) 寻找可能原因</li>
+<li>使用命令行如何获取节点上的 container 容器，如果 container 正常获取，且 pod 对应的 container 已正常退出，那么为何未看到 SyncLoop(PLEG) ContainerDied 事件</li>
+<li>pod 状态也是持续 running，而我们知道在 syncPod 中会调用 statusManager 设置新的 pod status，如果能获取到正确的 container info，pod status 也会被正确的更新至 kube-apiserver</li>
+<li>正常情况下，至多为一个 pod 保留一个 container 记录，其余均会被 clean。为何当时 docker ps -a 无一相关的 container，全都被 clear 了？那意味着 node evicted，或者是 pod 被 delete 了。evicted 的可能性较小，而 pod 被 delete 的话，除了人为，job-controller activeDeadline 超了也会设置</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1518,132 +1646,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9bd3bd71.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/9bd3bd71.html" class="post-title-link" itemprop="url">angularjs and webpack</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-12-03 15:58:34" itemprop="dateCreated datePublished" datetime="2017-12-03T15:58:34Z">2017-12-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 08:03:53" itemprop="dateModified" datetime="2020-11-22T08:03:53Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在给 ETCD cluster on k8s 写 FE (front end)，此篇总结一下框架性的东西</p>
-<p>很久之前在实验室的时候，曾经蹚水过一段时间 fe 开发，深知 fe 领域目前 一天涌现 100 个开发工具 的节奏，从 angularjs (google) 到 react (facebook)，都是 SPA (single page application) 的实践</p>
-<p>使用这两框架，对于 fe 小白开发来说，最大好处是省去了大部分 jQuery 手工操作 DOM 的繁杂代码，都由框架代为更新 DOM 元素了。当然也引入了比服务器端渲染页面的经典设计模式 MVC (model view controller)，更进一步的 MVVM (model view viewModel) 模式，支持视图到模型，模型到视图的双向数据更新特性。由此 fe 的代码得到极大净化</p>
-<p>然而无奈 fe 仍然是个劳动密集型的方向，毕竟是眼见为实，与用户距离最近的东西，一言不合就有需求，就有改动了。因此代码一开始可能是规整的，过了一段时间后，就直接起飞了 …</p>
-<p>现实不讨论了，先进入正题</p>
-<h2 id="找轮子"><a href="#找轮子" class="headerlink" title="找轮子"></a>找轮子</h2><p>不重复造轮子，github 上搜索一把，可以得到很多 startup 项目，找一个 star 比较多的，例如 <a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack%EF%BC%8C%E7%9B%B4%E6%8E%A5%E7%94%A8%E8%AF%A5%E9%A1%B9%E7%9B%AE%E6%9D%A5%E5%BC%80%E5%A7%8B%E5%A5%BD%E4%BA%86">https://github.com/preboot/angularjs-webpack，直接用该项目来开始好了</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/preboot/angularjs-webpack.git</span><br></pre></td></tr></table></figure>
-
-<h2 id="分析轮子"><a href="#分析轮子" class="headerlink" title="分析轮子"></a>分析轮子</h2><p>该项目为 node + angularjs + webpack 的一个极简 demo</p>
-<p>node 就不说了，fe 的革命，很大程度由 node 引发</p>
-<p>angularjs 呢，mvvm 框架</p>
-<p>webpack 简单理解的话，在 java / c++ 等语言中，可以通过 include or import 关键字导入依赖的库，进而在当前模块中使用已实现的方法，避免重复的开发工作。那么在 fe 中 import 依赖的组件，如当前模块依赖的 js / css 代码，webpack 的作用就是理解这些 import 指令，最后将所有代码 打包 成可实际执行的代码</p>
-<h2 id="用轮子造车子"><a href="#用轮子造车子" class="headerlink" title="用轮子造车子"></a>用轮子造车子</h2><h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── LICENSE</span><br><span class="line">├── README.md</span><br><span class="line">├── karma.conf.js</span><br><span class="line">├── node_modules</span><br><span class="line">├── package.json</span><br><span class="line">├── postcss.config.js</span><br><span class="line">├── src</span><br><span class="line">└── webpack.config.js</span><br></pre></td></tr></table></figure>
-
-<p>package.json 定义了 node 项目的依赖</p>
-<p>通过 npm install 安装 package.json 中定义的依赖到项目下的 node_modules 文件夹下</p>
-<p>国内的网络环境一般，需要一些手段加速依赖下载，如淘宝的 npm 镜像站</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装淘宝定义的 cnpm</span></span><br><span class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</span><br><span class="line"><span class="comment"># 安装项目依赖</span></span><br><span class="line">cnpm install</span><br></pre></td></tr></table></figure>
-
-<p>速度可以说是很快了，秒装</p>
-<p>webpack.config.js 为 webpack 的配置文件，其中比较重要的配置有</p>
-<p>SPA 应用 js 入口</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">config.entry = isTest ? <span class="keyword">void</span> <span class="number">0</span> : &#123;</span><br><span class="line">  <span class="attr">app</span>: <span class="string">&#x27;./src/app/app.js&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>SPA 应用 page 入口</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> HtmlWebpackPlugin(&#123;</span><br><span class="line">  <span class="attr">template</span>: <span class="string">&#x27;./src/public/index.html&#x27;</span>,</span><br><span class="line">  <span class="attr">inject</span>: <span class="string">&#x27;body&#x27;</span></span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
-
-<p>base 路径</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config.devServer = &#123;</span><br><span class="line">  <span class="attr">contentBase</span>: <span class="string">&#x27;./src/public&#x27;</span>,</span><br><span class="line">  <span class="attr">stats</span>: <span class="string">&#x27;minimal&#x27;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>即在该路径下有一文件，如 ./src/public/hello.png，那么在浏览器中 url/hello.png 能访问到</p>
-<p>本地开发时 dev server 的访问地址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// Output path from the view of the page</span><br><span class="line">// Uses webpack-dev-server in development</span><br><span class="line">publicPath: isProd ? &#x27;/&#x27; : &#x27;http://localhost:8080/&#x27;,</span><br></pre></td></tr></table></figure>
-
-<h3 id="本地开发"><a href="#本地开发" class="headerlink" title="本地开发"></a>本地开发</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 启动 webpack dev server</span><br><span class="line">npm start</span><br><span class="line">// 浏览器访问 pulicPath 地址即可，如</span><br><span class="line">// http://localhost:8080/</span><br></pre></td></tr></table></figure>
-
-<p>其他的不多说了，此篇质量一般，也是我现在开发 fe 的一个无奈吧，这里增加几句话，那里增加几句话，okay it works，细节不清楚，只是为了完成业务逻辑，当然也因为目前兴趣不在此。详细的可看看 参考 (3)</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://github.com/preboot/angularjs-webpack">https://github.com/preboot/angularjs-webpack</a></p>
-<p><a target="_blank" rel="noopener" href="https://npm.taobao.org/">https://npm.taobao.org/</a></p>
-<p><a target="_blank" rel="noopener" href="http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/">http://angular-tips.com/blog/2015/06/using-angular-1-dot-x-with-es6-and-webpack/</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1668,13 +1670,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">282k</span>
+    <span title="站点总字数">283k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:16</span>
+    <span title="站点阅读时长">4:18</span>
   </span>
 </div>
 
