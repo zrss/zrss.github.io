@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">125</span>
+          <span class="site-state-item-count">126</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,116 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b3b02fd2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b3b02fd2.html" class="post-title-link" itemprop="url">ssl tls and https</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 16:46:00" itemprop="dateCreated datePublished" datetime="2017-12-03T16:46:00Z">2017-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 08:47:28" itemprop="dateModified" datetime="2020-11-22T08:47:28Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>安全方面的姿势，掌握略有不足，趁着空闲；另外也是为了不仅仅知道，curl 命令访问 https 接口的时候，需要携带三个证书，如此模糊的解释而努力<br>to be cont.</p>
+</blockquote>
+<p>搜索了一下网上已有很多现有资料，这里就重新回顾一下，当做我自己的姿势了</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/denji/golang-tls">https://github.com/denji/golang-tls</a></p>
+<p>首先看下 go 语言中，如何实现 server 端 HTTPS/TLS</p>
+<p><a target="_blank" rel="noopener" href="http://tonybai.com/2015/04/30/go-and-https/">http://tonybai.com/2015/04/30/go-and-https/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="comment">// &quot;fmt&quot;</span></span><br><span class="line">    <span class="comment">// &quot;io&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">HelloServer</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/plain&quot;</span>)</span><br><span class="line">    w.Write([]<span class="keyword">byte</span>(<span class="string">&quot;This is an example server.\n&quot;</span>))</span><br><span class="line">    <span class="comment">// fmt.Fprintf(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">    <span class="comment">// io.WriteString(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">&quot;/hello&quot;</span>, HelloServer)</span><br><span class="line">    err := http.ListenAndServeTLS(<span class="string">&quot;:443&quot;</span>, <span class="string">&quot;server.crt&quot;</span>, <span class="string">&quot;server.key&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">&quot;ListenAndServe: &quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>443 为知名的 HTTPS 服务端口，那么 server.crt、server.key 这两个文件又是如何作用，哪来的呢？</p>
+<p>首先解释哪来的问题</p>
+<p>使用 openssl 生成私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;RSA&quot; ≥ 2048-bit</span></span><br><span class="line">openssl genrsa -out server.key 2048</span><br></pre></td></tr></table></figure>
+
+<p>or 使用另外一种算法生成的私钥</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;ECDSA&quot; ≥ secp384r1</span></span><br><span class="line"><span class="comment"># List ECDSA the supported curves (openssl ecparam -list_curves)</span></span><br><span class="line">openssl ecparam -genkey -name secp384r1 -out server.key</span><br></pre></td></tr></table></figure>
+
+<p>私钥生成好之后，使用私钥生成公钥（x509 自签发 crt）</p>
+<blockquote>
+<p>Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650</span><br></pre></td></tr></table></figure>
+
+<p>所以呢，server.key 是私钥，server.crt 是公钥，生成之后，就可以用来初始化 TLS server 了</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1212,116 +1322,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/3d903bd6.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/3d903bd6.html" class="post-title-link" itemprop="url">岁月无可回头(11)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-13 21:59:32" itemprop="dateCreated datePublished" datetime="2017-10-13T21:59:32Z">2017-10-13</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:46:24" itemprop="dateModified" datetime="2020-12-12T07:46:24Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>254</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>很久没写了，这次真的情绪很低落</p>
-<p>自己明明那么认真，然而却事与愿违</p>
-<p>不过想想也可以理解，毕竟每个人心中重要的事情不一样，接受吧</p>
-<p>是呢，工作半年，“我变强了，也变秃了”，不再是小年轻的模样，已是满脸胡须</p>
-<p>年轻真好呀，可以</p>
-<p>跑到海角之南，只为追一首歌的回忆</p>
-<p>天不怕地不怕的闯</p>
-<p>藐视一切</p>
-<p>可惜，又不可惜</p>
-<p>梦醒的感觉而已</p>
-<p>美好又遗憾</p>
-<p>2017年10月13日21:59:32 杭州</p>
-<hr>
-<p>三年后，此时的我，回去翻这些文字（陆陆续续写了 11 篇），只能感叹 “没有岁月可回头” ~ 希望今后有更强大的内心，去面对更多挑战</p>
-<p>2020年08月01日00:47:47 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1346,13 +1346,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">283k</span>
+    <span title="站点总字数">340k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:18</span>
+    <span title="站点阅读时长">5:09</span>
   </span>
 </div>
 

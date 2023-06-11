@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">125</span>
+          <span class="site-state-item-count">126</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,160 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/a1778563.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/a1778563.html" class="post-title-link" itemprop="url">k8s-subpath-and-s3fs</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-05 10:11:38" itemprop="dateCreated datePublished" datetime="2020-04-05T10:11:38Z">2020-04-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 02:15:32" itemprop="dateModified" datetime="2020-11-22T02:15:32Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>k8s subPath and s3 fuse mount (s3fs)</p>
+<p>意识流分析，致敬一个生产环境中的问题，真是看了很多代码</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/s3fs-fuse/s3fs-fuse">https://github.com/s3fs-fuse/s3fs-fuse</a></p>
+<p>实现了 fuse 接口，底层对接 s3 协议</p>
+<p>打开 s3fs info 日志，观察可知</p>
+<p>fuse 周期性触发</p>
+<ol>
+<li>s3fs_getattr<ol>
+<li>check_object_access<ol>
+<li>get_object_attribute<ol>
+<li>s3 head request</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>check_parent_object_access</li>
+</ol>
+</li>
+<li>s3fs_opendir<ol>
+<li>check_object_access<ol>
+<li>check_parent_object_access</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>s3fs_readdir 方法，该方法底层会调用 list_bucket func，到s3 server查询对象列表<ol>
+<li>查询到有新的对象后，会 add 到本地 stat cache，并且下载到本地</li>
+</ol>
+</li>
+</ol>
+<p>所以使用 s3fs mount s3 bucket 到本地时，s3fs 会周期性同步远端的数据到本地，写入时，也会同步到远端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -SIGUSR2 <span class="variable">$&#123;s3fs_pid&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以动态调整 s3fs 日志级别，s3fs 默认日志输出到 /var/log/messages</p>
+<p>messages.2.gz 文件解压，可以使用 <code>gzip -d messages.2.gz</code></p>
+<hr>
+<p>生产环境出了一个诡异的问题</p>
+<p>server / worker 两个实例，在不同节点，挂载了同一个桶</p>
+<p>k8s subPath 方式挂载子对象，例如 test-bucket/output1</p>
+<p>在开始阶段 server s3fs 会上传 test-bucket/output1 文件夹，两次</p>
+<p>而 worker s3fs 不会</p>
+<p>debug 了一会儿，直接原因与 s3 对象的权限相关，用户创建的对象，s3fs mount 时，没权限 head，但是又能 list 到</p>
+<p>s3fs 如果 list 该对象为非空时，可正常读写该对象下的内容，也与验证结果符合 -.0</p>
+<hr>
+<p>分割线，前边是一些分析</p>
+<p>k8s subPath</p>
+<p>subPath 是相对于 volume root path 的一个 sub path，用于挂载 volume 内的子目录</p>
+<p>实现上首先会将 volume 挂载于节点的 pod volume 路径下</p>
+<ol>
+<li>再去 open subPath，open 之后，成为 kubelet 进程下的一个 fd</li>
+<li>接下来创建 volume-subpaths 下的一个路径（文件名与 volumeMount index 一致），并且判断 subPath 是文件还是文件夹<ol>
+<li>文件夹，mkdir 一把</li>
+<li>文件，写一个空文件</li>
+</ol>
+</li>
+<li>最后将该 fd mount 到上述创建的路径中</li>
+</ol>
+<p>不明点，在 1 步骤上，实际上 subPath 为 noObject；从文件系统的角度不确定它为文件夹，还是对象，而 kubelet 却执行成功了，并顺利挂载到容器中</p>
+<p>从 s3fs 的日志，对 subPath 首先执行了</p>
+<ol>
+<li>s3fs_mkdir，mode 0750</li>
+<li>s3fs_chmod，mode 40777</li>
+</ol>
+<p>即触发了两次 s3 PUT.OBJECT 的操作</p>
+<p>这块就不深入分析了为何如此了</p>
+<p>感叹一下，系统层层调用之后，问题定位需要极其清晰的思路，大胆假设，小心求证；解决问题的思路是第一重要的</p>
+<hr>
+<p>另外 s3fs 1.80 版本 err ret 不打印错误信息，只打印了个 response code，这个也比较伤，建议升级到当前最新版本<br>s3fs 1.86，会把错误信息也打印出来</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1160,115 +1314,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9ca10b5e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/9ca10b5e.html" class="post-title-link" itemprop="url">horovod-tf</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-05-19 10:44:40" itemprop="dateCreated datePublished" datetime="2019-05-19T10:44:40Z">2019-05-19</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-22 02:45:33" itemprop="dateModified" datetime="2020-11-22T02:45:33Z">2020-11-22</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>408</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>0.16.2</p>
-</blockquote>
-<p>horovod 启动流程</p>
-<p>hvd.init() 发生了什么</p>
-<p>HorovodBasics -&gt; init -&gt; horovod_init -&gt; InitializeHorovodOnce</p>
-<p>启动线程</p>
-<p>BackgroundThreadLoop</p>
-<p>MPI 初始化</p>
-<p>MPI_Comm_dup</p>
-<p>MPI_Comm_rank 获取当前进程的 RANK</p>
-<p>MPI_Comm_size 获取 local size</p>
-<p>两次 AllGather, 把 rank 与 size 分发到所有进程</p>
-<p>检查是否同构，即 size 是否相同</p>
-<p>rank 0 初始化 MessageTable</p>
-<p>initialization_done = true 初始化结束</p>
-<p>主线程等待</p>
-<p>initialization_done = true</p>
-<p>背景线程持续 RunLoopOnce</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="built_in">RunLoopOnce</span>(state, is_coordinator));</span><br></pre></td></tr></table></figure>
-
-<p>从 message_queue 中获取数据</p>
-<p>DistributedOptimizer</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1293,13 +1338,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">283k</span>
+    <span title="站点总字数">340k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:18</span>
+    <span title="站点阅读时长">5:09</span>
   </span>
 </div>
 
