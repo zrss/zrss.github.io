@@ -4,6 +4,15 @@ abbrlink: f62c2008
 date: 2023-05-03 20:05:15
 ---
 
+以如下 nccl 版本为例分析
+
+* pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+* pytorch 1.13, cuda 11.6.2, nccl 2.14.3
+
+```python
+python -c "import torch;print(torch.cuda.nccl.version())"
+```
+
 # rdma 和网络相关知识
 
 1. https://www.doc.ic.ac.uk/~jgiceva/teaching/ssc18-rdma.pdf, rdma tutorial
@@ -17,45 +26,99 @@ date: 2023-05-03 20:05:15
 
 缩写解释
 
-CA: channel adapter, 即 rdma (infiniband) 网卡
+* CA: channel adapter, 即 rdma (infiniband) 网卡; HCA, host channel adapter
+* RoCE: rdma over Converged Ethernet; rdma 的一种高性价比实现 (对于云厂商来说, 一般而言只要替换支持 RoCE 的网卡即可, 传输/交换网络设备不需要更换, 即可支持业务层 rdma)
+* mlnx ofed: ib 驱动
+* rdma: remote direct memory access, 远程直接访问内存
+* rdma program
+  * qp: queue pair, 包括 send queue, recv queue; Rtr, ready to receive; Rts, ready to send; qp 状态机; qp 可以理解为 rdma 中的 client
+  * cq: completion queue, 用于获取 send/recv 结果
+  * mr: memory region, rdma 可操作的 memory region; rkey, 用于远程访问 mr 的 key; lkey, 用于本地读取 mr 的 key
+  * pd: protect domain, 用于关联 mr
+  * wr: work request
 
-# nccl ib
+# nccl net
 
-net.h, ncclNet
+net.h, ncclNet 里边相当于网络接口定义, 例如定义了 ncclNetIsend 等接口
 
-两种实现
+而这些接口的具体又会有 netSocketIsend 与 netIBIsend 的实现，在如下两个对象中
 
 * ncclNetSocket
 * ncclNetIb
 
-https://github.com/NVIDIA/nccl/issues/790
+## net 整体流程概述
 
-其中 ib 有如下一段代码
+**socket server**
 
+1. listen
+
+**send**
+
+1. connect
+1. send check
+1. send
+1. test
+
+**recv**
+
+1. accept
+1. recv check
+1. recv
+1. test
+
+## nccl net ib
+
+> https://github.com/Mellanox/nv_peer_memory
+> https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html, *This module, originally maintained by Mellanox on GitHub, is now included with the NVIDIA Linux GPU driver*
+
+1. net ib 相比与 net socket 的优势在于 net ib 通过 ibverbs api, 实现了 rdma (当然前提是主机上有能支持 rdma 的网卡); rdma 通过网卡直接读写远端的内存 (HOST MEM); 也就是达到了所谓的 OS bypass/CPU offload 效果, 能极大的提升通过网络传输数据的效率
+1. 如果安装了 `nv_peer_mem` mod, net ib 可以通过网卡直接读写远端的 GPU MEM (DEV MEM); 另外高版本 (例如 470) 的 gpu driver 自带了 `nvidia-peermem` mod, 可以替代 `nv_peer_mem` 提供 GPU Direct RDMA 功能
+
+### net ib 整体流程概述
+
+* ib connect, send check / ib accept, recv check
+
+在这个阶段, 主要是发送方与接收方通过 socket 完成 rdma 通信初始化工作, 具体如 qp 初始化
+
+![ib connect/ib accept](/images/nccl-ib-connect-accept.drawio.svg)
+
+* recv/send
+
+在这个阶段, 主要是接收方将待接收数据的 mem addr 通过 fifo 数据结构 rdma 写入到发送方; 随后发送方根据 fifo 数据结构, 将数据 rdma 写入到接收方指示的 mem addr
+
+![ib recv/ib send](/images/nccl-ib-send-recv.drawio.svg)
+
+**socket server**
+
+1. listen: 监听 bootstrap 网卡端口, 启动 socket server
+
+**send**
+
+1. connect: 创建 pd/cq (comm->verbs), mr (comm->fifo), qp (comm->qps); 最终将 qpInfo (包括 fifo addr, fifo rkey, qp 等信息) 通过 socket 发送到 receiver
+1. send check: 通过 socket 接收 receiver 返回的 qpInfo; 使用 receiver qpInfo 完成 sender qp (本端 qp) 的状态转移; 可以理解为建立 sender qp 与 receiver qp 的连接 (Rtr, Rts); 通过 socket 发送 1 (ready) 到 receiver; send comm ready
+1. send: `ibv_post_send`, 往 qp 的 send queue 发 wr (cp 会通知是否完成); 发送 fifo 中的 `ncclIbSendFifo` slot; 如果 slot ready, sender 根据 `ncclIbSendFifo` 中 receiver 写入的 MEM 地址, 直接将待发送的 data 写入到 receiver 指示的 MEM 地址
+1. test: `ibv_poll_cq`, 从 cq 中获取已完成的 wr, 判断发送请求是否完成
+
+**recv**
+
+1. accept: 接收 sender 的 qpInfo (包括 sender 的 fifo addr, fifo rkey, qp 等信息); 创建 pd/cq (rComm->verbs), mr (rComm->remFifo.elems), qp (rComm->qps); 使用 sender qpInfo 完成 receiver qp (本端 qp) 的状态转移; 最终将 qpInfo (包括 fifo addr, fifo rkey, qp 等信息) 通过 socket 发送到 sender
+1. recv check: 接收 1 (ready); recv comm ready
+1. recv: `ibv_post_recv` 往 qp 的 recv queue 发 wr (cq 会通知是否完成); `ncclIbPostFifo`, 将 fifo 信息 (receiver 准备接收数据的 MEM 地址, rkey 等信息) rdma 到 sender fifo
+1. test: `ibv_poll_cq`, 从 cq 中获取已完成的 wr, 判断接收请求是否完成
+
+# nccl recv 流程说明
+
+交由 rdma 操作的 MEM 需要先 reg 为 memory region (mr), reg 动作在 `recvProxyConnect` 方法中执行
+
+```c++
+NCCLCHECK(ncclNetRegMr(comm, resources->netRecvComm, resources->buffers[p], resources->buffSizes[p], NCCL_NET_MAP_DEV_MEM(map, buffs[p]) ? NCCL_PTR_CUDA : NCCL_PTR_HOST, &resources->mhandles[p]));
 ```
-      if (wc->status != IBV_WC_SUCCESS) {
-        char line[SOCKET_NAME_MAXLEN+1];
-        WARN("NET/IB : Got completion from peer %s with error %d, opcode %d, len %d, vendor err %d",
-             ncclSocketToString(r->addr, line), wc->status, wc->opcode, wc->byte_len, wc->vendor_err);
-        return ncclRemoteError;
-      }
-```
 
-ncclNetTest 被用于在特定场景下确认发送与接受是否完成
+随后执行 `recvProxyProgress` 方法, 涉及到网络通信的, 最终通过 `ncclNetIrecv` 方法执行接收数据的实现; `ncclNetIrecv` 在 net ib 中的实现为 `ncclIbIrecv`
 
-```
-      // Check whether the network has completed some send operations.
-      if (sub->done < sub->transmitted) {
-        int done;
-        int buffSlot = (sub->base+sub->done)%NCCL_STEPS;
-        NCCLCHECK(ncclNetTest(comm, sub->requests[buffSlot], &done, NULL));
-        if (done) {
-          TRACE(NCCL_NET, "sendProxy [%ld/%d] request %p done", sub->done, buffSlot, sub->requests[buffSlot]);
-```
+# nccl 流程说明
 
-pytorch 1.13 cuda 11.6.2 with nccl 2.14.3
-
-nccl 通信实现看下来的机制大概是
+nccl 完整通信实现看下来的机制大致是
 
 1. nccl group 启动
 1. nccl proxy service 启动
@@ -65,9 +128,25 @@ nccl 通信实现看下来的机制大概是
 
 c++ 代码较为难读 ... 先大致理解如上
 
-net_ib.cc 代码注释, 尽量理解, 难免有误
+# nccl ib 相关环境变量说明
 
-https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc
+> https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html
+> https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/
+
+RoCE
+
+1. **NCCL_SOCKET_IFNAME**: 指定 ib bootstrap 网卡 (socket)
+1. **NCCL_IB_HCA**: 指定 ib 网卡
+1. **NCCL_IB_RETRY_CNT**: qp.retry_cnt, A 3 bits value of the total number of times that the QP will try to resend the packets before reporting an error because the remote side doesn't answer in the primary path
+1. **NCCL_IB_TIMEOUT**: qp.timeout, The minimum timeout that a QP waits for ACK/NACK from remote QP before retransmitting the packet.
+1. **NCCL_IB_TC**: qp.ah_attr.grh.traffic_class, traffic_class, Using this value, the originator of the packets specifies the required delivery priority for handling them by the routers
+1. **NCCL_IB_GID_INDEX**: qp.ah_attr.grh.sgid_index, An index in the port's GID table that will be used to identify the originator of the packet
+
+# net_ib.cc 代码注释
+
+net_ib.cc 代码注释, 尽量理解, 难免有误, 持续学习
+
+> https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc
 
 ```c++
 /*************************************************************************
@@ -101,7 +180,7 @@ https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc
 static char ncclIbIfName[MAX_IF_NAME_SIZE+1];
 static union ncclSocketAddress ncclIbIfAddr;
 
-// rdma (infiniband) 中的 memory region, 即提供给 rdma 网卡直接操作的 pin memory
+// rdma (infiniband) 中的 memory region, 即提供给 rdma 网卡直接操作 (读/写) 的 pin memory
 struct ncclIbMr {
   uintptr_t addr;
   int pages;
@@ -267,14 +346,14 @@ ncclResult_t ncclIbInit(ncclDebugLogger_t logFunction) {
         struct ibv_device_attr devAttr;
         memset(&devAttr, 0, sizeof(devAttr));
         
-        // 查询 ib 设备
+        // 查询 ib 设备详情
         if (ncclSuccess != wrap_ibv_query_device(context, &devAttr)) {
           WARN("NET/IB : Unable to query device %s", devices[d]->name);
           if (ncclSuccess != wrap_ibv_close_device(context)) { return ncclInternalError; }
           continue;
         }
 
-        // 获取 ib 设备 port
+        // 获取 ib 设备 port 详情
         for (int port = 1; port <= devAttr.phys_port_cnt; port++) {
           struct ibv_port_attr portAttr;
           if (ncclSuccess != wrap_ibv_query_port(context, port, &portAttr)) {
@@ -426,7 +505,7 @@ static_assert(MAX_REQUESTS <= 256, "request id are encoded in wr_id and we need 
 
 #define NCCL_IB_MAX_QPS 128
 
-// rdma (infiniband) 中的 queue pair
+// 完成 rdma (infiniband) 需要的信息; 例如 queue pair num
 struct ncclIbQpInfo {
   uint32_t lid;
   uint8_t ib_port;
@@ -513,11 +592,10 @@ struct ncclIbListenComm {
 
 // ncclIbSendFifo
 struct ncclIbSendFifo {
-  uint64_t addr; // 远端地址信息
+  uint64_t addr; // 远端 mem addr
   int      size; // 数据大小
   uint32_t rkey; // remote key, 用于 rdma
 
-  // ??
   uint32_t nreqs;
   uint32_t tag;
   uint64_t idx;
@@ -586,7 +664,6 @@ ncclResult_t ncclIbInitVerbs(int dev, struct ibv_context* ctx, struct ncclIbVerb
   pthread_mutex_lock(&ncclIbDevs[dev].lock);
   if (0 == ncclIbDevs[dev].pdRefs++) {
     ncclResult_t res;
-
     // 分配 protect domain, pd
     NCCLCHECKGOTO(wrap_ibv_alloc_pd(&ncclIbDevs[dev].pd, ctx), res, failure);
     if (0) {
@@ -1006,7 +1083,7 @@ ncclResult_t ncclRecvCheck(struct ncclIbRecvComm* comm) {
   return ncclSuccess;
 }
 
-// 这放的也太随意了, 前后逻辑不连贯
+// 这放的位置有点儿突然 ...
 ncclResult_t ncclIbTest(void* request, int* done, int* size);
 
 /* DMA-BUF support */
@@ -1186,7 +1263,7 @@ ncclResult_t ncclIbMultiSend(struct ncclIbSendComm* comm, int slot) {
 ncclResult_t ncclIbIsend(void* sendComm, void* data, int size, int tag, void* mhandle, void** request) {
   struct ncclIbSendComm* comm = (struct ncclIbSendComm*)sendComm;
 
-  // 如果未 ready, 则初始化 qp
+  // 如果未 ready, 则 set up qp
   if (comm->ready == 0) NCCLCHECK(ncclSendCheck(comm));
   if (comm->ready == 0) { *request = NULL; return ncclSuccess; }
 
@@ -1204,7 +1281,6 @@ ncclResult_t ncclIbIsend(void* sendComm, void* data, int size, int tag, void* mh
   nreqs = slots[0].nreqs;
   // Wait until all data has arrived
   for (int r=1; r<nreqs; r++) while(slots[r].idx != idx);
-
 
   __sync_synchronize(); // order the nreqsPtr load against tag/rkey/addr loads below
   for (int r=0; r<nreqs; r++) {
@@ -1260,7 +1336,7 @@ ncclResult_t ncclIbIsend(void* sendComm, void* data, int size, int tag, void* mh
   return ncclSuccess;
 }
 
-// 发送 fifo 先进先出队列中的数据
+// 发送 fifo; fifo 中提供的是 ncclIbSendFifo, 其中有 rkey, 以及等待数据写入的 mem addr
 ncclResult_t ncclIbPostFifo(struct ncclIbRecvComm* comm, int n, void** data, int* sizes, int* tags, void** mhandles, struct ncclIbRequest* req) {
   struct ibv_send_wr wr;
   memset(&wr, 0, sizeof(wr));
@@ -1377,7 +1453,7 @@ ncclResult_t ncclIbIrecv(void* recvComm, int n, void** data, int* sizes, int* ta
   return ncclSuccess;
 }
 
-// 由前边的代码可知, ib flush 逻辑用于 gdr, 默认不开启
+// 由前边的代码可知, ib flush 逻辑用于 gdr flush, 默认开启
 ncclResult_t ncclIbIflush(void* recvComm, int n, void** data, int* sizes, void** mhandles, void** request) {
   struct ncclIbRecvComm* comm = (struct ncclIbRecvComm*)recvComm;
   int last = -1;
@@ -1440,14 +1516,22 @@ ncclResult_t ncclIbTest(void* request, int* done, int* sizes) {
 
     for (int w=0; w<wrDone; w++) {
       struct ibv_wc *wc = wcs+w;
+
+      // https://www.rdmamojo.com/2013/02/15/ibv_poll_cq/
+      // Not all wc attributes are always valid. If the completion status is other than IBV_WC_SUCCESS, only the following attributes are valid:
+      // wr_id
+      // status
+      // qp_num
+      // vendor_err
+
       if (wc->status != IBV_WC_SUCCESS) {
         char line[SOCKET_NAME_MAXLEN+1];
         WARN("NET/IB : Got completion from peer %s with error %d, opcode %d, len %d, vendor err %d",
-             ncclSocketToString(r->addr, line), wc->status, wc->opcode, wc->byte_len, wc->vendor_err);
+             ncclSocketToString(r->addr, line), wc->status, wc->opcode, wc->byte_len, wc->vendor_err); // 这里增加打印 qp num 会更方便 trace
         return ncclRemoteError;
       }
 
-      struct ncclIbRequest* req = r->verbs->reqs+(wc->wr_id & 0xff);
+      struct ncclIbRequest* req = r->verbs->reqs+(wc->wr_id & 0xff);      
       if (req->type == NCCL_NET_IB_REQ_SEND) {
         for (int i=0; i<req->nreqs; i++) {
           struct ncclIbRequest* sendReq = r->verbs->reqs+((wc->wr_id >> (i*8)) & 0xff);
