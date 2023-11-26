@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Docker NetworkIBM 的几篇 Blog overall 的讲了一下 容器如何访问外部网络 通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip 外部网络如何访问容器 容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker network">
+<meta property="og:url" content="https://zrss.github.io/archives/ac75c7e9.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="Docker NetworkIBM 的几篇 Blog overall 的讲了一下 容器如何访问外部网络 通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip 外部网络如何访问容器 容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-02T11:31:11.000Z">
+<meta property="article:modified_time" content="2023-05-03T03:15:20.367Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="tech">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/ac75c7e9.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/ac75c7e9.html","path":"archives/ac75c7e9.html","title":"docker network"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>docker network | 随风飘散的记忆</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-Network"><span class="nav-number">1.</span> <span class="nav-text">Docker Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flannel"><span class="nav-number">2.</span> <span class="nav-text">Flannel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Term"><span class="nav-number">3.</span> <span class="nav-text">Term</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">127</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">67</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ac75c7e9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker network
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-12-02 11:31:11" itemprop="dateCreated datePublished" datetime="2018-12-02T11:31:11Z">2018-12-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2023-05-03 03:15:20" itemprop="dateModified" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Docker-Network"><a href="#Docker-Network" class="headerlink" title="Docker Network"></a>Docker Network</h1><p>IBM 的几篇 Blog overall 的讲了一下</p>
+<p><strong>容器如何访问外部网络</strong></p>
+<p>通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip</p>
+<p><strong>外部网络如何访问容器</strong></p>
+<p>容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，指定映射到 host 的特定端口</p>
+<p>至于实现上也较为直接，若容器有 expose 端口，则 docker 会相应启动一个 docker-proxy 监听 host 上的 host 端口 (如上述例子中的 host-port)，外部流量到达 host-port 时，由 docker-proxy 转发至最终容器</p>
+<p>当然上述只是 docker network 的原生实现，docker 原生实现的不同 host 的 container 略去</p>
+<h1 id="Flannel"><a href="#Flannel" class="headerlink" title="Flannel"></a>Flannel</h1><p>如果在 k8s 生态中，docker container 跨 host 通信，早期版本多使用 Flannel 完成</p>
+<p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/30481.html">Flannel 原理</a></p>
+<p>Flannel 实现的是 overlay network，即基于已有的 underlay network，在其之上扩展报文字段，完成报文转发</p>
+<p>原理也比较好理解</p>
+<ul>
+<li>在 ETCD 中设置 Flannel 网段及子网范围</li>
+<li>多个 Host 上运行 Flannel daemon</li>
+<li>Flannel daemon 根据 ETCD 中记录的已分配子网，确定自己的子网，并注册至 ETCD 中</li>
+<li>Docker 根据 Flannel 划分的子网启动，docker0 地址从 Flannel 子网中分配得到，一般来说 Flannel0 地址为子网的第一个地址 (10.0.2.0)，docker0 地址为子网的第二个地址 (10.0.2.1)</li>
+</ul>
+<p>VM1 Container 1 至 VM2 Container 2 的报文转发过程</p>
+<p><a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">可参看该作者的一篇详细分析</a></p>
+<p>看上述链接吧，讲的非常好，图文并茂，下面我只是自我温习 😆 努力积累</p>
+<p><strong>VM1 Container 1</strong></p>
+<ul>
+<li>Container 1 报文中 src ip 为容器 ip，假设为 10.1.15.2/24，dst ip 为对端容器 ip，假设为 10.1.20.3/24</li>
+<li>报文从容器中的 veth0 发往 host 上的 veth pair (veth_XXX)</li>
+<li>kernel 根据 route 表将报文转发至 Flannel0 TUN</li>
+<li>Flannel0 接收到之后 overlay 的作用体现了，首先根据目的 ip 查询其所在 host 的 ip，封装一层 IP 报文，随后封装一层 UDP 报文，投递到对端 Flannel daemon 监听端口 8285。这个时候报文就能通过 underlay network 转发至对端 host 了</li>
+</ul>
+<p><strong>VM2 Container 2</strong></p>
+<ul>
+<li>报文到达当前 host 后，UDP 报文交由 Flannel daemon 处理</li>
+<li>Flannel daemon 交由 Flannel0 TUN 处理</li>
+<li>kernel 直接根据 route 表处理，转发至 docker0</li>
+<li>docker0 是网桥设备，所有 docker container 均连接在其之上，因此最后根据 container dst ip 转发至 dst container</li>
+</ul>
+<p>当然这是 Flannel 早期的版本，使用了 UDP 的报文封装，这样会有一些 packet 来回拷贝的开销</p>
+<p>Flannel 还支持 VxLan 的模式，看下它的原理，网络这块还是比较有意思</p>
+<p>这篇也很 nice <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-2-13fdc6c4e24c">An illustrated guide to Kubernetes Networking [Part 2]</a></p>
+<p>nice shot <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-1-d1ede3322727">An illustrated guide to Kubernetes Networking [Part 1]</a></p>
+<p>这篇非常详细 … 蛤蛤</p>
+<p>ARP 协议</p>
+<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/computer-network-arp-works/">ARP</a></p>
+<p>Flannel <a target="_blank" rel="noopener" href="https://www.slideshare.net/enakai/how-vxlan-works-on-linux">VxLan</a></p>
+<h1 id="Term"><a href="#Term" class="headerlink" title="Term"></a>Term</h1><p>ref <a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">Han’s blog</a></p>
+<ul>
+<li>TUN is a software interface implemented in linux kernel, it can pass raw ip packet between user program and the kernel</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/247bf619.html" rel="prev" title="neutron port">
+                  <i class="fa fa-chevron-left"></i> neutron port
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/2e8d2c8b.html" rel="next" title="mpi operator">
+                  mpi operator <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">347k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:15</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

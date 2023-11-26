@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="最近看了看 knative-build-controller 中使用的 workqueue，不得不说是个设计复杂 而且对于 controller 来说，非常好用的一个东西。因为 controller 中会使用到 informer，而 informer 产生的待 reconcile key 可以放入 workqueue 中，等待 controller 逐一处理 workqueue 的实现是由 cli">
+<meta property="og:type" content="article">
+<meta property="og:title" content="client go queues">
+<meta property="og:url" content="https://zrss.github.io/archives/8a17de67.html">
+<meta property="og:site_name" content="随风飘散的记忆">
+<meta property="og:description" content="最近看了看 knative-build-controller 中使用的 workqueue，不得不说是个设计复杂 而且对于 controller 来说，非常好用的一个东西。因为 controller 中会使用到 informer，而 informer 产生的待 reconcile key 可以放入 workqueue 中，等待 controller 逐一处理 workqueue 的实现是由 cli">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-09-16T14:12:30.000Z">
+<meta property="article:modified_time" content="2023-05-03T03:15:20.367Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="go">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/8a17de67.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/8a17de67.html","path":"archives/8a17de67.html","title":"client go queues"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>client go queues | 随风飘散的记忆</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">随风飘散的记忆</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RateLimittingQueue"><span class="nav-number">1.</span> <span class="nav-text">RateLimittingQueue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AddRateLimited"><span class="nav-number">1.1.</span> <span class="nav-text">AddRateLimited</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Forget"><span class="nav-number">1.2.</span> <span class="nav-text">Forget</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DelayingQueue"><span class="nav-number">2.</span> <span class="nav-text">DelayingQueue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AddAfter"><span class="nav-number">2.1.</span> <span class="nav-text">AddAfter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#waitingLoop"><span class="nav-number">2.2.</span> <span class="nav-text">waitingLoop</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Queue"><span class="nav-number">3.</span> <span class="nav-text">Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Add"><span class="nav-number">3.1.</span> <span class="nav-text">Add</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Get"><span class="nav-number">3.2.</span> <span class="nav-text">Get</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Done"><span class="nav-number">3.3.</span> <span class="nav-text">Done</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">4.</span> <span class="nav-text">Summary</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">领略了繁华沧桑<br>谁人过往不相似</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">127</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">67</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/8a17de67.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          client go queues
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-16 14:12:30" itemprop="dateCreated datePublished" datetime="2018-09-16T14:12:30Z">2018-09-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2023-05-03 03:15:20" itemprop="dateModified" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>9.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近看了看 <code>knative-build-controller</code> 中使用的 workqueue，不得不说是个设计复杂</p>
+<p>而且对于 controller 来说，非常好用的一个东西。因为 controller 中会使用到 <code>informer</code>，而 <code>informer</code> 产生的待 <code>reconcile</code> key 可以放入 workqueue 中，等待 controller 逐一处理</p>
+<p>workqueue 的实现是由 <code>client-go</code> <a target="_blank" rel="noopener" href="https://github.com/kubernetes/client-go">https://github.com/kubernetes/client-go</a> 库提供的，目录位于 <code>util/workqueue</code></p>
+<p>其中 knative-build-controller 使用的为 <code>rate_limitting_queue.go</code>，也就是通过</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewRateLimitingQueue</span><span class="params">(rateLimiter RateLimiter)</span> <span class="title">RateLimitingInterface</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;rateLimitingType&#123;</span><br><span class="line">        DelayingInterface: NewDelayingQueue(),</span><br><span class="line">        rateLimiter:       rateLimiter,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建出来的 queue</p>
+<p>使用 <code>default_rate_limiters.go</code>，也就是通过</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DefaultControllerRateLimiter</span><span class="params">()</span> <span class="title">RateLimiter</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> NewMaxOfRateLimiter(</span><br><span class="line">        NewItemExponentialFailureRateLimiter(<span class="number">5</span>*time.Millisecond, <span class="number">1000</span>*time.Second),</span><br><span class="line">        <span class="comment">// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)</span></span><br><span class="line">        &amp;BucketRateLimiter&#123;Limiter: rate.NewLimiter(rate.Limit(<span class="number">10</span>), <span class="number">100</span>)&#125;,</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建出来的 limiter，用来计算限流时间的，会取 <code>NewItemExponentialFailureRateLimiter</code> 和 <code>BucketRateLimiter</code> 中限流时间的大者</p>
+<p>咱们重点看 queue 的实现</p>
+<p>RateLimitingQueue 提供了 rate limit (限流) 的功能，而我们知道 knative-build-controller (当然 k8s 中许多其他的 controller 也是如此模型) 的处理模型为循环从 queue 中获取 item，并 reconcile 之</p>
+<p>从 api 来看，<code>rate_limitting_queue</code> 组合了 <code>DelayingInterface</code> 接口，并提供了</p>
+<ul>
+<li>AddRateLimited</li>
+<li>Forget</li>
+<li>NumRequeues</li>
+</ul>
+<p>方法</p>
+<p>其中 <code>DelayingInterface</code> 接口又组合了 <code>Interface</code> 接口，并提供了</p>
+<ul>
+<li>AddAfter</li>
+</ul>
+<p>方法</p>
+<p>最后 <code>Interface</code> 接口提供基本的 queue 功能</p>
+<ul>
+<li>Add</li>
+<li>Len</li>
+<li>Get</li>
+<li>Done</li>
+<li>Shutdown</li>
+<li>ShuttingDown</li>
+</ul>
+<h1 id="RateLimittingQueue"><a href="#RateLimittingQueue" class="headerlink" title="RateLimittingQueue"></a>RateLimittingQueue</h1><blockquote>
+<p>限流队列</p>
+</blockquote>
+<h2 id="AddRateLimited"><a href="#AddRateLimited" class="headerlink" title="AddRateLimited"></a>AddRateLimited</h2><p>实际上是调用了限流算法，根据重试次数计算出当前限流时间，在该时间之后，再将 item 加入 queue 中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *rateLimitingType)</span> <span class="title">AddRateLimited</span><span class="params">(item <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    q.DelayingInterface.AddAfter(item, q.rateLimiter.When(item))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因此这个实现依赖于 DelayingQueue 的 AddAfter 方法</p>
+<h2 id="Forget"><a href="#Forget" class="headerlink" title="Forget"></a>Forget</h2><p>这个方法有点儿特殊，Forget 是啥语义？忘了？我 item 好端端的，为啥要忘了我</p>
+<p>😂 一开始我也是一脸懵逼，不过想想呐，咱们调用了 AddRateLimited，而这个方法在计算限流时间时，需要使用到 item 的重试次数的，没有这个重试次数，当然计算限流时间就没有意义了</p>
+<p>所以 Forget 呢，实际上是清除 item 的重试次数，这样下次再将这个 item AddRateLimited 时，就不会受限流的影响了</p>
+<p>Forget 在 <code>ItemExponentialFailureRateLimiter</code> 中的实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *ItemExponentialFailureRateLimiter)</span> <span class="title">Forget</span><span class="params">(item <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    r.failuresLock.Lock()</span><br><span class="line">    <span class="keyword">defer</span> r.failuresLock.Unlock()</span><br><span class="line">    <span class="built_in">delete</span>(r.failures, item) <span class="comment">// 从重试统计次数表中删除 item</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以及计算限流时间的实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *ItemExponentialFailureRateLimiter)</span> <span class="title">When</span><span class="params">(item <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123;</span><br><span class="line">    r.failuresLock.Lock()</span><br><span class="line">    <span class="keyword">defer</span> r.failuresLock.Unlock()</span><br><span class="line">    exp := r.failures[item] <span class="comment">// 当 item 不在表中时，exp 为 0</span></span><br><span class="line">    <span class="comment">// 将重试次数设置为 1，也就是每次递增 1</span></span><br><span class="line">    r.failures[item] = r.failures[item] + <span class="number">1</span></span><br><span class="line">    <span class="comment">// 使用指数算法计算限流时间</span></span><br><span class="line">    backoff := <span class="keyword">float64</span>(r.baseDelay.Nanoseconds()) * math.Pow(<span class="number">2</span>, <span class="keyword">float64</span>(exp))</span><br><span class="line">    <span class="keyword">if</span> backoff &gt; math.MaxInt64 &#123;</span><br><span class="line">        <span class="keyword">return</span> r.maxDelay</span><br><span class="line">    &#125;</span><br><span class="line">    calculated := time.Duration(backoff)</span><br><span class="line">    <span class="keyword">if</span> calculated &gt; r.maxDelay &#123;</span><br><span class="line">        <span class="keyword">return</span> r.maxDelay</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> calculated</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="DelayingQueue"><a href="#DelayingQueue" class="headerlink" title="DelayingQueue"></a>DelayingQueue</h1><p>如此我们首先查看 <code>DelayingInterface</code> 接口的实现之一 <code>delaying_queue.go</code></p>
+<p>我们看，这个 queue 想实现如何的功能？</p>
+<p>AddAfter ? 所谓的在 n time 之后的再将 item 加入 queue 的功能</p>
+<p>为了实现这个功能，首先要考虑 AddAfter 是同步的，亦或是异步的方法 ?</p>
+<p>当前实现是异步的方法</p>
+<h2 id="AddAfter"><a href="#AddAfter" class="headerlink" title="AddAfter"></a>AddAfter</h2><p>计算出 readyAt 时间，将该时间与 item 一并存入 waitingForAddCh，这个 ch 的大小为 1000，也就是说未达到 1000 时，AddAfter 是不会被阻塞的</p>
+<p>细心的同学可能会问，如果 AddAfter 的时间为 0 甚至为负怎么办，当然这种情况直接加入 queue 即可，就不需要再加入 waitingForAddCh 了</p>
+<h2 id="waitingLoop"><a href="#waitingLoop" class="headerlink" title="waitingLoop"></a>waitingLoop</h2><p>当然为了实现 AddAfter 这个功能，免不了 queue 需要做一些额外的维护事情，最重要的就是 queue 初始化时，开始用协程执行 waitingLoop 方法</p>
+<p>这个方法是实现 <code>delaying_queue</code> 功能的核心逻辑</p>
+<p>注意到待加入 queue 的 item 位于 <code>waitingForAddCh</code> 中，<code>waitingLoop</code> 当可以从 <code>waitingForAddCh</code> 获取到 item 时</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> waitEntry := &lt;-q.waitingForAddCh:</span><br><span class="line">    <span class="keyword">if</span> waitEntry.readyAt.After(q.clock.Now()) &#123;</span><br><span class="line">        insert(waitingForQueue, waitingEntryByData, waitEntry)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        q.Add(waitEntry.data)</span><br><span class="line">    &#125;</span><br><span class="line">    drained := <span class="literal">false</span></span><br><span class="line">    <span class="keyword">for</span> !drained &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> waitEntry := &lt;-q.waitingForAddCh:</span><br><span class="line">            <span class="keyword">if</span> waitEntry.readyAt.After(q.clock.Now()) &#123;</span><br><span class="line">                insert(waitingForQueue, waitingEntryByData, waitEntry)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                q.Add(waitEntry.data)</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            drained = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先会判断这个 item 是否可以加入 queue 了，如果时候还没到，那么将该 item 加入以 readyAt 为排序关键的优先队列中。若时候到了，则加入 queue。处理完第一个 item 之后，会将 <code>waitingForAddCh</code> 中剩余的 item 均按照相同的逻辑处理之</p>
+<p>这个 item 加入优先队列时，还有一个讲究的地方，注意到下述代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// insert adds the entry to the priority queue, or updates the readyAt if it already exists in the queue</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">insert</span><span class="params">(q *waitForPriorityQueue, knownEntries <span class="keyword">map</span>[t]*waitFor, entry *waitFor)</span></span> &#123;</span><br><span class="line">    <span class="comment">// if the entry already exists, update the time only if it would cause the item to be queued sooner</span></span><br><span class="line">    existing, exists := knownEntries[entry.data]</span><br><span class="line">    <span class="keyword">if</span> exists &#123;</span><br><span class="line">        <span class="keyword">if</span> existing.readyAt.After(entry.readyAt) &#123;</span><br><span class="line">            existing.readyAt = entry.readyAt</span><br><span class="line">            heap.Fix(q, existing.index)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    heap.Push(q, entry)</span><br><span class="line">    knownEntries[entry.data] = entry</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果加入的 item 已经存在，并且新加入 item 的 readyAt 时间比已经存在的 item 的时间晚，那么不好意思哈，这个 item 会被直接丢弃。只有新加入的 item 的 readyAt 时间比已存在的 item 时间要早，才会更新已存在的 item 的 readyAt 时间，并调整 item 在优先队列中的位置</p>
+<p>所以看到这里，delaying_queue 实际上还有<strong>去重</strong>功能</p>
+<p>回到 waitingLoop 的 loop 来，loop 首先要执行的操作，即为从优先队列中依次 Peek item，即不断从优先队列中取出第一个 item，这个 item 最有可能到触发时间了</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Add ready entries</span></span><br><span class="line"><span class="keyword">for</span> waitingForQueue.Len() &gt; <span class="number">0</span> &#123;</span><br><span class="line">    entry := waitingForQueue.Peek().(*waitFor)</span><br><span class="line">    <span class="keyword">if</span> entry.readyAt.After(now) &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line">    entry = heap.Pop(waitingForQueue).(*waitFor)</span><br><span class="line">    q.Add(entry.data)</span><br><span class="line">    <span class="built_in">delete</span>(waitingEntryByData, entry.data)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>显然如果到达了 Add 时间，那么就将其加入 queue 中，并执行一些清理工作。若终于遍历到未到触发时间的 item 了，这个时候可以退出遍历优先队列的循环了</p>
+<p>因为这个时候，所有当前可以 Add queue 的 item 都已经处理完了，所以接下来，可以执行一段优化的逻辑，加快 item 的处理</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Set up a wait for the first item&#x27;s readyAt (if one exists)</span></span><br><span class="line">nextReadyAt := never</span><br><span class="line"><span class="keyword">if</span> waitingForQueue.Len() &gt; <span class="number">0</span> &#123;</span><br><span class="line">    entry := waitingForQueue.Peek().(*waitFor)</span><br><span class="line">    nextReadyAt = q.clock.After(entry.readyAt.Sub(now))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个有点意思，都处理完了是吧，那我选优先队列中的第一个 item，用它的 readyAt 时间设置一个定时器，这样的话，一旦到达需要 Add 的时间，waitLoop 就会处理了 (当然用户态的程序，定时上都有些许偏差，不会特别特别精确)</p>
+<p>都准备好之后，waitLoop 就进入等待数据/事件的逻辑了</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line"><span class="keyword">case</span> &lt;-q.stopCh:</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"><span class="keyword">case</span> &lt;-q.heartbeat.C():</span><br><span class="line">    <span class="comment">// continue the loop, which will add ready items</span></span><br><span class="line">    <span class="comment">// 这里是心跳，所谓的最大等待时间，目前是 10s，即如果 10s 内啥都没发生的话，也会执行一般 waitLoop 中的循环逻辑</span></span><br><span class="line"><span class="keyword">case</span> &lt;-nextReadyAt:</span><br><span class="line">    <span class="comment">// continue the loop, which will add ready items</span></span><br><span class="line">    <span class="comment">// 这里是优先队列的第一个 item 的定时器触发了</span></span><br><span class="line"><span class="keyword">case</span> waitEntry := &lt;-q.waitingForAddCh:</span><br><span class="line">    <span class="comment">// 这是我们说的，首先判断第一个 item 是否可以加入 queue</span></span><br><span class="line">    <span class="keyword">if</span> waitEntry.readyAt.After(q.clock.Now()) &#123;</span><br><span class="line">        insert(waitingForQueue, waitingEntryByData, waitEntry)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        q.Add(waitEntry.data)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 接下来会处理仍然处于 waitingForAddCh 中的 item，与上述逻辑一致</span></span><br><span class="line">    drained := <span class="literal">false</span></span><br><span class="line">    <span class="keyword">for</span> !drained &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> waitEntry := &lt;-q.waitingForAddCh:</span><br><span class="line">            <span class="keyword">if</span> waitEntry.readyAt.After(q.clock.Now()) &#123;</span><br><span class="line">                insert(waitingForQueue, waitingEntryByData, waitEntry)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                q.Add(waitEntry.data)</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            drained = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ok，至此 delaying_queue 的要点就说完了，下面提几点使用的时候的注意点，避免踩坑</p>
+<ul>
+<li>AddAfter 为异步方法，所以现象为调用 AddAfter 之后，item 并不会立即被加入到 queue 中</li>
+<li>AddAfter 会做去重处理，在 queue 中依然有相同的 item 时，如果新加入 item 的 readyAt time 靠后的话，新加入的 item 会被丢弃</li>
+</ul>
+<h1 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h1><p>代码实现位于 queue.go 中</p>
+<p>好了，在经过 DelayQueue 的延时加入策略之后，最终 item 还是被加入 queue 中的，而 queue 的实现也多有讲究，来一探究竟吧</p>
+<p>queue 内部有两个重要的数据结构</p>
+<ul>
+<li>processing set</li>
+<li>dirty set</li>
+</ul>
+<p>有一个比较特殊的方法</p>
+<ul>
+<li>Done</li>
+</ul>
+<p>首先来看一下 queue 的 Add 方法</p>
+<h2 id="Add"><a href="#Add" class="headerlink" title="Add"></a>Add</h2><p>代码不多，直接上了</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *Type)</span> <span class="title">Add</span><span class="params">(item <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="comment">// cond 加锁</span></span><br><span class="line">    q.cond.L.Lock()</span><br><span class="line">    <span class="keyword">defer</span> q.cond.L.Unlock()</span><br><span class="line">    <span class="keyword">if</span> q.shuttingDown &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果在 dirty set 中，那么该 item 被忽略</span></span><br><span class="line">    <span class="keyword">if</span> q.dirty.has(item) &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    q.metrics.add(item)</span><br><span class="line">    <span class="comment">// dirty set 标记</span></span><br><span class="line">    q.dirty.insert(item)</span><br><span class="line">    <span class="comment">// 如果当前 item 仍然在处理中，则被忽略</span></span><br><span class="line">    <span class="keyword">if</span> q.processing.has(item) &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 加入 queue</span></span><br><span class="line">    q.queue = <span class="built_in">append</span>(q.queue, item)</span><br><span class="line">    <span class="comment">// 通知 cond lock 的协程</span></span><br><span class="line">    q.cond.Signal()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h2><blockquote>
+<p>queue 的出口</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *Type)</span> <span class="title">Get</span><span class="params">()</span> <span class="params">(item <span class="keyword">interface</span>&#123;&#125;, shutdown <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">// cond 加锁</span></span><br><span class="line">    q.cond.L.Lock()</span><br><span class="line">    <span class="keyword">defer</span> q.cond.L.Unlock()</span><br><span class="line">    <span class="comment">// 如果 queue 为空，并且 queue 未关闭，则等待</span></span><br><span class="line">    <span class="comment">// 即 Get 方法在这种情况下，是阻塞的</span></span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">len</span>(q.queue) == <span class="number">0</span> &amp;&amp; !q.shuttingDown &#123;</span><br><span class="line">        q.cond.Wait()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 这种情况是 queue 关闭的时候</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(q.queue) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="comment">// We must be shutting down.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 取 queue 中第一个 item 返回</span></span><br><span class="line">    item, q.queue = q.queue[<span class="number">0</span>], q.queue[<span class="number">1</span>:]</span><br><span class="line">    q.metrics.get(item)</span><br><span class="line">    <span class="comment">// 标记 item 为处理中</span></span><br><span class="line">    q.processing.insert(item)</span><br><span class="line">    <span class="comment">// 去除 item dirty 标记</span></span><br><span class="line">    q.dirty.<span class="built_in">delete</span>(item)</span><br><span class="line">    <span class="keyword">return</span> item, <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看了 Add 与 Get 实现后，我们得到几个结论</p>
+<ul>
+<li>queue 也实现了去重: Add 相同 item，若该 item 未被 Get，那仅会被加入 queue 一次</li>
+<li>queue.Get 方法在 queue 中没数据时，是阻塞的，即你可以这写</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    obj := queue.Get()</span><br><span class="line">    <span class="comment">// obj 一定存在</span></span><br><span class="line">    <span class="comment">// blabla</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Done"><a href="#Done" class="headerlink" title="Done"></a>Done</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *Type)</span> <span class="title">Done</span><span class="params">(item <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    q.cond.L.Lock()</span><br><span class="line">    <span class="keyword">defer</span> q.cond.L.Unlock()</span><br><span class="line">    q.metrics.done(item)</span><br><span class="line">    q.processing.<span class="built_in">delete</span>(item)</span><br><span class="line">    <span class="keyword">if</span> q.dirty.has(item) &#123; <span class="comment">// 如果 item 被标记为 dirty，则重新加入 queue 中</span></span><br><span class="line">        q.queue = <span class="built_in">append</span>(q.queue, item)</span><br><span class="line">        q.cond.Signal()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Done 方法会去掉 item 的 processing 标记，并且如果 item 被标记为 dirty，那会再将 item 加入 queue。有这个逻辑那我们应该如何使用 queue ?</p>
+<p>我们首先来考虑这种场景</p>
+<p>itemA 被 Add queue，此时 X 协程 Get 时，获取到了 itemA，在这种情况下，itemA 被标记为 processing，而没有 dirty 的标记，若此时另一 Y 协程又再次调用 Add 方法将 itemA Add queue，这时 itemA 就被标记为 dirty 了，并且因为有 processing 标记，所以并不会被加入 queue 中</p>
+<p>过了一些时间后，X 协程执行 ok 了，调用 Done(itemA) 方法，去除 itemA 的 processing 标记，因为 itemA 为 dirty，所以将其重新加入 queue 中，等待被 Get 并处理</p>
+<p>所以在这种场景下就好理解多了，实际上 queue 还有个特性，即 queue 中不会有重复的 item，但是仅允许 item 被 Get 之后，Done 之前，被 Add 一次，在这种情况下，Done 的时候，会重新将 item 加入 queue 中</p>
+<p>可以理解为如果这个 item 正在被处理时，queue 允许至多缓存一次相同的 item</p>
+<p>所以再总结一次 queue 的特性</p>
+<ul>
+<li>添加 item 调用 Add 方法</li>
+<li>获取 item 调用 Get 方法</li>
+<li>处理 item 之后调用 Done 方法。否则再次 Add 相同 item 时，若该 item 仍未被 Get 则直接被忽略。若该 item 已被 Get，则被打上 dirty 标记，在其被调用 Done 时，该 item 才会被重新加入 queue 中</li>
+<li>本质上 queue 中不会有重复的 item</li>
+</ul>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>在看了这几种 queue 的实现之后，是否更了解 rate_limmiting_queue.go 该如何使用了？</p>
+<p>例如在 knative-build-controller 中它被如此初始化 (天下代码一大抄)</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), <span class="string">&quot;Builds&quot;</span>),</span><br></pre></td></tr></table></figure>
+
+<p>具体使用时</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Controller)</span> <span class="title">processNextWorkItem</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从 queue 中取 item</span></span><br><span class="line">    obj, shutdown := c.workqueue.Get()</span><br><span class="line">    <span class="keyword">if</span> shutdown &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err := <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">        <span class="comment">// 处理结束之后，需要调用 Done</span></span><br><span class="line">        <span class="keyword">defer</span> c.workqueue.Done(obj)</span><br><span class="line">        </span><br><span class="line">        key, ok := obj.(<span class="keyword">string</span>)</span><br><span class="line">        <span class="keyword">if</span> !ok &#123;</span><br><span class="line">            c.workqueue.Forget(obj) <span class="comment">// Fatal 错误，调用 Forget，没有重试的必要</span></span><br><span class="line">            runtime.HandleError(fmt.Errorf(<span class="string">&quot;expected string in workqueue but got %#v&quot;</span>, obj))</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> err := c.syncHandler(key); err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">// 处理失败时，不调用 Forget，增加 item 的重试次数</span></span><br><span class="line">            <span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;error syncing &#x27;%s&#x27;: %s&quot;</span>, key, err.Error())</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 处理成功调用 Forget，清除 item 的重试次数，使得下次相同的 item 不受 rate limit 影响</span></span><br><span class="line">        c.workqueue.Forget(obj)</span><br><span class="line">        c.logger.Infof(<span class="string">&quot;Successfully synced &#x27;%s&#x27;&quot;</span>, key)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;(obj); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        runtime.HandleError(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以再说一遍浓缩用法</p>
+<ul>
+<li>添加 item 调用 Add 方法</li>
+<li>获取 item 调用 Get 方法</li>
+<li>处理 item 之后调用 Done 方法</li>
+<li>不增加 item 重试次数调用 Forget 方法</li>
+</ul>
+<p>再说一遍 rate limit queue 重点，切莫踩坑</p>
+<ul>
+<li>Add 是异步方法</li>
+<li>Add 有去重功能<ul>
+<li>先经过 DelayQueue 去重处理，对于新加入的 item，在其优先队列中依然有相同的 item 时，如果新加入 item 的 readyAt time 较原 item 的 readyAt 时间靠后的话，新加入的 item 会被丢弃</li>
+<li>再经过 Queue 去重处理，如果 queue 中有相同 item 则直接被丢弃。若 queue 中没有相同 item，但是 item 处于被处理中，即未被调用 Done 时，会将 item 标记为 dirty，待 item 被调用 Done 时，重新加入 queue</li>
+</ul>
+</li>
+<li>处理 item 结束之后，无论如何调用 Done，标识该 item 已被处理结束</li>
+<li>若不需要增加 item 的重试次数，则结束之后调用 Forget 方法，清除该 item 的重试次数统计</li>
+<li>如果需要调用 Forget，则先调用 Forget 再调用 Done，确保再次 Add 的时候不受限流影响</li>
+</ul>
+<p>之所以关注到这个问题，是因为在写 build-controller 一个 bugfix 的 ut 时，各种坑，遂研究了下 workqueue 的细节，关于这个 bugfix 的讨论看这个链接 <a target="_blank" rel="noopener" href="https://github.com/knative/build/issues/332">Timeout of build may have problem</a></p>
+<p>Thanks for your time 😁</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/go/" rel="tag"># go</a>
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/73c2c618.html" rel="prev" title="client go informers">
+                  <i class="fa fa-chevron-left"></i> client go informers
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/b0559197.html" rel="next" title="Layer files Content">
+                  Layer files Content <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zrss</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">347k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:15</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
