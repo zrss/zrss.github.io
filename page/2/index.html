@@ -119,7 +119,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">127</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -159,6 +159,220 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/85943db7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/85943db7.html" class="post-title-link" itemprop="url">Docker container secure</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-03 03:15:20" itemprop="dateCreated datePublished" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>547</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="docker-security"><a href="#docker-security" class="headerlink" title="docker security"></a>docker security</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/">https://docs.docker.com/engine/security/</a></p>
+<p>docker security 总的来说，一个是使用了 <code>kernel namespace</code> 技术，为每个 container 创建了 <code>process</code>, <code>network</code> 等 namepsace，使得多个 container 不会有很大的相互影响</p>
+<p>另外一个方面是使用了 <code>control groups</code> 技术，用于限制 container 所使用的各类资源</p>
+<blockquote>
+<p>ensure that each container gets its fair share of memory, CPU, disk I/O</p>
+</blockquote>
+<p>简单理解，比如 cpu 资源，<code>cgroup</code> 用于避免某个 container 不当使用（或者恶意 or 无意代码 bug）cpu，导致其他 container 没法正常使用 cpu 的场景</p>
+<h1 id="container-root-user"><a href="#container-root-user" class="headerlink" title="container root user"></a>container root user</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/userns-remap/">https://docs.docker.com/engine/security/userns-remap/</a></p>
+<p>container 中不建议使用 <code>root</code> 用户执行进程，很大部分原因因为容器内的 uid gid 会映射到 host 上，举个例子，一旦容器内的进程逃逸到 host 上，那么它也有 <code>root</code> 用户的权限</p>
+<blockquote>
+<p>虽然说容器内的进程逃逸，是很严重的安全问题，docker 社区会第一时间修复</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/52d00230.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/52d00230.html" class="post-title-link" itemprop="url">Docker container -i -t</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-03 03:15:20" itemprop="dateCreated datePublished" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/run/#foreground">https://docs.docker.com/engine/reference/run/#foreground</a></p>
+<p>-t : Allocate a pseudo-tty<br>-i : Keep STDIN open even if not attached</p>
+</blockquote>
+<p><code>docker run -t</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:bionic-20200713</span><br><span class="line"></span><br><span class="line">docker run -t --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">root@9a7a115ff8d2:/# ls</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>启动容器无 <code>-i</code> 参数时，执行 <code>ls</code> 等命令无回显，执行 <code>exit</code> 命令无法退出 container terminal</p>
+<p><code>docker run -i</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -i --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">echo hello</span><br><span class="line">hello</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
+
+<p>启动容器无 <code>-t</code> 参数时，缺少常用的 terminal 功能，例如无当前登陆用户提示；但执行 <code>ls</code> 等命令正常有回显，且执行 <code>exit</code> 命令可退出</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag">https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag</a></p>
+<p>Without <code>-t</code> tag one can still interact with the container, but with it, you’ll have a nicer, more features terminal.</p>
+</blockquote>
+<h1 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core</a></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Variables for interactive containers, these have very specialized use-cases (e.g. debugging)</span></span><br><span class="line"><span class="comment">// and shouldn&#x27;t be used for general purpose containers.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Whether this container should allocate a buffer for stdin in the container runtime. If this</span></span><br><span class="line"><span class="comment">// is not set, reads from stdin in the container will always result in EOF.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">Stdin <span class="keyword">bool</span> <span class="string">`json:&quot;stdin,omitempty&quot; protobuf:&quot;varint,16,opt,name=stdin&quot;`</span></span><br><span class="line"><span class="comment">// Whether the container runtime should close the stdin channel after it has been opened by</span></span><br><span class="line"><span class="comment">// a single attach. When stdin is true the stdin stream will remain open across multiple attach</span></span><br><span class="line"><span class="comment">// sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the</span></span><br><span class="line"><span class="comment">// first client attaches to stdin, and then remains open and accepts data until the client disconnects,</span></span><br><span class="line"><span class="comment">// at which time stdin is closed and remains closed until the container is restarted. If this</span></span><br><span class="line"><span class="comment">// flag is false, a container processes that reads from stdin will never receive an EOF.</span></span><br><span class="line"><span class="comment">// Default is false</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">StdinOnce <span class="keyword">bool</span> <span class="string">`json:&quot;stdinOnce,omitempty&quot; protobuf:&quot;varint,17,opt,name=stdinOnce&quot;`</span></span><br><span class="line"><span class="comment">// Whether this container should allocate a TTY for itself, also requires &#x27;stdin&#x27; to be true.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">TTY <span class="keyword">bool</span> <span class="string">`json:&quot;tty,omitempty&quot; protobuf:&quot;varint,18,opt,name=tty&quot;`</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config := &amp;runtimeapi.ContainerConfig&#123;</span><br><span class="line">	Metadata: &amp;runtimeapi.ContainerMetadata&#123;</span><br><span class="line">		Name:    container.Name,</span><br><span class="line">		Attempt: restartCountUint32,</span><br><span class="line">	&#125;,</span><br><span class="line">	Image:       &amp;runtimeapi.ImageSpec&#123;Image: imageRef&#125;,</span><br><span class="line">	Command:     command,</span><br><span class="line">	Args:        args,</span><br><span class="line">	WorkingDir:  container.WorkingDir,</span><br><span class="line">	Labels:      newContainerLabels(container, pod),</span><br><span class="line">	Annotations: newContainerAnnotations(container, pod, restartCount, opts),</span><br><span class="line">	Devices:     makeDevices(opts),</span><br><span class="line">	Mounts:      m.makeMounts(opts, container),</span><br><span class="line">	LogPath:     containerLogsPath,</span><br><span class="line">	Stdin:       container.Stdin,</span><br><span class="line">	StdinOnce:   container.StdinOnce,</span><br><span class="line">	Tty:         container.TTY,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="use-conda-env-in-docker"><a href="#use-conda-env-in-docker" class="headerlink" title="use conda env in docker"></a>use conda env in docker</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://pythonspeed.com/articles/activate-conda-dockerfile/">https://pythonspeed.com/articles/activate-conda-dockerfile/</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda/en/latest/commands/run.html">https://docs.conda.io/projects/conda/en/latest/commands/run.html</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda run --no-capture-output -n my-python-env python --version</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1062,265 +1276,6 @@ InitContainer --&gt; SidecarContainer
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6555f3f9.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/6555f3f9.html" class="post-title-link" itemprop="url">resource limit in k8s</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-03 03:15:20" itemprop="dateCreated datePublished" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Docker-Resource-Limit"><a href="#Docker-Resource-Limit" class="headerlink" title="Docker Resource Limit"></a>Docker Resource Limit</h1><h2 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#cpu">https://docs.docker.com/config/containers/resource_constraints/#cpu</a></p>
-<ul>
-<li><code>--cpu-period</code>: CFS 调度算法中的 cpu 时间分片，默认为 100ms</li>
-<li><code>--cpu-quota</code>: CFS quota，在每个 cpu period 分片中，在 cpu 限流前，docker container 能使用的 cpu 时间</li>
-<li><code>--cpuset-cpus</code>: docker container binding to cpu core</li>
-<li><code>--cpu-shares</code>: Set this flag to a value greater or less than the default of 1024 to increase or reduce the container’s weight, and give it access to a greater or lesser proportion of the host machine’s CPU cycles. This is only enforced when CPU cycles are constrained. When plenty of CPU cycles are available, all containers use as much CPU as they need. In that way, this is a <strong>soft limit</strong>.</li>
-</ul>
-<h2 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory">https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory</a></p>
-<ul>
-<li><code>--memory</code>: The maximum amount of memory the container can use (cgroup limit)</li>
-<li><code>--memory-swap</code>:</li>
-<li><code>--oom-kill-disable</code>:</li>
-</ul>
-<p>针对 OOM 补充说明如下</p>
-<ol>
-<li>容器内进程使用 memory 超过限制，kernel 会触发 oom killer (cgroup)，kill oom_score 高分进程</li>
-<li>容器只要 1 pid 进程未退出，则容器不会退出</li>
-</ol>
-<p>OOM 始终针对的是进程，而非容器</p>
-<h2 id="Docker-Container-OOMKilled-status"><a href="#Docker-Container-OOMKilled-status" class="headerlink" title="Docker Container OOMKilled status"></a>Docker Container OOMKilled status</h2><ol>
-<li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container">https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/14440#issuecomment-119243820">https://github.com/moby/moby/issues/14440#issuecomment-119243820</a></li>
-<li><a target="_blank" rel="noopener" href="https://plumbr.io/blog/java/oomkillers-in-docker-are-more-complex-than-you-thought">https://plumbr.io/blog/java/oomkillers-in-docker-are-more-complex-than-you-thought</a></li>
-<li><a target="_blank" rel="noopener" href="https://zhimin-wen.medium.com/memory-limit-of-pod-and-oom-killer-891ee1f1cad8">https://zhimin-wen.medium.com/memory-limit-of-pod-and-oom-killer-891ee1f1cad8</a></li>
-<li><a target="_blank" rel="noopener" href="https://faun.pub/understanding-docker-container-memory-limit-behavior-41add155236c">https://faun.pub/understanding-docker-container-memory-limit-behavior-41add155236c</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/15621#issuecomment-181418985">https://github.com/moby/moby/issues/15621#issuecomment-181418985</a></li>
-<li><a target="_blank" rel="noopener" href="https://draveness.me/docker/">https://draveness.me/docker/</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/38352#issuecomment-446329512">https://github.com/moby/moby/issues/38352#issuecomment-446329512</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/containerd/cgroups/issues/74">https://github.com/containerd/cgroups/issues/74</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/78973">https://github.com/kubernetes/kubernetes/issues/78973</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/50632">https://github.com/kubernetes/kubernetes/issues/50632</a></li>
-</ol>
-<p>容器内的子进程发生了 oom killed，在 docker container 退出时也会被设置 OOMKilled 标志；参考该 issue</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/15621#issuecomment-181418985">https://github.com/moby/moby/issues/15621#issuecomment-181418985</a></p>
-<p>在 docker container 未退出时会设置 container event</p>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/events/">https://docs.docker.com/engine/reference/commandline/events/</a></p>
-<p>docker container 设置 OOMKilled 原理，参考该 issue</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/38352#issuecomment-446329512">https://github.com/moby/moby/issues/38352#issuecomment-446329512</a></p>
-<p>在实现上</p>
-<ol>
-<li>containerd 监听了一系列事件，假若获取到 cgroup oom event 则记录 OOMKilled = true</li>
-<li>containerd 将处理后的事件发送至 dockerd 进一步处理</li>
-<li>dockerd 在处理 OOM 事件时，记录 container oom 事件</li>
-<li>dockerd 在处理 Exit 事件时，将 OOMKilled = true 写入容器的 status</li>
-</ol>
-<h1 id="K8S-Resource-Limit"><a href="#K8S-Resource-Limit" class="headerlink" title="K8S Resource Limit"></a>K8S Resource Limit</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run">https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run</a></p>
-<h2 id="CPU-Docker-Container-config"><a href="#CPU-Docker-Container-config" class="headerlink" title="CPU (Docker Container config)"></a>CPU (Docker Container config)</h2><blockquote>
-<p>CPU is always requested as an absolute quantity, never as a relative quantity; 0.1 is the same amount of CPU on a single-core, dual-core, or 48-core machine.</p>
-</blockquote>
-<ul>
-<li><code>--cpu-shares</code>: max({requests.cpu} * 1024, 2)</li>
-</ul>
-<p>例如 requests 为 180，则 <code>--cpu-shares=184320</code></p>
-<ul>
-<li><p><code>--cpu-period</code>: 100</p>
-</li>
-<li><p><code>--cpu-quota</code>: limits.cpu * 100</p>
-</li>
-</ul>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/a/63352630">https://stackoverflow.com/a/63352630</a></p>
-<p> The resulting value is the total amount of CPU time in microseconds that a container can use every <strong>100ms</strong>. A container cannot use more than its share of CPU time during this interval.</p>
-<p>The default quota period is 100ms. The minimum resolution of CPU quota is 1ms.</p>
-</blockquote>
-<p>cpu 时间分片为 period，quota 为实际每个 period 周期中，可使用的 cpu time；假若受到 qutoa 限制的 cpu 任务，在当前 period 的 quota 仍未完成，则当前任务挂起，等待下个 period 继续执行</p>
-<p>multi cpu 机器注意 quota 可以是 period 的倍数，例如限制 container 使用 0.5 cpu，则 <code>--cpu-quota=50</code>，假若主机有 20 cpu，限制 container 使用 10 cpu，则 <code>--cpu-quota=10*100=1000</code></p>
-<h2 id="Memory-Docker-Container-config"><a href="#Memory-Docker-Container-config" class="headerlink" title="Memory (Docker Container config)"></a>Memory (Docker Container config)</h2><ul>
-<li><code>--memory</code>: int({limits.memory})</li>
-<li><code>--memory-swap</code>: int({limits.memory})</li>
-</ul>
-<p>the container does not have access to swap</p>
-<h2 id="K8s-OOM-Watcher"><a href="#K8s-OOM-Watcher" class="headerlink" title="K8s OOM Watcher"></a>K8s OOM Watcher</h2><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go">https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go</a></p>
-<ul>
-<li>/dev/kmsg</li>
-</ul>
-<blockquote>
-<p>Start watches for system oom’s and records an event for every system oom encountered.</p>
-</blockquote>
-<p>当 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get event --field-selector type&#x3D;Warning,reason&#x3D;SystemOOM</span><br></pre></td></tr></table></figure>
-
-<p>如下 PR 尝试将 pod 内进程 oom 关联至 pod，未合入</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/100483">https://github.com/kubernetes/kubernetes/issues/100483</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/100487">https://github.com/kubernetes/kubernetes/pull/100487</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/485f6ed4.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/485f6ed4.html" class="post-title-link" itemprop="url">rsync</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-03 03:15:20" itemprop="dateCreated datePublished" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>825</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Download"><a href="#Download" class="headerlink" title="Download"></a>Download</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/">https://rsync.samba.org/</a></p>
-<p>最新版本：<code>Rsync version 3.2.3 released</code></p>
-<h1 id="How-rsync-works"><a href="#How-rsync-works" class="headerlink" title="How rsync works"></a>How rsync works</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/how-rsync-works.html">https://rsync.samba.org/how-rsync-works.html</a></p>
-<h1 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h1><p><a target="_blank" rel="noopener" href="https://download.samba.org/pub/rsync/rsync.html">https://download.samba.org/pub/rsync/rsync.html</a></p>
-<ul>
-<li><code>--recursive</code>: recurse into directories</li>
-<li><code>--append</code>: append data onto shorter files</li>
-<li><code>--filter</code></li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;usr&#x2F;local&#x2F;Cellar&#x2F;rsync&#x2F;3.2.3&#x2F;bin&#x2F;rsync --verbose --no-whole-file --recursive --append --include&#x3D;&#39;*.log&#39; --include&#x3D;&#39;*&#x2F;&#39; --exclude&#x3D;&#39;*&#39; --prune-empty-dirs dir1&#x2F; dir2&#x2F;</span><br></pre></td></tr></table></figure>
-
-<p>注意 rsync 本地目录的特殊之处</p>
-<p><a target="_blank" rel="noopener" href="https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files">https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files</a></p>
-<blockquote>
-<p>–whole-file, This is the default when both the source and destination are specified as local paths, but only if no batch-writing option is in effect.</p>
-</blockquote>
-<h1 id="High-Availability"><a href="#High-Availability" class="headerlink" title="High Availability"></a>High Availability</h1><p><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted">https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1345,13 +1300,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">347k</span>
+    <span title="站点总字数">356k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:15</span>
+    <span title="站点阅读时长">5:24</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动

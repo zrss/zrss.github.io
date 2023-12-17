@@ -119,7 +119,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">127</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -159,6 +159,227 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/da4155d7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/da4155d7.html" class="post-title-link" itemprop="url">nvml cgo</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-12-17 19:03:00 / 修改时间：11:09:57" itemprop="dateCreated datePublished" datetime="2023-12-17T19:03:00Z">2023-12-17</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/go-nvml">https://github.com/NVIDIA/go-nvml</a></p>
+<blockquote>
+<p>The <code>nvml.h</code> file is a direct copy of <code>nvml.h</code> from the NVIDIA driver. Since the NVML API is guaranteed to be backwards compatible, we should strive to keep this always up to date with the latest.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/xlab/c-for-go.git">https://github.com/xlab/c-for-go.git</a></p>
+<p>golang cgo</p>
+<p><a target="_blank" rel="noopener" href="https://www.rectcircle.cn/posts/go-static-compile-and-cgo">https://www.rectcircle.cn/posts/go-static-compile-and-cgo</a></p>
+<p><a target="_blank" rel="noopener" href="https://chai2010.cn/advanced-go-programming-book/ch2-cgo/ch2-05-internal.html">https://chai2010.cn/advanced-go-programming-book/ch2-cgo/ch2-05-internal.html</a></p>
+<p>poc env, windows11 + wsl2 ubuntu 18.04</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">~&#x2F;projects&#x2F;go-nvml ❯ nvidia-smi</span><br><span class="line">Sun Dec 17 18:57:57 2023</span><br><span class="line">+---------------------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 545.29.04              Driver Version: 546.17       CUDA Version: 12.3     |</span><br><span class="line">|-----------------------------------------+----------------------+----------------------+</span><br><span class="line">| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |</span><br><span class="line">| Fan  Temp   Perf          Pwr:Usage&#x2F;Cap |         Memory-Usage | GPU-Util  Compute M. |</span><br><span class="line">|                                         |                      |               MIG M. |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|   0  NVIDIA GeForce RTX 3070 Ti     On  | 00000000:06:00.0  On |                  N&#x2F;A |</span><br><span class="line">|  0%   33C    P8              13W &#x2F; 290W |   1139MiB &#x2F;  8192MiB |      1%      Default |</span><br><span class="line">|                                         |                      |                  N&#x2F;A |</span><br><span class="line">+-----------------------------------------+----------------------+----------------------+</span><br><span class="line"></span><br><span class="line">+---------------------------------------------------------------------------------------+</span><br><span class="line">| Processes:                                                                            |</span><br><span class="line">|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |</span><br><span class="line">|        ID   ID                                                             Usage      |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|    0   N&#x2F;A  N&#x2F;A        23      G   &#x2F;Xwayland                                 N&#x2F;A      |</span><br><span class="line">+---------------------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<p>test code</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/NVIDIA/go-nvml/pkg/nvml&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getNvidiaDeviceCount</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ret := nvml.Init()</span><br><span class="line">	<span class="keyword">if</span> ret != nvml.SUCCESS &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;Unable to initialize NVML: %v&quot;</span>, nvml.ErrorString(ret))</span><br><span class="line">	&#125;</span><br><span class="line">	count, ret := nvml.DeviceGetCount()</span><br><span class="line">	<span class="keyword">if</span> ret != nvml.SUCCESS &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;Unable to get device count: %v&quot;</span>, nvml.ErrorString(ret))</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%d\n&quot;</span>, count)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	args := os.Args</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(args) &lt; <span class="number">2</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		getNvidiaDeviceCount()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>build commands</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CGO_LDFLAGS=<span class="string">&quot;-Wl,-z,now&quot;</span></span><br><span class="line"></span><br><span class="line">go build main.go</span><br><span class="line">./main</span><br><span class="line">./main: symbol lookup error: ./main: undefined symbol: nvmlGpuInstanceGetComputeInstanceProfileInfoV</span><br><span class="line"></span><br><span class="line">./main fake</span><br><span class="line">./main: symbol lookup error: ./main: undefined symbol: nvmlGpuInstanceGetComputeInstanceProfileInfoV</span><br><span class="line"></span><br><span class="line"><span class="comment"># now to lazy</span></span><br><span class="line"><span class="built_in">export</span> CGO_LDFLAGS=<span class="string">&quot;-Wl,-z,lazy&quot;</span></span><br><span class="line">go build main.go</span><br><span class="line">./main</span><br><span class="line">hello</span><br><span class="line"></span><br><span class="line">./main fake</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line">go clean --cache &amp;&amp; rm -rf main</span><br><span class="line">go build -work -x main.go</span><br></pre></td></tr></table></figure>
+
+<p>go build -x</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cd /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml</span><br><span class="line">TERM=&#x27;dumb&#x27; CGO_LDFLAGS=&#x27;&quot;-Wl,-z,lazy&quot; &quot;-Wl,--unresolved-symbols=ignore-in-object-files&quot; &quot;-Wl,--unresolved-symbols=ignore-in-object-files&quot;&#x27; /root/tools/go/pkg/tool/linux_amd64/cgo -objdir $WORK/b002/ -importpath github.com/NVIDIA/go-nvml/pkg/nvml -- -I $WORK/b002/ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 ./cgo_helpers.go ./const.go ./init.go ./nvml.go</span><br><span class="line">cd $WORK/b002</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -I ./ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -o ./_x001.o -c _cgo_export.c</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -I ./ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -o ./_x002.o -c cgo_helpers.cgo2.c</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -I ./ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -o ./_x003.o -c const.cgo2.c</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -I ./ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -o ./_x004.o -c init.cgo2.c</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -I ./ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -o ./_x005.o -c nvml.cgo2.c</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -I ./ -g -O2 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -DNVML_NO_UNVERSIONED_FUNC_DEFS=1 -o ./_cgo_main.o -c _cgo_main.c</span><br><span class="line">cd /root/projects/go-nvml</span><br><span class="line">TERM=&#x27;dumb&#x27; gcc -I /root/go/pkg/mod/github.com/!n!v!i!d!i!a/go-nvml@v0.12.0-1/pkg/nvml -fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=$WORK/b002=/tmp/go-build -gno-record-gcc-switches -o $WORK/b002/_cgo_.o $WORK/b002/_cgo_main.o $WORK/b002/_x001.o $WORK/b002/_x002.o $WORK/b002/_x003.o $WORK/b002/_x004.o $WORK/b002/_x005.o -Wl,-z,lazy -Wl,--unresolved-symbols=ignore-in-object-files -Wl,--unresolved-symbols=ignore-in-object-files</span><br><span class="line">TERM=&#x27;dumb&#x27; /root/tools/go/pkg/tool/linux_amd64/cgo -dynpackage nvml -dynimport $WORK/b002/_cgo_.o -dynout $WORK/b002/_cgo_import.go</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>/tmp/go-build2475505462/b002/nvml.cgo1.go</li>
+<li>/tmp/go-build2475505462/b002/nvml.cgo2.c</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">CGO_NO_SANITIZE_THREAD</span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">_cgo_c813f6172e91_Cfunc_nvmlGpuInstanceGetComputeInstanceProfileInfoV(<span class="keyword">void</span> *v)</span><br><span class="line">&#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">                nvmlGpuInstance_t p0;</span><br><span class="line">                <span class="keyword">unsigned</span> <span class="keyword">int</span> p1;</span><br><span class="line">                <span class="keyword">unsigned</span> <span class="keyword">int</span> p2;</span><br><span class="line">                nvmlComputeInstanceProfileInfo_v2_t* p3;</span><br><span class="line">                nvmlReturn_t r;</span><br><span class="line">                <span class="keyword">char</span> __pad28[<span class="number">4</span>];</span><br><span class="line">        &#125; __attribute__((__packed__, __gcc_struct__)) *_cgo_a = v;</span><br><span class="line">        <span class="keyword">char</span> *_cgo_stktop = _cgo_topofstack();</span><br><span class="line">        __typeof__(_cgo_a-&gt;r) _cgo_r;</span><br><span class="line">        _cgo_tsan_acquire();</span><br><span class="line">        _cgo_r = nvmlGpuInstanceGetComputeInstanceProfileInfoV(_cgo_a-&gt;p0, _cgo_a-&gt;p1, _cgo_a-&gt;p2, _cgo_a-&gt;p3);</span><br><span class="line">        _cgo_tsan_release();</span><br><span class="line">        _cgo_a = (<span class="keyword">void</span>*)((<span class="keyword">char</span>*)_cgo_a + (_cgo_topofstack() - _cgo_stktop));</span><br><span class="line">        _cgo_a-&gt;r = _cgo_r;</span><br><span class="line">        _cgo_msan_write(&amp;_cgo_a-&gt;r, <span class="keyword">sizeof</span>(_cgo_a-&gt;r));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ChatGPT 3.5</p>
+<p>-Wl,-z,lazy, -Wl,-z,now</p>
+<blockquote>
+<p><strong>-Wl,-z,lazy</strong>: The -Wl,-z,lazy flag in the gcc command is a linker option used to instruct the linker to utilize lazy binding for dynamic libraries during the linking process.<br>When a program uses shared libraries (dynamic libraries), such as .so files in Linux, the linking process involves resolving symbols (functions or global variables) from these libraries. Lazy binding delays the resolution of these symbols until they are actually referenced during the program’s execution, rather than resolving all symbols at startup.<br>Lazy binding delays the resolution of these symbols until they are actually referenced during the program’s execution, rather than resolving all symbols at startup.</p>
+<p><strong>-Wl,-z,now</strong>: When you compile a program using gcc with the -Wl,-z,now flag, it influences how the dynamic linker behaves at runtime, particularly when the program is executed and loaded into memory. This flag impacts the linking stage, ensuring that symbols from shared libraries are resolved and bound immediately during the linking phase.<br>During the binary’s execution, when shared libraries are loaded, immediate binding might help in reducing the overhead associated with symbol resolution at runtime because the symbols are already resolved and bound during the linking process.<br>In summary, the -Wl,-z,now flag influences the behavior of the linker while creating the binary, affecting how symbol resolution occurs when the binary is loaded and executed, potentially impacting the startup performance by pre-resolving symbols.</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9b7ac1f7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/9b7ac1f7.html" class="post-title-link" itemprop="url">the spark of OPT-175B</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-26 16:08:00" itemprop="dateCreated datePublished" datetime="2023-11-26T16:08:00Z">2023-11-26</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2023-12-17 11:03:18" itemprop="dateModified" datetime="2023-12-17T11:03:18Z">2023-12-17</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>681</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>近期的一些杂项</p>
+</blockquote>
+<p>infra decouple from kind of internal production system</p>
+<p>重点并不是 infra 如何帮忙自动恢复, 只是略有提到; 重点还是训练的调参</p>
+<p>famous uncorrectable ECC error</p>
+<p>we just restart the run</p>
+<p>try to make run stable (数学上的稳定)</p>
+<p>FP16</p>
+<p>Lost GPU<br>CUDA errors<br>Job hanging<br>NCCL error<br>Job Slowdown</p>
+<p>High DRAM correctable errors etc.<br>blob storage issues</p>
+<p>when we are training these models, we kind of just stare at tensorboard all day</p>
+<p>in general the mixture of hardware issues, training like numerical converting issues</p>
+<p>~30days change the hyperparameter to try to get through</p>
+<p>56days, 53 - 54 restarts, OPT-175B survived 143K steps</p>
+<p>Andrej Karpathy</p>
+<p>LLM</p>
+<p>LAMA-2-70B</p>
+<p>fp16, 2bytes, 70B</p>
+<p>2 * 70B = 140B bytes = 140 * 1,000,000,000 bytes = 140,000,000,000 bytes = 140 gigabytes (bytes, kbytes, mbytes, gbytes)</p>
+<p>140GB</p>
+<p>tokenize</p>
+<p>encoder, 将字符串转换为整数编码<br>decoder, 将整数编码转为字符串</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1322,220 +1543,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/85943db7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/85943db7.html" class="post-title-link" itemprop="url">Docker container secure</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-03 03:15:20" itemprop="dateCreated datePublished" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>547</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="docker-security"><a href="#docker-security" class="headerlink" title="docker security"></a>docker security</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/">https://docs.docker.com/engine/security/</a></p>
-<p>docker security 总的来说，一个是使用了 <code>kernel namespace</code> 技术，为每个 container 创建了 <code>process</code>, <code>network</code> 等 namepsace，使得多个 container 不会有很大的相互影响</p>
-<p>另外一个方面是使用了 <code>control groups</code> 技术，用于限制 container 所使用的各类资源</p>
-<blockquote>
-<p>ensure that each container gets its fair share of memory, CPU, disk I/O</p>
-</blockquote>
-<p>简单理解，比如 cpu 资源，<code>cgroup</code> 用于避免某个 container 不当使用（或者恶意 or 无意代码 bug）cpu，导致其他 container 没法正常使用 cpu 的场景</p>
-<h1 id="container-root-user"><a href="#container-root-user" class="headerlink" title="container root user"></a>container root user</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/userns-remap/">https://docs.docker.com/engine/security/userns-remap/</a></p>
-<p>container 中不建议使用 <code>root</code> 用户执行进程，很大部分原因因为容器内的 uid gid 会映射到 host 上，举个例子，一旦容器内的进程逃逸到 host 上，那么它也有 <code>root</code> 用户的权限</p>
-<blockquote>
-<p>虽然说容器内的进程逃逸，是很严重的安全问题，docker 社区会第一时间修复</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/52d00230.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/52d00230.html" class="post-title-link" itemprop="url">Docker container -i -t</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-03 03:15:20" itemprop="dateCreated datePublished" datetime="2023-05-03T03:15:20Z">2023-05-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/run/#foreground">https://docs.docker.com/engine/reference/run/#foreground</a></p>
-<p>-t : Allocate a pseudo-tty<br>-i : Keep STDIN open even if not attached</p>
-</blockquote>
-<p><code>docker run -t</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:bionic-20200713</span><br><span class="line"></span><br><span class="line">docker run -t --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">root@9a7a115ff8d2:/# ls</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>启动容器无 <code>-i</code> 参数时，执行 <code>ls</code> 等命令无回显，执行 <code>exit</code> 命令无法退出 container terminal</p>
-<p><code>docker run -i</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -i --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">echo hello</span><br><span class="line">hello</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
-
-<p>启动容器无 <code>-t</code> 参数时，缺少常用的 terminal 功能，例如无当前登陆用户提示；但执行 <code>ls</code> 等命令正常有回显，且执行 <code>exit</code> 命令可退出</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag">https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag</a></p>
-<p>Without <code>-t</code> tag one can still interact with the container, but with it, you’ll have a nicer, more features terminal.</p>
-</blockquote>
-<h1 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core</a></p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Variables for interactive containers, these have very specialized use-cases (e.g. debugging)</span></span><br><span class="line"><span class="comment">// and shouldn&#x27;t be used for general purpose containers.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Whether this container should allocate a buffer for stdin in the container runtime. If this</span></span><br><span class="line"><span class="comment">// is not set, reads from stdin in the container will always result in EOF.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">Stdin <span class="keyword">bool</span> <span class="string">`json:&quot;stdin,omitempty&quot; protobuf:&quot;varint,16,opt,name=stdin&quot;`</span></span><br><span class="line"><span class="comment">// Whether the container runtime should close the stdin channel after it has been opened by</span></span><br><span class="line"><span class="comment">// a single attach. When stdin is true the stdin stream will remain open across multiple attach</span></span><br><span class="line"><span class="comment">// sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the</span></span><br><span class="line"><span class="comment">// first client attaches to stdin, and then remains open and accepts data until the client disconnects,</span></span><br><span class="line"><span class="comment">// at which time stdin is closed and remains closed until the container is restarted. If this</span></span><br><span class="line"><span class="comment">// flag is false, a container processes that reads from stdin will never receive an EOF.</span></span><br><span class="line"><span class="comment">// Default is false</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">StdinOnce <span class="keyword">bool</span> <span class="string">`json:&quot;stdinOnce,omitempty&quot; protobuf:&quot;varint,17,opt,name=stdinOnce&quot;`</span></span><br><span class="line"><span class="comment">// Whether this container should allocate a TTY for itself, also requires &#x27;stdin&#x27; to be true.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">TTY <span class="keyword">bool</span> <span class="string">`json:&quot;tty,omitempty&quot; protobuf:&quot;varint,18,opt,name=tty&quot;`</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config := &amp;runtimeapi.ContainerConfig&#123;</span><br><span class="line">	Metadata: &amp;runtimeapi.ContainerMetadata&#123;</span><br><span class="line">		Name:    container.Name,</span><br><span class="line">		Attempt: restartCountUint32,</span><br><span class="line">	&#125;,</span><br><span class="line">	Image:       &amp;runtimeapi.ImageSpec&#123;Image: imageRef&#125;,</span><br><span class="line">	Command:     command,</span><br><span class="line">	Args:        args,</span><br><span class="line">	WorkingDir:  container.WorkingDir,</span><br><span class="line">	Labels:      newContainerLabels(container, pod),</span><br><span class="line">	Annotations: newContainerAnnotations(container, pod, restartCount, opts),</span><br><span class="line">	Devices:     makeDevices(opts),</span><br><span class="line">	Mounts:      m.makeMounts(opts, container),</span><br><span class="line">	LogPath:     containerLogsPath,</span><br><span class="line">	Stdin:       container.Stdin,</span><br><span class="line">	StdinOnce:   container.StdinOnce,</span><br><span class="line">	Tty:         container.TTY,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="use-conda-env-in-docker"><a href="#use-conda-env-in-docker" class="headerlink" title="use conda env in docker"></a>use conda env in docker</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://pythonspeed.com/articles/activate-conda-dockerfile/">https://pythonspeed.com/articles/activate-conda-dockerfile/</a></p>
-<p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda/en/latest/commands/run.html">https://docs.conda.io/projects/conda/en/latest/commands/run.html</a></p>
-</blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda run --no-capture-output -n my-python-env python --version</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1560,13 +1567,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">347k</span>
+    <span title="站点总字数">356k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:15</span>
+    <span title="站点阅读时长">5:24</span>
   </span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
