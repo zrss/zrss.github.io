@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">126</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,425 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/1d091a1a.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/1d091a1a.html" class="post-title-link" itemprop="url">docker image tar archieve</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-17 14:02:27" itemprop="dateCreated datePublished" datetime="2018-11-17T14:02:27Z">2018-11-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 06:05:41" itemprop="dateModified" datetime="2020-11-22T06:05:41Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>20k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>18 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>简析 crane pull image 过程</p>
+<p>详细过程在内网写了，粗略过程罗列于此</p>
+<p>以 docker hub registry 为例</p>
+<p>以 crane 二进制工具为参考</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/google/go-containerregistry/blob/master/cmd/crane/doc/crane.md">https://github.com/google/go-containerregistry/blob/master/cmd/crane/doc/crane.md</a></p>
+<p>google 的同事真是为世界造轮子，many thanks</p>
+<h1 id="Target"><a href="#Target" class="headerlink" title="Target"></a>Target</h1><p>从 registry 下载 nginx:latest 镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx:latest</span><br></pre></td></tr></table></figure>
+
+<h1 id="Auth"><a href="#Auth" class="headerlink" title="Auth"></a>Auth</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/registry/spec/auth/token/#requesting-a-token">https://docs.docker.com/registry/spec/auth/token/#requesting-a-token</a></p>
+<ol>
+<li>ping registry</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl -i https://registry.hub.docker.com/v2/</span><br><span class="line">HTTP/1.1 401 Unauthorized</span><br><span class="line">Content-Type: application/json; charset=utf-8</span><br><span class="line">Docker-Distribution-Api-Version: registry/2.0</span><br><span class="line">Www-Authenticate: Bearer realm=<span class="string">&quot;https://auth.docker.io/token&quot;</span>,service=<span class="string">&quot;registry.docker.io&quot;</span></span><br><span class="line">Date: Sat, 17 Nov 2018 01:27:49 GMT</span><br><span class="line">Content-Length: 87</span><br><span class="line">Strict-Transport-Security: max-age=31536000</span><br></pre></td></tr></table></figure>
+
+<p>在 Www-Authenticate 请求头中可见 Registry 使用 Bearer 认证方式</p>
+<ol start="2">
+<li>refresh docker auth</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl &quot;https://auth.docker.io/token?service=registry.docker.io&amp;scope=repository:library/nginx:pull&quot; | python -mjson.tool</span><br><span class="line">&#123;</span><br><span class="line">    &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1YyI6WyJNSUlDK2pDQ0FwK2dBd0lCQWdJQkFEQUtCZ2dxaGtqT1BRUURBakJHTVVRd1FnWURWUVFERXpzeVYwNVpPbFZMUzFJNlJFMUVVanBTU1U5Rk9reEhOa0U2UTFWWVZEcE5SbFZNT2tZelNFVTZOVkF5VlRwTFNqTkdPa05CTmxrNlNrbEVVVEFlRncweE9EQXlNVFF5TXpBMk5EZGFGdzB4T1RBeU1UUXlNekEyTkRkYU1FWXhSREJDQmdOVkJBTVRPMVpCUTFZNk5VNWFNenBNTkZSWk9sQlFTbGc2VWsxQlZEcEdWalpQT2xZMU1sTTZRa2szV2pwU1REVk9PbGhXVDBJNlFsTmFSanBHVTFRMk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBMGtyTmgyZWxESnVvYjVERWd5Wi9oZ3l1ZlpxNHo0OXdvNStGRnFRK3VPTGNCMDRyc3N4cnVNdm1aSzJZQ0RSRVRERU9xNW5keEVMMHNaTE51UXRMSlNRdFY1YUhlY2dQVFRkeVJHUTl2aURPWGlqNFBocE40R0N0eFV6YTNKWlNDZC9qbm1YbmtUeDViOElUWXBCZzg2TGNUdmMyRFVUV2tHNy91UThrVjVPNFFxNlZKY05TUWRId1B2Mmp4YWRZa3hBMnhaaWNvRFNFQlpjWGRneUFCRWI2YkRnUzV3QjdtYjRRVXBuM3FXRnRqdCttKzBsdDZOR3hvenNOSFJHd3EwakpqNWtZbWFnWHpEQm5NQ3l5eDFBWFpkMHBNaUlPSjhsaDhRQ09GMStsMkVuV1U1K0thaTZKYVNEOFZJc2VrRzB3YXd4T1dER3U0YzYreE1XYUx3SURBUUFCbzRHeU1JR3ZNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVBCZ05WSFNVRUNEQUdCZ1JWSFNVQU1FUUdBMVVkRGdROUJEdFdRVU5XT2pWT1dqTTZURFJVV1RwUVVFcFlPbEpOUVZRNlJsWTJUenBXTlRKVE9rSkpOMW82VWt3MVRqcFlWazlDT2tKVFdrWTZSbE5VTmpCR0JnTlZIU01FUHpBOWdEc3lWMDVaT2xWTFMxSTZSRTFFVWpwU1NVOUZPa3hITmtFNlExVllWRHBOUmxWTU9rWXpTRVU2TlZBeVZUcExTak5HT2tOQk5sazZTa2xFVVRBS0JnZ3Foa2pPUFFRREFnTkpBREJHQWlFQWdZTWF3Si9uMXM0dDlva0VhRjh2aGVkeURzbERObWNyTHNRNldmWTFmRTRDSVFEbzNWazJXcndiSjNmU1dwZEVjT3hNazZ1ZEFwK2c1Nkd6TjlRSGFNeVZ1QT09Il19.eyJhY2Nlc3MiOlt7InR5cGUiOiJyZXBvc2l0b3J5IiwibmFtZSI6ImxpYnJhcnkvbmdpbngiLCJhY3Rpb25zIjpbInB1bGwiXX1dLCJhdWQiOiJyZWdpc3RyeS5kb2NrZXIuaW8iLCJleHAiOjE1NDI0MTg2MjgsImlhdCI6MTU0MjQxODMyOCwiaXNzIjoiYXV0aC5kb2NrZXIuaW8iLCJqdGkiOiI1SG5JQllqVkluZERFYlRkRlUzOSIsIm5iZiI6MTU0MjQxODAyOCwic3ViIjoiIn0.zzVk9t-govqoyzQCwHfivOAkdIG0D6r5RoMS7HRq4vOBj1bQdASOfB6YqVLGWP6G-4cf6ESCDTxdidREgZYnklpApX7dYdrAf6OpxA5HXP5MYDMTE7PEZueoUpBipz0UsPI4lzMC1j80UjjgTVHyjiIMcwgxPXpT6-zPJJFp9EjDrLsBHtj2cdmPv_54KA0j50VQLZKccUvC67z0iT5KpSRvKyFcWLEActeCnmuZjkJgySmaVduVfLiDLFbboBOw0mNLeTFIodfHoEdFqYBooBK1d_x37GFCSunYH8fFZ0XkfS7OFDyaYiOlQzafbnz0TxLIUU-jOEsJkaofOnHF2Q&quot;,</span><br><span class="line">    &quot;access_token&quot;: &quot;eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1YyI6WyJNSUlDK2pDQ0FwK2dBd0lCQWdJQkFEQUtCZ2dxaGtqT1BRUURBakJHTVVRd1FnWURWUVFERXpzeVYwNVpPbFZMUzFJNlJFMUVVanBTU1U5Rk9reEhOa0U2UTFWWVZEcE5SbFZNT2tZelNFVTZOVkF5VlRwTFNqTkdPa05CTmxrNlNrbEVVVEFlRncweE9EQXlNVFF5TXpBMk5EZGFGdzB4T1RBeU1UUXlNekEyTkRkYU1FWXhSREJDQmdOVkJBTVRPMVpCUTFZNk5VNWFNenBNTkZSWk9sQlFTbGc2VWsxQlZEcEdWalpQT2xZMU1sTTZRa2szV2pwU1REVk9PbGhXVDBJNlFsTmFSanBHVTFRMk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBMGtyTmgyZWxESnVvYjVERWd5Wi9oZ3l1ZlpxNHo0OXdvNStGRnFRK3VPTGNCMDRyc3N4cnVNdm1aSzJZQ0RSRVRERU9xNW5keEVMMHNaTE51UXRMSlNRdFY1YUhlY2dQVFRkeVJHUTl2aURPWGlqNFBocE40R0N0eFV6YTNKWlNDZC9qbm1YbmtUeDViOElUWXBCZzg2TGNUdmMyRFVUV2tHNy91UThrVjVPNFFxNlZKY05TUWRId1B2Mmp4YWRZa3hBMnhaaWNvRFNFQlpjWGRneUFCRWI2YkRnUzV3QjdtYjRRVXBuM3FXRnRqdCttKzBsdDZOR3hvenNOSFJHd3EwakpqNWtZbWFnWHpEQm5NQ3l5eDFBWFpkMHBNaUlPSjhsaDhRQ09GMStsMkVuV1U1K0thaTZKYVNEOFZJc2VrRzB3YXd4T1dER3U0YzYreE1XYUx3SURBUUFCbzRHeU1JR3ZNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVBCZ05WSFNVRUNEQUdCZ1JWSFNVQU1FUUdBMVVkRGdROUJEdFdRVU5XT2pWT1dqTTZURFJVV1RwUVVFcFlPbEpOUVZRNlJsWTJUenBXTlRKVE9rSkpOMW82VWt3MVRqcFlWazlDT2tKVFdrWTZSbE5VTmpCR0JnTlZIU01FUHpBOWdEc3lWMDVaT2xWTFMxSTZSRTFFVWpwU1NVOUZPa3hITmtFNlExVllWRHBOUmxWTU9rWXpTRVU2TlZBeVZUcExTak5HT2tOQk5sazZTa2xFVVRBS0JnZ3Foa2pPUFFRREFnTkpBREJHQWlFQWdZTWF3Si9uMXM0dDlva0VhRjh2aGVkeURzbERObWNyTHNRNldmWTFmRTRDSVFEbzNWazJXcndiSjNmU1dwZEVjT3hNazZ1ZEFwK2c1Nkd6TjlRSGFNeVZ1QT09Il19.eyJhY2Nlc3MiOlt7InR5cGUiOiJyZXBvc2l0b3J5IiwibmFtZSI6ImxpYnJhcnkvbmdpbngiLCJhY3Rpb25zIjpbInB1bGwiXX1dLCJhdWQiOiJyZWdpc3RyeS5kb2NrZXIuaW8iLCJleHAiOjE1NDI0MTg2MjgsImlhdCI6MTU0MjQxODMyOCwiaXNzIjoiYXV0aC5kb2NrZXIuaW8iLCJqdGkiOiI1SG5JQllqVkluZERFYlRkRlUzOSIsIm5iZiI6MTU0MjQxODAyOCwic3ViIjoiIn0.zzVk9t-govqoyzQCwHfivOAkdIG0D6r5RoMS7HRq4vOBj1bQdASOfB6YqVLGWP6G-4cf6ESCDTxdidREgZYnklpApX7dYdrAf6OpxA5HXP5MYDMTE7PEZueoUpBipz0UsPI4lzMC1j80UjjgTVHyjiIMcwgxPXpT6-zPJJFp9EjDrLsBHtj2cdmPv_54KA0j50VQLZKccUvC67z0iT5KpSRvKyFcWLEActeCnmuZjkJgySmaVduVfLiDLFbboBOw0mNLeTFIodfHoEdFqYBooBK1d_x37GFCSunYH8fFZ0XkfS7OFDyaYiOlQzafbnz0TxLIUU-jOEsJkaofOnHF2Q&quot;,</span><br><span class="line">    &quot;expires_in&quot;: 300,</span><br><span class="line">    &quot;issued_at&quot;: &quot;2018-11-17T01:32:08.367366757Z&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>设置 token var</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1YyI6WyJNSUlDK2pDQ0FwK2dBd0lCQWdJQkFEQUtCZ2dxaGtqT1BRUURBakJHTVVRd1FnWURWUVFERXpzeVYwNVpPbFZMUzFJNlJFMUVVanBTU1U5Rk9reEhOa0U2UTFWWVZEcE5SbFZNT2tZelNFVTZOVkF5VlRwTFNqTkdPa05CTmxrNlNrbEVVVEFlRncweE9EQXlNVFF5TXpBMk5EZGFGdzB4T1RBeU1UUXlNekEyTkRkYU1FWXhSREJDQmdOVkJBTVRPMVpCUTFZNk5VNWFNenBNTkZSWk9sQlFTbGc2VWsxQlZEcEdWalpQT2xZMU1sTTZRa2szV2pwU1REVk9PbGhXVDBJNlFsTmFSanBHVTFRMk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBMGtyTmgyZWxESnVvYjVERWd5Wi9oZ3l1ZlpxNHo0OXdvNStGRnFRK3VPTGNCMDRyc3N4cnVNdm1aSzJZQ0RSRVRERU9xNW5keEVMMHNaTE51UXRMSlNRdFY1YUhlY2dQVFRkeVJHUTl2aURPWGlqNFBocE40R0N0eFV6YTNKWlNDZC9qbm1YbmtUeDViOElUWXBCZzg2TGNUdmMyRFVUV2tHNy91UThrVjVPNFFxNlZKY05TUWRId1B2Mmp4YWRZa3hBMnhaaWNvRFNFQlpjWGRneUFCRWI2YkRnUzV3QjdtYjRRVXBuM3FXRnRqdCttKzBsdDZOR3hvenNOSFJHd3EwakpqNWtZbWFnWHpEQm5NQ3l5eDFBWFpkMHBNaUlPSjhsaDhRQ09GMStsMkVuV1U1K0thaTZKYVNEOFZJc2VrRzB3YXd4T1dER3U0YzYreE1XYUx3SURBUUFCbzRHeU1JR3ZNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVBCZ05WSFNVRUNEQUdCZ1JWSFNVQU1FUUdBMVVkRGdROUJEdFdRVU5XT2pWT1dqTTZURFJVV1RwUVVFcFlPbEpOUVZRNlJsWTJUenBXTlRKVE9rSkpOMW82VWt3MVRqcFlWazlDT2tKVFdrWTZSbE5VTmpCR0JnTlZIU01FUHpBOWdEc3lWMDVaT2xWTFMxSTZSRTFFVWpwU1NVOUZPa3hITmtFNlExVllWRHBOUmxWTU9rWXpTRVU2TlZBeVZUcExTak5HT2tOQk5sazZTa2xFVVRBS0JnZ3Foa2pPUFFRREFnTkpBREJHQWlFQWdZTWF3Si9uMXM0dDlva0VhRjh2aGVkeURzbERObWNyTHNRNldmWTFmRTRDSVFEbzNWazJXcndiSjNmU1dwZEVjT3hNazZ1ZEFwK2c1Nkd6TjlRSGFNeVZ1QT09Il19.eyJhY2Nlc3MiOlt7InR5cGUiOiJyZXBvc2l0b3J5IiwibmFtZSI6ImxpYnJhcnkvbmdpbngiLCJhY3Rpb25zIjpbInB1bGwiXX1dLCJhdWQiOiJyZWdpc3RyeS5kb2NrZXIuaW8iLCJleHAiOjE1NDI0MTg2MjgsImlhdCI6MTU0MjQxODMyOCwiaXNzIjoiYXV0aC5kb2NrZXIuaW8iLCJqdGkiOiI1SG5JQllqVkluZERFYlRkRlUzOSIsIm5iZiI6MTU0MjQxODAyOCwic3ViIjoiIn0.zzVk9t-govqoyzQCwHfivOAkdIG0D6r5RoMS7HRq4vOBj1bQdASOfB6YqVLGWP6G-4cf6ESCDTxdidREgZYnklpApX7dYdrAf6OpxA5HXP5MYDMTE7PEZueoUpBipz0UsPI4lzMC1j80UjjgTVHyjiIMcwgxPXpT6-zPJJFp9EjDrLsBHtj2cdmPv_54KA0j50VQLZKccUvC67z0iT5KpSRvKyFcWLEActeCnmuZjkJgySmaVduVfLiDLFbboBOw0mNLeTFIodfHoEdFqYBooBK1d_x37GFCSunYH8fFZ0XkfS7OFDyaYiOlQzafbnz0TxLIUU-jOEsJkaofOnHF2Q</span><br></pre></td></tr></table></figure>
+
+<h1 id="Pull"><a href="#Pull" class="headerlink" title="Pull"></a>Pull</h1><ol>
+<li>Get Image Manifest</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">curl -v -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application/vnd.docker.distribution.manifest.v2+json&quot; &quot;https://registry.hub.docker.com/v2/library/nginx/manifests/latest&quot;</span><br><span class="line">resp</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;schemaVersion&quot;: 2,</span><br><span class="line">    &quot;mediaType&quot;: &quot;application/vnd.docker.distribution.manifest.v2+json&quot;,</span><br><span class="line">    &quot;config&quot;: &#123;</span><br><span class="line">        &quot;mediaType&quot;: &quot;application/vnd.docker.container.image.v1+json&quot;,</span><br><span class="line">        &quot;size&quot;: 6022,</span><br><span class="line">        &quot;digest&quot;: &quot;sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;layers&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;mediaType&quot;: &quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">            &quot;size&quot;: 22486277,</span><br><span class="line">            &quot;digest&quot;: &quot;sha256:a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;mediaType&quot;: &quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">            &quot;size&quot;: 22204196,</span><br><span class="line">            &quot;digest&quot;: &quot;sha256:67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;mediaType&quot;: &quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">            &quot;size&quot;: 203,</span><br><span class="line">            &quot;digest&quot;: &quot;sha256:e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>Get Image Config</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br></pre></td><td class="code"><pre><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; &quot;https://registry.hub.docker.com/v2/library/nginx/blobs/sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&quot;</span><br><span class="line">HTTP/1.1 307 Temporary Redirect</span><br><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Docker-Distribution-Api-Version: registry/2.0</span><br><span class="line">Location: https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/e8/e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a/data?verify=1542423249-8ogA6RSAc3PlmtNd%2FOuiIuAUo3c%3D</span><br><span class="line">Date: Sat, 17 Nov 2018 02:04:09 GMT</span><br><span class="line">Content-Length: 244</span><br><span class="line">Strict-Transport-Security: max-age=31536000</span><br><span class="line">redirect</span><br><span class="line"></span><br><span class="line">curl https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/e8/e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a/data?verify=1542423249-8ogA6RSAc3PlmtNd%2FOuiIuAUo3c%3D | python -mjson.tool</span><br><span class="line">config json file</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;architecture&quot;: &quot;amd64&quot;,</span><br><span class="line">    &quot;config&quot;: &#123;</span><br><span class="line">        &quot;Hostname&quot;: &quot;&quot;,</span><br><span class="line">        &quot;Domainname&quot;: &quot;&quot;,</span><br><span class="line">        &quot;User&quot;: &quot;&quot;,</span><br><span class="line">        &quot;AttachStdin&quot;: false,</span><br><span class="line">        &quot;AttachStdout&quot;: false,</span><br><span class="line">        &quot;AttachStderr&quot;: false,</span><br><span class="line">        &quot;ExposedPorts&quot;: &#123;</span><br><span class="line">            &quot;80/tcp&quot;: &#123;&#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Tty&quot;: false,</span><br><span class="line">        &quot;OpenStdin&quot;: false,</span><br><span class="line">        &quot;StdinOnce&quot;: false,</span><br><span class="line">        &quot;Env&quot;: [</span><br><span class="line">            &quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;,</span><br><span class="line">            &quot;NGINX_VERSION=1.15.6-1~stretch&quot;,</span><br><span class="line">            &quot;NJS_VERSION=1.15.6.0.2.5-1~stretch&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Cmd&quot;: [</span><br><span class="line">            &quot;nginx&quot;,</span><br><span class="line">            &quot;-g&quot;,</span><br><span class="line">            &quot;daemon off;&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;ArgsEscaped&quot;: true,</span><br><span class="line">        &quot;Image&quot;: &quot;sha256:eb4657966d3e92498b450e24969a0a2808f254ab44102f31674543f642e35ed7&quot;,</span><br><span class="line">        &quot;Volumes&quot;: null,</span><br><span class="line">        &quot;WorkingDir&quot;: &quot;&quot;,</span><br><span class="line">        &quot;Entrypoint&quot;: null,</span><br><span class="line">        &quot;OnBuild&quot;: [],</span><br><span class="line">        &quot;Labels&quot;: &#123;</span><br><span class="line">            &quot;maintainer&quot;: &quot;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;StopSignal&quot;: &quot;SIGTERM&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;container&quot;: &quot;d4fa15093ad8ad3df60d7403c1752a379503686e32a76b70771b3ea268ec5d66&quot;,</span><br><span class="line">    &quot;container_config&quot;: &#123;</span><br><span class="line">        &quot;Hostname&quot;: &quot;d4fa15093ad8&quot;,</span><br><span class="line">        &quot;Domainname&quot;: &quot;&quot;,</span><br><span class="line">        &quot;User&quot;: &quot;&quot;,</span><br><span class="line">        &quot;AttachStdin&quot;: false,</span><br><span class="line">        &quot;AttachStdout&quot;: false,</span><br><span class="line">        &quot;AttachStderr&quot;: false,</span><br><span class="line">        &quot;ExposedPorts&quot;: &#123;</span><br><span class="line">            &quot;80/tcp&quot;: &#123;&#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Tty&quot;: false,</span><br><span class="line">        &quot;OpenStdin&quot;: false,</span><br><span class="line">        &quot;StdinOnce&quot;: false,</span><br><span class="line">        &quot;Env&quot;: [</span><br><span class="line">            &quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;,</span><br><span class="line">            &quot;NGINX_VERSION=1.15.6-1~stretch&quot;,</span><br><span class="line">            &quot;NJS_VERSION=1.15.6.0.2.5-1~stretch&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Cmd&quot;: [</span><br><span class="line">            &quot;/bin/sh&quot;,</span><br><span class="line">            &quot;-c&quot;,</span><br><span class="line">            &quot;#(nop) &quot;,</span><br><span class="line">            &quot;CMD [\&quot;nginx\&quot; \&quot;-g\&quot; \&quot;daemon off;\&quot;]&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;ArgsEscaped&quot;: true,</span><br><span class="line">        &quot;Image&quot;: &quot;sha256:eb4657966d3e92498b450e24969a0a2808f254ab44102f31674543f642e35ed7&quot;,</span><br><span class="line">        &quot;Volumes&quot;: null,</span><br><span class="line">        &quot;WorkingDir&quot;: &quot;&quot;,</span><br><span class="line">        &quot;Entrypoint&quot;: null,</span><br><span class="line">        &quot;OnBuild&quot;: [],</span><br><span class="line">        &quot;Labels&quot;: &#123;</span><br><span class="line">            &quot;maintainer&quot;: &quot;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;StopSignal&quot;: &quot;SIGTERM&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;created&quot;: &quot;2018-11-16T13:32:10.147294787Z&quot;,</span><br><span class="line">    &quot;docker_version&quot;: &quot;17.06.2-ce&quot;,</span><br><span class="line">    &quot;history&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-15T22:45:06.938205528Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop) ADD file:dab9baf938799c515ddce14c02f899da5992f0b76a432fa10a2338556a3cb04f in / &quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-15T22:45:07.243453424Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  CMD [\&quot;bash\&quot;]&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:31:11.175776557Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  LABEL maintainer=NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:31:11.487598267Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  ENV NGINX_VERSION=1.15.6-1~stretch&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:31:11.783900832Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  ENV NJS_VERSION=1.15.6.0.2.5-1~stretch&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:07.382613887Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c set -x \t&amp;&amp; apt-get update \t&amp;&amp; apt-get install --no-install-recommends --no-install-suggests -y gnupg1 apt-transport-https ca-certificates \t&amp;&amp; \tNGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \tfound=&#x27;&#x27;; \tfor server in \t\tha.pool.sks-keyservers.net \t\thkp://keyserver.ubuntu.com:80 \t\thkp://p80.pool.sks-keyservers.net:80 \t\tpgp.mit.edu \t; do \t\techo \&quot;Fetching GPG key $NGINX_GPGKEY from $server\&quot;; \t\tapt-key adv --keyserver \&quot;$server\&quot; --keyserver-options timeout=10 --recv-keys \&quot;$NGINX_GPGKEY\&quot; &amp;&amp; found=yes &amp;&amp; break; \tdone; \ttest -z \&quot;$found\&quot; &amp;&amp; echo &gt;&amp;2 \&quot;error: failed to fetch GPG key $NGINX_GPGKEY\&quot; &amp;&amp; exit 1; \tapt-get remove --purge --auto-remove -y gnupg1 &amp;&amp; rm -rf /var/lib/apt/lists/* \t&amp;&amp; dpkgArch=\&quot;$(dpkg --print-architecture)\&quot; \t&amp;&amp; nginxPackages=\&quot; \t\tnginx=$&#123;NGINX_VERSION&#125; \t\tnginx-module-xslt=$&#123;NGINX_VERSION&#125; \t\tnginx-module-geoip=$&#123;NGINX_VERSION&#125; \t\tnginx-module-image-filter=$&#123;NGINX_VERSION&#125; \t\tnginx-module-njs=$&#123;NJS_VERSION&#125; \t\&quot; \t&amp;&amp; case \&quot;$dpkgArch\&quot; in \t\tamd64|i386) \t\t\techo \&quot;deb https://nginx.org/packages/mainline/debian/ stretch nginx\&quot; &gt;&gt; /etc/apt/sources.list.d/nginx.list \t\t\t&amp;&amp; apt-get update \t\t\t;; \t\t*) \t\t\techo \&quot;deb-src https://nginx.org/packages/mainline/debian/ stretch nginx\&quot; &gt;&gt; /etc/apt/sources.list.d/nginx.list \t\t\t\t\t\t&amp;&amp; tempDir=\&quot;$(mktemp -d)\&quot; \t\t\t&amp;&amp; chmod 777 \&quot;$tempDir\&quot; \t\t\t\t\t\t&amp;&amp; savedAptMark=\&quot;$(apt-mark showmanual)\&quot; \t\t\t\t\t\t&amp;&amp; apt-get update \t\t\t&amp;&amp; apt-get build-dep -y $nginxPackages \t\t\t&amp;&amp; ( \t\t\t\tcd \&quot;$tempDir\&quot; \t\t\t\t&amp;&amp; DEB_BUILD_OPTIONS=\&quot;nocheck parallel=$(nproc)\&quot; \t\t\t\t\tapt-get source --compile $nginxPackages \t\t\t) \t\t\t\t\t\t&amp;&amp; apt-mark showmanual | xargs apt-mark auto &gt; /dev/null \t\t\t&amp;&amp; &#123; [ -z \&quot;$savedAptMark\&quot; ] || apt-mark manual $savedAptMark; &#125; \t\t\t\t\t\t&amp;&amp; ls -lAFh \&quot;$tempDir\&quot; \t\t\t&amp;&amp; ( cd \&quot;$tempDir\&quot; &amp;&amp; dpkg-scanpackages . &gt; Packages ) \t\t\t&amp;&amp; grep &#x27;^Package: &#x27; \&quot;$tempDir/Packages\&quot; \t\t\t&amp;&amp; echo \&quot;deb [ trusted=yes ] file://$tempDir ./\&quot; &gt; /etc/apt/sources.list.d/temp.list \t\t\t&amp;&amp; apt-get -o Acquire::GzipIndexes=false update \t\t\t;; \tesac \t\t&amp;&amp; apt-get install --no-install-recommends --no-install-suggests -y \t\t\t\t\t\t$nginxPackages \t\t\t\t\t\tgettext-base \t&amp;&amp; apt-get remove --purge --auto-remove -y apt-transport-https ca-certificates &amp;&amp; rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nginx.list \t\t&amp;&amp; if [ -n \&quot;$tempDir\&quot; ]; then \t\tapt-get purge -y --auto-remove \t\t&amp;&amp; rm -rf \&quot;$tempDir\&quot; /etc/apt/sources.list.d/temp.list; \tfi&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:08.778195069Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c ln -sf /dev/stdout /var/log/nginx/access.log \t&amp;&amp; ln -sf /dev/stderr /var/log/nginx/error.log&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:09.22115772Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  EXPOSE 80/tcp&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:09.696803649Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  STOPSIGNAL [SIGTERM]&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;created&quot;: &quot;2018-11-16T13:32:10.147294787Z&quot;,</span><br><span class="line">            &quot;created_by&quot;: &quot;/bin/sh -c #(nop)  CMD [\&quot;nginx\&quot; \&quot;-g\&quot; \&quot;daemon off;\&quot;]&quot;,</span><br><span class="line">            &quot;empty_layer&quot;: true</span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    &quot;os&quot;: &quot;linux&quot;,</span><br><span class="line">    &quot;rootfs&quot;: &#123;</span><br><span class="line">        &quot;type&quot;: &quot;layers&quot;,</span><br><span class="line">        &quot;diff_ids&quot;: [</span><br><span class="line">            &quot;sha256:ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3&quot;,</span><br><span class="line">            &quot;sha256:876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795&quot;,</span><br><span class="line">            &quot;sha256:9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b&quot;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>Get Image Layers</li>
+</ol>
+<p>根据 Image Manifest Layers 下载 Image Layers</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application/vnd.docker.distribution.manifest.v2+json&quot; &quot;https://registry.hub.docker.com/v2/library/nginx/blobs/sha256:a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0&quot;</span><br><span class="line">curl -o a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0.tar.gz https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/a5/a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0/data?verify=1542424303-e8ERUR8oG%2BoBh41TGIpCy7iFeYg%3D</span><br><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application/vnd.docker.distribution.manifest.v2+json&quot; &quot;https://registry.hub.docker.com/v2/library/nginx/blobs/sha256:67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b&quot;</span><br><span class="line">curl -o 67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b.tar.gz https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/67/67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b/data\?verify\=1542424505-PVOE52Er6OY7iKDTx5QZSZxI99I%3D</span><br><span class="line">curl -i -H &quot;Authorization: Bearer $token&quot; -H &quot;Accept: application/vnd.docker.distribution.manifest.v2+json&quot; &quot;https://registry.hub.docker.com/v2/library/nginx/blobs/sha256:e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527&quot;</span><br><span class="line">curl -o e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527.tar.gz https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/e8/e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527/data\?verify\=1542424575-kXRXCIAWm%2FXyHHfrhI1yOIPt4FA%3D</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>Generated Image Tar Archive Description (manifest.json)</li>
+</ol>
+<p>根据 Config file 及 Layers files 的组织目录结构，生成 Image Tar Archive Manifest</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;Config&quot;: &quot;sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a&quot;,</span><br><span class="line">        &quot;RepoTags&quot;: [</span><br><span class="line">            &quot;index.docker.io/library/nginx:latest&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Layers&quot;: [</span><br><span class="line">            &quot;a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0.tar.gz&quot;,</span><br><span class="line">            &quot;67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b.tar.gz&quot;,</span><br><span class="line">            &quot;e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527.tar.gz&quot;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>Tar Archive File Structure Summary</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── 67da5fbcb7a04397eda35dccb073d8569d28de13172fbd569fbb7a3e30b5886b.tar.gz --- Layer file</span><br><span class="line">├── a5a6f2f73cd8abbdc55d0df0d8834f7262713e87d6c8800ea3851f103025e0f0.tar.gz --- Layer file</span><br><span class="line">├── e82455fa5628738170735528c8db36567b5423ec59802a1e2c084ed42b082527.tar.gz --- Layer file</span><br><span class="line">├── manifest.json --- Image Tar Archive Description</span><br><span class="line">└── sha256:e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a --- Image Config</span><br><span class="line">0 directories, 5 files</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9d1faa5.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/9d1faa5.html" class="post-title-link" itemprop="url">docker load tar archive</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-17 13:58:45" itemprop="dateCreated datePublished" datetime="2018-11-17T13:58:45Z">2018-11-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 06:07:05" itemprop="dateModified" datetime="2020-11-22T06:07:05Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>在上一遍文章中我们 get 到了 crane pull 的过程，然而好奇的我仍然有个疑问，那就是 tar archive 中并未定义了 layer 的 stack 关系，如此 docker load 如何能正确组织 image 的 fs changeset 呢 ？</p>
+</blockquote>
+<p>docker load</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/load/">https://docs.docker.com/engine/reference/commandline/load/</a></p>
+<p>docker (moby)</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby">https://github.com/moby/moby</a></p>
+<p>Layer 是如何串联起来的</p>
+<p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/44544.html">https://www.hi-linux.com/posts/44544.html</a></p>
+<h1 id="Study"><a href="#Study" class="headerlink" title="Study"></a>Study</h1><p>按说理论上每层，应有镜像层 id，并且有指向 parent layer 的指针，当然基础镜像没有 parent layer</p>
+<p>否则无法将 layer 组织起来</p>
+<p>既然如此那在 image tar archive 中，是如何体现这种 layer stack 关系的 ?</p>
+<p>docker save</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── 2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de</span><br><span class="line">│   ├── VERSION</span><br><span class="line">│   ├── json</span><br><span class="line">│   └── layer.tar</span><br><span class="line">├── 9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831</span><br><span class="line">│   ├── VERSION</span><br><span class="line">│   ├── json</span><br><span class="line">│   └── layer.tar</span><br><span class="line">├── e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a.json</span><br><span class="line">├── ecfed8505473c79ab6831d6272a1adff68a42cd102e9992e60b2f8925df01927</span><br><span class="line">│   ├── VERSION</span><br><span class="line">│   ├── json</span><br><span class="line">│   └── layer.tar</span><br><span class="line">├── manifest.json</span><br><span class="line">└── repositories</span><br><span class="line">3 directories, 12 files</span><br></pre></td></tr></table></figure>
+
+<p>可见 docker save 时会将 layer 的 metadata 文件输出，查看 json 文件后发现其的确有 parent 的定义</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;id&quot;: &quot;2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de&quot;,</span><br><span class="line">    &quot;parent&quot;: &quot;9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831&quot;,</span><br><span class="line">    &quot;created&quot;: &quot;2018-11-16T13:32:10.147294787Z&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我还做了个实验，将每层的 json, VERSION 及 repositories 文件删除，检查是否仍然能继续 docker load，呃当然是肯定的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── 2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de</span><br><span class="line">│   └── layer.tar --- Layer File</span><br><span class="line">├── 9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831</span><br><span class="line">│   └── layer.tar --- Layer File</span><br><span class="line">├── e81eb098537d6c4a75438eacc6a2ed94af74ca168076f719f3a0558bd24d646a.json --- Config file</span><br><span class="line">├── ecfed8505473c79ab6831d6272a1adff68a42cd102e9992e60b2f8925df01927</span><br><span class="line">│   └── layer.tar --- Layer File</span><br><span class="line">└── manifest.json --- Image Tar Archive Description</span><br><span class="line">3 directories, 5 files</span><br></pre></td></tr></table></figure>
+
+<p>docker load 一把</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tar -cf nginx-new.tar *</span><br><span class="line">&gt; docker load -i nginx-new.tar</span><br><span class="line">ef68f6734aa4: Loading layer [==================================================&gt;]  58.44MB/58.44MB</span><br><span class="line">876456b96423: Loading layer [==================================================&gt;]  54.38MB/54.38MB</span><br><span class="line">9a8f339aeebe: Loading layer [==================================================&gt;]  3.584kB/3.584kB</span><br><span class="line">Loaded image: nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>docker load 各 layer, 其中左侧的 hex 值为 layer sha256 hash value</p>
+<p>可见的确未受影响，所以 docker load 并未依赖 docker save 时保留的 layer metadata 信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&quot;os&quot;: &quot;linux&quot;,</span><br><span class="line">&quot;rootfs&quot;: &#123;</span><br><span class="line">    &quot;type&quot;: &quot;layers&quot;,</span><br><span class="line">    &quot;diff_ids&quot;: [</span><br><span class="line">        &quot;sha256:ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3&quot;,</span><br><span class="line">        &quot;sha256:876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795&quot;,</span><br><span class="line">        &quot;sha256:9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外对于镜像 Config file 中说明的 rootfs.diff_ids, 其中的 sha256 hash 值均为各 layer 的 sha256 hash 值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3  ecfed8505473c79ab6831d6272a1adff68a42cd102e9992e60b2f8925df01927/layer.tar</span><br><span class="line">876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795  9fbc75679caed833594370d2effbdbba4e09eb6ee7a87f9d2e94b41627d56831/layer.tar</span><br><span class="line">9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b  2daafd635a629218204652bd3b10ddd23ae5e33abe1ebc3c26c01103e33369de/layer.tar</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://www.huweihuang.com/article/docker/docker-commands-principle/">https://www.huweihuang.com/article/docker/docker-commands-principle/</a></p>
+<blockquote>
+<p>如果你要持久化一个镜像，可以使用 docker save 指令<br>它与 docker export 的区别在于其保留了所有元数据和历史层<br>另外 docker export 用于容器，而不是镜像</p>
+</blockquote>
+<p>docker inspect 用于查看镜像最顶层的 metadata</p>
+<p>docker images -a 该指令用作列出镜像的所有镜像层。镜像层的排序以每个顶层镜像 ID 为首，依次列出每个镜像下的所有镜像层</p>
+<p>docker history 查看该镜像 ID 下的所有历史镜像</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>对比发现，其实在 Image Tar Archive 中，layer 的 parent-child 关系实际上就是定义于镜像 Config file 中的 rootfs.diff_ids 顺序</p>
+<p>[0] &lt;- [1] &lt;- [2] &lt;- …</p>
+<p>以 nginx:latest 为例</p>
+<ol>
+<li>ef68f6734aa485edf13a8509fe60e4272428deaf63f446a441b79d47fc5d17d3 (base layer)</li>
+<li>876456b964239fb297770341ec7e4c2630e42b64b7bbad5112becb1bd2c72795</li>
+<li>9a8f339aeebe1e8bcef322376e1274360653fb802abd4b94c69ea45a54f71a2b</li>
+<li>…</li>
+</ol>
+<p>这下就恍然大悟了</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b0559197.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b0559197.html" class="post-title-link" itemprop="url">Layer files Content</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-17 11:47:49" itemprop="dateCreated datePublished" datetime="2018-11-17T11:47:49Z">2018-11-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-22 03:51:34" itemprop="dateModified" datetime="2020-11-22T03:51:34Z">2020-11-22</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Creating-an-Image-Filesystem-Changeset"><a href="#Creating-an-Image-Filesystem-Changeset" class="headerlink" title="Creating an Image Filesystem Changeset"></a>Creating an Image Filesystem Changeset</h1><p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/blob/master/image/spec/v1.md#creating-an-image-filesystem-changeset">https://github.com/moby/moby/blob/master/image/spec/v1.md#creating-an-image-filesystem-changeset</a></p>
+<p>描述了如何 Creating an Image Filesystem Changeset</p>
+<p>每层 layers file 仅可能有如下的情况</p>
+<ul>
+<li>add</li>
+<li>update</li>
+<li>deleted</li>
+</ul>
+<p>例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Added:      /etc/my-app.d/default.cfg</span><br><span class="line">Modified:   /bin/my-app-tools</span><br><span class="line">Deleted:    /etc/my-app-config</span><br></pre></td></tr></table></figure>
+
+<p>对于 changeset 来说，会生成如下文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/etc/my-app.d/default.cfg</span><br><span class="line">/bin/my-app-tools</span><br><span class="line">/etc/.wh.my-app-config</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>.wh. i.e. without</p>
+</blockquote>
+<h1 id="Loading-an-Image-Filesystem-Changeset"><a href="#Loading-an-Image-Filesystem-Changeset" class="headerlink" title="Loading an Image Filesystem Changeset"></a>Loading an Image Filesystem Changeset</h1><p>那么我们又如何 Loading an Image Filesystem Changeset</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/blob/master/image/spec/v1.md#loading-an-image-filesystem-changeset">https://github.com/moby/moby/blob/master/image/spec/v1.md#loading-an-image-filesystem-changeset</a></p>
+<ol>
+<li>找到 the root ancestor changeset</li>
+<li>从 root ancestor changeset 开始，逐级解压 layer’s filesystem changeset archive 到目录 (将被使用来作为 the root of a container filesystem)<br> 1.1 每层解压之后再遍历一次目录，删除已被标记删除的目录 removing any files with the prefix .wh. and the corresponding file or directory named without this prefix</li>
+</ol>
+<h1 id="Owner-and-Group"><a href="#Owner-and-Group" class="headerlink" title="Owner and Group"></a>Owner and Group</h1><p>另外尝试改变文件属主</p>
+<p>changeset 也算作文件 update</p>
+<p>untar 的时候注意 –same-owner</p>
+<p>这里有个新问题，就是 docker load 是如何处理 Image Filesystem Changeset 中的属主的</p>
+<p>实际测试得需要 root 用户 <code>tar --same-owner -xvf</code> 才行, 解压出来的属主和 group 也仅为 id 值，毕竟宿主机上不一定有该 owner 和 group</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ash-3.2$ ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x   3 zrss  staff  102 11 17 19:24 .</span><br><span class="line">drwxr-xr-x  10 zrss  staff  340 11 17 18:39 ..</span><br><span class="line">drwxr-xr-x  13 101   101    442 11 17 19:25 var</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>101 nginx</p>
+</blockquote>
+<h1 id="Permission"><a href="#Permission" class="headerlink" title="Permission"></a>Permission</h1><p>改变文件权限</p>
+<p>changeset 也算作文件 update</p>
+<p>直接解压即可，可以保留原权限</p>
+<h1 id="Scan-Image-Tar-Archive"><a href="#Scan-Image-Tar-Archive" class="headerlink" title="Scan Image Tar Archive"></a>Scan Image Tar Archive</h1><p>业界做法扫描 layer，</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/ee/dtr/user/manage-images/scan-images-for-vulnerabilities/">https://docs.docker.com/ee/dtr/user/manage-images/scan-images-for-vulnerabilities/</a></p>
+<p>而不是将 layer combine 成 container root fs 之后，再全文件扫描</p>
+<p>当然可能因为是病毒扫描，这样做比较简单</p>
+<p>话说有没有必要组成 root fs 之后再扫描呢，因为毕竟可能之前 layer 的漏洞，在下一 layer 被修复了，感觉可能是会误报的 ? 细节上不知道可以如何实现</p>
+<p>倒是可以看下 coreos clair 是如何实现的</p>
+<p>🙄 其实也是一样的，把 layer 解压之后，扫文件，比对数据库</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>其实是有点儿疑惑的, 业界镜像扫描解决方案 (当然是针对病毒扫描) 都是直接扫描 image layer</p>
+<p>暂未发现有按照 Loading an Image Filesystem Changeset 描述的过程那样，挂载出 container root fs 之后，再扫描的解决方案</p>
+<p>当然描述的过程感觉其实只是好理解，实际上 dockerd 再组织镜像 root fs 时，是需要根据不同的 storage driver 的实现，调用不同的命令实现的挂载 (或者换一个说法，storage driver 本质上实现了描述的过程 …)</p>
+<ol>
+<li>overlay2</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://terriblecode.com/blog/how-docker-images-work-union-file-systems-for-dummies/">https://terriblecode.com/blog/how-docker-images-work-union-file-systems-for-dummies/</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir base diff overlay workdir</span><br><span class="line">sudo mount \</span><br><span class="line">    -t overlay \</span><br><span class="line">    -o lowerdir=base,upperdir=diff,workdir=workdir \</span><br><span class="line">    overlay \</span><br><span class="line">    overlay</span><br></pre></td></tr></table></figure>
+
+<p>这哥们没讲太细</p>
+<ol start="2">
+<li>aufs</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://coolshell.cn/articles/17061.html?spm=a2c4e.11153940.blogcont62949.21.53a61eearfeDBm">https://coolshell.cn/articles/17061.html?spm=a2c4e.11153940.blogcont62949.21.53a61eearfeDBm</a></p>
+<p>有文件删除的话，在可写层放个 .wh.[file-name]，文件就被隐藏了。和直接 rm 是一样的</p>
+<ol start="3">
+<li>devicemapper</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://coolshell.cn/articles/17200.html?spm=a2c4e.11153940.blogcont62949.22.53a61eearfeDBm">https://coolshell.cn/articles/17200.html?spm=a2c4e.11153940.blogcont62949.22.53a61eearfeDBm</a></p>
+<p>描述如何用 devicemapper 实现 layers 挂载成 union file system 的，各层可以通过 devicemapper 的 snapshot 技术实现，对用户来说就是单一的 fs</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1297,421 +1716,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2413e37b.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/2413e37b.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 4)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-07-08 11:21:05" itemprop="dateCreated datePublished" datetime="2018-07-08T11:21:05Z">2018-07-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-06 03:23:08" itemprop="dateModified" datetime="2020-12-06T03:23:08Z">2020-12-06</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>现在我们知道 Server 端会首先进入 onOpen 状态，随后会持续从 socket 中获取 WebSocket Frame 组装成 Message 后，回调业务层 onMessage 方法</p>
-<p>而 Client 端在接收到 101 status code 之后，也会进入 onOpen 状态，典型的 Client 端实现如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create WebSocket connection.</span></span><br><span class="line"><span class="keyword">const</span> socket = <span class="keyword">new</span> WebSocket(<span class="string">&#x27;wss://remoteAddress:443&#x27;</span>);</span><br><span class="line"><span class="comment">// Connection opened</span></span><br><span class="line">socket.addEventListener(<span class="string">&#x27;open&#x27;</span>, function (event) &#123;</span><br><span class="line">    socket.send(<span class="string">&#x27;Hello Server!&#x27;</span>);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// Listen for messages</span></span><br><span class="line">socket.addEventListener(<span class="string">&#x27;message&#x27;</span>, function (event) &#123;</span><br><span class="line">    console.log(<span class="string">&#x27;Message from server &#x27;</span>, event.data);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket">https://developer.mozilla.org/en-US/docs/Web/API/WebSocket</a></p>
-<p>而我遇到的问题是，web terminal 一般实现，会在 onOpen 中发送一个设置 terminal size 的 message，例如 k8s 中可以发送如下消息</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Connection opened</span></span><br><span class="line">socket.addEventListener(<span class="string">&#x27;open&#x27;</span>, <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    socket.send(<span class="string">&#x27;4&#123;&quot;Width&quot;:80,&quot;Height&quot;:20&#125;&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>该消息不能被立即发送，若立即发送，则会导致 Tomcat side ServerEndpoint onMessage 一直未被调用</p>
-<p>而后端 k8s side 的数据能推送至 Client side，具体来说 Client side 能接收到 k8s side 推送回来的初始化空数据，而 Client side 发送的数据帧 ServerEndpoint onMessage 一直未被调用</p>
-<p>说明 WebSocket 链接是没问题的，于是乎 Client 发送的数据帧被发送到了哪里？</p>
-<p>之前的几篇讨论中，其实我是判定如果 ServerEndpoint onOpen stuck 住，会出现该问题。然而实际情况可以说明，既然后端的数据可以推送至客户端，证明 onOpen 已经执行结束</p>
-<p>ServerEndpoint onOpen 时执行的逻辑如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> hashmap frontEndWsSessionMap;</span><br><span class="line"><span class="keyword">static</span> hashmap backEndWsSessionMap;</span><br><span class="line">onOpen(session) &#123;</span><br><span class="line">    wsBackEndSession = connectToBackEnd(...);</span><br><span class="line">    backEndWsSessionMap.put(wsBackEndSession.getId(), session);</span><br><span class="line">    frontEndWsSessionMap.put(session.getId(), wsBackEndSession);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而通过查看代码知道 connectToBackEnd，即 Server side 实现 WebSocket 请求时，用了两个新的线程，其中一个用于接收数据，另一个用于获取数据</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Switch to WebSocket</span></span><br><span class="line">WsRemoteEndpointImplClient wsRemoteEndpointClient = <span class="keyword">new</span> WsRemoteEndpointImplClient(channel);</span><br><span class="line">WsSession wsSession = <span class="keyword">new</span> WsSession(endpoint, wsRemoteEndpointClient,</span><br><span class="line">        <span class="keyword">this</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, extensionsAgreed,</span><br><span class="line">        subProtocol, Collections.&lt;String,String&gt;emptyMap(), secure,</span><br><span class="line">        clientEndpointConfiguration);</span><br><span class="line">WsFrameClient wsFrameClient = <span class="keyword">new</span> WsFrameClient(response, channel,</span><br><span class="line">        wsSession, transformation);</span><br><span class="line"><span class="comment">// WsFrame adds the necessary final transformations. Copy the</span></span><br><span class="line"><span class="comment">// completed transformation chain to the remote end point.</span></span><br><span class="line">wsRemoteEndpointClient.setTransformation(wsFrameClient.getTransformation());</span><br><span class="line">endpoint.onOpen(wsSession, clientEndpointConfiguration);</span><br><span class="line">registerSession(endpoint, wsSession);</span><br><span class="line"><span class="comment">/* It is possible that the server sent one or more messages as soon as</span></span><br><span class="line"><span class="comment"> * the WebSocket connection was established. Depending on the exact</span></span><br><span class="line"><span class="comment"> * timing of when those messages were sent they could be sat in the</span></span><br><span class="line"><span class="comment"> * input buffer waiting to be read and will not trigger a &quot;data</span></span><br><span class="line"><span class="comment"> * available to read&quot; event. Therefore, it is necessary to process the</span></span><br><span class="line"><span class="comment"> * input buffer here. Note that this happens on the current thread which</span></span><br><span class="line"><span class="comment"> * means that this thread will be used for any onMessage notifications.</span></span><br><span class="line"><span class="comment"> * This is a special case. Subsequent &quot;data available to read&quot; events</span></span><br><span class="line"><span class="comment"> * will be handled by threads from the AsyncChannelGroup&#x27;s executor.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">wsFrameClient.startInputProcessing();</span><br></pre></td></tr></table></figure>
-
-<p>链接建立之后，会立即调用 wsFrameClient.startInputProcessing(); 处理当前 response 中的数据，即调用 ClientEndpoint onMessage 方法</p>
-<p>后续的数据处理由线程池中的读线程完成</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">onMessage(String message, session) &#123;</span><br><span class="line">    frontEndSession = backEndWsSessionMap.get(session.getId());</span><br><span class="line">    frontEndSession.getBasicRemote.sendText(message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>大致流程也是类似的，从 socketOutput 中持续获取数据，组装 okay 之后，回调 ClientEndpoint onMessage 方法</p>
-<p>综上，上述逻辑 okay，并不是在 onOpen 中 stuck</p>
-<p>至此与问题现象对比之后，可以认为如果问题出现 Tomcat 侧，则仅可能为 onDataAvailable 之后，一直未能从 socketInputStream 中获取到数据</p>
-<p>如果可以抓包分析的话，抓包最为简单，之所以费这么大劲儿分析 Tomcat WebSocket 的实现，实际上是因为全是 TLS 流量，so 抓到的全是 tcp 包，根本没法区分</p>
-<p>尝试过导入 Nginx 的私钥，也没法解，听 Nginx 的同事说是 Nginx 与 Server 之间还会动态协商一个私钥 … 醉了</p>
-<p>如果能确定 Client 的 WebSocket 包都发送到达 Tomcat 了，这也可以确认是 Server side 的问题，然鹅</p>
-<p>绝望 … so sad</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6b5275bc.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/6b5275bc.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 3)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-07-08 11:09:28" itemprop="dateCreated datePublished" datetime="2018-07-08T11:09:28Z">2018-07-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-06 03:13:48" itemprop="dateModified" datetime="2020-12-06T03:13:48Z">2020-12-06</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>回答上篇末尾的调用时序问题</p>
-<p>Tomcat 7 默认使用 BIO Http11Protocol</p>
-<p>注意到在 Http11Protocol 的 process 方法中（AbstractProtocol）有如下逻辑</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (processor.isUpgrade()) &#123;</span><br><span class="line">        <span class="comment">// Init WebSocket OPEN_READ processor httpUpgradeHandler is null</span></span><br><span class="line">        <span class="comment">// And when the second round came, upgradeDispatch will dispatch OPEN_READ status</span></span><br><span class="line">        <span class="comment">// ha, upgradeServletInputStream.onDataAvailable() will be called</span></span><br><span class="line">        state = processor.upgradeDispatch(status);</span><br><span class="line">        <span class="comment">// but, pay attention to that fact</span></span><br><span class="line">        <span class="comment">// WsFrameServer.onDataAvailable is a for loop so it will remain in it</span></span><br><span class="line">        <span class="comment">// that&#x27;s the reason why we can&#x27;t see the state of Upgraded return</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Init WebSocket OPEN_READ will go through here</span></span><br><span class="line">        state = processor.process(wrapper);</span><br><span class="line">        <span class="comment">// Finally adapter.service(request, response) will be called in processor.process</span></span><br><span class="line">        <span class="comment">// then the request will go through filter</span></span><br><span class="line">        <span class="comment">// Once it arrives the WsFilter</span></span><br><span class="line">        <span class="comment">// and it will call upgrade method with a WsHttpUpgradeHandler in WsFilter</span></span><br><span class="line">        <span class="comment">// That will instance a WsHttpUpgradeHandler and call action Upgrade hook</span></span><br><span class="line">        <span class="comment">// That&#x27;s the time httpUpgradeHandler be set to WsHttpUpgradeHandler and no more null value</span></span><br><span class="line">        <span class="comment">// So isUpgrade() return true and state will become</span></span><br><span class="line">        <span class="comment">// SocketState.UPGRADING</span></span><br><span class="line">        <span class="comment">// And it will create a new processor named upgradeProcessor to replace previous processor</span></span><br><span class="line">        <span class="comment">// in the state of SocketState.UPGRADING in following code</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isDebugEnabled()) &#123;</span><br><span class="line">        getLog().debug(<span class="string">&quot;Socket: [&quot;</span> + wrapper +</span><br><span class="line">                <span class="string">&quot;], Status in: [&quot;</span> + status +</span><br><span class="line">                <span class="string">&quot;], State out: [&quot;</span> + state + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">        <span class="comment">// it means that if it is a WebSocket Request</span></span><br><span class="line">        <span class="comment">// it turns out to be once debug info</span></span><br><span class="line">        <span class="comment">// Status in: OPEN_READ, State out: UPGRADING</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">while</span> (state == SocketState.UPGRADING);</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">if</span> (state == SocketState.UPGRADING) &#123;</span><br><span class="line">    <span class="comment">// Get the HTTP upgrade handler</span></span><br><span class="line">    HttpUpgradeHandler httpUpgradeHandler =</span><br><span class="line">            processor.getHttpUpgradeHandler();</span><br><span class="line">    <span class="comment">// Release the Http11 processor to be re-used</span></span><br><span class="line">    release(wrapper, processor, <span class="keyword">false</span>, <span class="keyword">false</span>);</span><br><span class="line">    <span class="comment">// Create the upgrade processor</span></span><br><span class="line">    processor = createUpgradeProcessor(</span><br><span class="line">            wrapper, httpUpgradeHandler);</span><br><span class="line">    <span class="comment">// Mark the connection as upgraded</span></span><br><span class="line">    wrapper.setUpgraded(<span class="keyword">true</span>);</span><br><span class="line">    <span class="comment">// Associate with the processor with the connection</span></span><br><span class="line">    connections.put(socket, processor);</span><br><span class="line">    <span class="comment">// Initialise the upgrade handler (which may trigger</span></span><br><span class="line">    <span class="comment">// some IO using the new protocol which is why the lines</span></span><br><span class="line">    <span class="comment">// above are necessary)</span></span><br><span class="line">    <span class="comment">// This cast should be safe. If it fails the error</span></span><br><span class="line">    <span class="comment">// handling for the surrounding try/catch will deal with</span></span><br><span class="line">    <span class="comment">// it.</span></span><br><span class="line">    httpUpgradeHandler.init((WebConnection) processor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>所以 Tomcat 7 WebSocket 实现上的时序是正确的，大致的请求处理流程如下</p>
-<ul>
-<li>Client 与 OS 特定端口建立 Connection …</li>
-<li>Http11Protocol.process 被调用，传入 OPEN_READ status</li>
-<li>processor.process(wrapper) 被调用</li>
-<li>WsFilter 被调用，发现为 HTTP Upgrade to websocket request，设置 httpUpgradeHandler 为 WsHttpUpgradeHandler</li>
-<li>processor.process(wrapper) 返回 UPGRADING state</li>
-<li>Http11Protocol.process 创建新的 upgradeProcessor 以代替之前的 processor</li>
-<li>调用 WsHttpUpgradeHandler.init 方法</li>
-<li>init 方法执行<ul>
-<li>在 sos 上注册 WsWriteListener 方法</li>
-<li>调用 onOpen 方法</li>
-<li>在 sis 上注册 WsReadListener 方法</li>
-</ul>
-</li>
-<li>status 仍然为 OPEN_READ</li>
-<li>processor.upgradeDispatch(status) 被调用，for loop socketInputStream</li>
-</ul>
-<p>上述过程均在同一线程中执行，Tomcat 7 Http11Protocol 实现的是简单的处理模型，Acceptor 获取 socket，当有新的 socket 连接时，使用一个新线程去处理。</p>
-<p>现在我们可以给出 WebSocket ServerEndpoint 的精确时序了</p>
-<ul>
-<li>SocketState OPEN_READ 后 ServerEndpoint onOpen 被调用</li>
-<li>WsFrameServer onDataAvailable 被调用</li>
-<li>onDataAvailable 组装好 Message 后 ServerEndpoint onMessage 被调用</li>
-</ul>
-<p>因此即使 onOpen 执行时间过长，数据也只是被累积在 socket 输入缓冲区中，一旦执行结束后，依然能触发 onDataAvailable，从而回调 ServerEndpoint onMessage</p>
-<p>另一方面也说明了，onOpen 首先被执行，onMessage 其次被执行的时序</p>
-<p>值得注意的是 WebSocket 一旦成功 upgradeDispatch(OPEN_READ) state 后，逻辑将会停留在循环从 socketInputStream 获取数据上</p>
-<p>而我们知道 WebSocket 为双工协议，那么 OPEN_WRITE 状态什么时候被 upgradeDispatch ? 这不被 upgradeDispatch 的话，Server side 就没法向 Client side 推送数据了？</p>
-<p>WsRemoteEndpointImplServer onWritePossible</p>
-<p>从 byteBuffers 中读取字节，并写入 socketOutputStream 中，byteBuffers 读取 complete 发送完成后，循环退出</p>
-<p>这仅是 onWritePossible 自身的逻辑</p>
-<p>而实际上如果是 upgradeDispatch(OPEN_WRITE) trigger onWritePossible(useDispatch: false)</p>
-<p>WsRemoteEndpointImplServer doWrite trigger onWritePossible(useDispatch: true)</p>
-<p>耐人寻味</p>
-<p>注意到我们使用 wsSession.getBasicRemote().sendText() 发送消息，实际上最后调用的为 doWrite 方法，所以逻辑就清晰了，实际上并不一定需要 upgradeDispatch(OPEN_WRITE) 才能写入，只不过在实现上，通过 upgradeDispatch(OPEN_WRITE) 执行的 doWrite 与在 onOpen / onMessage 中使用 wsSession 直接写入的 doWrite 传入参数不同，均能完成写入</p>
-<ul>
-<li>upgradeDispatch(OPEN_WRITE): onWritePossible(useDispatch: false)</li>
-<li>wsSession.getBasicRemote().sendText(…): onWritePossible(useDispatch: true)</li>
-</ul>
-<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><p>这块逻辑看的还不是特别清晰，主要是为了没有 OPEN_WRITE state 也是可以写入的这个结论</p>
-<p>所以完整的 WebSocket 请求流程</p>
-<ul>
-<li>客户端发起 WebSocket 请求时，需要新建一个链接</li>
-<li>Tomcat 接收到 socket 链接后，按通用处理流程处理之</li>
-<li>WebSocket 的第一个请求为 HTTP GET Upgrade 请求，这个请求在通用处理流程中经过 WsFilter</li>
-<li>WsFilter 识别到该请求为 WebSocket 请求，随后设置 WsHttpUpgradeHandler 为其 httpUpgradeHandler，调用 upgrade 方法，并 preInit WsHttpUpgradeHandler</li>
-<li>Tomcat 发现当前 socket state 变为 UPGRADING，因此创建 upgradeProcessor 以替换之前的 http processor，此时会执行 WsHttpUpgradeHandler init 方法</li>
-<li>WsHttpUpgradeHandler init 方法中会回调 <strong>ServerEndpoint onOpen</strong> 方法</li>
-<li>Tomcat 继续处理时发现 processor 为 upgradeProcessor，因此调用 upgradeDispatch(OPEN_READ)</li>
-<li>这时触发 WsHttpUpgradeHandler.onDataAvailable()，随即继续调用至 WsFrameServer.onDataAvailable()</li>
-<li>WsFrameServer.onDataAvailable() 尝试获取对象锁之后，进入 for loop 获取 socketInputStream 输入逻辑，组装好数据后，回调 <strong>ServerEndpoint onMessage</strong> 方法，即业务层此时可以感知到 Client 发送的数据</li>
-<li>到这里当前线程就一直在干读取 socket 中的数据并调用 onMessage 这件事儿了</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/724944fd.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/724944fd.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 2)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-07-06 20:28:07" itemprop="dateCreated datePublished" datetime="2018-07-06T20:28:07Z">2018-07-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-06 03:18:54" itemprop="dateModified" datetime="2020-12-06T03:18:54Z">2020-12-06</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>6.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>接着上一篇，来分析一下 Tomcat 7 中 WebSocket 的实现</p>
-<h1 id="WsFilter"><a href="#WsFilter" class="headerlink" title="WsFilter"></a>WsFilter</h1><p>WebSocket 的实现入口处为 WsFilter，该 Filter 检查 HTTP header 中是否包含下述字段</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket</span><br></pre></td></tr></table></figure>
-
-<p>且为 HTTP GET 请求。若符合 WebSocket Handshake 要求，则从 WebSocketContainer 中查找请求路径是否有 filter 拦截，若没有则继续后续的 filter，若有则进入 UpgradeUtil.doUpgrade 方法</p>
-<h1 id="WsServerContainer"><a href="#WsServerContainer" class="headerlink" title="WsServerContainer"></a>WsServerContainer</h1><p>回头来看 WsServerContainer 的初始化，当然最为重要的是注册了 WsFilter</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">FilterRegistration.Dynamic fr = servletContext.addFilter(</span><br><span class="line">        <span class="string">&quot;Tomcat WebSocket (JSR356) Filter&quot;</span>, <span class="keyword">new</span> WsFilter());</span><br><span class="line">fr.setAsyncSupported(<span class="keyword">true</span>);</span><br><span class="line">EnumSet&lt;DispatcherType&gt; types = EnumSet.of(DispatcherType.REQUEST,</span><br><span class="line">        DispatcherType.FORWARD);</span><br><span class="line">fr.addMappingForUrlPatterns(types, <span class="keyword">true</span>, <span class="string">&quot;/*&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>可见 WsFilter 拦截所有请求，当遇到 HTTP Upgrade to websocket 协议的请求时执行 doUpgrade 逻辑</p>
-<h1 id="UpgradeUtil-doUpgrade"><a href="#UpgradeUtil-doUpgrade" class="headerlink" title="UpgradeUtil.doUpgrade"></a>UpgradeUtil.doUpgrade</h1><p>doUpgrade 在各种检查后，可以接受 Client Upgrade 请求时，需向 Client 端返回的 HTTP 报文头中添加如下字段（Sec-WebSocket-Protocol / Sec-WebSocket-Extensions 可选）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket</span><br><span class="line">Connection: upgrade</span><br><span class="line">Sec-WebSocket-Accept: [key]</span><br><span class="line">Sec-WebSocket-Protocol: [subProtocol]</span><br><span class="line">Sec-WebSocket-Extensions: [extensions]</span><br></pre></td></tr></table></figure>
-
-<p>当然还需要初始化 ServerEndpoint 实例（@ServerEndpoint 注解）</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Endpoint ep;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    Class&lt;?&gt; clazz = sec.getEndpointClass();</span><br><span class="line">    <span class="keyword">if</span> (Endpoint.class.isAssignableFrom(clazz)) &#123;</span><br><span class="line">        ep = (Endpoint) sec.getConfigurator().getEndpointInstance(</span><br><span class="line">                clazz);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ep = <span class="keyword">new</span> PojoEndpointServer();</span><br><span class="line">        <span class="comment">// Need to make path params available to POJO</span></span><br><span class="line">        perSessionServerEndpointConfig.getUserProperties().put(</span><br><span class="line">                PojoEndpointServer.POJO_PATH_PARAM_KEY, pathParams);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (InstantiationException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ServletException(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>最后向 Client 返回 HTTP Response</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">WsHttpUpgradeHandler wsHandler =</span><br><span class="line">        ((RequestFacade) inner).upgrade(WsHttpUpgradeHandler.class);</span><br><span class="line">wsHandler.preInit(ep, perSessionServerEndpointConfig, sc, wsRequest,</span><br><span class="line">        negotiatedExtensionsPhase2, subProtocol, transformation, pathParams,</span><br><span class="line">        req.isSecure());</span><br></pre></td></tr></table></figure>
-
-<p>而 WsHttpUpgradeHandler 则会用于处理</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The handler for all further incoming data on the current connection.</span><br></pre></td></tr></table></figure>
-
-<h1 id="WsHttpUpgradeHandler"><a href="#WsHttpUpgradeHandler" class="headerlink" title="WsHttpUpgradeHandler"></a>WsHttpUpgradeHandler</h1><p>WsHttpUpgradeHandler init 方法中干了很多事情</p>
-<ul>
-<li>首先从 WebConnection 中获取输入流/输出流</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.connection = connection;</span><br><span class="line">AbstractServletInputStream sis;</span><br><span class="line">AbstractServletOutputStream sos;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    sis = connection.getInputStream();</span><br><span class="line">    sos = connection.getOutputStream();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>实例化 WsSession，注意 SessionId 使用一个 static AtomicLong 维护，每次增加 1</li>
-<li>实例化 WsFrameServer，用于读写 Message</li>
-<li>在 sos 上注册 WsWriteListener</li>
-<li>调用 ServerEndpoint onOpen 方法</li>
-<li>在 sis 上注册 WsReadListener</li>
-</ul>
-<h2 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h2><p>所以综上所述，每一次 HTTP Upgrade 请求均会创建一个新的 ServerEndpoint 实例，因此定义于 ServerEndpoint 中的 static 变量需注意确保线程安全</p>
-<p>另外 ServerEndpoint 中 onOpen 和 onMessage 的执行顺序为 onOpen 必然首先执行，若 onOpen 执行时间过长，则就算 sis 中有数据等待处理，也不会触发 onMessage，因为从 WsHttpUpgradeHandler init 方法中可以看出 onOpen 调用结束后，才会在 sis 上注册 WsReadListener。接下来继续分析，如何触发 WsReadListener</p>
-<h1 id="Connector"><a href="#Connector" class="headerlink" title="Connector"></a>Connector</h1><p>AbstractServiceInputStream.onDataAvailable() 方法中调用 listener.onDataAvailable(); 即 WsReadListener.onDataAvailable()</p>
-<p>而 AbstractServiceInputStream.onDataAvailable() 又由 AbstractProcessor.upgradeDispatch(SocketStatus status) 调用</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> SocketState <span class="title">upgradeDispatch</span><span class="params">(SocketStatus status)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (status == SocketStatus.OPEN_READ) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletInputStream.onDataAvailable();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            <span class="comment">// The error handling within the ServletInputStream should have</span></span><br><span class="line">            <span class="comment">// marked the stream for closure which will get picked up below,</span></span><br><span class="line">            <span class="comment">// triggering the clean-up of this processor.</span></span><br><span class="line">            getLog().debug(sm.getString(<span class="string">&quot;abstractProcessor.onDataAvailableFail&quot;</span>), ioe);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == SocketStatus.OPEN_WRITE) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletOutputStream.onWritePossible();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            <span class="comment">// The error handling within the ServletOutputStream should have</span></span><br><span class="line">            <span class="comment">// marked the stream for closure which will get picked up below,</span></span><br><span class="line">            <span class="comment">// triggering the clean-up of this processor.</span></span><br><span class="line">            getLog().debug(sm.getString(<span class="string">&quot;abstractProcessor.onWritePossibleFail&quot;</span>), ioe);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == SocketStatus.STOP) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletInputStream.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            getLog().debug(sm.getString(</span><br><span class="line">                    <span class="string">&quot;abstractProcessor.isCloseFail&quot;</span>, ioe));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            upgradeServletOutputStream.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">            getLog().debug(sm.getString(</span><br><span class="line">                    <span class="string">&quot;abstractProcessor.osCloseFail&quot;</span>, ioe));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Unexpected state</span></span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (upgradeServletInputStream.isCloseRequired() ||</span><br><span class="line">            upgradeServletOutputStream.isCloseRequired()) &#123;</span><br><span class="line">        <span class="keyword">return</span> SocketState.CLOSED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> SocketState.UPGRADED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Tomcat 7 默认使用 BIO，Http11Protocol.createUpgradeProcessor，其中将 socket 超时时间设置为不超时，并返回一个 Processor</p>
-<p>因此 Tomcat 处理 WebSocket 请求的大致流程为</p>
-<ul>
-<li>JIOEndpoint accept socket and new a thread to handle it</li>
-<li>Worker wait for the next socket to be assigned and call handler to process socket</li>
-<li>Http11ConnectionHandler</li>
-<li>Http11Processor</li>
-</ul>
-<p>客户端首先打开一个 connection，connection 建立后，向服务器端发起 WebSocket Handshake 请求，服务器接受后，返回 101 status code，双方可在当前 connection 上双工通信</p>
-<p>当 SocketStatus 为 OPEN_READ 时，回调 readListener 的 onDataAvailable 方法，此处逻辑有 trick 的地方，值得注意的是如果 SocketStatus.OPEN_READ 时，仍未完成注册 readListener，则不会触发 listener.onDataAvailable() … 显然，因为 listener 为 null</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">onDataAvailable</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (listener == <span class="keyword">null</span>) &#123; <span class="comment">// it doesn&#x27;t have a listener</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ready = Boolean.TRUE;</span><br><span class="line">    Thread thread = Thread.currentThread();</span><br><span class="line">    ClassLoader originalClassLoader = thread.getContextClassLoader();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        thread.setContextClassLoader(applicationLoader);</span><br><span class="line">        listener.onDataAvailable();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        thread.setContextClassLoader(originalClassLoader);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 WsFrameServer 的 onDataAvailable 方法中首先尝试获取对象锁，获取成功后，for loop 监听 Servlet 输入流，当有数据时读取数据供 WsFrameServer 处理，处理 okay 后，回调 ServerEndpoint 的 onMessage 方法，业务层即感知到从 ws 连接中获取到数据</p>
-<p>另外 ServerEndpoint onOpen 是在 WsHttpUpgradeHandler init 方法中被回调，看看官方文档对 handler 的 init 方法的描述</p>
-<blockquote>
-<p>This method is called once the request/response pair where the upgrade is initiated has completed processing and is the point where control of the connection passes from the container to the HttpUpgradeHandler.</p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-7.0-doc/api/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.html">https://tomcat.apache.org/tomcat-7.0-doc/api/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.html</a></p>
-<p>so 理论上要想使得 Tomcat 7 WebSocket 能正常工作的前提为</p>
-<ul>
-<li>WsHttpUpgradeHandler init 方法被调用 —— WsHttpUpgradeHandler</li>
-<li>在 sos 上注册 WsWriteListener 方法结束 —— WsHttpUpgradeHandler</li>
-<li>SocketStatus.OPEN_WRITE —— AbstractProcessor</li>
-<li>onOpen 方法回调结束 —— ServerEndpoint</li>
-<li>在 sis 上注册 WsReadListener 方法结束 —— WsHttpUpgradeHandler</li>
-<li>SocketStatus.OPEN_READ —— AbstractProcessor</li>
-</ul>
-<p>接下来需要搞清楚一个问题，上述这些逻辑是单线程在跑，还是多线程，单线程的话，时序问题不大，但是多线程的情况下，就很有讲究了</p>
-<p>To be cont. 下一遍回答上述时序问题</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1725,7 +1729,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1736,13 +1740,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">340k</span>
+    <span title="站点总字数">342k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:09</span>
+    <span title="站点阅读时长">5:11</span>
   </span>
 </div>
 

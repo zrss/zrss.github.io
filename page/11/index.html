@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">126</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,498 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9e766461.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/9e766461.html" class="post-title-link" itemprop="url">ETCD V2 的启动过程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-03 00:00:01" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:01Z">2017-10-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:39:23" itemprop="dateModified" datetime="2020-12-12T07:39:23Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>简单的源码阅读</p>
+<p>链接: <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd/tree/release-2.3">https://github.com/coreos/etcd/tree/release-2.3</a></p>
+</blockquote>
+<h1 id="Main"><a href="#Main" class="headerlink" title="Main"></a>Main</h1><ol>
+<li>检查运行 arch</li>
+<li>parse 启动配置参数</li>
+<li>设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志）</li>
+<li>声明停止通道 <code>var stopped &lt;-chan struct&#123;&#125;</code></li>
+<li>打印 etcd 版本 / GitSHA / 编译时的 Go VERSION / 运行架构信息</li>
+</ol>
+<p>检查数据目录是否存在，若存在日志提示 (<strong>只有 data-dir 存在</strong>，就会打印如下日志)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">the server is already initialized as member before, starting as etcd member...</span><br></pre></td></tr></table></figure>
+
+<p>不管数据目录存在与否，均如此启动</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stopped, err = startEtcd(cfg)</span><br></pre></td></tr></table></figure>
+
+<p>最后获取到停止信号停止</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// etcd process stpo</span></span><br><span class="line">&lt;-stoped</span><br></pre></td></tr></table></figure>
+
+<h1 id="startEtcd"><a href="#startEtcd" class="headerlink" title="startEtcd"></a>startEtcd</h1><p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
+<p>接下来使用 listen-client-url 新建 client listener，这块直接使用 net.Listen 方法，开启 tcp 服务；然后判断系统文件描述符限制，如果 &lt; 150，则 panic，然后限制 listener 的数量为 系统描述符限制 - 150</p>
+<p>初始化 net.Listen 的 keepAliveListener</p>
+<p>初始化 etcd server config</p>
+<p>初始化 etcdserver</p>
+<p>启动 etcdserver</p>
+<hr>
+<p>注册操作系统终止回调函数 osutil.RegisterInterruptHandler(s.Stop)</p>
+<hr>
+<p>使用 cors 初始化 clientHandler</p>
+<p>使用 etcdhttp 初始化 peerHandler</p>
+<p>goroutine 为每个 peer listener 开启 http 服务 处理请求，5 min read timeout</p>
+<p>goroutine 为每个 client listener 开启 http 服务 处理请求，0 min read timeout // 与 golang 的一个 bug 有关</p>
+<p>etcdhttp/peer.go</p>
+<p>etcdhttp/client.go</p>
+<p>其实是 http server，待阅读</p>
+<hr>
+<p>最后，返回停止通道及错误</p>
+<h1 id="etcdserver-NewServer"><a href="#etcdserver-NewServer" class="headerlink" title="etcdserver.NewServer"></a>etcdserver.NewServer</h1><p>初始化 etcdserver</p>
+<p>集群信息存在 /0</p>
+<p>key 信息存在 /1</p>
+<p>检查数据目录版本，并更新数据目录</p>
+<p>判断以何种方式启动</p>
+<p><strong>(1) !haveWAL &amp;&amp; !cfg.NewCluster</strong></p>
+<p>没有 wal 目录且 new-cluster == false，此时通过从启动参数 initial-token 及 initial-cluster 配置的集群信息来访问集群（会将自己的 peer url 排除），获取到当前存在的集群信息</p>
+<p>校验 启动参数中配置的集群信息与获取到存在的集群信息，并为 local member 设置 id</p>
+<p>此时成员信息从 remote peer 中获取，当前 server 的 cluster id 被设置为 remote peer 中获取到 cluster id</p>
+<p>打印启动参数 <code>cfg.Print()</code></p>
+<p>启动 raftnode</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id, n, s, w = startNode(cfg, cl, nil)</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9e766462.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/9e766462.html" class="post-title-link" itemprop="url">ETCD V2 的启动过程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-03 00:00:01" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:01Z">2017-10-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>简单的源码阅读</p>
+<p>链接: <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd/tree/release-2.3">https://github.com/coreos/etcd/tree/release-2.3</a></p>
+</blockquote>
+<h1 id="Main"><a href="#Main" class="headerlink" title="Main"></a>Main</h1><ul>
+<li>检查运行 arch</li>
+<li>parse 启动配置参数</li>
+<li>设置日志级别（参考 <code>admin guide debug part</code>，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志）</li>
+<li>声明停止通道 <code>var stopped &lt;-chan struct&#123;&#125;</code></li>
+<li>打印 etcd 版本 / GitSHA / 编译时的 Go VERSION / 运行架构信息</li>
+</ul>
+<p>检查数据目录是否存在，若存在日志提示 (只有 data-dir 存在，就会打印如下日志)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">the server is already initialized as member before, starting as etcd member...</span><br></pre></td></tr></table></figure>
+
+<p>不管数据目录存在与否，均如此启动</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stopped, err = startEtcd(cfg)</span><br></pre></td></tr></table></figure>
+
+<p>最后获取到停止信号停止</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// etcd process stpo</span></span><br><span class="line">&lt;-stoped</span><br></pre></td></tr></table></figure>
+
+<h1 id="startEtcd"><a href="#startEtcd" class="headerlink" title="startEtcd"></a>startEtcd</h1><p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
+<p>接下来使用 listen-client-url 新建 client listener，这块直接使用 net.Listen 方法，开启 tcp 服务；然后判断系统文件描述符限制，如果 &lt; 150，则 panic，然后限制 listener 的数量为 系统描述符限制 - 150</p>
+<p>初始化 net.Listen 的 keepAliveListener</p>
+<p>初始化 etcd server config</p>
+<p>初始化 etcdserver</p>
+<p>启动 etcdserver</p>
+<hr>
+<p>注册操作系统终止回调函数 osutil.RegisterInterruptHandler(s.Stop)</p>
+<hr>
+<p>使用 cors 初始化 clientHandler</p>
+<p>使用 etcdhttp 初始化 peerHandler</p>
+<p>goroutine 为每个 peer listener 开启 http 服务 处理请求，5 min read timeout</p>
+<p>goroutine 为每个 client listener 开启 http 服务 处理请求，0 min read timeout // 与 golang 的一个 bug 有关</p>
+<p>etcdhttp/peer.go</p>
+<p>etcdhttp/client.go</p>
+<p>其实是 http server，待阅读</p>
+<hr>
+<h1 id="etcdserver-NewServer"><a href="#etcdserver-NewServer" class="headerlink" title="etcdserver.NewServer"></a>etcdserver.NewServer</h1><p>初始化 etcdserver</p>
+<p>集群信息存在 /0</p>
+<p>key 信息存在 /1</p>
+<p>检查数据目录版本，并更新数据目录</p>
+<p>判断以何种方式启动</p>
+<p>(1) !haveWAL &amp;&amp; !cfg.NewCluster</p>
+<p>没有 wal 目录且 new-cluster == false，此时通过从启动参数 initial-token 及 initial-cluster 配置的集群信息来访问集群（会将自己的 peer url 排除），获取到当前存在的集群信息</p>
+<p>校验 启动参数中配置的集群信息与获取到存在的集群信息，并为 local member 设置 id</p>
+<p>此时成员信息从 remote peer 中获取，当前 server 的 cluster id 被设置为 remote peer 中获取到 cluster id</p>
+<p>打印启动参数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cfg.Print()</span><br></pre></td></tr></table></figure>
+
+<p>启动 raftnode</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id, n, s, w = startNode(cfg, cl, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+<p>(2) !haveWAL &amp;&amp; cfg.NewCluster</p>
+<p>没有 wal 目录且 NewCluster == true</p>
+<p>判断 isMemberBootstrapped，从 remote peer 中获取集群信息，如果 server id 已经存在集群中且其 client url 不为空，则表示已经被启动过了，返回错误</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">member XXX has already been bootstrapped</span><br></pre></td></tr></table></figure>
+
+<p>打印启动参数，并启动 raftnode</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cfg.PrintWithInitial()</span><br><span class="line">id, n, s, w = startNode(cfg, cl, cl.MemberIDs())</span><br></pre></td></tr></table></figure>
+
+<p>可见</p>
+<ul>
+<li>initial advertise peer url</li>
+<li>intial cluster</li>
+</ul>
+<p>参数是用来 bootstrap 成员用的</p>
+<p>(3) haveWAL</p>
+<p>有 WAL 目录的情况</p>
+<p>data-dir/member</p>
+<p>data-dir/member/wal</p>
+<p>data-dir/member/snap</p>
+<p>load snapshot 文件</p>
+<p>从 snapshot 文件中恢复</p>
+<p>最后启动 raftNode</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cfg.Print()</span><br><span class="line"><span class="keyword">if</span> !cfg.ForceNewCluster &#123;</span><br><span class="line">       id, cl, n, s, w = restartNode(cfg, snapshot)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       id, cl, n, s, w = restartAsStandaloneNode(cfg, snapshot)</span><br><span class="line">&#125;</span><br><span class="line">cl.SetStore(st)</span><br><span class="line">cl.Recover()</span><br></pre></td></tr></table></figure>
+
+<p>注意备份文件恢复时，一定要使用 force-new-start 的原理就在这里了</p>
+<p>判断完了以何种方式启动 raftnode 之后，开始初始化 EtcdServer，并且初始化 rafthttp.Transport，启动 rafthttp.Transport，将从 remote peer 获取到的 peer url 信息全部加入 tr.AddRemote，AddRemote 中会判断是否已经存在 peer 或者 remote 中，已存在则不再加入；将 cluster 中的 member 信息全部加入 tr.AddPeer</p>
+<p>当然都是除了自己，加入之前判断了 id，如果 id == 本身则不加入</p>
+<p>不过我还是不太明白 remote 和 peer 有啥区别，目前</p>
+<p>得看看 remote.go 和 peer.go 都干了什么</p>
+<h1 id="EtcdServer-Start"><a href="#EtcdServer-Start" class="headerlink" title="EtcdServer.Start"></a>EtcdServer.Start</h1><ol>
+<li>EtcdServer.start()</li>
+<li>goroutine publish</li>
+<li>goroutine purge file</li>
+<li>goroutine monit file descriptor</li>
+<li>goroutine monitor versions</li>
+</ol>
+<h1 id="EtcdServer-publish"><a href="#EtcdServer-publish" class="headerlink" title="EtcdServer.publish"></a>EtcdServer.publish</h1><p>注册 server 信息到 cluster 中，并更新 server 的静态 client url</p>
+<p>publish 的过程比较直接，调用 pb.Request 方法，将其 attributes 即 name 和 clientURLs 写入集群中</p>
+<p>即写入 key / value 中 (v2 的存储)</p>
+<p>key 的格式为 /0/members/id/attributes</p>
+<p>实践中，当成员无法 publish 至集群时，一般发生的错误为超时；超时后会重试，毕竟是个 for loop，在 publish 成功或者成员停止时直接 return 结束 for loop 否则会持续 publish</p>
+<h1 id="EtcdServer-purge"><a href="#EtcdServer-purge" class="headerlink" title="EtcdServer.purge"></a>EtcdServer.purge</h1><p>启了个 goroutine 删除超出 threshold 的 snap 和 wal 文件</p>
+<h1 id="EtcdServer-monitorFileDescriptor"><a href="#EtcdServer-monitorFileDescriptor" class="headerlink" title="EtcdServer.monitorFileDescriptor"></a>EtcdServer.monitorFileDescriptor</h1><p>启了个 goroutine 检查系统当前使用的 fd 数量是否超过了 limit 的 80%</p>
+<h1 id="EtcdServer-monitorVersions"><a href="#EtcdServer-monitorVersions" class="headerlink" title="EtcdServer.monitorVersions"></a>EtcdServer.monitorVersions</h1><p>启了个 goroutine 检查集群 version</p>
+<h1 id="EtcdServer-start"><a href="#EtcdServer-start" class="headerlink" title="EtcdServer.start"></a>EtcdServer.start</h1><p>设置默认 snapshotCount，初始化 done / stop 通道，打印集群版本信息，goroutine run</p>
+<h1 id="EtcdServer-run"><a href="#EtcdServer-run" class="headerlink" title="EtcdServer.run"></a>EtcdServer.run</h1><p>raftnode start</p>
+<p>待阅读</p>
+<h1 id="startRemote"><a href="#startRemote" class="headerlink" title="startRemote"></a>startRemote</h1><p>newPeerStatus(to)</p>
+<p>这个结构体中提供了 activate / deactivate 方法</p>
+<p>即日志中常见的 the connection with [Member ID] became active 信息</p>
+<p>随后初始化了 remote 结构体</p>
+<p>remote 结构体中初始化了 pipeline</p>
+<p>sync.waitGroup 初始化为 4</p>
+<p>启了 4 个 goroutine 跑 handle</p>
+<p>handle 从 msgc 通道中获取 raftpb.Message，并使用 post 方法发送出去</p>
+<p>waitGroup 在 stop 方法内调用 wait，确保 handle goroutine 均已关闭</p>
+<h1 id="startPeer"><a href="#startPeer" class="headerlink" title="startPeer"></a>startPeer</h1><p>newPeerStatus(to)</p>
+<p>初始化 peer 结构体</p>
+<p>初始化 msgAppV2Writer: msgAppV2Writer / writer: startStreamWriter</p>
+<p>初始化 pipeline: newPipeline / snapSender: newSnapshotSender</p>
+<hr>
+<p>goroutine startPeer 从 recvc 通道中获取 message 交由底层 raft 处理</p>
+<hr>
+<p>goroutine startPeer 从 propc 通道中获取 message 交由底层 raft 处理</p>
+<hr>
+<p>初始化 p.msgAppV2Reader = startStreamReader</p>
+<p>初始化 p.msgAppReader = startStreamReader</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// peer is the representative of a remote raft node. Local raft node sends</span><br><span class="line">// messages to the remote through peer.</span><br><span class="line">// Each peer has two underlying mechanisms to send out a message: stream and</span><br><span class="line">// pipeline.</span><br><span class="line">// A stream is a receiver initialized long-polling connection, which</span><br><span class="line">// is always open to transfer messages. Besides general stream, peer also has</span><br><span class="line">// a optimized stream for sending msgApp since msgApp accounts for large part</span><br><span class="line">// of all messages. Only raft leader uses the optimized stream to send msgApp</span><br><span class="line">// to the remote follower node.</span><br><span class="line">// A pipeline is a series of http clients that send http requests to the remote.</span><br><span class="line">// It is only used when the stream has not been established.</span><br></pre></td></tr></table></figure>
+
+<p>peer 是 remote raft node 的代表，本地 raft node 通过 peer 发送 message 到 remote</p>
+<p>stream and pipeline</p>
+<p>pipeline 是一系列 http clients，用于向 remote 发送 http 请求，它只有在 stream 没有建立起来时使用</p>
+<p>stream 是接收者 long-polling 链接，用于传递 message；另外 raft leader 使用优化过的 stream 发送 msgApp 信息</p>
+<p>stream run 起来之后，尝试去 dial 远端，dial 未返回错误后，将 peerStatus 设置为 active，即此时日志中会打印 the connection with [Member ID] became active</p>
+<p>dial 如果返回 errUnsupportedStreamType 亦或是 err := cr.decodeLoop(rc, t) 返回的 err 不是 EOF 或者链接被关闭，则 peerStatus 被设置为 inactive</p>
+<p>stream 每 100 ms 会重新尝试 dial remote peer，如果出现 request sent was ignored (cluster ID mismatch: remote[remote member id]=X-Etcd-Cluster-ID in http header, local=local cluster id) 错误的话，那么这个错误日志的打印频率将会很高，需要及时处理</p>
+<p>stream 将获取到的 raftpb.Message 放入相应的通道 recvc / propc</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>相比 k8s 的复杂来说，etcd 的代码阅读算是还能摸得着头的了</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2e8f7f88.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/2e8f7f88.html" class="post-title-link" itemprop="url">Cluster ID 和 Member ID 的生成规则</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-03 00:00:00" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:00Z">2017-10-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-12 07:39:52" itemprop="dateModified" datetime="2020-12-12T07:39:52Z">2020-12-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>etcd v3.1.9</p>
+</blockquote>
+<h1 id="从-etcd-启动参数中生成-Cluster-ID-和-Member-ID"><a href="#从-etcd-启动参数中生成-Cluster-ID-和-Member-ID" class="headerlink" title="从 etcd 启动参数中生成 Cluster ID 和 Member ID"></a>从 etcd 启动参数中生成 Cluster ID 和 Member ID</h1><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cl, err = membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)</span><br></pre></td></tr></table></figure>
+
+<p>上述方法从 –initial-cluster-token and –initial-cluster 这个两个启动参数中生成 Cluster ID 和各个 Member ID</p>
+<p>NewClusterFromURLsMap 这个方法中调用 NewMember 生成 Member ID</p>
+<p>首先来看 NewMember 方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func NewMember(name string, peerURLs types.URLs, clusterName string, now *time.Time) *Member</span><br></pre></td></tr></table></figure>
+
+<p>核心思路</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b []<span class="keyword">byte</span>: peerUrls + clusterName + time</span><br><span class="line">hash := sha1.Sum(b)</span><br><span class="line">memberID: binary.BigEndian.Uint64(hash[:<span class="number">8</span>])</span><br></pre></td></tr></table></figure>
+
+<p>Member ID 根据 peerUrls / clusterName / current_time 的 sha1 sum 值，取其前 8 个 bytes，为 16 位的 hex 数</p>
+<p>回到 NewClusterFromURLsMap 方法中的 NewMember（代码如下）可见最后一个参数为 nil，即不加入时间因素，因此 NewClusterFromURLsMap 生成的 Member ID 是固定的</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m := NewMember(name, urls, token, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="Member-Add-生成的-Member-ID"><a href="#Member-Add-生成的-Member-ID" class="headerlink" title="Member Add 生成的 Member ID"></a>Member Add 生成的 Member ID</h1><p>直接从 server 端看起 —— etcdserver/api/v3rpc/member.go 中的 MemberAdd 方法</p>
+<p>可见如下代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">urls, err := types.NewURLs(r.PeerURLs)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, rpctypes.ErrGRPCMemberBadURLs</span><br><span class="line">&#125;</span><br><span class="line">now := time.Now()</span><br><span class="line">m := membership.NewMember(<span class="string">&quot;&quot;</span>, urls, <span class="string">&quot;&quot;</span>, &amp;now)</span><br><span class="line"><span class="keyword">if</span> err = cs.server.AddMember(ctx, *m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, togRPCError(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>m := membership.NewMember(“”, urls, “”, &amp;now) 加入了当前时间，因此 Member ID 是不确定的</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>cluster ID 仅生成一次，此后不会变化</p>
+<p>通过 etcd 启动参数生成 (initial-cluster) 的 Member ID 固定</p>
+<p>通过 Member add 生成的 Member ID 不确定</p>
+<p>Member add 的时候，没有传递 member 的 name，因此 member add 成功时，member list 出来的 member item，新加入的 member 其 name 为空，且没有 client url，因该 member 尚未 publish 其 client url 到集群中</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -945,324 +1437,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/29df1d79.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/29df1d79.html" class="post-title-link" itemprop="url">岁月无可回头(4)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-28 22:54:12" itemprop="dateCreated datePublished" datetime="2017-04-28T22:54:12Z">2017-04-28</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:40:41" itemprop="dateModified" datetime="2020-12-12T07:40:41Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>忙碌了一星期，终于可以安心的坐下来，听着小音乐 (《神话(古筝)》)，安静的写东西了，也是幸福的时刻之一呢。</p>
-<p>工作上的挑战还挺大的，具体来说呢，因为之前我都是在写业务代码，所以只要熟悉之后，写起来也轻车熟路的。然而工作做的这个方向，偏技术，使用的语言也不同，需要学习很多东西，着急不了，就是得耐心去补一些知识，才能慢慢上手。其次项目的代码量挺大的，一天看下来，头晕眼花，还没太理清楚，不过也是越看越有感觉了。另外一个挑战是，项目近期要出版本，整个组都疯了似的，坐我后面的好几个“兄弟”在公司睡好几晚了。项目太忙，新人虽然都有导师，然而实际上属于没人带的节奏，节后等项目交付了会好一些吧。同事都挺厉害的，来自浙大、杭电的比较多，毕竟本地的学校。</p>
-<p>至于工作的时间点，早上八点之前，晚上一般得九点之后，中午十二点到一点半休息。午休算是比较有公司特色的了，会关灯，大部分人都会睡觉的，所以大多都买了午睡床。我一般是早上七点起床，到公司吃早餐，然后到工位大概七点四五十的样子。</p>
-<p>周末的时候童鞋来杭出差，和他们去了九溪，挺美的一个地方，图片已发圈，有张图片拍的还挺有九寨沟的感觉的；吃了杭州酒家，哈哈，还记得么，那一大块东坡肉。</p>
-<p>昨晚回来的时候十点多了，忘记带钥匙了，遇到一个小姑娘，帮开了门禁，我说了谢谢。后来没想到居然还在同一单元，和她同一电梯上去了，她还让我帮她按了 10 楼，我说她怎么这么晚才回来，她说下去买东西啦。不知道为什么，莫名觉得温暖。朋友看了那状态说 “心无邪，爱永恒”。</p>
-<p>对了，杭州这边是有公共自行车租用的，公交车站附近一般都有这种公共自行车停放点，用公交卡就可以刷开骑走，一小时内是免费的，还挺方便的。这里当然也有共享单车，不过没有摩拜就是了。</p>
-<p>室友 A 早上会起来在小区里跑步来着；我呢，周末做做饭，看看书，偶尔出去看看风景，还挺有意思的。想想 Work life balance 挺难的，因为 work life 觉得并不能彻底分开的，珍惜时间才是永恒，工作的时候就全力以赴，生活的时候就认真生活。</p>
-<p>还有就是最近学弟学妹们找实习已渐进尾声了，听闻收获不少大实习 offer 的消息，g 家好几个，a 家好几十个，微软结果快出了吧，真是后生可畏呀，感觉都不好意思说自己是这个实验室出来的了，老学长连沙滩都够不着就被打翻了。</p>
-<p>不过老学长心态还是很好的，好好做自己了。</p>
-<p>最近比较大的失误觉得是，刚工作，不熟悉，又着急想出成绩，心态不太好，总之就是浮躁，会好好调整的。</p>
-<p>突然想到室友 B 明天回北京去看男票呢，也祝这 cp 有好结果咯。</p>
-<p>写的不好，流水账，也不温暖，就是生活本来的样子。</p>
-<p>2017年04月28日22:54:12 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/669e8bbe.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/669e8bbe.html" class="post-title-link" itemprop="url">岁月无可回头(3)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-21 22:23:25" itemprop="dateCreated datePublished" datetime="2017-04-21T22:23:25Z">2017-04-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:40:44" itemprop="dateModified" datetime="2020-12-12T07:40:44Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>708</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>今天还是例行写点咯，记录下流淌的岁月，以后拿出来再回味也是极好的 ~</p>
-<p>最近最大的事情就是知道了自己的工作方向了，说实话，有点出乎意料了，毕竟这个方向之前木有深入的实践过，只了解一些皮毛，所以得投入大量的时间在工作中学习咯，快速学习新知识也是一种能力嘛，毕竟现在这个知识爆炸的时代，这个能力也是很重要的，不亏，总之努力对得起吹过的牛逼。</p>
-<p>导师是个team leader，级别不低，不是年轻人咯，不过还挺幽默的。之前在宜信的时候，导师也是刚入职的新人，没啥时间指导。这正式工作了，虽是个老司机，不过更没时间指导。还是得靠自己，不懂就多问，厚着脸皮问咯。至于同事呢，各个学校的都有，浙大、杭电人居多，各种专业的也都有。</p>
-<p>这边忙不忙，看部门看组的，也有不少部门是准点下班的。我是得早上八点前，晚上不时得到最晚时间（11点）。由于公司比较大，招人多，也有不少看起来不像程序猿的非典型程序猿的。食堂吃饭，不时能看到一些外籍员工。培训的时候，同组还有一个台湾小哥，挺 fashion 的。当然也有很多典型的 IT 男了。</p>
-<p>周日两童鞋从帝都来杭，说是要一起吃个饭呢，蛮好的，从来就不孤单。来这边一开始是辛苦了一点，不过这慢慢的工作生活，都走上了正规，也算是过好小日子了吧。想要的不多，有收获，吃到饱，睡到自然醒，有个牵挂的人。“带着这份温暖和善意一直走下去”。</p>
-<p>呃，有个不幸的事情，刚去看照片的时候，发现在台湾的最后一天的照片原图找不到了，只有很少一部分处理过的照片，有点遗憾 ~ 不知道有木有机会再去一次，把这些照片补上[机智]啊。另外特别感谢文兄还留着那健身照！不然真就丢了。</p>
-<p>也没到要睡的时间，这次就不说好梦了。</p>
-<p>2017年04月21日22:23:25 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/7f85baff.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/7f85baff.html" class="post-title-link" itemprop="url">岁月无可回头(2)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-14 23:31:47" itemprop="dateCreated datePublished" datetime="2017-04-14T23:31:47Z">2017-04-14</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 07:40:46" itemprop="dateModified" datetime="2020-12-12T07:40:46Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>753</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>有很多想写的话，待付诸笔端之时，又不知从何下手。断断续续的写了这些，但愿长相思忆。</p>
-<p>《时间煮雨》</p>
-<p>这些天连着下了两天雨，接着半天阴天，到下午才有阳光的影子。开心的是晾了三天的鞋子可算有了要干的迹象。雨水充沛，四处绿色，是这座城市的一大观感。</p>
-<p>室友 A 前几天匆匆买了去北京的票，心里想着五一、端午过后，就只有十一了，中间隔着好几个月，还是回去看看 TA 吧。A 就职网易云音乐前端部门，平均下班时间九点到九点半。下班回来后，偶尔会在客厅的沙发上闲聊一二，而后到点回屋歇着。</p>
-<p>沙县小吃（特别多，感觉到哪儿都有），黄焖鸡米饭（也是一样，哪儿都有），周边小店已然吃腻。待室友 B 锅碗瓢盆、菜米油盐买齐了，我们涮火锅 or 煮面条 or 有闲心的时候做饭吃。室友 B 在阿里 B2B 部门从事后台开发工作，平均下班时间八点，热爱生活。</p>
-<p>室友 A 和 B 都是之前实验室的同学了，彼此熟悉，以后很长时间会互相帮助的。</p>
-<p>偶然间看到微信订阅号上显示的标题《是你们见证了破壳的生命之光》，点进去看了下，惊奇的发现这不就是刘晓晔和王印么，不就是上次去看的《两只狗的生活意见》的主演么。再往后翻，扫到了新话剧的名字《蛋》。回想起当时出剧场时，对着墙上的宣传画拍照，画上宣传的应该就是这剧了。杭州也有蜂巢剧场呢，不知道会发生怎么样的故事。</p>
-<p>啊，刚回屋的路上，突然一个语音进来。之前老打架的学妹开心的说，居然收到了阿里的 offer，喜极而泣。据她自己说的，面完二面觉得自己挂了，没想到还是收到了 offer，并且是核心部门。不过真不太敢想象她过来的样子，希望她还有更好的去处。</p>
-<p>另外体检的地方离西湖好近，所以体检结束后又去西湖走了走。哎，抱歉，美得有点腻了，绿水雾天，直接上图吧。</p>
-<p>(图去了吧，今天想起来自己看一眼，发现加载速度很慢 …)</p>
-<p>《青空》</p>
-<p>2017年04月14日23:31:47 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/10/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/12/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1276,7 +1450,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1287,13 +1461,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">340k</span>
+    <span title="站点总字数">342k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:09</span>
+    <span title="站点阅读时长">5:11</span>
   </span>
 </div>
 

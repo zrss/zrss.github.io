@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">126</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,314 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6f5ad8f8.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/6f5ad8f8.html" class="post-title-link" itemprop="url">clusterd</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-06-01 19:30:00" itemprop="dateCreated datePublished" datetime="2025-06-01T19:30:00Z">2025-06-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2025-06-02 13:57:50" itemprop="dateModified" datetime="2025-06-02T13:57:50Z">2025-06-02</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>907</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://www.hiascend.com/document/detail/zh/mindcluster/70rc1/clustersched/dlug/mxdlug_007.html">https://www.hiascend.com/document/detail/zh/mindcluster/70rc1/clustersched/dlug/mxdlug_007.html</a></p>
+<p>有如下几类 configmap</p>
+<ul>
+<li>cmDevice: ns, kube-system; cmName, mindx-dl-deviceinfo-{NodeName}; which is reported by device-plugin</li>
+<li>cmNode: ns, mindx-dl; cmName, mindx-dl-nodeinfo-{NodeName}; which is reported by nodeD</li>
+<li>cmPingMesh: ns, cluster-system; cmName, pingmesh-config;</li>
+<li>cmSuperPodDevice: ns, cluster-system; cmName, super-pod-{SuperPodId}; clusterD 维护<ul>
+<li>特别的 {RAS_NET_ROOT_PATH}/cluster/super-pod-{SuperPodId}/super-pod-{SuperPodId}.json; clusterD 维护</li>
+</ul>
+</li>
+<li>cmPubicFault: mc-consumer-publicfault=true label;</li>
+</ul>
+<p>其中 cmDevice configmap mindx-dl-deviceinfo-{NodeName}, 由 device-plugin 上报, 包括如下信息</p>
+<ul>
+<li>DeviceInfoCfg</li>
+<li>SwitchInfoCfg</li>
+</ul>
+<p>cmPubicFault configmap, 包括如下信息</p>
+<ul>
+<li>PublicFault</li>
+</ul>
+<p>pingmesh-config 的格式为 global pingmesh 任务的配置或者是指定 superpodid 的任务配置</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;activate&quot;</span>: <span class="string">&quot;on&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;task_interval&quot;</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>node annotation 中包括如下信息</p>
+<ul>
+<li>product-serial-number</li>
+<li>superPodID</li>
+<li>baseDeviceInfos</li>
+<li>serverType</li>
+<li>serverIndex</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/d79572d9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/d79572d9.html" class="post-title-link" itemprop="url">model</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-24 18:17:00" itemprop="dateCreated datePublished" datetime="2024-02-24T18:17:00Z">2024-02-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-03-31 02:42:35" itemprop="dateModified" datetime="2024-03-31T02:42:35Z">2024-03-31</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://wangcong.net/article/FPandBP.html">https://wangcong.net/article/FPandBP.html</a></p>
+<p>pathways</p>
+<p><a target="_blank" rel="noopener" href="https://blog.research.google/2022/04/pathways-language-model-palm-scaling-to.html">https://blog.research.google/2022/04/pathways-language-model-palm-scaling-to.html</a></p>
+<blockquote>
+<p>a single model that could generalize across domains and tasks while being highly efficient. An important milestone toward realizing this vision was to develop the new Pathways system to orchestrate distributed computation for accelerators.</p>
+</blockquote>
+<p>few-shot</p>
+<p>TPU v4 Pods</p>
+<p>Pipelining is typically used with DCN</p>
+<p>word to vector, This vector represents the word’s meaning and context within the given language</p>
+<p>embedding layer, lookup table</p>
+<p>Positional encoding</p>
+<p><a target="_blank" rel="noopener" href="https://medium.com/@tech-gumptions/transformer-architecture-simplified-3fb501d461c8">https://medium.com/@tech-gumptions/transformer-architecture-simplified-3fb501d461c8</a></p>
+<p>This means that the output of a layer is added to the initial input, allowing the model to learn to only make small changes to the input</p>
+<p>The decoder’s job is to produce the English sentence based on both the original French sentence and the bits of the English sentence it has generated so far.</p>
+<p>Input Embedding: Just as with the Encoder, the input to the Decoder (which is the target sequence during training) is first embedded into continuous vectors. </p>
+<p>It’s important to note that this masking is only applied during training. During inference, the decoder can attend to all words in the target sequence, including future words.</p>
+<p>To summarize, the Decoder in the Transformer architecture processes its input through self-attention, cross-attention with the Encoder’s output, and position-wise Feed-Forward networks, repeatedly for each stacked block, culminating in a final output sequence after the softmax operation.</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/88d66e68.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/88d66e68.html" class="post-title-link" itemprop="url">nccl tests</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-01 21:40:00" itemprop="dateCreated datePublished" datetime="2024-02-01T21:40:00Z">2024-02-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-01-31 14:56:45" itemprop="dateModified" datetime="2024-01-31T14:56:45Z">2024-01-31</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>0</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1023,449 +1331,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/52d00230.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/52d00230.html" class="post-title-link" itemprop="url">Docker container -i -t</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-08-14 02:56:55 / 修改时间：08:43:57" itemprop="dateCreated datePublished" datetime="2022-08-14T02:56:55Z">2022-08-14</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/run/#foreground">https://docs.docker.com/engine/reference/run/#foreground</a></p>
-<p>-t : Allocate a pseudo-tty<br>-i : Keep STDIN open even if not attached</p>
-</blockquote>
-<p><code>docker run -t</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:bionic-20200713</span><br><span class="line"></span><br><span class="line">docker run -t --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">root@9a7a115ff8d2:/# ls</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>启动容器无 <code>-i</code> 参数时，执行 <code>ls</code> 等命令无回显，执行 <code>exit</code> 命令无法退出 container terminal</p>
-<p><code>docker run -i</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -i --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">echo hello</span><br><span class="line">hello</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
-
-<p>启动容器无 <code>-t</code> 参数时，缺少常用的 terminal 功能，例如无当前登陆用户提示；但执行 <code>ls</code> 等命令正常有回显，且执行 <code>exit</code> 命令可退出</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag">https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag</a></p>
-<p>Without <code>-t</code> tag one can still interact with the container, but with it, you’ll have a nicer, more features terminal.</p>
-</blockquote>
-<h1 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core</a></p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Variables for interactive containers, these have very specialized use-cases (e.g. debugging)</span></span><br><span class="line"><span class="comment">// and shouldn&#x27;t be used for general purpose containers.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Whether this container should allocate a buffer for stdin in the container runtime. If this</span></span><br><span class="line"><span class="comment">// is not set, reads from stdin in the container will always result in EOF.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">Stdin <span class="keyword">bool</span> <span class="string">`json:&quot;stdin,omitempty&quot; protobuf:&quot;varint,16,opt,name=stdin&quot;`</span></span><br><span class="line"><span class="comment">// Whether the container runtime should close the stdin channel after it has been opened by</span></span><br><span class="line"><span class="comment">// a single attach. When stdin is true the stdin stream will remain open across multiple attach</span></span><br><span class="line"><span class="comment">// sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the</span></span><br><span class="line"><span class="comment">// first client attaches to stdin, and then remains open and accepts data until the client disconnects,</span></span><br><span class="line"><span class="comment">// at which time stdin is closed and remains closed until the container is restarted. If this</span></span><br><span class="line"><span class="comment">// flag is false, a container processes that reads from stdin will never receive an EOF.</span></span><br><span class="line"><span class="comment">// Default is false</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">StdinOnce <span class="keyword">bool</span> <span class="string">`json:&quot;stdinOnce,omitempty&quot; protobuf:&quot;varint,17,opt,name=stdinOnce&quot;`</span></span><br><span class="line"><span class="comment">// Whether this container should allocate a TTY for itself, also requires &#x27;stdin&#x27; to be true.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">TTY <span class="keyword">bool</span> <span class="string">`json:&quot;tty,omitempty&quot; protobuf:&quot;varint,18,opt,name=tty&quot;`</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config := &amp;runtimeapi.ContainerConfig&#123;</span><br><span class="line">	Metadata: &amp;runtimeapi.ContainerMetadata&#123;</span><br><span class="line">		Name:    container.Name,</span><br><span class="line">		Attempt: restartCountUint32,</span><br><span class="line">	&#125;,</span><br><span class="line">	Image:       &amp;runtimeapi.ImageSpec&#123;Image: imageRef&#125;,</span><br><span class="line">	Command:     command,</span><br><span class="line">	Args:        args,</span><br><span class="line">	WorkingDir:  container.WorkingDir,</span><br><span class="line">	Labels:      newContainerLabels(container, pod),</span><br><span class="line">	Annotations: newContainerAnnotations(container, pod, restartCount, opts),</span><br><span class="line">	Devices:     makeDevices(opts),</span><br><span class="line">	Mounts:      m.makeMounts(opts, container),</span><br><span class="line">	LogPath:     containerLogsPath,</span><br><span class="line">	Stdin:       container.Stdin,</span><br><span class="line">	StdinOnce:   container.StdinOnce,</span><br><span class="line">	Tty:         container.TTY,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="use-conda-env-in-docker"><a href="#use-conda-env-in-docker" class="headerlink" title="use conda env in docker"></a>use conda env in docker</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://pythonspeed.com/articles/activate-conda-dockerfile/">https://pythonspeed.com/articles/activate-conda-dockerfile/</a></p>
-<p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda/en/latest/commands/run.html">https://docs.conda.io/projects/conda/en/latest/commands/run.html</a></p>
-</blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda run --no-capture-output -n my-python-env python --version</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/4c123add.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/4c123add.html" class="post-title-link" itemprop="url">mlnx ofed</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-06-19 14:11:00 / 修改时间：14:04:45" itemprop="dateCreated datePublished" datetime="2022-06-19T14:11:00Z">2022-06-19</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="mlnx-cx-adapter-card-firmware"><a href="#mlnx-cx-adapter-card-firmware" class="headerlink" title="mlnx cx adapter card firmware"></a>mlnx cx adapter card firmware</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/connectx4ib/">https://network.nvidia.com/support/firmware/connectx4ib/</a></p>
-</blockquote>
-<ul>
-<li>12.28.2006 – newer, current versions</li>
-<li>12.28.1002 – old</li>
-<li>12.27.4000 – older</li>
-</ul>
-<p>注意到 mlnx ofed Additional Firware Version Supported 一般是前几个 firmware 版本中的一个</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/connectx5ib/">https://network.nvidia.com/support/firmware/connectx5ib/</a></p>
-</blockquote>
-<ul>
-<li>16.28.2006 – newer</li>
-<li>16.28.1002 – old</li>
-</ul>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/connectx6dx/">https://network.nvidia.com/support/firmware/connectx6dx/</a></p>
-</blockquote>
-<ul>
-<li>22.28.2006 – newer</li>
-<li>22.28.1002 – old</li>
-</ul>
-<h1 id="mlnx-ofed"><a href="#mlnx-ofed" class="headerlink" title="mlnx ofed"></a>mlnx ofed</h1><p>容器镜像中安装的 mlnx ofed，与宿主机中安装的 mlnx ofed 有何联系？</p>
-<p>其实并无联系，仅仅与宿主机 mlnx 网卡型号，及其 firmware 版本有关系</p>
-<p>以 mlnx ofed LTS version 5.4-3.1.0.0 为例，在其 Release Notes 中明确提到了该 ofed 配套的 firmware 版本</p>
-<blockquote>
-<p>不同 OS 版本，均指向同一 Release Notes</p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/networking/display/MLNXOFEDv543100/Release+Notes">https://docs.nvidia.com/networking/display/MLNXOFEDv543100/Release+Notes</a></p>
-<p>支持的网卡及其速率</p>
-<ul>
-<li>ConnectX-4<ul>
-<li>Infiniband: …</li>
-<li>Ethernet: 100Gb, …</li>
-</ul>
-</li>
-<li>ConnectX-5<ul>
-<li>Infiniband: …</li>
-<li>Ethernet: 100Gb, …</li>
-</ul>
-</li>
-<li>ConnectX-6 Dx<ul>
-<li>Ethernet: 100Gb, …</li>
-</ul>
-</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/networking/display/MLNXOFEDv543100/General+Support#GeneralSupport-SupportedNICFirmwareVersions">https://docs.nvidia.com/networking/display/MLNXOFEDv543100/General+Support#GeneralSupport-SupportedNICFirmwareVersions</a></p>
-<blockquote>
-<p>Upgrading MLNX_OFED on a cluster requires upgrading all of its nodes to the newest version as well</p>
-</blockquote>
-<blockquote>
-<p>This current version is tested with the following NVIDIA NIC firmware versions</p>
-</blockquote>
-<blockquote>
-<p>Firmware versions listed are the minimum supported versions</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>NIC</th>
-<th>Recommended Firmware Version</th>
-<th>Additional Firmware Version Supported</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>cx4</td>
-<td>12.28.2006</td>
-<td>12.28.2006</td>
-</tr>
-<tr>
-<td>cx5</td>
-<td>16.31.2006</td>
-<td>16.31.1014</td>
-</tr>
-<tr>
-<td>cx6 dx</td>
-<td>22.31.2006</td>
-<td>22.31.1014</td>
-</tr>
-</tbody></table>
-<p>该 mlnx ofed 5.4-3.1.0.0 驱动要求的 <strong>最小</strong> firmware 版本，但是注意到 mlnx ofed 从 5.4 版本才开始增加 <code>minimum supported versions</code> 的描述</p>
-<p>与之相比，mlnx ofed LTS version 4.9-4.1.7.0 驱动要求的 firmware 版本如下</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/networking/display/MLNXOFEDv494170/General+Support+in+MLNX_OFED#GeneralSupportinMLNX_OFED-SupportedNICsFirmwareVersions">https://docs.nvidia.com/networking/display/MLNXOFEDv494170/General+Support+in+MLNX_OFED#GeneralSupportinMLNX_OFED-SupportedNICsFirmwareVersions</a></p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>NIC</th>
-<th>Recommended Firmware Version</th>
-<th>Additional Firmware Version Supported</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>cx4</td>
-<td>12.28.2006</td>
-<td>12.27.4000</td>
-</tr>
-<tr>
-<td>cx5</td>
-<td>16.28.2006</td>
-<td>16.27.2008</td>
-</tr>
-<tr>
-<td>cx6 dx</td>
-<td>22.28.2006</td>
-<td>NA</td>
-</tr>
-</tbody></table>
-<h1 id="identifying-adapter-cards"><a href="#identifying-adapter-cards" class="headerlink" title="identifying adapter cards"></a>identifying adapter cards</h1><p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/identification/">https://network.nvidia.com/support/firmware/identification/</a></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ibv_devinfo</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e3ce3305.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/e3ce3305.html" class="post-title-link" itemprop="url">use docker container in modelarts training service</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-06-12 15:06:00 / 修改时间：07:11:18" itemprop="dateCreated datePublished" datetime="2022-06-12T15:06:00Z">2022-06-12</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>目标：构建有如下软件的容器镜像，并使用华为云 ModelArts 训练服务运行</p>
-<ul>
-<li>ubuntu-18.04</li>
-<li>cuda-10.2</li>
-<li>python-3.7.13</li>
-<li>pytorch-1.8.1</li>
-</ul>
-<h1 id="1-准备-context-文件夹"><a href="#1-准备-context-文件夹" class="headerlink" title="1. 准备 context 文件夹"></a>1. 准备 context 文件夹</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p context</span><br></pre></td></tr></table></figure>
-
-<h2 id="1-1-准备文件"><a href="#1-1-准备文件" class="headerlink" title="1.1. 准备文件"></a>1.1. 准备文件</h2><h3 id="1-1-1-pip-conf"><a href="#1-1-1-pip-conf" class="headerlink" title="1.1.1. pip.conf"></a>1.1.1. pip.conf</h3><blockquote>
-<p>使用华为开源镜像站 pypi 配置</p>
-<p><a target="_blank" rel="noopener" href="https://mirrors.huaweicloud.com/home">https://mirrors.huaweicloud.com/home</a></p>
-</blockquote>
-<p>文件内容如下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">index-url = https://repo.huaweicloud.com/repository/pypi/simple</span><br><span class="line">trusted-host = repo.huaweicloud.com</span><br><span class="line">timeout = 120</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-1-2-torch-whl"><a href="#1-1-2-torch-whl" class="headerlink" title="1.1.2. torch*.whl"></a>1.1.2. torch*.whl</h3><blockquote>
-<p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/previous-versions/#v181">https://pytorch.org/get-started/previous-versions/#v181</a></p>
-</blockquote>
-<p>在该地址上 <a target="_blank" rel="noopener" href="https://download.pytorch.org/whl/torch_stable.html">https://download.pytorch.org/whl/torch_stable.html</a> 搜索并下载如下 whl</p>
-<ul>
-<li>torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</li>
-<li>torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</li>
-<li>torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</li>
-</ul>
-<h3 id="1-1-3-Miniconda3"><a href="#1-1-3-Miniconda3" class="headerlink" title="1.1.3. Miniconda3"></a>1.1.3. Miniconda3</h3><blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a></p>
-<p>Miniconda3-py37_4.12.0-Linux-x86_64.sh</p>
-</blockquote>
-<p>使用该地址 <a target="_blank" rel="noopener" href="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh">https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh</a>, 下载 miniconda3 安装文件</p>
-<h2 id="1-2-context-文件夹内容"><a href="#1-2-context-文件夹内容" class="headerlink" title="1.2. context 文件夹内容"></a>1.2. context 文件夹内容</h2><p>将上述文件放置在 context 文件夹内</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">├── Miniconda3-py37_4.12.0-Linux-x86_64.sh</span><br><span class="line">├── pip.conf</span><br><span class="line">├── torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">├── torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">└── torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-
-<h1 id="2-编写容器镜像-Dockerfile-文件"><a href="#2-编写容器镜像-Dockerfile-文件" class="headerlink" title="2. 编写容器镜像 Dockerfile 文件"></a>2. 编写容器镜像 Dockerfile 文件</h1><p>在 context 文件夹内新建名为 <strong>Dockerfile</strong> 的空文件，并将下述文件内容写入其中</p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 容器镜像构建主机需要连通公网</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础容器镜像, https://github.com/NVIDIA/nvidia-docker/wiki/CUDA</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds</span></span><br><span class="line"><span class="comment"># require Docker Engine &gt;= 17.05</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># builder stage</span></span><br><span class="line"><span class="keyword">FROM</span> nvidia/cuda:<span class="number">10.2</span>-runtime-ubuntu18.<span class="number">04</span> AS builder</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础容器镜像的默认用户已经是 root</span></span><br><span class="line"><span class="comment"># USER root</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用华为开源镜像站提供的 pypi 配置</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> mkdir -p /root/.pip/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> pip.conf /root/.pip/pip.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拷贝待安装文件到基础容器镜像中的 /tmp 目录</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> Miniconda3-py37_4.12.0-Linux-x86_64.sh \</span></span><br><span class="line"><span class="bash">     torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     ./tmp</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># https://conda.io/projects/conda/en/latest/user-guide/install/linux.html#installing-on-linux</span></span><br><span class="line"><span class="comment"># 安装 Miniconda3 到基础容器镜像的 /home/ma-user/miniconda3 目录中</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> bash /tmp/Miniconda3-py37_4.12.0-Linux-x86_64.sh -b -p /home/ma-user/miniconda3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 Miniconda3 默认 python 环境 (即 /home/ma-user/miniconda3/bin/pip) 安装 torch*.whl</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">cd</span> /tmp &amp;&amp; \</span></span><br><span class="line"><span class="bash">    /home/ma-user/miniconda3/bin/pip install --no-cache-dir \</span></span><br><span class="line"><span class="bash">    /tmp/torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">    /tmp/torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">    /tmp/torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建最终容器镜像</span></span><br><span class="line"><span class="keyword">FROM</span> nvidia/cuda:<span class="number">10.2</span>-runtime-ubuntu18.<span class="number">04</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 vim / curl 工具（依然使用华为开源镜像站）</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> cp -a /etc/apt/sources.list /etc/apt/sources.list.bak &amp;&amp; \</span></span><br><span class="line"><span class="bash">    sed -i <span class="string">&quot;s@http://.*archive.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="bash">    sed -i <span class="string">&quot;s@http://.*security.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get update &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get install -y vim curl &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get clean &amp;&amp; \</span></span><br><span class="line"><span class="bash">    mv /etc/apt/sources.list.bak /etc/apt/sources.list</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加 ma-user 用户 (uid = 1000, gid = 100)</span></span><br><span class="line"><span class="comment"># 注意到基础容器镜像已存在 gid = 100 的组，因此 ma-user 用户可直接使用</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从上述 builder stage 中拷贝 /home/ma-user/miniconda3 目录到当前容器镜像的同名目录</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --chown=ma-user --from=builder /home/ma-user/miniconda3 /home/ma-user/miniconda3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置容器镜像预置环境变量</span></span><br><span class="line"><span class="comment"># 请务必设置 PYTHONUNBUFFERED=1, 以免日志丢失</span></span><br><span class="line"><span class="keyword">ENV</span> PATH=$PATH:/home/ma-<span class="keyword">user</span>/miniconda3/bin \</span><br><span class="line">    PYTHONUNBUFFERED=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置容器镜像默认用户与工作目录</span></span><br><span class="line"><span class="keyword">USER</span> ma-<span class="keyword">user</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /home/ma-user</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="3-构建容器镜像"><a href="#3-构建容器镜像" class="headerlink" title="3. 构建容器镜像"></a>3. 构建容器镜像</h1><p>context 文件夹内容如下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">├── Dockerfile</span><br><span class="line">├── Miniconda3-py37_4.12.0-Linux-x86_64.sh</span><br><span class="line">├── pip.conf</span><br><span class="line">├── torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">├── torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">└── torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-
-<p>执行如下命令构建容器镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 执行构建容器镜像命令之前，请务必切换到 context 目录内</span></span><br><span class="line">cd context</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 执行构建容器镜像命令</span></span><br><span class="line">docker build . -t swr.cn-north-4.myhuaweicloud.com/deep-learning-demo/pytorch:1.8.1-cuda10.2</span><br></pre></td></tr></table></figure>
-
-<p>容器镜像构建成功后，可通过如下命令查询到对应的容器镜像地址</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep pytorch | grep 1.8.1-cuda10.2</span><br></pre></td></tr></table></figure>
-
-<h1 id="3-pytorch-verification-code"><a href="#3-pytorch-verification-code" class="headerlink" title="3. pytorch verification code"></a>3. pytorch verification code</h1><p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/locally/#linux-verification">https://pytorch.org/get-started/locally/#linux-verification</a></p>
-<p>验证示例代码：pytorch-verification.py</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line">x = torch.randn(<span class="number">5</span>, <span class="number">3</span>)</span><br><span class="line"><span class="built_in">print</span>(x)</span><br><span class="line"></span><br><span class="line">available_dev = torch.device(<span class="string">&quot;cuda&quot;</span>) <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> torch.device(<span class="string">&quot;cpu&quot;</span>)</span><br><span class="line">y = torch.randn(<span class="number">5</span>, <span class="number">3</span>).to(available_dev)</span><br><span class="line"><span class="built_in">print</span>(y)</span><br></pre></td></tr></table></figure>
-
-<h1 id="4-boot-command-in-modelarts-training-service"><a href="#4-boot-command-in-modelarts-training-service" class="headerlink" title="4. boot command in modelarts training service"></a>4. boot command in modelarts training service</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/home/ma-user/miniconda3/bin/python $&#123;MA_JOB_DIR&#125;/code/pytorch-verification.py</span><br></pre></td></tr></table></figure>
-
-<p>cpu 训练作业日志显示示例</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tensor([[ 0.8945, -0.6946,  0.3807],</span><br><span class="line">        [ 0.6665,  0.3133,  0.8285],</span><br><span class="line">        [-0.5353, -0.1730, -0.5419],</span><br><span class="line">        [ 0.4870,  0.5183,  0.2505],</span><br><span class="line">        [ 0.2679, -0.4996,  0.7919]])</span><br><span class="line">tensor([[ 0.9692,  0.4652,  0.5659],</span><br><span class="line">        [ 2.2032,  1.4157, -0.1755],</span><br><span class="line">        [-0.6296,  0.5466,  0.6994],</span><br><span class="line">        [ 0.2353, -0.0089, -1.9546],</span><br><span class="line">        [ 0.9319,  1.1781, -0.4587]])</span><br></pre></td></tr></table></figure>
-
-<p>gpu 训练作业日志显示示例</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tensor([[-0.2874, -0.3475,  0.1848],</span><br><span class="line">        [-0.1660, -0.5038, -0.5470],</span><br><span class="line">        [ 0.1289, -0.2400,  2.0829],</span><br><span class="line">        [ 1.6870, -0.0492,  0.1189],</span><br><span class="line">        [ 0.4800, -0.3611, -0.9572]])</span><br><span class="line">tensor([[-0.6710,  0.4095, -0.7370],</span><br><span class="line">        [ 1.4353,  0.9093,  1.7551],</span><br><span class="line">        [ 1.3477, -0.0499,  0.2404],</span><br><span class="line">        [ 1.7489, -1.0203, -0.7875],</span><br><span class="line">        [-1.2104,  0.4593,  1.1365]], device=&#x27;cuda:0&#x27;)</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1479,7 +1344,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1490,13 +1355,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">340k</span>
+    <span title="站点总字数">342k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:09</span>
+    <span title="站点阅读时长">5:11</span>
   </span>
 </div>
 

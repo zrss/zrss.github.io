@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">126</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,335 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/cd7f3948.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/cd7f3948.html" class="post-title-link" itemprop="url">golang logrus</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-04 07:24:06 / 修改时间：07:58:38" itemprop="dateCreated datePublished" datetime="2021-07-04T07:24:06Z">2021-07-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="log-output-format-sample"><a href="#log-output-format-sample" class="headerlink" title="log output format sample"></a>log output format sample</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO[2021-07-04 15:26:26]main.go:28 have a nice day                               zs=log</span><br><span class="line">INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                     zs=log</span><br></pre></td></tr></table></figure>
+
+<h1 id="code-sample"><a href="#code-sample" class="headerlink" title="code sample"></a>code sample</h1><p>show timestamp</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/415">https://github.com/Sirupsen/logrus/issues/415</a></li>
+</ul>
+<p>the meaning of [0000]</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/163">https://github.com/Sirupsen/logrus/issues/163</a></li>
+</ul>
+<p>add common prefix</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/773">https://github.com/sirupsen/logrus/issues/773</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#default-fields">https://github.com/sirupsen/logrus#default-fields</a></li>
+</ul>
+<p>have a little overhead, add filename and line number</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922">https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922</a> </li>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#logging-method-name">https://github.com/sirupsen/logrus#logging-method-name</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go">https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go</a> </li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;path&quot;</span></span><br><span class="line">	<span class="string">&quot;runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/sirupsen/logrus&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;logrus.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   <span class="literal">true</span>,</span><br><span class="line">		TimestampFormat: <span class="string">&quot;2006-01-02 15:04:05&quot;</span>,</span><br><span class="line">		CallerPrettyfier: <span class="function"><span class="keyword">func</span><span class="params">(f *runtime.Frame)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">			_, filename := path.Split(f.File)</span><br><span class="line">			<span class="comment">// do not log func name</span></span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, filename + <span class="string">&quot;:&quot;</span> + strconv.Itoa(f.Line)</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.SetFormatter(formatter)</span><br><span class="line">	log.SetReportCaller(<span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(<span class="string">&quot;zs&quot;</span>, <span class="string">&quot;log&quot;</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(<span class="string">&quot;have a nice day&quot;</span>)</span><br><span class="line">	contextLogger.Infof(<span class="string">&quot;%s gogogo&quot;</span>, <span class="string">&quot;zs&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="third-party-formatter"><a href="#third-party-formatter" class="headerlink" title="third-party formatter"></a>third-party formatter</h1><p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#formatters">https://github.com/sirupsen/logrus#formatters</a></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/x-cray/logrus-prefixed-formatter">https://github.com/x-cray/logrus-prefixed-formatter</a></li>
+</ul>
+<h2 id="log-output-format-sample-1"><a href="#log-output-format-sample-1" class="headerlink" title="log output format sample"></a>log output format sample</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[2021-07-04 15:50:26]  INFO log: have a nice day</span><br><span class="line">[2021-07-04 15:50:26]  INFO log: zs gogogo</span><br></pre></td></tr></table></figure>
+
+<h2 id="code-sample-1"><a href="#code-sample-1" class="headerlink" title="code sample"></a>code sample</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;github.com/sirupsen/logrus&quot;</span><br><span class="line">	prefixed &quot;github.com/x-cray/logrus-prefixed-formatter&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;prefixed.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   true,</span><br><span class="line">		TimestampFormat: &quot;2006-01-02 15:04:05&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.Formatter = formatter</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(&quot;have a nice day&quot;)</span><br><span class="line">	contextLogger.Infof(&quot;%s gogogo&quot;, &quot;zs&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>as previous code show</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contextLogger := log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>u can prefix a <em>log</em> key and colon before the msg output</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/485f6ed4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/485f6ed4.html" class="post-title-link" itemprop="url">rsync</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-05-30 14:03:15 / 修改时间：17:00:14" itemprop="dateCreated datePublished" datetime="2021-05-30T14:03:15Z">2021-05-30</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>766</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Download"><a href="#Download" class="headerlink" title="Download"></a>Download</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/">https://rsync.samba.org/</a></p>
+<p>最新版本：<code>Rsync version 3.2.3 released</code></p>
+<h1 id="How-rsync-works"><a href="#How-rsync-works" class="headerlink" title="How rsync works"></a>How rsync works</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/how-rsync-works.html">https://rsync.samba.org/how-rsync-works.html</a></p>
+<h1 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h1><p><a target="_blank" rel="noopener" href="https://download.samba.org/pub/rsync/rsync.html">https://download.samba.org/pub/rsync/rsync.html</a></p>
+<ul>
+<li><code>--recursive</code>: recurse into directories</li>
+<li><code>--append</code>: append data onto shorter files</li>
+<li><code>--filter</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/Cellar/rsync/3.2.3/bin/rsync --verbose --no-whole-file --recursive --append --include=&#x27;*.log&#x27; --include=&#x27;*/&#x27; --exclude=&#x27;*&#x27; --prune-empty-dirs dir1/ dir2/</span><br></pre></td></tr></table></figure>
+
+<p>注意 rsync 本地目录的特殊之处</p>
+<p><a target="_blank" rel="noopener" href="https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files">https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files</a></p>
+<blockquote>
+<p>–whole-file, This is the default when both the source and destination are specified as local paths, but only if no batch-writing option is in effect.</p>
+</blockquote>
+<h1 id="High-Availability"><a href="#High-Availability" class="headerlink" title="High Availability"></a>High Availability</h1><p><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted">https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b8075dfc.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/b8075dfc.html" class="post-title-link" itemprop="url">infiniband sr-iov</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-23 09:52:41" itemprop="dateCreated datePublished" datetime="2021-05-23T09:52:41Z">2021-05-23</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-05-30 17:00:14" itemprop="dateModified" datetime="2021-05-30T17:00:14Z">2021-05-30</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/in-between-ethernet-vlans-and-infiniband-pkeys">https://community.mellanox.com/s/article/in-between-ethernet-vlans-and-infiniband-pkeys</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-use-infiniband-pkey-membership-types-in-virtualization-environment--connectx-3--connectx-3-pro-x">https://community.mellanox.com/s/article/howto-use-infiniband-pkey-membership-types-in-virtualization-environment--connectx-3--connectx-3-pro-x</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-ipoib-networks-with-gateway-and-multiple-pkeys">https://community.mellanox.com/s/article/howto-configure-ipoib-networks-with-gateway-and-multiple-pkeys</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/HowTo-Configure-SR-IOV-for-ConnectX-4-ConnectX-5-ConnectX-6-with-KVM-Ethernet">https://community.mellanox.com/s/article/HowTo-Configure-SR-IOV-for-ConnectX-4-ConnectX-5-ConnectX-6-with-KVM-Ethernet</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin">https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/mellanox/k8s-rdma-shared-dev-plugin">https://github.com/mellanox/k8s-rdma-shared-dev-plugin</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/add-pod.html#add-pod">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/add-pod.html#add-pod</a></p>
+<p>IOV: I/O Virtualization</p>
+<p>Single Root I/O Virtualization (SR-IOV) network</p>
+<p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/k8snetworkplumbingwg/sriov-cni">https://github.com/k8snetworkplumbingwg/sriov-cni</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV">https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -937,361 +1266,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/fca75258.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/fca75258.html" class="post-title-link" itemprop="url">ib_write_bw failed</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-20 20:00:00" itemprop="dateCreated datePublished" datetime="2020-11-20T20:00:00Z">2020-11-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 06:29:47" itemprop="dateModified" datetime="2020-12-12T06:29:47Z">2020-12-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://github.com/linux-rdma/perftest/blob/master/src/write_bw.c">https://github.com/linux-rdma/perftest/blob/master/src/write_bw.c</a></p>
-<p>main</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_param.verb = WRITE;</span><br><span class="line">user_param.tst = BW;</span><br></pre></td></tr></table></figure>
-
-<p>parser</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-c, --connection=&lt;RC/XRC/UC/DC&gt; Connection type RC/XRC/UC/DC (default RC)</span><br><span class="line">-s, --size=&lt;size&gt; Size of message to exchange (default 65536)</span><br></pre></td></tr></table></figure>
-
-<p>init_perftest_params</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_SIZE_BW   (65536)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_SIZE_LAT  (2)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_CACHE_LINE_SIZE (64)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_PAGE_SIZE (4096)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_FLOWS (1)</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;size = (user_param-&gt;tst == BW ) ? DEF_SIZE_BW : DEF_SIZE_LAT;</span><br><span class="line"></span><br><span class="line">user_param-&gt;connection_type	= (user_param-&gt;connection_type == RawEth) ? RawEth : RC;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;cache_line_size	= get_cache_line_size();</span><br><span class="line">user_param-&gt;cycle_buffer = sysconf(_SC_PAGESIZE);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (user_param-&gt;cycle_buffer &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    user_param-&gt;cycle_buffer = DEF_PAGE_SIZE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;flows = DEF_FLOWS;</span><br></pre></td></tr></table></figure>
-
-<p><code>get_cache_line_size()</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line"> <span class="meta">#<span class="meta-keyword">if</span> !defined(__FreeBSD__)</span></span><br><span class="line">	size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);</span><br><span class="line">	<span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">if</span> defined(__sparc__) &amp;&amp; defined(__arch64__)</span></span><br><span class="line">		<span class="keyword">char</span>* file_name =</span><br><span class="line">			<span class="string">&quot;/sys/devices/system/cpu/cpu0/l2_cache_line_size&quot;</span>;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">		<span class="keyword">char</span>* file_name =</span><br><span class="line">			<span class="string">&quot;/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size&quot;</span>;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">		FILE *fp;</span><br><span class="line">		<span class="keyword">char</span> line[<span class="number">10</span>];</span><br><span class="line">		fp = fopen(file_name, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">		<span class="keyword">if</span> (fp == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> DEF_CACHE_LINE_SIZE;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span>(fgets(line,<span class="number">10</span>,fp) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">			size = atoi(line);</span><br><span class="line">			fclose(fp);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">if</span> (size &lt;= <span class="number">0</span>)</span><br><span class="line">		size = DEF_CACHE_LINE_SIZE;</span><br></pre></td></tr></table></figure>
-
-<p><code>getconf LEVEL1_DCACHE_LINESIZE</code></p>
-<p>main -&gt; alloc_ctx</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ctx-&gt;size = user_param-&gt;size;</span><br><span class="line"></span><br><span class="line">num_of_qps_factor = (user_param-&gt;mr_per_qp) ? <span class="number">1</span> : user_param-&gt;num_of_qps;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* holds the size of maximum between msg size and cycle buffer,</span></span><br><span class="line"><span class="comment">* aligned to cache line,</span></span><br><span class="line"><span class="comment">* it is multiply by 2 for send and receive</span></span><br><span class="line"><span class="comment">* with reference to number of flows and number of QPs */</span></span><br><span class="line">ctx-&gt;buff_size = INC(BUFF_SIZE(ctx-&gt;size, ctx-&gt;cycle_buffer),</span><br><span class="line">				 ctx-&gt;cache_line_size) * <span class="number">2</span> * num_of_qps_factor * user_param-&gt;flows;</span><br></pre></td></tr></table></figure>
-
-<p>65536 = 64Kb</p>
-<p>generally, 16 pages</p>
-<p>root cause: ulimit -l is 16 (default) in container</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5a3d0ab7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/5a3d0ab7.html" class="post-title-link" itemprop="url">install PyTorch 1.8 from source</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-11-15 11:47:00" itemprop="dateCreated datePublished" datetime="2020-11-15T11:47:00Z">2020-11-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-11-21 14:32:39" itemprop="dateModified" datetime="2020-11-21T14:32:39Z">2020-11-21</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Issues/" itemprop="url" rel="index"><span itemprop="name">Issues</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本地复现一个 <code>TcpStore</code> 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch</p>
-<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
-<li>macOS 10.15.7</li>
-<li>XCode 12.2 (12B45b)</li>
-</ul>
-<h1 id="源码信息"><a href="#源码信息" class="headerlink" title="源码信息"></a>源码信息</h1><p>master latest commit (2020-11-14): <code>f8248543a13b0144a6f5d0a549f72b1e470d88aa</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit f8248543a13b0144a6f5d0a549f72b1e470d88aa (github/master, github/gh/ljk53/194/base, github/HEAD, master)</span><br><span class="line">Author: Rohan Varma &lt;rvarm1@fb.com&gt;</span><br><span class="line">Date:   Sat Nov 14 13:36:31 2020 -0800</span><br></pre></td></tr></table></figure>
-
-<h1 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h1><blockquote>
-<p>(1) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch#from-source">https://github.com/pytorch/pytorch#from-source</a></p>
-<p>(2) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips">https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips</a></p>
-</blockquote>
-<h2 id="glog"><a href="#glog" class="headerlink" title="glog"></a>glog</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install glog</span><br></pre></td></tr></table></figure>
-
-<h2 id="conda"><a href="#conda" class="headerlink" title="conda"></a>conda</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.6</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add these packages if torch.distributed is needed</span></span><br><span class="line">conda install pkg-config libuv</span><br></pre></td></tr></table></figure>
-
-<h2 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h2><p>uninstall </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda uninstall torch</span><br><span class="line">pip uninstall torch</span><br><span class="line"></span><br><span class="line">rm -rf build/</span><br></pre></td></tr></table></figure>
-
-<p>then reinstall</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CMAKE_PREFIX_PATH=<span class="variable">$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))/../&quot;&#125;</span></span><br><span class="line">MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ MAX_JOBS=8 BUILD_CAFFE2=0 BUILD_CAFFE2_OPS=0 USE_GLOG=1 USE_DISTRIBUTED=1 USE_MKLDNN=0 USE_CUDA=0 USE_FBGEMM=0 USE_NNPACK=0 USE_QNNPACK=0 USE_XNNPACK=0 python setup.py develop</span><br></pre></td></tr></table></figure>
-
-<p>Quad-Core Intel Core i7 ~ 45min</p>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; torch.__version__</span><br><span class="line">&#x27;1.8.0a0+f1a8a82&#x27;</span><br></pre></td></tr></table></figure>
-
-<h2 id="TcpStore"><a href="#TcpStore" class="headerlink" title="TcpStore"></a>TcpStore</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python test/distributed/test_c10d.py</span><br><span class="line"></span><br><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch.distributed as dist</span><br><span class="line">&gt;&gt;&gt; server_store = dist.TCPStore(&quot;127.0.0.1&quot;, 18668, 1, True)</span><br></pre></td></tr></table></figure>
-
-<p>or</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./build/bin/TCPStoreTest</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5285fc6a.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/5285fc6a.html" class="post-title-link" itemprop="url">pod termination</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-08-23 14:16:34" itemprop="dateCreated datePublished" datetime="2020-08-23T14:16:34Z">2020-08-23</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-12 06:18:34" itemprop="dateModified" datetime="2020-12-12T06:18:34Z">2020-12-12</time>
-      </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination">https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination</a></p>
-</blockquote>
-<p>简而言之，pod 被删除时</p>
-<ol>
-<li>kubelet 触发 container runtime 对 pod 中的每个 container 的 1 号进程，发送 TERM 信号</li>
-<li>等待 the grace period expires (terminationGracePeriodSeconds 默认为 30s)</li>
-<li>如果 the grace period expires 后 containers 仍未退出，则 kubelet 触发 container runtime，向 pod 中的每个 container 中仍然处于 running 状态的进程发送 KILL 信号</li>
-</ol>
-<p>正确处理 TERM 信号，可以让业务优雅退出（or 更快退出）；例如</p>
-<p>假设 pod command 为</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#run-a-command-in-a-shell">https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#run-a-command-in-a-shell</a></p>
-</blockquote>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">command:</span> [<span class="string">&quot;/bin/bash&quot;</span>]</span><br><span class="line"><span class="attr">args:</span> [<span class="string">&quot;-c&quot;</span>, <span class="string">&quot;/home/rt/run.sh&quot;</span>]</span><br></pre></td></tr></table></figure>
-
-<p>or</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">command:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;/bin/bash&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;-c&quot;</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;/home/rt/run.sh&quot;</span></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><code>/bin/bash /home/rt/run.sh</code> 是 1 号进程</p>
-</blockquote>
-<p>在 /home/rt/run.sh 中可以如此处理，以达到优雅退出的目的</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> prog_exit &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;receive SIGTERM signal&quot;</span></span><br><span class="line">    pkill python</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">trap</span> prog_exit SIGTERM</span><br><span class="line"></span><br><span class="line"><span class="comment"># main function</span></span><br><span class="line">python /home/rt/train.py &amp;</span><br><span class="line"></span><br><span class="line"><span class="built_in">wait</span> $!</span><br></pre></td></tr></table></figure>
-
-<p>ref: docker stop</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/commandline/stop/">https://docs.docker.com/engine/reference/commandline/stop/</a></p>
-<p>The main process inside the container will receive SIGTERM, and after a grace period, SIGKILL.</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1305,7 +1279,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1316,13 +1290,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">340k</span>
+    <span title="站点总字数">342k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:09</span>
+    <span title="站点阅读时长">5:11</span>
   </span>
 </div>
 

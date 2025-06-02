@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">126</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,6 +158,356 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/dfdab12d.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/dfdab12d.html" class="post-title-link" itemprop="url">golang memory model</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-26 21:39:00 / 修改时间：13:39:59" itemprop="dateCreated datePublished" datetime="2021-12-26T21:39:00Z">2021-12-26</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://go.dev/ref/mem">https://go.dev/ref/mem</a></p>
+<blockquote>
+<p>Note that a read <em>r</em> may observe the value written by a write <em>w</em> that happens concurrently with <em>r</em>. Even if this occurs, it does not imply that reads happening after <em>r</em> will observe writes that happened before <em>w</em>.</p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a, b <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="number">1</span></span><br><span class="line">	b = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">g</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="built_in">print</span>(b)</span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	g()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>it can happen that g prints 2 and then 0.</p>
+<blockquote>
+<p>A send on a channel happens before the corresponding receive from that channel completes.</p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)</span><br><span class="line"><span class="keyword">var</span> a <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="string">&quot;hello, world&quot;</span></span><br><span class="line">	c &lt;- <span class="number">0</span> <span class="comment">// send on c</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	&lt;-c</span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>is guaranteed to print “hello, world”. The write to <em>a</em> happens before the send on <em>c</em>, which happens before the corresponding receive on <em>c</em> completes, which happens before the <em>print</em>.</p>
+<p>The closing of a channel happens before a receive that returns a zero value because the channel is closed.</p>
+<p>In the previous example, replacing <code>c &lt;- 0</code> with <code>close(c)</code> yields a program with the same guaranteed behavior.</p>
+<blockquote>
+<p>A receive from an unbuffered channel happens before the send on that channel completes.</p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"><span class="keyword">var</span> a <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span></span> &#123;</span><br><span class="line">	a = <span class="string">&quot;hello, world&quot;</span></span><br><span class="line">	&lt;-c</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> f()</span><br><span class="line">	c &lt;- <span class="number">0</span></span><br><span class="line">	<span class="built_in">print</span>(a)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>is also guaranteed to print “hello, world”. The write to a happens before the receive on <em>c</em>, which happens before the corresponding send on <em>c</em> completes, which happens before the <em>print</em>.</p>
+<p>If the channel were buffered (e.g., c = make(chan int, 1)) then the program would not be guaranteed to print “hello, world”. (It might print the empty string, crash, or do something else.)</p>
+<blockquote>
+<p>The kth receive on a channel with capacity C happens before the k+Cth send from that channel completes.</p>
+</blockquote>
+<p>This program starts a goroutine for every entry in the work list, but the goroutines coordinate using the limit channel to ensure that at most three are running work functions at a time.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> limit = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> _, w := <span class="keyword">range</span> work &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(w <span class="keyword">func</span>()</span>)</span> &#123;</span><br><span class="line">			limit &lt;- <span class="number">1</span></span><br><span class="line">			w()</span><br><span class="line">			&lt;-limit</span><br><span class="line">		&#125;(w)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">select</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/50cf0505.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/50cf0505.html" class="post-title-link" itemprop="url">infiniband ethernet</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-12-26 14:44:37" itemprop="dateCreated datePublished" datetime="2021-12-26T14:44:37Z">2021-12-26</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-06 05:53:58" itemprop="dateModified" datetime="2022-03-06T05:53:58Z">2022-03-06</time>
+      </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Configure-RoCE"><a href="#Configure-RoCE" class="headerlink" title="Configure RoCE"></a>Configure RoCE</h1><p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4">https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4</a></p>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/understanding-show-gids-script">https://community.mellanox.com/s/article/understanding-show-gids-script</a></p>
+<blockquote>
+<p>Use <code>ibv_query_gid</code> and <code>ibv_find_gid_index</code> functions defined in libibverbs to get the desired GID index.</p>
+</blockquote>
+<p>根据上述材料可知，RoCE 首先需要网卡设备支持比如 mlnx ConnectX-4</p>
+<p>以 mlnx 网卡设备为例</p>
+<ol>
+<li>找到 mlnx 设备 GID 映射到的网络设备</li>
+</ol>
+<p><code>cat /sys/class/infiniband/mlx5_0/ports/1/gid_attrs/ndevs/1</code></p>
+<ol start="2">
+<li>查看 GIDs 1 对应的 RoCE type</li>
+</ol>
+<p><code>cat /sys/class/infiniband/mlx5_0/ports/1/gid_attrs/types/1</code></p>
+<ol start="3">
+<li>查看 GIDs 1 地址</li>
+</ol>
+<p><code>cat /sys/class/infiniband/mlx5_0/ports/1/gids/1</code></p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>GID Index</th>
+<th>RoCE version</th>
+<th>GID Address</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ens785f0</td>
+<td>1</td>
+<td>RoCEv2</td>
+<td>fe80:0000:0000:0000:e61d:2dff:fef2:a488</td>
+</tr>
+</tbody></table>
+<p>确定好需要使用的 GID 后，可使用 <code>ib_send_bw</code> 指定 GID 进行 RoCE 通信</p>
+<p>另外注意到</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4">https://community.mellanox.com/s/article/howto-configure-roce-on-connectx-4</a></p>
+</blockquote>
+<p>在 mlnx 设备映射到的网络设备中增加的 vlan 网卡也支持 RoCE</p>
+<h1 id="RoCE-in-container"><a href="#RoCE-in-container" class="headerlink" title="RoCE in container"></a>RoCE in container</h1><h2 id="NCCL-RoCE-failed-in-container"><a href="#NCCL-RoCE-failed-in-container" class="headerlink" title="NCCL RoCE failed in container"></a>NCCL RoCE failed in container</h2><blockquote>
+<p>NCCL WARN Call to ibv_modify_qp failed with error No such device</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IB setup</span></span><br><span class="line">ibv_context* ctx = ncclIbDevs[lComm-&gt;dev].context;</span><br><span class="line"><span class="keyword">uint8_t</span> ib_port = ncclIbDevs[lComm-&gt;dev].port;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ibv_port_attr</span> <span class="title">portAttr</span>;</span></span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">wrap_ibv_query_port</span>(ctx, ib_port, &amp;portAttr));</span><br><span class="line"><span class="class"><span class="keyword">union</span> <span class="title">ibv_gid</span> <span class="title">gid</span>;</span></span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">wrap_ibv_query_gid</span>(ctx, ib_port, <span class="built_in">ncclParamIbGidIndex</span>(), &amp;gid));</span><br><span class="line"></span><br><span class="line"><span class="comment">// QP Creation</span></span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbInitVerbs</span>(ctx, &amp;rComm-&gt;verbs));</span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbCreateQp</span>(ib_port, &amp;rComm-&gt;verbs, IBV_ACCESS_REMOTE_WRITE, &amp;rComm-&gt;qp));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Adjust the MTU</span></span><br><span class="line">remQpInfo.mtu = (<span class="keyword">enum</span> ibv_mtu)std::<span class="built_in">min</span>(remQpInfo.mtu, portAttr.active_mtu);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Setup QP</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ibv_qp</span>* <span class="title">qp</span> =</span> rComm-&gt;qp;</span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbRtrQp</span>(qp, &amp;remQpInfo));</span><br><span class="line"><span class="built_in">NCCLCHECK</span>(<span class="built_in">ncclIbRtsQp</span>(qp));</span><br></pre></td></tr></table></figure>
+
+<p><strong>ncclIbRtrQp</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ncclResult_t <span class="title">ncclIbRtrQp</span><span class="params">(ibv_qp* qp, struct ncclIbQpInfo* info)</span> </span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ibv_qp_attr</span> <span class="title">qpAttr</span>;</span></span><br><span class="line">  <span class="built_in">memset</span>(&amp;qpAttr, <span class="number">0</span>, <span class="built_in"><span class="keyword">sizeof</span></span>(struct ibv_qp_attr));</span><br><span class="line">  qpAttr.qp_state = IBV_QPS_RTR;</span><br><span class="line">  qpAttr.path_mtu = info-&gt;mtu;</span><br><span class="line">  qpAttr.dest_qp_num = info-&gt;qpn;</span><br><span class="line">  qpAttr.rq_psn = <span class="number">0</span>;</span><br><span class="line">  qpAttr.max_dest_rd_atomic = <span class="number">1</span>;</span><br><span class="line">  qpAttr.min_rnr_timer = <span class="number">12</span>;</span><br><span class="line">  <span class="keyword">if</span> (info-&gt;lid == <span class="number">0</span>) &#123;</span><br><span class="line">    qpAttr.ah_attr.is_global = <span class="number">1</span>;</span><br><span class="line">    qpAttr.ah_attr.grh.dgid.global.subnet_prefix = info-&gt;spn;</span><br><span class="line">    qpAttr.ah_attr.grh.dgid.global.interface_id = info-&gt;iid;</span><br><span class="line">    qpAttr.ah_attr.grh.flow_label = <span class="number">0</span>;</span><br><span class="line">    qpAttr.ah_attr.grh.sgid_index = <span class="built_in">ncclParamIbGidIndex</span>();</span><br><span class="line">    qpAttr.ah_attr.grh.hop_limit = <span class="number">255</span>;</span><br><span class="line">    qpAttr.ah_attr.grh.traffic_class = <span class="built_in">ncclParamIbTc</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    qpAttr.ah_attr.is_global = <span class="number">0</span>;</span><br><span class="line">    qpAttr.ah_attr.dlid = info-&gt;lid;</span><br><span class="line">  &#125;</span><br><span class="line">  qpAttr.ah_attr.sl = <span class="built_in">ncclParamIbSl</span>();</span><br><span class="line">  qpAttr.ah_attr.src_path_bits = <span class="number">0</span>;</span><br><span class="line">  qpAttr.ah_attr.port_num = info-&gt;ib_port;</span><br><span class="line">  <span class="built_in">NCCLCHECK</span>(<span class="built_in">wrap_ibv_modify_qp</span>(qp, &amp;qpAttr, IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN | IBV_QP_RQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER));</span><br><span class="line">  <span class="keyword">return</span> ncclSuccess;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>推测是在容器中虽然发现了 mlnx 设备，但是并没有发现 mlnx 设备对应的网络设备（例如 demo 中的 ens785f0)，也就无法找到可使用的 GID 进行 RoCE 通信</p>
+<h2 id="ib-write-bw-failed-in-container"><a href="#ib-write-bw-failed-in-container" class="headerlink" title="ib_write_bw failed in container"></a>ib_write_bw failed in container</h2><blockquote>
+<p>Failed to modify QP 100 to RTR</p>
+</blockquote>
+<p>使用 <code>ib_write_bw</code> 也会报错，看报错信息，与 NCCL 出错的方法一致 <code>ncclIbRtrQp</code></p>
+<h2 id="multus-cni"><a href="#multus-cni" class="headerlink" title="multus-cni"></a>multus-cni</h2><p><a target="_blank" rel="noopener" href="https://github.com/k8snetworkplumbingwg/multus-cni">https://github.com/k8snetworkplumbingwg/multus-cni</a></p>
+<p>理论上需要使用 multus-cni 以 macvlan 的方式增加 RoCE 网络设备到容器中</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin/issues/18">https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin/issues/18</a></p>
+<blockquote>
+<p>instead of calico, you should use macvlan cni where those virtual devices are child of enp175s0. RoCE can make use of those netdevices.</p>
+<p>Other users are using multus plugin, which allows you to have multiple netdev interfaces in a Pod. Such as first managed default veth interface via your existing plugin, and second macvlan or sriov interface via 2nd cni.<br>This way you get both of both world for performance and functionality.</p>
+</blockquote>
+<p>根据 multus-cni quick start 文档，假若 multus 实测可兼容目前 k8s 集群默认的 cni 插件的情况下，需要额外增加 macvlan RoCE 网络设备的 crd 资源配置（假若主机上有多个 RoCE 网络设备，则可分别创建多个 crd 资源配置，每个资源配置对应其中一个 RoCE 网络设备）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF | kubectl create -f -</span><br><span class="line">apiVersion: &quot;k8s.cni.cncf.io/v1&quot;</span><br><span class="line">kind: NetworkAttachmentDefinition</span><br><span class="line">metadata:</span><br><span class="line">  name: macvlan-conf</span><br><span class="line">spec:</span><br><span class="line">  config: &#x27;&#123;</span><br><span class="line">      &quot;cniVersion&quot;: &quot;0.3.0&quot;,</span><br><span class="line">      &quot;type&quot;: &quot;macvlan&quot;,</span><br><span class="line">      &quot;master&quot;: &quot;eth0&quot;,</span><br><span class="line">      &quot;mode&quot;: &quot;bridge&quot;,</span><br><span class="line">      &quot;ipam&quot;: &#123;</span><br><span class="line">        &quot;type&quot;: &quot;host-local&quot;,</span><br><span class="line">        &quot;subnet&quot;: &quot;192.168.1.0/24&quot;,</span><br><span class="line">        &quot;rangeStart&quot;: &quot;192.168.1.200&quot;,</span><br><span class="line">        &quot;rangeEnd&quot;: &quot;192.168.1.216&quot;,</span><br><span class="line">        &quot;routes&quot;: [</span><br><span class="line">          &#123; &quot;dst&quot;: &quot;0.0.0.0/0&quot; &#125;</span><br><span class="line">        ],</span><br><span class="line">        &quot;gateway&quot;: &quot;192.168.1.1&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;&#x27;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<p><strong>当然前提是 k8s 集群中已安装了 macvlan cni</strong></p>
+<blockquote>
+<p>type: This tells CNI which binary to call on disk. Each CNI plugin is a binary that’s called. Typically, these binaries are stored in /opt/cni/bin on each node, and CNI executes this binary. In this case we’ve specified the loopback binary (which create a loopback-type network interface). <strong>If this is your first time installing Multus, you might want to verify that the plugins that are in the “type” field are actually on disk in the /opt/cni/bin directory.</strong></p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/">https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cni.dev/plugins/current/main/macvlan/">https://www.cni.dev/plugins/current/main/macvlan/</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/network/macvlan/">https://docs.docker.com/network/macvlan/</a></p>
+<blockquote>
+<p>Some applications, especially legacy applications or applications which monitor network traffic, expect to be directly connected to the physical network. In this type of situation, you can use the macvlan network driver to assign a MAC address to each container’s virtual network interface, making it appear to be a physical network interface directly connected to the physical network.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/network/network-tutorial-macvlan/">https://docs.docker.com/network/network-tutorial-macvlan/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/71008a70.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随风飘散的记忆">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/71008a70.html" class="post-title-link" itemprop="url">k8s-crd-clientsets</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-26 14:43:37 / 修改时间：06:45:47" itemprop="dateCreated datePublished" datetime="2021-12-26T14:43:37Z">2021-12-26</time>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>126</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/code-generator">https://github.com/kubernetes/code-generator</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.redhat.com/blog/kubernetes-deep-dive-code-generation-customresources">https://cloud.redhat.com/blog/kubernetes-deep-dive-code-generation-customresources</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -977,335 +1327,6 @@ InitContainer --&gt; SidecarContainer
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/cd7f3948.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/cd7f3948.html" class="post-title-link" itemprop="url">golang logrus</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-04 07:24:06 / 修改时间：07:58:38" itemprop="dateCreated datePublished" datetime="2021-07-04T07:24:06Z">2021-07-04</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="log-output-format-sample"><a href="#log-output-format-sample" class="headerlink" title="log output format sample"></a>log output format sample</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO[2021-07-04 15:26:26]main.go:28 have a nice day                               zs=log</span><br><span class="line">INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                     zs=log</span><br></pre></td></tr></table></figure>
-
-<h1 id="code-sample"><a href="#code-sample" class="headerlink" title="code sample"></a>code sample</h1><p>show timestamp</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/415">https://github.com/Sirupsen/logrus/issues/415</a></li>
-</ul>
-<p>the meaning of [0000]</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/163">https://github.com/Sirupsen/logrus/issues/163</a></li>
-</ul>
-<p>add common prefix</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/773">https://github.com/sirupsen/logrus/issues/773</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#default-fields">https://github.com/sirupsen/logrus#default-fields</a></li>
-</ul>
-<p>have a little overhead, add filename and line number</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922">https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922</a> </li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#logging-method-name">https://github.com/sirupsen/logrus#logging-method-name</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go">https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go</a> </li>
-</ul>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;path&quot;</span></span><br><span class="line">	<span class="string">&quot;runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/sirupsen/logrus&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;logrus.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   <span class="literal">true</span>,</span><br><span class="line">		TimestampFormat: <span class="string">&quot;2006-01-02 15:04:05&quot;</span>,</span><br><span class="line">		CallerPrettyfier: <span class="function"><span class="keyword">func</span><span class="params">(f *runtime.Frame)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">			_, filename := path.Split(f.File)</span><br><span class="line">			<span class="comment">// do not log func name</span></span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, filename + <span class="string">&quot;:&quot;</span> + strconv.Itoa(f.Line)</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.SetFormatter(formatter)</span><br><span class="line">	log.SetReportCaller(<span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(<span class="string">&quot;zs&quot;</span>, <span class="string">&quot;log&quot;</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(<span class="string">&quot;have a nice day&quot;</span>)</span><br><span class="line">	contextLogger.Infof(<span class="string">&quot;%s gogogo&quot;</span>, <span class="string">&quot;zs&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="third-party-formatter"><a href="#third-party-formatter" class="headerlink" title="third-party formatter"></a>third-party formatter</h1><p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#formatters">https://github.com/sirupsen/logrus#formatters</a></p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/x-cray/logrus-prefixed-formatter">https://github.com/x-cray/logrus-prefixed-formatter</a></li>
-</ul>
-<h2 id="log-output-format-sample-1"><a href="#log-output-format-sample-1" class="headerlink" title="log output format sample"></a>log output format sample</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[2021-07-04 15:50:26]  INFO log: have a nice day</span><br><span class="line">[2021-07-04 15:50:26]  INFO log: zs gogogo</span><br></pre></td></tr></table></figure>
-
-<h2 id="code-sample-1"><a href="#code-sample-1" class="headerlink" title="code sample"></a>code sample</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;github.com/sirupsen/logrus&quot;</span><br><span class="line">	prefixed &quot;github.com/x-cray/logrus-prefixed-formatter&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;prefixed.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   true,</span><br><span class="line">		TimestampFormat: &quot;2006-01-02 15:04:05&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.Formatter = formatter</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(&quot;have a nice day&quot;)</span><br><span class="line">	contextLogger.Infof(&quot;%s gogogo&quot;, &quot;zs&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>as previous code show</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contextLogger := log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br></pre></td></tr></table></figure>
-
-<p>u can prefix a <em>log</em> key and colon before the msg output</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/485f6ed4.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/485f6ed4.html" class="post-title-link" itemprop="url">rsync</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-05-30 14:03:15 / 修改时间：17:00:14" itemprop="dateCreated datePublished" datetime="2021-05-30T14:03:15Z">2021-05-30</time>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>766</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Download"><a href="#Download" class="headerlink" title="Download"></a>Download</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/">https://rsync.samba.org/</a></p>
-<p>最新版本：<code>Rsync version 3.2.3 released</code></p>
-<h1 id="How-rsync-works"><a href="#How-rsync-works" class="headerlink" title="How rsync works"></a>How rsync works</h1><p><a target="_blank" rel="noopener" href="https://rsync.samba.org/how-rsync-works.html">https://rsync.samba.org/how-rsync-works.html</a></p>
-<h1 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h1><p><a target="_blank" rel="noopener" href="https://download.samba.org/pub/rsync/rsync.html">https://download.samba.org/pub/rsync/rsync.html</a></p>
-<ul>
-<li><code>--recursive</code>: recurse into directories</li>
-<li><code>--append</code>: append data onto shorter files</li>
-<li><code>--filter</code></li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/Cellar/rsync/3.2.3/bin/rsync --verbose --no-whole-file --recursive --append --include=&#x27;*.log&#x27; --include=&#x27;*/&#x27; --exclude=&#x27;*&#x27; --prune-empty-dirs dir1/ dir2/</span><br></pre></td></tr></table></figure>
-
-<p>注意 rsync 本地目录的特殊之处</p>
-<p><a target="_blank" rel="noopener" href="https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files">https://superuser.com/questions/234273/why-doest-rsync-use-delta-transfer-for-local-files</a></p>
-<blockquote>
-<p>–whole-file, This is the default when both the source and destination are specified as local paths, but only if no batch-writing option is in effect.</p>
-</blockquote>
-<h1 id="High-Availability"><a href="#High-Availability" class="headerlink" title="High Availability"></a>High Availability</h1><p><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted">https://unix.stackexchange.com/questions/48298/can-rsync-resume-after-being-interrupted</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b8075dfc.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-      <meta itemprop="description" content="领略了繁华沧桑<br>谁人过往不相似">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="随风飘散的记忆">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/b8075dfc.html" class="post-title-link" itemprop="url">infiniband sr-iov</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-23 09:52:41" itemprop="dateCreated datePublished" datetime="2021-05-23T09:52:41Z">2021-05-23</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-05-30 17:00:14" itemprop="dateModified" datetime="2021-05-30T17:00:14Z">2021-05-30</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-      </div>
-      <div class="post-meta">
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/in-between-ethernet-vlans-and-infiniband-pkeys">https://community.mellanox.com/s/article/in-between-ethernet-vlans-and-infiniband-pkeys</a></p>
-<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-use-infiniband-pkey-membership-types-in-virtualization-environment--connectx-3--connectx-3-pro-x">https://community.mellanox.com/s/article/howto-use-infiniband-pkey-membership-types-in-virtualization-environment--connectx-3--connectx-3-pro-x</a></p>
-<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/howto-configure-ipoib-networks-with-gateway-and-multiple-pkeys">https://community.mellanox.com/s/article/howto-configure-ipoib-networks-with-gateway-and-multiple-pkeys</a></p>
-<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/HowTo-Configure-SR-IOV-for-ConnectX-4-ConnectX-5-ConnectX-6-with-KVM-Ethernet">https://community.mellanox.com/s/article/HowTo-Configure-SR-IOV-for-ConnectX-4-ConnectX-5-ConnectX-6-with-KVM-Ethernet</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin">https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/mellanox/k8s-rdma-shared-dev-plugin">https://github.com/mellanox/k8s-rdma-shared-dev-plugin</a></p>
-<p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/add-pod.html#add-pod">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/add-pod.html#add-pod</a></p>
-<p>IOV: I/O Virtualization</p>
-<p>Single Root I/O Virtualization (SR-IOV) network</p>
-<p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/k8snetworkplumbingwg/sriov-cni">https://github.com/k8snetworkplumbingwg/sriov-cni</a></p>
-<p><a target="_blank" rel="noopener" href="https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV">https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV</a></p>
-<p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
@@ -1319,7 +1340,7 @@ InitContainer --&gt; SidecarContainer
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1330,13 +1351,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">340k</span>
+    <span title="站点总字数">342k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:09</span>
+    <span title="站点阅读时长">5:11</span>
   </span>
 </div>
 
