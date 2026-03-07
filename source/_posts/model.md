@@ -1,5 +1,6 @@
 ---
 title: model
+abbrlink: d79572d9
 date: 2024-02-24 18:17:00
 ---
 

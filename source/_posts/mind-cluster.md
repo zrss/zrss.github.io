@@ -1,5 +1,6 @@
 ---
 title: clusterd
+abbrlink: 6f5ad8f8
 date: 2025-06-01 19:30:00
 ---
 
