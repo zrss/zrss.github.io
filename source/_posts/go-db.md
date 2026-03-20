@@ -1,5 +1,6 @@
 ---
 title: go db connection pool
+date: 2021-09-25 18:27:41
 tags:
   - golang
   - db

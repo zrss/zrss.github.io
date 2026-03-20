@@ -1,5 +1,6 @@
 ---
 title: resource limit in k8s
+date: 2021-09-12 17:07:35
 tags:
   - k8s
 abbrlink: 6555f3f9

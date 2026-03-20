@@ -1,5 +1,6 @@
 ---
 title: GPUDirect RDMA
+date: 2021-02-28 15:02:52
 tags:
   - Infiniband
   - GPU

@@ -1,5 +1,6 @@
 ---
 title: k8s init and sidecar container
+date: 2021-07-18 16:58:54
 tags:
   - k8s
   - design

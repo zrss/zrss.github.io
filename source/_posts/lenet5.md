@@ -1,5 +1,6 @@
 ---
 title: learning lenet5
+date: 2021-09-12 17:07:35
 tags:
   - model
   - deep learning

@@ -1,5 +1,6 @@
 ---
 title: get pid of pipeline command in background
+date: 2021-07-11 18:26:13
 tags:
   - bash
   - pipeline

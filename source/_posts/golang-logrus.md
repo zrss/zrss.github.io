@@ -1,5 +1,6 @@
 ---
 title: golang logrus
+date: 2021-07-04 15:54:40
 tags:
   - golang
   - log

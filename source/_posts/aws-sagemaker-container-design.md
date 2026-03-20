@@ -1,5 +1,6 @@
 ---
 title: Deep Learning Training Container Design
+date: 2021-03-04 00:27:10
 tags:
   - AWS
   - SageMaker

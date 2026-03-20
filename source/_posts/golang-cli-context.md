@@ -1,5 +1,6 @@
 ---
 title: golang cli context
+date: 2021-07-13 00:49:43
 tags:
   - golang
   - context

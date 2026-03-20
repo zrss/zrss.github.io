@@ -1,5 +1,6 @@
 ---
 title: learning golang again
+date: 2021-05-31 00:57:11
 tags:
   - golang
 categories: 笔记

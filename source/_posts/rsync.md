@@ -1,5 +1,6 @@
 ---
 title: rsync
+date: 2021-05-31 00:57:11
 tags:
   - tools
 abbrlink: 485f6ed4
