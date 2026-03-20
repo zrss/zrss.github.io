@@ -101,6 +101,13 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: next
+theme_config:
+  sidebar:
+    position: right
+  footer:
+    icon:
+      name: false
+    powered: false
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
