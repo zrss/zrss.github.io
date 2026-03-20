@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念 术语MPIMessage passing interface 消息传递接口，可以理解为分布式消息传递框架 OpenMPIMPI 的一种开源实现 RDMAremote direct memory access InfinibandIB 网络设备，支持 RDMA OpenMPITerminology MCA  framew">
+<meta property="og:type" content="article">
+<meta property="og:title" content="welcome to hpc">
+<meta property="og:url" content="https://zrss.github.io/archives/e57ea50b.html">
+<meta property="og:site_name" content="NotebookZrss">
+<meta property="og:description" content="最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念 术语MPIMessage passing interface 消息传递接口，可以理解为分布式消息传递框架 OpenMPIMPI 的一种开源实现 RDMAremote direct memory access InfinibandIB 网络设备，支持 RDMA OpenMPITerminology MCA  framew">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-01-19T10:54:39.000Z">
+<meta property="article:modified_time" content="2026-03-19T16:21:19.063Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="hpc">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/e57ea50b.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/e57ea50b.html","path":"archives/e57ea50b.html","title":"welcome to hpc"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>welcome to hpc | NotebookZrss</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NotebookZrss</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">1.</span> <span class="nav-text">术语</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MPI"><span class="nav-number">1.1.</span> <span class="nav-text">MPI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenMPI"><span class="nav-number">1.2.</span> <span class="nav-text">OpenMPI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDMA"><span class="nav-number">1.3.</span> <span class="nav-text">RDMA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Infiniband"><span class="nav-number">1.4.</span> <span class="nav-text">Infiniband</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#OpenMPI-1"><span class="nav-number">2.</span> <span class="nav-text">OpenMPI</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e57ea50b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NotebookZrss">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="welcome to hpc | NotebookZrss">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          welcome to hpc
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-19 10:54:39" itemprop="dateCreated datePublished" datetime="2019-01-19T10:54:39Z">2019-01-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>最近接触了一些 HPC (高性能计算) 新玩意儿，入门首先要掌握一些基本的概念</p>
+<h1 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h1><h2 id="MPI"><a href="#MPI" class="headerlink" title="MPI"></a>MPI</h2><p>Message passing interface</p>
+<p>消息传递接口，可以理解为分布式消息传递框架</p>
+<h2 id="OpenMPI"><a href="#OpenMPI" class="headerlink" title="OpenMPI"></a>OpenMPI</h2><p>MPI 的一种开源实现</p>
+<h2 id="RDMA"><a href="#RDMA" class="headerlink" title="RDMA"></a>RDMA</h2><p>remote direct memory access</p>
+<h2 id="Infiniband"><a href="#Infiniband" class="headerlink" title="Infiniband"></a>Infiniband</h2><p>IB</p>
+<p>网络设备，支持 RDMA</p>
+<h1 id="OpenMPI-1"><a href="#OpenMPI-1" class="headerlink" title="OpenMPI"></a>OpenMPI</h1><p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=developers#ompi-terminology">Terminology</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#mca-def">MCA</a></p>
+<ul>
+<li>framework</li>
+<li>components</li>
+<li>module</li>
+</ul>
+<blockquote>
+<p>An easy example framework to discuss is the MPI framework named “btl”, or the Byte Transfer Layer. It is used to send and receive data on different kinds of networks. Hence, Open MPI has btl components for shared memory, TCP, Infiniband, Myrinet, etc.</p>
+</blockquote>
+<p>不同的 MCA 支持不同的参数，我们可以参考如下查询支持的 MCA 参数</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#available-mca-params">available-mca-params</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ompi_info --param all all --level 9</span><br><span class="line"><span class="comment"># only btl</span></span><br><span class="line">ompi_info --param btl all --level 9</span><br><span class="line"><span class="comment"># only tcp of btl</span></span><br><span class="line">ompi_info --param btl tcp --level 9</span><br></pre></td></tr></table></figure>
+
+<p>可以通过 MCA 参数选择 Components</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tuning#selecting-components">selecting-components</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl ^tcp,openib</span><br></pre></td></tr></table></figure>
+
+<p>不使用 btl framework 中的 tcp component，使用其中的 openib</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/doc/v3.1/man1/mpirun.1.php">mpirun</a></p>
+<p>mpirun 的常用参数</p>
+<ul>
+<li>-H: List of hosts on which to invoke processes.</li>
+<li>-np: Run this many copies of the program on the given nodes. This option indicates that the specified file is an executable program and not an application context. If no value is provided for the number of copies to execute (i.e., neither the “-np” nor its synonyms are provided on the command line), Open MPI will automatically execute a copy of the program on each process slot (see below for description of a “process slot”). This feature, however, can only be used in the SPMD model and will return an error (without beginning execution of the application) otherwise.</li>
+<li>–bind-to: Bind processes to the specified object, defaults to core. Supported options include slot, hwthread, core, l1cache, l2cache, l3cache, socket, numa, board, and none.</li>
+<li>-x: Export the specified environment variables to the remote nodes before executing the program. Only one environment variable can be specified per -x option. Existing environment variables can be specified or new variable names specified with corresponding values. For example: % mpirun -x DISPLAY -x OFILE=/tmp/out … The parser for the -x option is not very sophisticated; it does not even understand quoted values. Users are advised to set variables in the environment, and then use -x to export (not define) them.</li>
+<li>-mca: Send arguments to various MCA modules. See the “MCA” section, below.</li>
+</ul>
+<p><code>--mca btl self</code> 的作用</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=openfabrics#ib-btl">ib-btl</a></p>
+<p>self 用于本地进程通信 (可能使用 lo 设备，也可能不用，例如可以使用内存共享)</p>
+<p>openmpi，假设多机同一个地址族的地址可通，如果主机上有多个网络，openmpi 参考如下链接进行网络选择</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-selection">tcp-selection</a></p>
+<p>注意到 openmpi 会使用所见的所有网络，如果你不想其使用 ip network，你可以显式的禁用之，然而</p>
+<blockquote>
+<p>Note that Open MPI will still use TCP for control messages, such as data between mpirun and the MPI processes, rendezvous information during MPI_INIT, etc. To disable TCP altogether, you also need to disable the tcp component from the OOB framework.</p>
+</blockquote>
+<p>这句话比较有意思，一般来说 mpirun 要求 node 间可以 ssh 免密登录，而 ssh 是应用层协议，依赖 TCP</p>
+<p>openmpi 会选择最优的网络</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability">tcp-routability</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-routability-1.3">tcp-routability-1.3</a></p>
+<p>如何查看 mpirun 连接的过程</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun --mca btl self,vader,tcp --mca btl_base_verbose 30 -np 2 -host NodeA,NodeB a.out</span><br></pre></td></tr></table></figure>
+
+<p>a.out 为可执行程序</p>
+<p>如果有 ib 卡，tcp component 会自动下线</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=tcp#tcp-auto-disable">tcp-auto-disable</a></p>
+<p>openmpi build default option</p>
+<p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#default-build">default-build</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--with-openib(=DIR) and --with-openib-libdir=DIR</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/hpc/" rel="tag"># hpc</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/2e8d2c8b.html" rel="prev" title="mpi operator">
+                  <i class="fa fa-angle-left"></i> mpi operator
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/efe6a532.html" rel="next" title="mxnet-network-and-infiniband">
+                  mxnet-network-and-infiniband <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">359k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:26</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
