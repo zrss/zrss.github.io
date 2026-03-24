@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="尚未系统整理，先记一个粗判断：整体架构在走向成熟，部署形态普遍解耦——不止训推分离，还会出现 Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层。 在这种形态下，常见会并行做两件事：一是用 OpenTelemetry（以 spans 为主） 做标准化 trace，沉淀模型 &#x2F; Agent 的行为轨迹，再回流进 RL 训练闭环；二是通过 LLM Proxy 统一 A">
+    <meta name="description" content="尚未系统整理，先记一个粗判断：整体架构在走向成熟，部署形态普遍解耦——不止训推分离，还出现了 Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层。 在这种形态下，常见会并行做两件事：一是用 OpenTelemetry（以 spans 为主） 做标准化 trace，沉淀模型 &#x2F; Agent 的行为轨迹，再回流进 RL 训练闭环；二是通过 LLM Proxy 统一 A">
 <meta property="og:type" content="article">
 <meta property="og:title" content="rl infra">
 <meta property="og:url" content="https://zrss.github.io/archives/e4d00207.html">
 <meta property="og:site_name" content="NotebookZrss">
-<meta property="og:description" content="尚未系统整理，先记一个粗判断：整体架构在走向成熟，部署形态普遍解耦——不止训推分离，还会出现 Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层。 在这种形态下，常见会并行做两件事：一是用 OpenTelemetry（以 spans 为主） 做标准化 trace，沉淀模型 &#x2F; Agent 的行为轨迹，再回流进 RL 训练闭环；二是通过 LLM Proxy 统一 A">
+<meta property="og:description" content="尚未系统整理，先记一个粗判断：整体架构在走向成熟，部署形态普遍解耦——不止训推分离，还出现了 Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层。 在这种形态下，常见会并行做两件事：一是用 OpenTelemetry（以 spans 为主） 做标准化 trace，沉淀模型 &#x2F; Agent 的行为轨迹，再回流进 RL 训练闭环；二是通过 LLM Proxy 统一 A">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-10-12T14:30:00.000Z">
-<meta property="article:modified_time" content="2026-03-24T17:03:59.426Z">
+<meta property="article:modified_time" content="2026-03-24T17:09:33.865Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="rl">
 <meta name="twitter:card" content="summary">
@@ -208,7 +208,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-24 17:03:59" itemprop="dateModified" datetime="2026-03-24T17:03:59Z">2026-03-24</time>
+      <time title="修改时间：2026-03-24 17:09:33" itemprop="dateModified" datetime="2026-03-24T17:09:33Z">2026-03-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -244,7 +244,7 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>尚未系统整理，先记一个粗判断：<strong>整体架构在走向成熟，部署形态普遍解耦</strong>——不止训推分离，还会出现 <strong>Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层</strong>。</p>
+    <div class="post-body" itemprop="articleBody"><p>尚未系统整理，先记一个粗判断：<strong>整体架构在走向成熟，部署形态普遍解耦</strong>——不止训推分离，还出现了 <strong>Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层</strong>。</p>
 <p>在这种形态下，常见会并行做两件事：一是用 <strong>OpenTelemetry（以 spans 为主）</strong> 做标准化 trace，沉淀模型 / Agent 的行为轨迹，再回流进 RL 训练闭环；二是通过 <strong>LLM Proxy</strong> 统一 Agent 侧使用的模型 API，在训练态把请求 <strong>转发到当前正在更新的模型</strong>，由它承担 RL 里的推理侧，避免应用侧调用与训练态模型服务两条路径对不齐。</p>
 <p>关于轨迹记录与训练回流，直觉上和早年搜索推荐那一套并无本质不同：<strong>线上记录与埋点 → 数据回流 → 离线实验与训练</strong>。</p>
 

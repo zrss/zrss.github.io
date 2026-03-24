@@ -323,7 +323,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-24 17:03:59" itemprop="dateModified" datetime="2026-03-24T17:03:59Z">2026-03-24</time>
+      <time title="修改时间：2026-03-24 17:09:33" itemprop="dateModified" datetime="2026-03-24T17:09:33Z">2026-03-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -360,7 +360,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>尚未系统整理，先记一个粗判断：<strong>整体架构在走向成熟，部署形态普遍解耦</strong>——不止训推分离，还会出现 <strong>Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层</strong>。</p>
+          <p>尚未系统整理，先记一个粗判断：<strong>整体架构在走向成熟，部署形态普遍解耦</strong>——不止训推分离，还出现了 <strong>Agent 应用与训推平台、训推 API（如 Tinker API）、训推框架的分层</strong>。</p>
 <p>在这种形态下，常见会并行做两件事：一是用 <strong>OpenTelemetry（以 spans 为主）</strong> 做标准化 trace，沉淀模型 / Agent 的行为轨迹，再回流进 RL 训练闭环；二是通过 <strong>LLM Proxy</strong> 统一 Agent 侧使用的模型 API，在训练态把请求 <strong>转发到当前正在更新的模型</strong>，由它承担 RL 里的推理侧，避免应用侧调用与训练态模型服务两条路径对不齐。</p>
 <p>关于轨迹记录与训练回流，直觉上和早年搜索推荐那一套并无本质不同：<strong>线上记录与埋点 → 数据回流 → 离线实验与训练</strong>。</p>
 
