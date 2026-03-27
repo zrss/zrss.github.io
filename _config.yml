@@ -105,14 +105,10 @@ theme_config:
   sidebar:
     position: right
   favicon:
-    # Replace NexT's default "N" favicon/logo in the browser tab.
-    # File should exist under `source/`, e.g. `source/images/Z.png`.
-    small: /images/Z.png
-    medium: /images/Z.png
-    apple_touch_icon: /images/Z.png
-    # Note: "mask-icon" is ideally an SVG. If you only have PNG,
-    # you can set it here anyway, but Safari pinned-tab may not look as expected.
-    safari_pinned_tab: /images/Z.png
+    small: /images/favicon-16x16.png
+    medium: /images/favicon-32x32.png
+    apple_touch_icon: /images/apple-touch-icon.png
+    safari_pinned_tab: /images/favicon.svg
     android_manifest: false
   footer:
     icon:
