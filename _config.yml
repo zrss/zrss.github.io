@@ -102,7 +102,7 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: next
 theme_config:
-  scheme: Mist
+  scheme: Muse
   sidebar:
     position: right
   favicon:
