@@ -18,13 +18,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
     <meta name="description" content="现在环境中 etcd 数据目录独立挂盘，看磁盘命名应该是个 lv df -h 查看到类似 &#x2F;device-mapper 和 lvm 相关 https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;index.php&#x2F;LVM pvs https:&#x2F;&#x2F;linux.die.net&#x2F;man&#x2F;8&#x2F;pvs iotop iotop -n 1 -b -o iostat 监控变化 watch -n 2 -d “xxx”">
 <meta property="og:type" content="article">
 <meta property="og:title" content="disk-io">
 <meta property="og:url" content="https://zrss.github.io/archives/c69c7a93.html">
-<meta property="og:site_name" content="NotebookZrss">
+<meta property="og:site_name" content="MegaThinking">
 <meta property="og:description" content="现在环境中 etcd 数据目录独立挂盘，看磁盘命名应该是个 lv df -h 查看到类似 &#x2F;device-mapper 和 lvm 相关 https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;index.php&#x2F;LVM pvs https:&#x2F;&#x2F;linux.die.net&#x2F;man&#x2F;8&#x2F;pvs iotop iotop -n 1 -b -o iostat 监控变化 watch -n 2 -d “xxx”">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-10-21T15:34:07.000Z">
@@ -40,7 +40,7 @@
 <script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/c69c7a93.html","path":"archives/c69c7a93.html","title":"disk-io"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>disk-io | NotebookZrss</title>
+<title>disk-io | MegaThinking</title>
   
 
 
@@ -87,9 +87,10 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <p class="site-title">NotebookZrss</p>
+      <p class="site-title">MegaThinking</p>
       <i class="logo-line"></i>
     </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
   </div>
 
   <div class="site-nav-right">
@@ -180,12 +181,12 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="NotebookZrss">
+      <meta itemprop="name" content="MegaThinking">
       <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="disk-io | NotebookZrss">
+      <meta itemprop="name" content="disk-io | MegaThinking">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">

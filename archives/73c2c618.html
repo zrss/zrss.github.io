@@ -18,13 +18,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
     <meta name="description" content="占个坑，还是在 ut 的时候被坑到了，后续有时间补上，这个我认为 k8s 最成功的地方 不是容器调度，而是这套基于 etcd 抽象出来的 api 😃  informer lister  这 informer 呀，其实就是提供 add&#x2F;update&#x2F;create 回调的封装 (所谓 informer) 而这 lister 呢，是对象 cache，从 lister 中可以获取到对象。lister 由">
 <meta property="og:type" content="article">
 <meta property="og:title" content="client go informers">
 <meta property="og:url" content="https://zrss.github.io/archives/73c2c618.html">
-<meta property="og:site_name" content="NotebookZrss">
+<meta property="og:site_name" content="MegaThinking">
 <meta property="og:description" content="占个坑，还是在 ut 的时候被坑到了，后续有时间补上，这个我认为 k8s 最成功的地方 不是容器调度，而是这套基于 etcd 抽象出来的 api 😃  informer lister  这 informer 呀，其实就是提供 add&#x2F;update&#x2F;create 回调的封装 (所谓 informer) 而这 lister 呢，是对象 cache，从 lister 中可以获取到对象。lister 由">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-09-16T14:09:09.000Z">
@@ -40,7 +40,7 @@
 <script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/73c2c618.html","path":"archives/73c2c618.html","title":"client go informers"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>client go informers | NotebookZrss</title>
+<title>client go informers | MegaThinking</title>
   
 
 
@@ -87,9 +87,10 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <p class="site-title">NotebookZrss</p>
+      <p class="site-title">MegaThinking</p>
       <i class="logo-line"></i>
     </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
   </div>
 
   <div class="site-nav-right">
@@ -180,12 +181,12 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="NotebookZrss">
+      <meta itemprop="name" content="MegaThinking">
       <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="client go informers | NotebookZrss">
+      <meta itemprop="name" content="client go informers | MegaThinking">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
