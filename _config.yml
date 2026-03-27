@@ -3,8 +3,8 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: NotebookZrss
-subtitle: ''
+title: MegaThinking
+subtitle: 'better tokens, better intelligence, contributing superior tokens to models'
 description: '汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention'
 keywords: tech
 author: Zrss
@@ -102,6 +102,7 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: next
 theme_config:
+  scheme: Mist
   sidebar:
     position: right
   favicon:
