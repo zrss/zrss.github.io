@@ -102,6 +102,9 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: next
 theme_config:
+  cache:
+    enable: true
+  minify: true
   scheme: Muse
   sidebar:
     position: right
