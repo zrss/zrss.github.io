@@ -35,3 +35,9 @@ Input Embedding: Just as with the Encoder, the input to the Decoder (which is th
 It’s important to note that this masking is only applied during training. During inference, the decoder can attend to all words in the target sequence, including future words.
 
 To summarize, the Decoder in the Transformer architecture processes its input through self-attention, cross-attention with the Encoder’s output, and position-wise Feed-Forward networks, repeatedly for each stacked block, culminating in a final output sequence after the softmax operation.
+
+https://jalammar.github.io/illustrated-transformer/
+
+https://nlp.seas.harvard.edu/2018/04/03/attention.html
+
+https://jalammar.github.io/illustrated-gpt2/
