@@ -656,7 +656,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-29 08:04:26" itemprop="dateModified" datetime="2026-03-29T08:04:26Z">2026-03-29</time>
+      <time title="修改时间：2026-03-29 12:12:17" itemprop="dateModified" datetime="2026-03-29T12:12:17Z">2026-03-29</time>
     </span>
 
   
@@ -666,7 +666,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
+      <span>1.5k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -702,6 +702,9 @@
 <p>Input Embedding: Just as with the Encoder, the input to the Decoder (which is the target sequence during training) is first embedded into continuous vectors. </p>
 <p>It’s important to note that this masking is only applied during training. During inference, the decoder can attend to all words in the target sequence, including future words.</p>
 <p>To summarize, the Decoder in the Transformer architecture processes its input through self-attention, cross-attention with the Encoder’s output, and position-wise Feed-Forward networks, repeatedly for each stacked block, culminating in a final output sequence after the softmax operation.</p>
+<p><a target="_blank" rel="noopener" href="https://jalammar.github.io/illustrated-transformer/">https://jalammar.github.io/illustrated-transformer/</a></p>
+<p><a target="_blank" rel="noopener" href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">https://nlp.seas.harvard.edu/2018/04/03/attention.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://jalammar.github.io/illustrated-gpt2/">https://jalammar.github.io/illustrated-gpt2/</a></p>
 
       
     </div>
@@ -764,7 +767,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-28 11:23:39" itemprop="dateModified" datetime="2026-03-28T11:23:39Z">2026-03-28</time>
+      <time title="修改时间：2026-03-29 12:12:12" itemprop="dateModified" datetime="2026-03-29T12:12:12Z">2026-03-29</time>
     </span>
 
   
@@ -774,7 +777,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>0</span>
+      <span>192</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -792,7 +795,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          
+          <p>多节点测试依赖 mpi。编译时打开 MPI 开头。</p>
+<p>测试时配置多节点 ssh 免密。另外如果是 RoCE 网络，注意正确配置 NCCL 无损队列匹配 RoCE 无损队列。</p>
+<p>逐渐调大 size 衡量网络带宽情况。</p>
+<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html#nccl-algo">https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html#nccl-algo</a></p>
+<p>NCCL_ALGO=ring 衡量网络带宽时较为稳定。</p>
+
       
     </div>
 
