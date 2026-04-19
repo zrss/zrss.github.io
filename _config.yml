@@ -118,6 +118,12 @@ theme_config:
     icon:
       name: false
     powered: false
+  math:
+    every_page: false
+    mathjax:
+      enable: false
+    katex:
+      enable: true
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
