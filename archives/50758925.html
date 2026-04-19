@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -135,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -244,7 +249,6 @@
 </ol>
 <p>完成上述配置后发现 <code>docker info</code> 非常慢，并且尝试 <code>docker run</code> 容器镜像会有如下报错</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker: Error response from daemon: all SubConns are in TransientFailure, latest connection error: connection error: desc &#x3D; &quot;transport: Error while dialing dial unix:&#x2F;&#x2F;&#x2F;run&#x2F;containerd&#x2F;containerd.sock: timeout&quot;: unavailable.</span><br></pre></td></tr></table></figure>
-
 <p>参考 <a target="_blank" rel="noopener" href="https://github.com/sous-chefs/docker/issues/1062">https://github.com/sous-chefs/docker/issues/1062</a> 发现疑似 master 分支的 systemd 配置引入了不兼容修改，导致使用 master 分支的 systemd 配置，无法完全启动 docker engine 18.09.9。修改 systemd 配置为 <a target="_blank" rel="noopener" href="https://github.com/moby/moby/tree/v18.09.9/contrib/init/systemd">https://github.com/moby/moby/tree/v18.09.9/contrib/init/systemd</a> 后，<code>docker info</code> 以及 <code>docker run</code> 功能恢复正常</p>
 
     </div>
@@ -297,13 +301,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

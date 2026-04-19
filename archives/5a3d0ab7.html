@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="本地复现一个 TcpStore 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch 环境信息 macOS 10.15.7 XCode 12.2 (12B45b)  源码信息master latest commit (2020-11-14): f8248543a13b0144a6f5d0a549f72b1e470d88aa 123commit f8248543a13b0144a6f5d">
+    <meta name="description" content="本地复现一个 TcpStore 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch  环境信息  macOS 10.15.7 XCode 12.2 (12B45b)   源码信息 master latest commit (2020-11-14): f8248543a13b0144a6f5d0a549f72b1e470d88aa 123commit f8248543a13b0144a">
 <meta property="og:type" content="article">
 <meta property="og:title" content="install PyTorch 1.8 from source">
 <meta property="og:url" content="https://zrss.github.io/archives/5a3d0ab7.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="本地复现一个 TcpStore 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch 环境信息 macOS 10.15.7 XCode 12.2 (12B45b)  源码信息master latest commit (2020-11-14): f8248543a13b0144a6f5d0a549f72b1e470d88aa 123commit f8248543a13b0144a6f5d">
+<meta property="og:description" content="本地复现一个 TcpStore 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch  环境信息  macOS 10.15.7 XCode 12.2 (12B45b)   源码信息 master latest commit (2020-11-14): f8248543a13b0144a6f5d0a549f72b1e470d88aa 123commit f8248543a13b0144a">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-11-15T11:47:00.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.040Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E4%BF%A1%E6%81%AF"><span class="nav-number">1.</span> <span class="nav-text">环境信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text">源码信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA"><span class="nav-number">3.</span> <span class="nav-text">构建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#glog"><span class="nav-number">3.1.</span> <span class="nav-text">glog</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conda"><span class="nav-number">3.2.</span> <span class="nav-text">conda</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-and-install"><span class="nav-number">3.3.</span> <span class="nav-text">build and install</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TcpStore"><span class="nav-number">4.1.</span> <span class="nav-text">TcpStore</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E4%BF%A1%E6%81%AF"><span class="nav-number">1.</span> <span class="nav-text"> 环境信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text"> 源码信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA"><span class="nav-number">3.</span> <span class="nav-text"> 构建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#glog"><span class="nav-number">3.1.</span> <span class="nav-text"> glog</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conda"><span class="nav-number">3.2.</span> <span class="nav-text"> conda</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-and-install"><span class="nav-number">3.3.</span> <span class="nav-text"> build and install</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text"> 测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#tcpstore"><span class="nav-number">4.1.</span> <span class="nav-text"> TcpStore</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -247,32 +252,33 @@
     
     
     <div class="post-body" itemprop="articleBody"><p>本地复现一个 <code>TcpStore</code> 的测试用例问题，修改了部分代码，因此需要源码编译 PyTorch</p>
-<h1 id="环境信息"><a href="#环境信息" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
+<h1 id="环境信息"><a class="markdownIt-Anchor" href="#环境信息"></a> 环境信息</h1>
+<ul>
 <li>macOS 10.15.7</li>
 <li>XCode 12.2 (12B45b)</li>
 </ul>
-<h1 id="源码信息"><a href="#源码信息" class="headerlink" title="源码信息"></a>源码信息</h1><p>master latest commit (2020-11-14): <code>f8248543a13b0144a6f5d0a549f72b1e470d88aa</code></p>
+<h1 id="源码信息"><a class="markdownIt-Anchor" href="#源码信息"></a> 源码信息</h1>
+<p>master latest commit (2020-11-14): <code>f8248543a13b0144a6f5d0a549f72b1e470d88aa</code></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit f8248543a13b0144a6f5d0a549f72b1e470d88aa (github&#x2F;master, github&#x2F;gh&#x2F;ljk53&#x2F;194&#x2F;base, github&#x2F;HEAD, master)</span><br><span class="line">Author: Rohan Varma &lt;rvarm1@fb.com&gt;</span><br><span class="line">Date:   Sat Nov 14 13:36:31 2020 -0800</span><br></pre></td></tr></table></figure>
-
-<h1 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h1><blockquote>
+<h1 id="构建"><a class="markdownIt-Anchor" href="#构建"></a> 构建</h1>
+<blockquote>
 <p>(1) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch#from-source">https://github.com/pytorch/pytorch#from-source</a></p>
 <p>(2) <a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips">https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md#c-development-tips</a></p>
 </blockquote>
-<h2 id="glog"><a href="#glog" class="headerlink" title="glog"></a>glog</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install glog</span><br></pre></td></tr></table></figure>
-
-<h2 id="conda"><a href="#conda" class="headerlink" title="conda"></a>conda</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.6</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add these packages if torch.distributed is needed</span></span><br><span class="line">conda install pkg-config libuv</span><br></pre></td></tr></table></figure>
-
-<h2 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h2><p>uninstall </p>
+<h2 id="glog"><a class="markdownIt-Anchor" href="#glog"></a> glog</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install glog</span><br></pre></td></tr></table></figure>
+<h2 id="conda"><a class="markdownIt-Anchor" href="#conda"></a> conda</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python=3.6</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add these packages if torch.distributed is needed</span></span><br><span class="line">conda install pkg-config libuv</span><br></pre></td></tr></table></figure>
+<h2 id="build-and-install"><a class="markdownIt-Anchor" href="#build-and-install"></a> build and install</h2>
+<p>uninstall</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda uninstall torch</span><br><span class="line">pip uninstall torch</span><br><span class="line"></span><br><span class="line">rm -rf build&#x2F;</span><br></pre></td></tr></table></figure>
-
 <p>then reinstall</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CMAKE_PREFIX_PATH=<span class="variable">$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))/../&quot;&#125;</span></span><br><span class="line">MACOSX_DEPLOYMENT_TARGET=10.9 CC=clang CXX=clang++ MAX_JOBS=8 BUILD_CAFFE2=0 BUILD_CAFFE2_OPS=0 USE_GLOG=1 USE_DISTRIBUTED=1 USE_MKLDNN=0 USE_CUDA=0 USE_FBGEMM=0 USE_NNPACK=0 USE_QNNPACK=0 USE_XNNPACK=0 python setup.py develop</span><br></pre></td></tr></table></figure>
-
 <p>Quad-Core Intel Core i7 ~ 45min</p>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; torch.__version__</span><br><span class="line">&#39;1.8.0a0+f1a8a82&#39;</span><br></pre></td></tr></table></figure>
-
-<h2 id="TcpStore"><a href="#TcpStore" class="headerlink" title="TcpStore"></a>TcpStore</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python test&#x2F;distributed&#x2F;test_c10d.py</span><br><span class="line"></span><br><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch.distributed as dist</span><br><span class="line">&gt;&gt;&gt; server_store &#x3D; dist.TCPStore(&quot;127.0.0.1&quot;, 18668, 1, True)</span><br></pre></td></tr></table></figure>
-
+<h1 id="测试"><a class="markdownIt-Anchor" href="#测试"></a> 测试</h1>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; torch.__version__</span><br><span class="line">&#39;1.8.0a0+f1a8a82&#39;</span><br></pre></td></tr></table></figure>
+<h2 id="tcpstore"><a class="markdownIt-Anchor" href="#tcpstore"></a> TcpStore</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python test&#x2F;distributed&#x2F;test_c10d.py</span><br><span class="line"></span><br><span class="line">Python 3.6.12 |Anaconda, Inc.| (default, Sep  8 2020, 17:50:39)</span><br><span class="line">[GCC Clang 10.0.0 ] on darwin</span><br><span class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</span><br><span class="line">&gt;&gt;&gt; import torch.distributed as dist</span><br><span class="line">&gt;&gt;&gt; server_store &#x3D; dist.TCPStore(&quot;127.0.0.1&quot;, 18668, 1, True)</span><br></pre></td></tr></table></figure>
 <p>or</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;build&#x2F;bin&#x2F;TCPStoreTest</span><br></pre></td></tr></table></figure>
 
@@ -329,13 +335,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

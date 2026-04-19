@@ -67,6 +67,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -124,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#overview-of-scheduler"><span class="nav-number">1.</span> <span class="nav-text">overview of scheduler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#schedule-of-scheduler"><span class="nav-number">2.</span> <span class="nav-text">schedule of scheduler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#F-A-Q-of-scheduler"><span class="nav-number">3.</span> <span class="nav-text">F.A.Q of scheduler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#that%E2%80%99s-it"><span class="nav-number">4.</span> <span class="nav-text">that’s it</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#part-of-kube-scheduler"><span class="nav-number">4.1.</span> <span class="nav-text">part of kube-scheduler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#part-of-kube-apiserver"><span class="nav-number">4.2.</span> <span class="nav-text">part of kube-apiserver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#part-of-kubelet"><span class="nav-number">4.3.</span> <span class="nav-text">part of kubelet</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#overview-of-scheduler"><span class="nav-number">1.</span> <span class="nav-text"> overview of scheduler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#schedule-of-scheduler"><span class="nav-number">2.</span> <span class="nav-text"> schedule of scheduler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#faq-of-scheduler"><span class="nav-number">3.</span> <span class="nav-text"> F.A.Q of scheduler</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#thats-it"><span class="nav-number">4.</span> <span class="nav-text"> that’s it</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#part-of-kube-scheduler"><span class="nav-number">4.1.</span> <span class="nav-text"> part of kube-scheduler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#part-of-kube-apiserver"><span class="nav-number">4.2.</span> <span class="nav-text"> part of kube-apiserver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#part-of-kubelet"><span class="nav-number">4.3.</span> <span class="nav-text"> part of kubelet</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -243,17 +248,20 @@
 </blockquote>
 <p>the workflow of the scheduler in kubernetes，开门见山的说，所谓云主机管理也好，网络流量管理也好，总得有个调度员，控制虚拟机实际被运行于哪台物理机中，管理网络流量的走向等等，那么今天看的 scheduler 组件即为 k8s 中的 Pod 调度器组件</p>
 <p>概括的说，scheduler 发现有需要调度的 Pod 时，使用注册好的各种策略，进行备选节点筛选及排序，最后选出pod 应被运行于的节点，即完成了其任务</p>
-<h1 id="overview-of-scheduler"><a href="#overview-of-scheduler" class="headerlink" title="overview of scheduler"></a>overview of scheduler</h1><p>从入口看起，so that is<br>plugin/pkg/scheduler/scheduler.go</p>
+<h1 id="overview-of-scheduler"><a class="markdownIt-Anchor" href="#overview-of-scheduler"></a> overview of scheduler</h1>
+<p>从入口看起，so that is<br />
+plugin/pkg/scheduler/scheduler.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> wait.Until(sched.scheduleOne, <span class="number">0</span>, sched.config.StopEverything)</span><br></pre></td></tr></table></figure>
-
 <p>即无限执行 sched.scheduleOne，那么 sched.scheduleOne 又干了啥，主要的逻辑如下</p>
 <ul>
 <li>获取待调度的 Pod (sched.config.NextPod())</li>
 <li>获取该 Pod 被调度到的节点 (sched.schedule(pod))</li>
 <li>并发 bind the pod to its host</li>
 </ul>
-<h1 id="schedule-of-scheduler"><a href="#schedule-of-scheduler" class="headerlink" title="schedule of scheduler"></a>schedule of scheduler</h1><p>plugin/pkg/scheduler/core/generic_scheduler.go</p>
-<p>默认 schedule 的实现在 generic_scheduler.go 中，实现了调度接口方法 Schedule<br>Schedule 的方法又完成了下述两个过程</p>
+<h1 id="schedule-of-scheduler"><a class="markdownIt-Anchor" href="#schedule-of-scheduler"></a> schedule of scheduler</h1>
+<p>plugin/pkg/scheduler/core/generic_scheduler.go</p>
+<p>默认 schedule 的实现在 generic_scheduler.go 中，实现了调度接口方法 Schedule<br />
+Schedule 的方法又完成了下述两个过程</p>
 <ul>
 <li>predicates</li>
 <li>prioritizing</li>
@@ -263,12 +271,11 @@
 <p>得分排序函数实现</p>
 <p>plugin/scheduler/api/types.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h HostPriorityList)</span> <span class="title">Less</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> h[i].Score == h[j].Score &#123;</span><br><span class="line">		<span class="keyword">return</span> h[i].Host &lt; h[j].Host</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> h[i].Score &lt; h[j].Score</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>即 Score 升序排列，在 Score 相等时，host (节点名称) 的字典序在前的优先。得分相同的节点，有 lastNodeIndex round-robin 的方式选择节点</p>
 <p>plugin/pkg/scheduler/core/generic_scheduler.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">firstAfterMaxScore := sort.Search(<span class="built_in">len</span>(priorityList), <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> priorityList[i].Score &lt; maxScore &#125;)</span><br><span class="line">g.lastNodeIndexLock.Lock()</span><br><span class="line">ix := <span class="keyword">int</span>(g.lastNodeIndex % <span class="keyword">uint64</span>(firstAfterMaxScore))</span><br><span class="line">g.lastNodeIndex++</span><br><span class="line">g.lastNodeIndexLock.Unlock()</span><br></pre></td></tr></table></figure>
-
-<h1 id="F-A-Q-of-scheduler"><a href="#F-A-Q-of-scheduler" class="headerlink" title="F.A.Q of scheduler"></a>F.A.Q of scheduler</h1><ul>
+<h1 id="faq-of-scheduler"><a class="markdownIt-Anchor" href="#faq-of-scheduler"></a> F.A.Q of scheduler</h1>
+<ul>
 <li>scheduler 调度的单位是？</li>
 </ul>
 <p>Pod</p>
@@ -282,29 +289,24 @@
 <p>scheduler 的 config 中使用了 podInformer，仅关注未被 assigned 和非 Succeeded 或者 Failed 的 Pod</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// unassignedNonTerminatedPod selects pods that are unassigned and non-terminal.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">unassignedNonTerminatedPod</span><span class="params">(pod *v1.Pod)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(pod.Spec.NodeName) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>scheduler 为 podInformer 提供了 Pod add/update/delete 操作 podQueue 的方法，因此是在此处更新的 podQueue (add 和 update 逻辑实际相同)。另外 podQueue 内部有去重，如果是相同的 pod，则不再入队</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(</span><br><span class="line">		cache.FilteringResourceEventHandler&#123;</span><br><span class="line">			FilterFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">				...</span><br><span class="line">			&#125;,</span><br><span class="line">			Handler: cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">				AddFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">					c.podQueue.Add(obj);</span><br><span class="line">				&#125;,</span><br><span class="line">				UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(oldObj, newObj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">					c.podQueue.Update(newObj);</span><br><span class="line">				&#125;,</span><br><span class="line">				DeleteFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">					c.podQueue.Delete(obj);</span><br><span class="line">				&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
-
 <p>注意 podInformer 还用于维护 scheduler 的 cache</p>
 <blockquote>
 <p>向节点中增加 Pod</p>
 </blockquote>
 <p>plugin/pkg/scheduler/schedulercache/cache.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cache *schedulerCache)</span> <span class="title">addPod</span><span class="params">(pod *v1.Pod)</span></span> &#123;</span><br><span class="line">	n, ok := cache.nodes[pod.Spec.NodeName]</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		n = NewNodeInfo()</span><br><span class="line">		cache.nodes[pod.Spec.NodeName] = n</span><br><span class="line">	&#125;</span><br><span class="line">	n.addPod(pod)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>计算节点资源</p>
 <p>plugin/pkg/scheduler/schedulercache/node_info.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// addPod adds pod information to this NodeInfo.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *NodeInfo)</span> <span class="title">addPod</span><span class="params">(pod *v1.Pod)</span></span> &#123;</span><br><span class="line">	res, non0_cpu, non0_mem := calculateResource(pod)</span><br><span class="line">	n.requestedResource.MilliCPU += res.MilliCPU</span><br><span class="line">	n.requestedResource.Memory += res.Memory</span><br><span class="line">	</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">// Consume ports when pods added.</span></span><br><span class="line">	n.updateUsedPorts(pod, <span class="literal">true</span>)</span><br><span class="line">	n.generation++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>scheduler 的 node 从哪里获取？</li>
 </ul>
 <p>套路与 Pod 一致，scheduler 使用了 nodeInformer，add/update/delete 操作 node cache，于是 scheduler 可见所有可使用的 node 资源</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Only nodes in the &quot;Ready&quot; condition with status == &quot;True&quot; are schedulable</span></span><br><span class="line">	nodeInformer.Informer().AddEventHandlerWithResyncPeriod(</span><br><span class="line">		cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">			AddFunc:    c.addNodeToCache,</span><br><span class="line">			UpdateFunc: c.updateNodeInCache,</span><br><span class="line">			DeleteFunc: c.deleteNodeFromCache,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="number">0</span>,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>scheduler 如何调度 pod 的？</li>
 </ul>
@@ -322,16 +324,17 @@
 <p>计算当前 node 的资源是否能满足 Pod Request，注意 init-container 是串行运行的，因此其所需要的资源，取各个资源维度的最大值，而其他正常的 container 为并行运行的，因此其所需要的资源，取各个资源维度的总和，最后一个 pod 所需要的资源，为 init-container 的最大值与正常 container 的资源总和的较大值</p>
 <p>plugin/pkg/scheduler/algorithm/predicates/predicates.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Returns a *schedulercache.Resource that covers the largest width in each</span></span><br><span class="line"><span class="comment">// resource dimension. Because init-containers run sequentially, we collect the</span></span><br><span class="line"><span class="comment">// max in each dimension iteratively. In contrast, we sum the resource vectors</span></span><br><span class="line"><span class="comment">// for regular containers since they run simultaneously.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Example:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Pod:</span></span><br><span class="line"><span class="comment">//   InitContainers</span></span><br><span class="line"><span class="comment">//     IC1:</span></span><br><span class="line"><span class="comment">//       CPU: 2</span></span><br><span class="line"><span class="comment">//       Memory: 1G</span></span><br><span class="line"><span class="comment">//     IC2:</span></span><br><span class="line"><span class="comment">//       CPU: 2</span></span><br><span class="line"><span class="comment">//       Memory: 3G</span></span><br><span class="line"><span class="comment">//   Containers</span></span><br><span class="line"><span class="comment">//     C1:</span></span><br><span class="line"><span class="comment">//       CPU: 2</span></span><br><span class="line"><span class="comment">//       Memory: 1G</span></span><br><span class="line"><span class="comment">//     C2:</span></span><br><span class="line"><span class="comment">//       CPU: 1</span></span><br><span class="line"><span class="comment">//       Memory: 1G</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Result: CPU: 3, Memory: 3G</span></span><br></pre></td></tr></table></figure>
-
 <p>PodMatchNodeSelector</p>
 <p>即 pod 只能被调度至 pod.Spec.NodeSelector 指定的节点上</p>
 <p>PodFitsHost</p>
 <p>即 pod 只能调度至 pod.Spec.NodeName 的节点上</p>
 <p>InterPodAffinityMatches</p>
 <ol>
-<li><p>检查当前 pod 如被调度到节点上，是否会破坏当前节点上的 pod 的反亲和性</p>
+<li>
+<p>检查当前 pod 如被调度到节点上，是否会破坏当前节点上的 pod 的反亲和性</p>
 </li>
-<li><p>检查当前 pod 如被调度到节点上，是否满足亲和性及反亲和性</p>
+<li>
+<p>检查当前 pod 如被调度到节点上，是否满足亲和性及反亲和性</p>
 </li>
 </ol>
 <p>CheckNodeMemoryPressurePredicate</p>
@@ -346,7 +349,6 @@
 <p>CalculateSpreadPriority</p>
 <p>plugin/pkg/scheduler/algorithm/priorities/selector_spreading.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CalculateSpreadPriority spreads pods across hosts and zones, considering pods belonging to the same service or replication controller.</span></span><br><span class="line"><span class="comment">// When a pod is scheduled, it looks for services, RCs or RSs that match the pod, then finds existing pods that match those selectors.</span></span><br><span class="line"><span class="comment">// It favors nodes that have fewer existing matching pods.</span></span><br></pre></td></tr></table></figure>
-
 <p>即 soft-anti-affinity</p>
 <p>BalancedResourceAllocationMap</p>
 <p>平衡节点资源分配</p>
@@ -356,9 +358,11 @@
 <li>binding ?</li>
 </ul>
 <ol>
-<li><p>调用 apiserver 接口发送 post binding 请求 sched.config.Binder.Bind(b)</p>
+<li>
+<p>调用 apiserver 接口发送 post binding 请求 sched.config.Binder.Bind(b)</p>
 </li>
-<li><p>binding 发送之后，调用 sched.config.SchedulerCache.FinishBinding(assumed)</p>
+<li>
+<p>binding 发送之后，调用 sched.config.SchedulerCache.FinishBinding(assumed)</p>
 </li>
 </ol>
 <p>FinishBinding 将 pod 信息附带 ttl 记入 cache，ttl 过期后，从 cache 中删除</p>
@@ -367,20 +371,21 @@
 <p>而另外一处 podInformer 则是设置已被调度的 pod 的 add/update/delete 的事件回调，用来同步 cache，若发现 assumePod 已被调度，则从 cache 中删除，又或者 assumePod 已过 ttl 被 cache 删除，则重新 cache.addPod</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// scheduled pod cache</span></span><br><span class="line">	podInformer.Informer().AddEventHandler(</span><br><span class="line">		cache.FilteringResourceEventHandler&#123;</span><br><span class="line">			FilterFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">				...</span><br><span class="line">			&#125;,</span><br><span class="line">			Handler: cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">				AddFunc:    c.addPodToCache,</span><br><span class="line">				UpdateFunc: c.updatePodInCache,</span><br><span class="line">				DeleteFunc: c.deletePodFromCache,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
-
-<h1 id="that’s-it"><a href="#that’s-it" class="headerlink" title="that’s it"></a>that’s it</h1><p>可见 scheduler 基于 informer，实时关注 pod 和 node 状态，获取到待调度的 pod 后，根据 predicate 和 prioritizing 策略，为 pod 选出合适的 node，最后并发完成 pod 和 node 的 binding，完成一次调度过程</p>
+<h1 id="thats-it"><a class="markdownIt-Anchor" href="#thats-it"></a> that’s it</h1>
+<p>可见 scheduler 基于 informer，实时关注 pod 和 node 状态，获取到待调度的 pod 后，根据 predicate 和 prioritizing 策略，为 pod 选出合适的 node，最后并发完成 pod 和 node 的 binding，完成一次调度过程</p>
 <p>更详细来说的话 (可能有误，欢迎大家交流斧正)</p>
-<h2 id="part-of-kube-scheduler"><a href="#part-of-kube-scheduler" class="headerlink" title="part of kube-scheduler"></a>part of kube-scheduler</h2><p>当有新的 pod 创建时，the podInformer of scheduler 一方面过滤未被调度且非 Succeed/Failed 状态的 pod， 触发 add 事件，scheduler 将其加入 podQueue 中等待调度，schedulerOne 方法循环执行，每次从 podQueue 中取出一个 pod，根据 predicates / priorities 策略选出 suggested host，assume 该 pod 被调度到 suggested host 上，更新 pod.Spec.NodeName 字段 (仅为后续 addPod，并不影响实际 etcd 中的 pod 对象)，随后开始并发 (goroutine) binding，即调用 kube-apiserver api post a binding RPC，随后 finishingBinding，在 cache 中记录该 pod</p>
+<h2 id="part-of-kube-scheduler"><a class="markdownIt-Anchor" href="#part-of-kube-scheduler"></a> part of kube-scheduler</h2>
+<p>当有新的 pod 创建时，the podInformer of scheduler 一方面过滤未被调度且非 Succeed/Failed 状态的 pod， 触发 add 事件，scheduler 将其加入 podQueue 中等待调度，schedulerOne 方法循环执行，每次从 podQueue 中取出一个 pod，根据 predicates / priorities 策略选出 suggested host，assume 该 pod 被调度到 suggested host 上，更新 pod.Spec.NodeName 字段 (仅为后续 addPod，并不影响实际 etcd 中的 pod 对象)，随后开始并发 (goroutine) binding，即调用 kube-apiserver api post a binding RPC，随后 finishingBinding，在 cache 中记录该 pod</p>
 <p>cache 会定时扫描其中的 assumedPods 信息，若 pod 被 assumed 且超过了 ttl，则删除该 pod (该 pod 所占用的节点资源也被释放)</p>
 <p>the podInformer of scheduler 另一方面过滤已被调度（pod.Spec.NodeName 非空）且非 Succeed/Failed 状态的 pod，触发 add/update/delete 事件等，观察到 assumedPod 被调度后，即从 cache 中删除该 pod</p>
-<h2 id="part-of-kube-apiserver"><a href="#part-of-kube-apiserver" class="headerlink" title="part of kube-apiserver"></a>part of kube-apiserver</h2><p>kube-apiserver 在接收到创建 binding 对象请求后，执行 assignPod 方法，最后在 setPodHostAndAnnotations 方法中，将 pod.Spec.NodeName 写入 etcd 中</p>
+<h2 id="part-of-kube-apiserver"><a class="markdownIt-Anchor" href="#part-of-kube-apiserver"></a> part of kube-apiserver</h2>
+<p>kube-apiserver 在接收到创建 binding 对象请求后，执行 assignPod 方法，最后在 setPodHostAndAnnotations 方法中，将 pod.Spec.NodeName 写入 etcd 中</p>
 <p>pkg/pod/registry/core/pod/storage/storage.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create ensures a pod is bound to a specific host.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *BindingREST)</span> <span class="title">Create</span><span class="params">(ctx genericapirequest.Context, obj runtime.Object, includeUninitialized <span class="keyword">bool</span>)</span> <span class="params">(out runtime.Object, err error)</span></span> &#123;</span><br><span class="line">	binding := obj.(*api.Binding)</span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> move me to a binding strategy</span></span><br><span class="line">	<span class="keyword">if</span> errs := validation.ValidatePodBinding(binding); <span class="built_in">len</span>(errs) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errs.ToAggregate()</span><br><span class="line">	&#125;</span><br><span class="line">	err = r.assignPod(ctx, binding.Name, binding.Target.Name, binding.Annotations)</span><br><span class="line">	out = &amp;metav1.Status&#123;Status: metav1.StatusSuccess&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="part-of-kubelet"><a href="#part-of-kubelet" class="headerlink" title="part of kubelet"></a>part of kubelet</h2><p>kubelet 启动时，list-watch apiserver</p>
+<h2 id="part-of-kubelet"><a class="markdownIt-Anchor" href="#part-of-kubelet"></a> part of kubelet</h2>
+<p>kubelet 启动时，list-watch apiserver</p>
 <p>pkg/kubelet/config/apiserver.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NewSourceApiserver creates a config source that watches and pulls from the apiserver.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSourceApiserver</span><span class="params">(c clientset.Interface, nodeName types.NodeName, updates <span class="keyword">chan</span>&lt;- <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	lw := cache.NewListWatchFromClient(c.Core().RESTClient(), <span class="string">&quot;pods&quot;</span>, metav1.NamespaceAll, fields.OneTermEqualSelector(api.PodHostField, <span class="keyword">string</span>(nodeName)))</span><br><span class="line">	newSourceApiserverFromLW(lw, updates)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>kubelet 使用 selector list-watch apiserver，这个 selector 即为 api.PodHostField=nodeName pod.Spec.NodeName=nodeName。kubelet list-watch 被调度本节点上的 pod，当触发 add/update/delete 后做相应的操作</p>
 
     </div>
@@ -437,13 +442,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

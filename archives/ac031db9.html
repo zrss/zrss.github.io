@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="Terms SXM: Server PCI Express Module, a high bandwidth socket solution for connecting Nvidia Compute Accelerators to a system NVL: NVLink is a wire-based serial multi-lane near-range communications li">
+    <meta name="description" content="Terms  SXM: Server PCI Express Module, a high bandwidth socket solution for connecting Nvidia Compute Accelerators to a system NVL: NVLink is a wire-based serial multi-lane near-range communications">
 <meta property="og:type" content="article">
 <meta property="og:title" content="H800">
 <meta property="og:url" content="https://zrss.github.io/archives/ac031db9.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="Terms SXM: Server PCI Express Module, a high bandwidth socket solution for connecting Nvidia Compute Accelerators to a system NVL: NVLink is a wire-based serial multi-lane near-range communications li">
+<meta property="og:description" content="Terms  SXM: Server PCI Express Module, a high bandwidth socket solution for connecting Nvidia Compute Accelerators to a system NVL: NVLink is a wire-based serial multi-lane near-range communications">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-11-26T11:00:00.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.051Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Terms"><span class="nav-number">1.</span> <span class="nav-text">Terms</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#H800-vs-H100"><span class="nav-number">2.</span> <span class="nav-text">H800 vs H100</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Driver"><span class="nav-number">3.</span> <span class="nav-text">Driver</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CUDA"><span class="nav-number">4.</span> <span class="nav-text">CUDA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TensorFlow"><span class="nav-number">5.</span> <span class="nav-text">TensorFlow</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PyTorch"><span class="nav-number">6.</span> <span class="nav-text">PyTorch</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#terms"><span class="nav-number">1.</span> <span class="nav-text"> Terms</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#h800-vs-h100"><span class="nav-number">2.</span> <span class="nav-text"> H800 vs H100</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#driver"><span class="nav-number">3.</span> <span class="nav-text"> Driver</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cuda"><span class="nav-number">4.</span> <span class="nav-text"> CUDA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#tensorflow"><span class="nav-number">5.</span> <span class="nav-text"> TensorFlow</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#pytorch"><span class="nav-number">6.</span> <span class="nav-text"> PyTorch</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -237,19 +242,24 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="Terms"><a href="#Terms" class="headerlink" title="Terms"></a>Terms</h1><ul>
+    <div class="post-body" itemprop="articleBody"><h1 id="terms"><a class="markdownIt-Anchor" href="#terms"></a> Terms</h1>
+<ul>
 <li>SXM: Server PCI Express Module, a high bandwidth socket solution for connecting Nvidia Compute Accelerators to a system</li>
 <li>NVL: NVLink is a wire-based serial multi-lane near-range communications link developed by Nvidia. Unlike PCI Express, a device can consist of multiple NVLinks, and devices use mesh networking to communicate instead of a central hub.</li>
 <li>PCIe: PCI Express (Peripheral Component Interconnect Express), officially abbreviated as PCIe or PCI-e,[1] is a high-speed serial computer expansion bus standard</li>
 </ul>
 <p>from Wikipedia</p>
-<h1 id="H800-vs-H100"><a href="#H800-vs-H100" class="headerlink" title="H800 vs H100"></a>H800 vs H100</h1><blockquote>
+<h1 id="h800-vs-h100"><a class="markdownIt-Anchor" href="#h800-vs-h100"></a> H800 vs H100</h1>
+<blockquote>
 <ol>
-<li><p><a target="_blank" rel="noopener" href="https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet">https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet</a></p>
+<li>
+<p><a target="_blank" rel="noopener" href="https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet">https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet</a></p>
 </li>
-<li><p>NVIDIA H100 Tensor Core GPU</p>
+<li>
+<p>NVIDIA H100 Tensor Core GPU</p>
 </li>
-<li><p>H800 没找到 NVIDIA 官网 Specification, 只能从代理商和一些B站UP主看到的数据</p>
+<li>
+<p>H800 没找到 NVIDIA 官网 Specification, 只能从代理商和一些B站UP主看到的数据</p>
 </li>
 </ol>
 </blockquote>
@@ -261,7 +271,8 @@
 <th>H100 SXM</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>FP64</td>
 <td>1 teraFLOPS</td>
 <td>34 teraFLOPS</td>
@@ -316,11 +327,13 @@
 <td>NVLink 400GB/s PCIe Gen5: 128GB/s</td>
 <td>NVLink 900GB/s PCIe Gen5: 128GB/s</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <ul>
 <li>H800 FP64 算力限制</li>
 </ul>
-<h1 id="Driver"><a href="#Driver" class="headerlink" title="Driver"></a>Driver</h1><p><a target="_blank" rel="noopener" href="https://resources.nvidia.com/en-us-tensor-core/gtc22-whitepaper-hopper">https://resources.nvidia.com/en-us-tensor-core/gtc22-whitepaper-hopper</a></p>
+<h1 id="driver"><a class="markdownIt-Anchor" href="#driver"></a> Driver</h1>
+<p><a target="_blank" rel="noopener" href="https://resources.nvidia.com/en-us-tensor-core/gtc22-whitepaper-hopper">https://resources.nvidia.com/en-us-tensor-core/gtc22-whitepaper-hopper</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.nvidia.com/content/dam/en-zz/Solutions/gtcs22/data-center/h100/PB-11133-001_v01.pdf">https://www.nvidia.com/content/dam/en-zz/Solutions/gtcs22/data-center/h100/PB-11133-001_v01.pdf</a></p>
 <p>Software Specifications</p>
 <table>
@@ -330,12 +343,15 @@
 <th>Description</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Driver support</td>
 <td>Linux: R520 or later</td>
 </tr>
-</tbody></table>
-<h1 id="CUDA"><a href="#CUDA" class="headerlink" title="CUDA"></a>CUDA</h1><blockquote>
+</tbody>
+</table>
+<h1 id="cuda"><a class="markdownIt-Anchor" href="#cuda"></a> CUDA</h1>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/datacenter/tesla/drivers/index.html#cuda-arch-matrix">https://docs.nvidia.com/datacenter/tesla/drivers/index.html#cuda-arch-matrix</a></p>
 </blockquote>
 <table>
@@ -346,13 +362,16 @@
 <th>First CUDA Toolkit Support</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Hopper</td>
 <td>9.0</td>
 <td>CUDA 11.8<br>CUDA 12.0</td>
 </tr>
-</tbody></table>
-<h1 id="TensorFlow"><a href="#TensorFlow" class="headerlink" title="TensorFlow"></a>TensorFlow</h1><p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/install/source#tested_build_configurations">https://www.tensorflow.org/install/source#tested_build_configurations</a></p>
+</tbody>
+</table>
+<h1 id="tensorflow"><a class="markdownIt-Anchor" href="#tensorflow"></a> TensorFlow</h1>
+<p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/install/source#tested_build_configurations">https://www.tensorflow.org/install/source#tested_build_configurations</a></p>
 <table>
 <thead>
 <tr>
@@ -364,7 +383,8 @@
 <th>CUDA</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>tensorflow-2.15.0</td>
 <td>3.9-3.11</td>
 <td>Clang 16.0.0</td>
@@ -412,15 +432,16 @@
 <td>8.1</td>
 <td>11.2</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>candidates on H800</p>
 <ul>
 <li>&gt;= tensorflow-2.12.0</li>
 </ul>
 <p><a target="_blank" rel="noopener" href="https://hub.docker.com/r/tensorflow/tensorflow/tags">docker images</a></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull tensorflow/tensorflow:2.14.0-gpu</span><br><span class="line">docker pull tensorflow/tensorflow:2.13.0-gpu</span><br><span class="line">docker pull tensorflow/tensorflow:2.12.0-gpu</span><br></pre></td></tr></table></figure>
-
-<h1 id="PyTorch"><a href="#PyTorch" class="headerlink" title="PyTorch"></a>PyTorch</h1><p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/previous-versions/">https://pytorch.org/get-started/previous-versions/</a></p>
+<h1 id="pytorch"><a class="markdownIt-Anchor" href="#pytorch"></a> PyTorch</h1>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/previous-versions/">https://pytorch.org/get-started/previous-versions/</a></p>
 <table>
 <thead>
 <tr>
@@ -428,7 +449,8 @@
 <th>CUDA</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>v1.13.1</td>
 <td>11.6, 11.7</td>
 </tr>
@@ -448,7 +470,8 @@
 <td>v2.1.1</td>
 <td>11.8, 12.1</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>candidates on H800</p>
 <ul>
 <li>&gt;= v2.0.0, with cuda 11.8 support</li>
@@ -506,13 +529,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3  Main 检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan str">
+    <meta name="description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3   Main  检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan s">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ETCD V2 的启动过程">
 <meta property="og:url" content="https://zrss.github.io/archives/9e766462.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3  Main 检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan str">
+<meta property="og:description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3   Main  检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan s">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-10-03T00:00:01.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.062Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Main"><span class="nav-number">1.</span> <span class="nav-text">Main</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startEtcd"><span class="nav-number">2.</span> <span class="nav-text">startEtcd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserver-NewServer"><span class="nav-number">3.</span> <span class="nav-text">etcdserver.NewServer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-Start"><span class="nav-number">4.</span> <span class="nav-text">EtcdServer.Start</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-publish"><span class="nav-number">5.</span> <span class="nav-text">EtcdServer.publish</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-purge"><span class="nav-number">6.</span> <span class="nav-text">EtcdServer.purge</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-monitorFileDescriptor"><span class="nav-number">7.</span> <span class="nav-text">EtcdServer.monitorFileDescriptor</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-monitorVersions"><span class="nav-number">8.</span> <span class="nav-text">EtcdServer.monitorVersions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-start"><span class="nav-number">9.</span> <span class="nav-text">EtcdServer.start</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EtcdServer-run"><span class="nav-number">10.</span> <span class="nav-text">EtcdServer.run</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startRemote"><span class="nav-number">11.</span> <span class="nav-text">startRemote</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startPeer"><span class="nav-number">12.</span> <span class="nav-text">startPeer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">13.</span> <span class="nav-text">Summary</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#main"><span class="nav-number">1.</span> <span class="nav-text"> Main</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startetcd"><span class="nav-number">2.</span> <span class="nav-text"> startEtcd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdservernewserver"><span class="nav-number">3.</span> <span class="nav-text"> etcdserver.NewServer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserverstart"><span class="nav-number">4.</span> <span class="nav-text"> EtcdServer.Start</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserverpublish"><span class="nav-number">5.</span> <span class="nav-text"> EtcdServer.publish</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserverpurge"><span class="nav-number">6.</span> <span class="nav-text"> EtcdServer.purge</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdservermonitorfiledescriptor"><span class="nav-number">7.</span> <span class="nav-text"> EtcdServer.monitorFileDescriptor</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdservermonitorversions"><span class="nav-number">8.</span> <span class="nav-text"> EtcdServer.monitorVersions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserverstart-2"><span class="nav-number">9.</span> <span class="nav-text"> EtcdServer.start</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserverrun"><span class="nav-number">10.</span> <span class="nav-text"> EtcdServer.run</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startremote"><span class="nav-number">11.</span> <span class="nav-text"> startRemote</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startpeer"><span class="nav-number">12.</span> <span class="nav-text"> startPeer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">13.</span> <span class="nav-text"> Summary</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -250,7 +255,8 @@
 <p>简单的源码阅读</p>
 <p>链接: <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd/tree/release-2.3">https://github.com/coreos/etcd/tree/release-2.3</a></p>
 </blockquote>
-<h1 id="Main"><a href="#Main" class="headerlink" title="Main"></a>Main</h1><ul>
+<h1 id="main"><a class="markdownIt-Anchor" href="#main"></a> Main</h1>
+<ul>
 <li>检查运行 arch</li>
 <li>parse 启动配置参数</li>
 <li>设置日志级别（参考 <code>admin guide debug part</code>，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志）</li>
@@ -259,22 +265,20 @@
 </ul>
 <p>检查数据目录是否存在，若存在日志提示 (只有 data-dir 存在，就会打印如下日志)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">the server is already initialized as member before, starting as etcd member...</span><br></pre></td></tr></table></figure>
-
 <p>不管数据目录存在与否，均如此启动</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stopped, err = startEtcd(cfg)</span><br></pre></td></tr></table></figure>
-
 <p>最后获取到停止信号停止</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// etcd process stpo</span></span><br><span class="line">&lt;-stoped</span><br></pre></td></tr></table></figure>
-
-<h1 id="startEtcd"><a href="#startEtcd" class="headerlink" title="startEtcd"></a>startEtcd</h1><p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
+<h1 id="startetcd"><a class="markdownIt-Anchor" href="#startetcd"></a> startEtcd</h1>
+<p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
 <p>接下来使用 listen-client-url 新建 client listener，这块直接使用 net.Listen 方法，开启 tcp 服务；然后判断系统文件描述符限制，如果 &lt; 150，则 panic，然后限制 listener 的数量为 系统描述符限制 - 150</p>
 <p>初始化 net.Listen 的 keepAliveListener</p>
 <p>初始化 etcd server config</p>
 <p>初始化 etcdserver</p>
 <p>启动 etcdserver</p>
-<hr>
+<hr />
 <p>注册操作系统终止回调函数 osutil.RegisterInterruptHandler(s.Stop)</p>
-<hr>
+<hr />
 <p>使用 cors 初始化 clientHandler</p>
 <p>使用 etcdhttp 初始化 peerHandler</p>
 <p>goroutine 为每个 peer listener 开启 http 服务 处理请求，5 min read timeout</p>
@@ -282,8 +286,9 @@
 <p>etcdhttp/peer.go</p>
 <p>etcdhttp/client.go</p>
 <p>其实是 http server，待阅读</p>
-<hr>
-<h1 id="etcdserver-NewServer"><a href="#etcdserver-NewServer" class="headerlink" title="etcdserver.NewServer"></a>etcdserver.NewServer</h1><p>初始化 etcdserver</p>
+<hr />
+<h1 id="etcdservernewserver"><a class="markdownIt-Anchor" href="#etcdservernewserver"></a> etcdserver.NewServer</h1>
+<p>初始化 etcdserver</p>
 <p>集群信息存在 /0</p>
 <p>key 信息存在 /1</p>
 <p>检查数据目录版本，并更新数据目录</p>
@@ -294,18 +299,14 @@
 <p>此时成员信息从 remote peer 中获取，当前 server 的 cluster id 被设置为 remote peer 中获取到 cluster id</p>
 <p>打印启动参数</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cfg.Print()</span><br></pre></td></tr></table></figure>
-
 <p>启动 raftnode</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id, n, s, w = startNode(cfg, cl, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
-
 <p>(2) !haveWAL &amp;&amp; cfg.NewCluster</p>
 <p>没有 wal 目录且 NewCluster == true</p>
 <p>判断 isMemberBootstrapped，从 remote peer 中获取集群信息，如果 server id 已经存在集群中且其 client url 不为空，则表示已经被启动过了，返回错误</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">member XXX has already been bootstrapped</span><br></pre></td></tr></table></figure>
-
 <p>打印启动参数，并启动 raftnode</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cfg.PrintWithInitial()</span><br><span class="line">id, n, s, w &#x3D; startNode(cfg, cl, cl.MemberIDs())</span><br></pre></td></tr></table></figure>
-
 <p>可见</p>
 <ul>
 <li>initial advertise peer url</li>
@@ -321,31 +322,38 @@
 <p>从 snapshot 文件中恢复</p>
 <p>最后启动 raftNode</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cfg.Print()</span><br><span class="line"><span class="keyword">if</span> !cfg.ForceNewCluster &#123;</span><br><span class="line">       id, cl, n, s, w = restartNode(cfg, snapshot)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       id, cl, n, s, w = restartAsStandaloneNode(cfg, snapshot)</span><br><span class="line">&#125;</span><br><span class="line">cl.SetStore(st)</span><br><span class="line">cl.Recover()</span><br></pre></td></tr></table></figure>
-
 <p>注意备份文件恢复时，一定要使用 force-new-start 的原理就在这里了</p>
 <p>判断完了以何种方式启动 raftnode 之后，开始初始化 EtcdServer，并且初始化 rafthttp.Transport，启动 rafthttp.Transport，将从 remote peer 获取到的 peer url 信息全部加入 tr.AddRemote，AddRemote 中会判断是否已经存在 peer 或者 remote 中，已存在则不再加入；将 cluster 中的 member 信息全部加入 tr.AddPeer</p>
 <p>当然都是除了自己，加入之前判断了 id，如果 id == 本身则不加入</p>
 <p>不过我还是不太明白 remote 和 peer 有啥区别，目前</p>
 <p>得看看 remote.go 和 peer.go 都干了什么</p>
-<h1 id="EtcdServer-Start"><a href="#EtcdServer-Start" class="headerlink" title="EtcdServer.Start"></a>EtcdServer.Start</h1><ol>
+<h1 id="etcdserverstart"><a class="markdownIt-Anchor" href="#etcdserverstart"></a> EtcdServer.Start</h1>
+<ol>
 <li>EtcdServer.start()</li>
 <li>goroutine publish</li>
 <li>goroutine purge file</li>
 <li>goroutine monit file descriptor</li>
 <li>goroutine monitor versions</li>
 </ol>
-<h1 id="EtcdServer-publish"><a href="#EtcdServer-publish" class="headerlink" title="EtcdServer.publish"></a>EtcdServer.publish</h1><p>注册 server 信息到 cluster 中，并更新 server 的静态 client url</p>
+<h1 id="etcdserverpublish"><a class="markdownIt-Anchor" href="#etcdserverpublish"></a> EtcdServer.publish</h1>
+<p>注册 server 信息到 cluster 中，并更新 server 的静态 client url</p>
 <p>publish 的过程比较直接，调用 pb.Request 方法，将其 attributes 即 name 和 clientURLs 写入集群中</p>
 <p>即写入 key / value 中 (v2 的存储)</p>
 <p>key 的格式为 /0/members/id/attributes</p>
 <p>实践中，当成员无法 publish 至集群时，一般发生的错误为超时；超时后会重试，毕竟是个 for loop，在 publish 成功或者成员停止时直接 return 结束 for loop 否则会持续 publish</p>
-<h1 id="EtcdServer-purge"><a href="#EtcdServer-purge" class="headerlink" title="EtcdServer.purge"></a>EtcdServer.purge</h1><p>启了个 goroutine 删除超出 threshold 的 snap 和 wal 文件</p>
-<h1 id="EtcdServer-monitorFileDescriptor"><a href="#EtcdServer-monitorFileDescriptor" class="headerlink" title="EtcdServer.monitorFileDescriptor"></a>EtcdServer.monitorFileDescriptor</h1><p>启了个 goroutine 检查系统当前使用的 fd 数量是否超过了 limit 的 80%</p>
-<h1 id="EtcdServer-monitorVersions"><a href="#EtcdServer-monitorVersions" class="headerlink" title="EtcdServer.monitorVersions"></a>EtcdServer.monitorVersions</h1><p>启了个 goroutine 检查集群 version</p>
-<h1 id="EtcdServer-start"><a href="#EtcdServer-start" class="headerlink" title="EtcdServer.start"></a>EtcdServer.start</h1><p>设置默认 snapshotCount，初始化 done / stop 通道，打印集群版本信息，goroutine run</p>
-<h1 id="EtcdServer-run"><a href="#EtcdServer-run" class="headerlink" title="EtcdServer.run"></a>EtcdServer.run</h1><p>raftnode start</p>
+<h1 id="etcdserverpurge"><a class="markdownIt-Anchor" href="#etcdserverpurge"></a> EtcdServer.purge</h1>
+<p>启了个 goroutine 删除超出 threshold 的 snap 和 wal 文件</p>
+<h1 id="etcdservermonitorfiledescriptor"><a class="markdownIt-Anchor" href="#etcdservermonitorfiledescriptor"></a> EtcdServer.monitorFileDescriptor</h1>
+<p>启了个 goroutine 检查系统当前使用的 fd 数量是否超过了 limit 的 80%</p>
+<h1 id="etcdservermonitorversions"><a class="markdownIt-Anchor" href="#etcdservermonitorversions"></a> EtcdServer.monitorVersions</h1>
+<p>启了个 goroutine 检查集群 version</p>
+<h1 id="etcdserverstart-2"><a class="markdownIt-Anchor" href="#etcdserverstart-2"></a> EtcdServer.start</h1>
+<p>设置默认 snapshotCount，初始化 done / stop 通道，打印集群版本信息，goroutine run</p>
+<h1 id="etcdserverrun"><a class="markdownIt-Anchor" href="#etcdserverrun"></a> EtcdServer.run</h1>
+<p>raftnode start</p>
 <p>待阅读</p>
-<h1 id="startRemote"><a href="#startRemote" class="headerlink" title="startRemote"></a>startRemote</h1><p>newPeerStatus(to)</p>
+<h1 id="startremote"><a class="markdownIt-Anchor" href="#startremote"></a> startRemote</h1>
+<p>newPeerStatus(to)</p>
 <p>这个结构体中提供了 activate / deactivate 方法</p>
 <p>即日志中常见的 the connection with [Member ID] became active 信息</p>
 <p>随后初始化了 remote 结构体</p>
@@ -354,19 +362,19 @@
 <p>启了 4 个 goroutine 跑 handle</p>
 <p>handle 从 msgc 通道中获取 raftpb.Message，并使用 post 方法发送出去</p>
 <p>waitGroup 在 stop 方法内调用 wait，确保 handle goroutine 均已关闭</p>
-<h1 id="startPeer"><a href="#startPeer" class="headerlink" title="startPeer"></a>startPeer</h1><p>newPeerStatus(to)</p>
+<h1 id="startpeer"><a class="markdownIt-Anchor" href="#startpeer"></a> startPeer</h1>
+<p>newPeerStatus(to)</p>
 <p>初始化 peer 结构体</p>
 <p>初始化 msgAppV2Writer: msgAppV2Writer / writer: startStreamWriter</p>
 <p>初始化 pipeline: newPipeline / snapSender: newSnapshotSender</p>
-<hr>
+<hr />
 <p>goroutine startPeer 从 recvc 通道中获取 message 交由底层 raft 处理</p>
-<hr>
+<hr />
 <p>goroutine startPeer 从 propc 通道中获取 message 交由底层 raft 处理</p>
-<hr>
+<hr />
 <p>初始化 p.msgAppV2Reader = startStreamReader</p>
 <p>初始化 p.msgAppReader = startStreamReader</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; peer is the representative of a remote raft node. Local raft node sends</span><br><span class="line">&#x2F;&#x2F; messages to the remote through peer.</span><br><span class="line">&#x2F;&#x2F; Each peer has two underlying mechanisms to send out a message: stream and</span><br><span class="line">&#x2F;&#x2F; pipeline.</span><br><span class="line">&#x2F;&#x2F; A stream is a receiver initialized long-polling connection, which</span><br><span class="line">&#x2F;&#x2F; is always open to transfer messages. Besides general stream, peer also has</span><br><span class="line">&#x2F;&#x2F; a optimized stream for sending msgApp since msgApp accounts for large part</span><br><span class="line">&#x2F;&#x2F; of all messages. Only raft leader uses the optimized stream to send msgApp</span><br><span class="line">&#x2F;&#x2F; to the remote follower node.</span><br><span class="line">&#x2F;&#x2F; A pipeline is a series of http clients that send http requests to the remote.</span><br><span class="line">&#x2F;&#x2F; It is only used when the stream has not been established.</span><br></pre></td></tr></table></figure>
-
 <p>peer 是 remote raft node 的代表，本地 raft node 通过 peer 发送 message 到 remote</p>
 <p>stream and pipeline</p>
 <p>pipeline 是一系列 http clients，用于向 remote 发送 http 请求，它只有在 stream 没有建立起来时使用</p>
@@ -375,7 +383,8 @@
 <p>dial 如果返回 errUnsupportedStreamType 亦或是 err := cr.decodeLoop(rc, t) 返回的 err 不是 EOF 或者链接被关闭，则 peerStatus 被设置为 inactive</p>
 <p>stream 每 100 ms 会重新尝试 dial remote peer，如果出现 request sent was ignored (cluster ID mismatch: remote[remote member id]=X-Etcd-Cluster-ID in http header, local=local cluster id) 错误的话，那么这个错误日志的打印频率将会很高，需要及时处理</p>
 <p>stream 将获取到的 raftpb.Message 放入相应的通道 recvc / propc</p>
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>相比 k8s 的复杂来说，etcd 的代码阅读算是还能摸得着头的了</p>
+<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h1>
+<p>相比 k8s 的复杂来说，etcd 的代码阅读算是还能摸得着头的了</p>
 
     </div>
 
@@ -430,13 +439,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

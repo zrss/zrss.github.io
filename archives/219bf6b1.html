@@ -67,6 +67,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -245,23 +250,18 @@
 <p><a target="_blank" rel="noopener" href="https://github.com/jinzhu/gorm/blob/v1.9.16/logger.go">https://github.com/jinzhu/gorm/blob/v1.9.16/logger.go</a></p>
 <p>gorm v1 print log</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">print</span><span class="params">(v ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	s.logger.Print(v...)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">log</span><span class="params">(v ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> s != <span class="literal">nil</span> &amp;&amp; s.logMode == detailedLogMode &#123;</span><br><span class="line">		s.<span class="built_in">print</span>(<span class="built_in">append</span>([]<span class="keyword">interface</span>&#123;&#125;&#123;<span class="string">&quot;log&quot;</span>, fileWithLineNum()&#125;, v...)...)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">slog</span><span class="params">(sql <span class="keyword">string</span>, t time.Time, vars ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> s.logMode == detailedLogMode &#123;</span><br><span class="line">		s.<span class="built_in">print</span>(<span class="string">&quot;sql&quot;</span>, fileWithLineNum(), NowFunc().Sub(t), sql, vars, s.RowsAffected)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>gorm v1 print error</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AddError add error to the db</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">AddError</span><span class="params">(err error)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> err != ErrRecordNotFound &#123;</span><br><span class="line">			<span class="keyword">if</span> s.logMode == defaultLogMode &#123;</span><br><span class="line">				<span class="keyword">go</span> s.<span class="built_in">print</span>(<span class="string">&quot;error&quot;</span>, fileWithLineNum(), err)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				s.log(err)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			errors := Errors(s.GetErrors())</span><br><span class="line">			errors = errors.Add(err)</span><br><span class="line">			<span class="keyword">if</span> <span class="built_in">len</span>(errors) &gt; <span class="number">1</span> &#123;</span><br><span class="line">				err = errors</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		s.Error = err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>gorm v1 print sql</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// trace print sql log</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(scope *Scope)</span> <span class="title">trace</span><span class="params">(t time.Time)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(scope.SQL) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		scope.db.slog(scope.SQL, t, scope.SQLVars...)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>因此在打开 gorm v1 LogMode 的时候</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LogMode set log mode, `true` for detailed logs, `false` for no log, default, will only print error logs</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">LogMode</span><span class="params">(enable <span class="keyword">bool</span>)</span> *<span class="title">DB</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> enable &#123;</span><br><span class="line">		s.logMode = detailedLogMode</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		s.logMode = noLogMode</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>会进入到 <code>s.print log</code>, <code>s.print sql</code> 的打印逻辑</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.soberkoder.com/go-gorm-logging/">https://www.soberkoder.com/go-gorm-logging/</a></p>
 </blockquote>
 <p>如若需要自定义 gorm v1 logger 可以参考如下代码段</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// GormLogger struct</span></span><br><span class="line"><span class="keyword">type</span> GormLogger <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Print - Log Formatter</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*GormLogger)</span> <span class="title">Print</span><span class="params">(v ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">  <span class="keyword">if</span> v[<span class="number">0</span>] == <span class="string">&quot;sql&quot;</span> &#123;</span><br><span class="line">    log.WithFields(</span><br><span class="line">      log.Fields&#123;</span><br><span class="line">        <span class="string">&quot;module&quot;</span>:        <span class="string">&quot;gorm&quot;</span>,</span><br><span class="line">        <span class="string">&quot;type&quot;</span>:          <span class="string">&quot;sql&quot;</span>,</span><br><span class="line">        <span class="string">&quot;rows_returned&quot;</span>: v[<span class="number">5</span>],</span><br><span class="line">        <span class="string">&quot;src&quot;</span>:           v[<span class="number">1</span>],</span><br><span class="line">        <span class="comment">//&quot;values&quot;:        v[4],</span></span><br><span class="line">        <span class="string">&quot;duration&quot;</span>:      v[<span class="number">2</span>],</span><br><span class="line">      &#125;,</span><br><span class="line">    ).Info(v[<span class="number">3</span>])</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    log.WithFields(log.Fields&#123;<span class="string">&quot;module&quot;</span>: <span class="string">&quot;gorm&quot;</span>, <span class="string">&quot;type&quot;</span>: <span class="string">&quot;log&quot;</span>, <span class="string">&quot;src&quot;</span>: v[<span class="number">1</span>]&#125;).Print(v[<span class="number">2</span>:]...)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>另外也可以根据 <code>duration</code> 实现客户端的 slow sql 打印</p>
 
     </div>
@@ -318,13 +318,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

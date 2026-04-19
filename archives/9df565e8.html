@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="当然有点儿标题党的意思  学习到这呢，已经大概有点儿感觉了 union fsdocker container 的 root fs，本质上呢都叫 ufs 技术，union file system docker 用它来干啥的，镜像不是分层的嘛，docker 用这玩意儿技术来把所有层 union 成一个单一的 fs，给用户使用 这就是 docker container root fs 的基础了 问题就">
+    <meta name="description" content="当然有点儿标题党的意思  学习到这呢，已经大概有点儿感觉了  union fs docker container 的 root fs，本质上呢都叫 ufs 技术，union file system docker 用它来干啥的，镜像不是分层的嘛，docker 用这玩意儿技术来把所有层 union 成一个单一的 fs，给用户使用 这就是 docker container root fs 的基础了 问">
 <meta property="og:type" content="article">
 <meta property="og:title" content="finally storage driver in docker">
 <meta property="og:url" content="https://zrss.github.io/archives/9df565e8.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="当然有点儿标题党的意思  学习到这呢，已经大概有点儿感觉了 union fsdocker container 的 root fs，本质上呢都叫 ufs 技术，union file system docker 用它来干啥的，镜像不是分层的嘛，docker 用这玩意儿技术来把所有层 union 成一个单一的 fs，给用户使用 这就是 docker container root fs 的基础了 问题就">
+<meta property="og:description" content="当然有点儿标题党的意思  学习到这呢，已经大概有点儿感觉了  union fs docker container 的 root fs，本质上呢都叫 ufs 技术，union file system docker 用它来干啥的，镜像不是分层的嘛，docker 用这玩意儿技术来把所有层 union 成一个单一的 fs，给用户使用 这就是 docker container root fs 的基础了 问">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-11-18T11:43:37.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.050Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#union-fs"><span class="nav-number">1.</span> <span class="nav-text">union fs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#still-docker-pull"><span class="nav-number">2.</span> <span class="nav-text">still docker pull</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#union-fs"><span class="nav-number">1.</span> <span class="nav-text"> union fs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#still-docker-pull"><span class="nav-number">2.</span> <span class="nav-text"> still docker pull</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,7 +246,8 @@
 <p>当然有点儿标题党的意思</p>
 </blockquote>
 <p>学习到这呢，已经大概有点儿感觉了</p>
-<h1 id="union-fs"><a href="#union-fs" class="headerlink" title="union fs"></a>union fs</h1><p>docker container 的 root fs，本质上呢都叫 ufs 技术，union file system</p>
+<h1 id="union-fs"><a class="markdownIt-Anchor" href="#union-fs"></a> union fs</h1>
+<p>docker container 的 root fs，本质上呢都叫 ufs 技术，union file system</p>
 <p>docker 用它来干啥的，镜像不是分层的嘛，docker 用这玩意儿技术来把所有层 union 成一个单一的 fs，给用户使用</p>
 <p>这就是 docker container root fs 的基础了</p>
 <p>问题就来了，现在不依赖 dockerd 咋 union file system，于是乎在 google 中搜索了下 union file system impl in golang，发现了个项目，还挺有意思</p>
@@ -252,16 +258,22 @@
 </ul>
 <p>看看能不能用吧</p>
 <p>显然不能 … 粗略一扫，就是一些 os api 封装，文档也不友好 sigh</p>
-<h1 id="still-docker-pull"><a href="#still-docker-pull" class="headerlink" title="still docker pull"></a>still docker pull</h1><p>docker pull 的大概过程，pull 镜像，随后使用 graph driver union mount，最后把 image 注册到 layer store</p>
+<h1 id="still-docker-pull"><a class="markdownIt-Anchor" href="#still-docker-pull"></a> still docker pull</h1>
+<p>docker pull 的大概过程，pull 镜像，随后使用 graph driver union mount，最后把 image 注册到 layer store</p>
 <p>怎么看的，在 daemon/graphdriver/aufs 往上搜就行，最后发现 docker pull 也用了它</p>
 <p>所以回答上篇的问题 扫描镜像时，为何不把 layer union 之后，再扫描，看到这，诸位可能已经发现不好实现呀</p>
 <p>能不能实现，当然能！</p>
 <ol>
-<li>按照这里所说 loading-an-image-filesystem-changeset<br> 1.1 untar root layer to a dir (act as container root fs)<br> 1.2 untar each layer to the previous dir, and walk once, rm any file with .wh. prefix and its coresponding file<br> 1.3 continue this process<br> 1.4 … pay attention, 可能有童鞋会觉得这个细节可能因 storage driver 而异，实则不然，image tar archive 的格式是独立于 storage driver 的</li>
+<li>按照这里所说 loading-an-image-filesystem-changeset<br />
+1.1 untar root layer to a dir (act as container root fs)<br />
+1.2 untar each layer to the previous dir, and walk once, rm any file with .wh. prefix and its coresponding file<br />
+1.3 continue this process<br />
+1.4 … pay attention, 可能有童鞋会觉得这个细节可能因 storage driver 而异，实则不然，image tar archive 的格式是独立于 storage driver 的</li>
 <li>熟悉 docker layer 代码的老铁，没准能把这部分代码给整出个独立的 lib 来，实现把 image layer union mount 之后，给扫描程序一个统一的 fs view, 但是显然它依赖于 storage driver 的能力，你要想在容器里面干这个事情，我就 🙄 了。要是非得在容器里这么折腾，不如直接挂 docker socket 到容器里，用宿主机的 dockerd 直接搞来的快些，废这大劲儿 sucks</li>
 </ol>
 <blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/storage/storagedriver/">https://docs.docker.com/storage/storagedriver/</a><br>Storage drivers allow you to create data in the writable layer of your container. The files won’t be persisted after the container is deleted, and both read and write speeds are low.</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/storage/storagedriver/">https://docs.docker.com/storage/storagedriver/</a><br />
+Storage drivers allow you to create data in the writable layer of your container. The files won’t be persisted after the container is deleted, and both read and write speeds are low.</p>
 </blockquote>
 <p>也是够精辟</p>
 <p>不过我还是有个疑问，不同 storage driver 实现分层镜像的细节不同，docker save 的时候，是怎么把不同 storage driver 的 layer 能统一到 Image Tar File Archive 里面去的</p>
@@ -327,13 +339,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

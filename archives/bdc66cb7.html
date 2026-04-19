@@ -69,6 +69,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -126,7 +131,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Show-time"><span class="nav-number">1.</span> <span class="nav-text">Show time</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#go-tool-pprof"><span class="nav-number">2.</span> <span class="nav-text">go tool pprof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Secure-of-pprof"><span class="nav-number">3.</span> <span class="nav-text">Secure of pprof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Visual-pprof"><span class="nav-number">4.</span> <span class="nav-text">Visual pprof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Ref"><span class="nav-number">5.</span> <span class="nav-text">Ref</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#show-time"><span class="nav-number">1.</span> <span class="nav-text"> Show time</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#go-tool-pprof"><span class="nav-number">2.</span> <span class="nav-text"> go tool pprof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#secure-of-pprof"><span class="nav-number">3.</span> <span class="nav-text"> Secure of pprof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#visual-pprof"><span class="nav-number">4.</span> <span class="nav-text"> Visual pprof</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ref"><span class="nav-number">5.</span> <span class="nav-text"> Ref</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -139,7 +144,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -244,69 +249,61 @@
 <p>前段时间分析了一个 apiserver 处理请求性能较低的问题，正是使用了 pprof 确定了问题点，从而解决了该问题</p>
 <p>这次使用 etcd <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd">https://github.com/coreos/etcd</a> 来举个例子，关于 pprof 的使用及可视化，Ref 中提到了 golang 性能分析大名鼎鼎的几篇 blog，建议先行参考，看了之后会对 golang 性能分析有个 overall 的思路</p>
 <p>此篇并无太多 creative 之处</p>
-<h1 id="Show-time"><a href="#Show-time" class="headerlink" title="Show time"></a>Show time</h1><p>之前提到 golang 中自带了 pprof 采集代码，而且启用它们也非常简单</p>
+<h1 id="show-time"><a class="markdownIt-Anchor" href="#show-time"></a> Show time</h1>
+<p>之前提到 golang 中自带了 pprof 采集代码，而且启用它们也非常简单</p>
 <p>如果是一个 web server 的话，仅需要 import _ “net/http/pprof”，则会注册 pprof 相关的 handler</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ <span class="string">&quot;net/http/pprof&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        log.Println(http.ListenAndServe(<span class="string">&quot;localhost:6060&quot;</span>, <span class="literal">nil</span>))</span><br><span class="line">    &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>web server 启动后，即可调用 pprof 接口获取数据</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http:&#x2F;&#x2F;localhost:6060&#x2F;debug&#x2F;pprof&#x2F;profile -O profile-data</span><br></pre></td></tr></table></figure>
-
 <p>当然 curl 也行</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http:&#x2F;&#x2F;localhost:6060&#x2F;debug&#x2F;pprof&#x2F;profile -o profile-data</span><br></pre></td></tr></table></figure>
-
 <p>对于 etcd 来说，pprof 也已经集成，可通过启动参数指定开启</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;etcd --enable-pprof</span><br></pre></td></tr></table></figure>
-
 <p>当然对于非 web server 类的 app，也可以使用 runtime/pprof 包中的方法输出 pprof 数据</p>
-<h1 id="go-tool-pprof"><a href="#go-tool-pprof" class="headerlink" title="go tool pprof"></a>go tool pprof</h1><blockquote>
+<h1 id="go-tool-pprof"><a class="markdownIt-Anchor" href="#go-tool-pprof"></a> go tool pprof</h1>
+<blockquote>
 <p>以 etcd v3.1.9 为例子, go1.10</p>
 </blockquote>
 <p>采样 10s cpu profile 数据</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http:&#x2F;&#x2F;localhost:2379&#x2F;debug&#x2F;pprof&#x2F;profile?seconds&#x3D;10 -o etcd-profile-10</span><br></pre></td></tr></table></figure>
-
 <p>使用 go tool pprof 分析</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ go tool pprof <span class="variable">$GOPATH</span>/src/github.com/coreos/etcd/bin/etcd etcd-profile-10</span><br><span class="line">File: etcd</span><br><span class="line">Type: cpu</span><br><span class="line">Time: Aug 12, 2018 at 11:45am (CST)</span><br><span class="line">Duration: 10s, Total samples = 40ms (  0.4%)</span><br><span class="line">Entering interactive mode (<span class="built_in">type</span> <span class="string">&quot;help&quot;</span> <span class="keyword">for</span> commands, <span class="string">&quot;o&quot;</span> <span class="keyword">for</span> options)</span><br></pre></td></tr></table></figure>
-
 <p>注意传入对应的二进制文件，否则可能无法找到相应的方法</p>
 <p>go tool pprof 常用命令 top / list，其中 list 方法是正则匹配的，能显示匹配上的方法的 profile 信息</p>
-<h1 id="Secure-of-pprof"><a href="#Secure-of-pprof" class="headerlink" title="Secure of pprof"></a>Secure of pprof</h1><p>注意到之前均使用的是 http 的 Protocol 访问 pprof 接口，如果 server 是 https 该怎么办？</p>
+<h1 id="secure-of-pprof"><a class="markdownIt-Anchor" href="#secure-of-pprof"></a> Secure of pprof</h1>
+<p>注意到之前均使用的是 http 的 Protocol 访问 pprof 接口，如果 server 是 https 该怎么办？</p>
 <p>搜索得知 golang 很快便会支持 go tool pprof with client certificates 了</p>
 <p>cmd/pprof: add HTTPS support with client certificates: <a target="_blank" rel="noopener" href="https://github.com/golang/go/issues/20939">https://github.com/golang/go/issues/20939</a></p>
 <p>Support HTTPS certs, keys and CAs: <a target="_blank" rel="noopener" href="https://github.com/google/pprof/pull/261">https://github.com/google/pprof/pull/261</a></p>
 <p>当然如果 server 不要求 client certificates 的话，可以如此使用 go tool pprof 获取数据（注意 https+insecure）</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go tool pprof -seconds 5 https+insecure://192.168.99.100:32473/debug/pprof/profile</span><br></pre></td></tr></table></figure>
-
 <p>如果要求 client certificates 的话，亦或是日常使用时，其实也没必要直接用 go tool pprof 获取数据，使用 wget / curl 同样可以下载，下载之后再使用 go tool pprof 或者是 go-torch 分析好了</p>
 <p>而 curl 显然是支持传入 ca.crt / tls.crt / tls.key 的</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --cacert ca.crt --cert ./tls.crt --key tls.key https://192.168.99.100:32473/debug/pprof/profile -O profile-data</span><br></pre></td></tr></table></figure>
-
-<h1 id="Visual-pprof"><a href="#Visual-pprof" class="headerlink" title="Visual pprof"></a>Visual pprof</h1><p>go tool pprof 命令行模式，并不是特别直观，如果可以图形化的展示各个方法的消耗情况，那么将能更快的确定问题所在</p>
+<h1 id="visual-pprof"><a class="markdownIt-Anchor" href="#visual-pprof"></a> Visual pprof</h1>
+<p>go tool pprof 命令行模式，并不是特别直观，如果可以图形化的展示各个方法的消耗情况，那么将能更快的确定问题所在</p>
 <ul>
 <li>graphviz</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install graphviz</span><br></pre></td></tr></table></figure>
-
 <p>安装 ok graphviz 之后</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ go tool pprof <span class="variable">$GOPATH</span>/src/github.com/coreos/etcd/bin/etcd etcd-profile-10</span><br><span class="line">File: etcd</span><br><span class="line">Type: cpu</span><br><span class="line">Time: Aug 12, 2018 at 11:45am (CST)</span><br><span class="line">Duration: 10s, Total samples = 40ms (  0.4%)</span><br><span class="line">Entering interactive mode (<span class="built_in">type</span> <span class="string">&quot;help&quot;</span> <span class="keyword">for</span> commands, <span class="string">&quot;o&quot;</span> <span class="keyword">for</span> options)</span><br><span class="line">(pprof) web</span><br></pre></td></tr></table></figure>
-
 <p>即可在浏览器中显示 .svg 文件，浏览器中 Ctrl+s 保存到本地，即可传阅</p>
-<p><img src="/images/web-pprof.svg" alt="web-pprof"></p>
+<p><img src="/images/web-pprof.svg" alt="web-pprof" /></p>
 <ul>
 <li>go-torch</li>
 </ul>
 <p>大名鼎鼎的火焰图 (flame-graph)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com&#x2F;uber&#x2F;go-torch</span><br></pre></td></tr></table></figure>
-
 <p>clone brandangregg 的火焰图生成脚本</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git@github.com:brendangregg&#x2F;FlameGraph.git</span><br></pre></td></tr></table></figure>
-
 <p>生成火焰图</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ <span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$GOPATH</span>/src/github.com/brendangregg/FlameGraph</span><br><span class="line">bash-3.2$</span><br><span class="line">bash-3.2$ <span class="variable">$GOPATH</span>/bin/go-torch --file <span class="string">&quot;torch.svg&quot;</span> etcd-profile-10</span><br><span class="line">INFO[13:12:17] Run pprof <span class="built_in">command</span>: go tool pprof -raw -seconds 30 etcd-profile-10</span><br><span class="line">INFO[13:12:17] Writing svg to torch.svg</span><br></pre></td></tr></table></figure>
-
 <p>浏览器打开 torch.svg 即可</p>
-<p><img src="/images/torch.svg" alt="torch"></p>
+<p><img src="/images/torch.svg" alt="torch" /></p>
 <p>个人觉得 flame-graph 更为直观，横向为各个方法消耗占比，纵向为调用栈上的各个方法消耗占比，一目了然，对应分析消耗较大的方法即可</p>
-<h1 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h1><p>golang pprof <a target="_blank" rel="noopener" href="https://blog.golang.org/profiling-go-programs">https://blog.golang.org/profiling-go-programs</a></p>
+<h1 id="ref"><a class="markdownIt-Anchor" href="#ref"></a> Ref</h1>
+<p>golang pprof <a target="_blank" rel="noopener" href="https://blog.golang.org/profiling-go-programs">https://blog.golang.org/profiling-go-programs</a></p>
 <p>pprof tools <a target="_blank" rel="noopener" href="http://colobu.com/2017/03/02/a-short-survey-of-golang-pprof/">http://colobu.com/2017/03/02/a-short-survey-of-golang-pprof/</a></p>
 
     </div>
@@ -362,13 +359,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="Type size https:&#x2F;&#x2F;golang.org&#x2F;ref&#x2F;spec#Size_and_alignment_guarantees  https:&#x2F;&#x2F;github.com&#x2F;ardanlabs&#x2F;gotraining-studyguide&#x2F;blob&#x2F;master&#x2F;go&#x2F;language&#x2F;struct.go 12345type example struct &amp;#123;	flag    bool	c">
+    <meta name="description" content="Type size  https:&#x2F;&#x2F;golang.org&#x2F;ref&#x2F;spec#Size_and_alignment_guarantees  https:&#x2F;&#x2F;github.com&#x2F;ardanlabs&#x2F;gotraining-studyguide&#x2F;blob&#x2F;master&#x2F;go&#x2F;language&#x2F;struct.go 12345type example struct &amp;#123;	flag    bool">
 <meta property="og:type" content="article">
 <meta property="og:title" content="learning golang again">
 <meta property="og:url" content="https://zrss.github.io/archives/84d885dc.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="Type size https:&#x2F;&#x2F;golang.org&#x2F;ref&#x2F;spec#Size_and_alignment_guarantees  https:&#x2F;&#x2F;github.com&#x2F;ardanlabs&#x2F;gotraining-studyguide&#x2F;blob&#x2F;master&#x2F;go&#x2F;language&#x2F;struct.go 12345type example struct &amp;#123;	flag    bool	c">
+<meta property="og:description" content="Type size  https:&#x2F;&#x2F;golang.org&#x2F;ref&#x2F;spec#Size_and_alignment_guarantees  https:&#x2F;&#x2F;github.com&#x2F;ardanlabs&#x2F;gotraining-studyguide&#x2F;blob&#x2F;master&#x2F;go&#x2F;language&#x2F;struct.go 12345type example struct &amp;#123;	flag    bool">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-05-31T00:57:11.000Z">
 <meta property="article:modified_time" content="2026-03-20T14:32:18.196Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Type-size"><span class="nav-number">1.</span> <span class="nav-text">Type size</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#type-size"><span class="nav-number">1.</span> <span class="nav-text"> Type size</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -246,12 +251,12 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="Type-size"><a href="#Type-size" class="headerlink" title="Type size"></a>Type size</h1><blockquote>
+    <div class="post-body" itemprop="articleBody"><h1 id="type-size"><a class="markdownIt-Anchor" href="#type-size"></a> Type size</h1>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://golang.org/ref/spec#Size_and_alignment_guarantees">https://golang.org/ref/spec#Size_and_alignment_guarantees</a></p>
 </blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go">https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type example struct &#123;</span><br><span class="line">	flag    bool</span><br><span class="line">	counter int16</span><br><span class="line">	pi      float32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>字节对齐系数 <code>#pragma pack(n)</code></p>
 <ul>
 <li>成员对齐</li>
@@ -334,13 +339,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

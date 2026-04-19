@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="Docker NetworkIBM 的几篇 Blog overall 的讲了一下 容器如何访问外部网络 通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip 外部网络如何访问容器 容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，">
+    <meta name="description" content="Docker Network IBM 的几篇 Blog overall 的讲了一下 容器如何访问外部网络 通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip 外部网络如何访问容器 容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker network">
 <meta property="og:url" content="https://zrss.github.io/archives/ac75c7e9.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="Docker NetworkIBM 的几篇 Blog overall 的讲了一下 容器如何访问外部网络 通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip 外部网络如何访问容器 容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，">
+<meta property="og:description" content="Docker Network IBM 的几篇 Blog overall 的讲了一下 容器如何访问外部网络 通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip 外部网络如何访问容器 容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-12-02T11:31:11.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.048Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-Network"><span class="nav-number">1.</span> <span class="nav-text">Docker Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flannel"><span class="nav-number">2.</span> <span class="nav-text">Flannel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Term"><span class="nav-number">3.</span> <span class="nav-text">Term</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#docker-network"><span class="nav-number">1.</span> <span class="nav-text"> Docker Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#flannel"><span class="nav-number">2.</span> <span class="nav-text"> Flannel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#term"><span class="nav-number">3.</span> <span class="nav-text"> Term</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -237,14 +242,16 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="Docker-Network"><a href="#Docker-Network" class="headerlink" title="Docker Network"></a>Docker Network</h1><p>IBM 的几篇 Blog overall 的讲了一下</p>
+    <div class="post-body" itemprop="articleBody"><h1 id="docker-network"><a class="markdownIt-Anchor" href="#docker-network"></a> Docker Network</h1>
+<p>IBM 的几篇 Blog overall 的讲了一下</p>
 <p><strong>容器如何访问外部网络</strong></p>
 <p>通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip</p>
 <p><strong>外部网络如何访问容器</strong></p>
 <p>容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，指定映射到 host 的特定端口</p>
 <p>至于实现上也较为直接，若容器有 expose 端口，则 docker 会相应启动一个 docker-proxy 监听 host 上的 host 端口 (如上述例子中的 host-port)，外部流量到达 host-port 时，由 docker-proxy 转发至最终容器</p>
 <p>当然上述只是 docker network 的原生实现，docker 原生实现的不同 host 的 container 略去</p>
-<h1 id="Flannel"><a href="#Flannel" class="headerlink" title="Flannel"></a>Flannel</h1><p>如果在 k8s 生态中，docker container 跨 host 通信，早期版本多使用 Flannel 完成</p>
+<h1 id="flannel"><a class="markdownIt-Anchor" href="#flannel"></a> Flannel</h1>
+<p>如果在 k8s 生态中，docker container 跨 host 通信，早期版本多使用 Flannel 完成</p>
 <p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/30481.html">Flannel 原理</a></p>
 <p>Flannel 实现的是 overlay network，即基于已有的 underlay network，在其之上扩展报文字段，完成报文转发</p>
 <p>原理也比较好理解</p>
@@ -279,7 +286,8 @@
 <p>ARP 协议</p>
 <p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/computer-network-arp-works/">ARP</a></p>
 <p>Flannel <a target="_blank" rel="noopener" href="https://www.slideshare.net/enakai/how-vxlan-works-on-linux">VxLan</a></p>
-<h1 id="Term"><a href="#Term" class="headerlink" title="Term"></a>Term</h1><p>ref <a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">Han’s blog</a></p>
+<h1 id="term"><a class="markdownIt-Anchor" href="#term"></a> Term</h1>
+<p>ref <a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">Han’s blog</a></p>
 <ul>
 <li>TUN is a software interface implemented in linux kernel, it can pass raw ip packet between user program and the kernel</li>
 </ul>
@@ -334,13 +342,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

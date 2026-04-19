@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="又要开始分析一个疑难杂症了 现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出 job-controller 的工作原理job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分 12345go job.NewJobController(    ctx">
+    <meta name="description" content="又要开始分析一个疑难杂症了 现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出  job-controller 的工作原理 job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分 12345go job.NewJobController(    c">
 <meta property="og:type" content="article">
 <meta property="og:title" content="a weired bug of job workload">
 <meta property="og:url" content="https://zrss.github.io/archives/8e645281.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="又要开始分析一个疑难杂症了 现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出 job-controller 的工作原理job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分 12345go job.NewJobController(    ctx">
+<meta property="og:description" content="又要开始分析一个疑难杂症了 现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出  job-controller 的工作原理 job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分 12345go job.NewJobController(    c">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-07-06T11:05:29.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.044Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#job-controller-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">job-controller 的工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kubelet"><span class="nav-number">2.</span> <span class="nav-text">kubelet</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#job-controller-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text"> job-controller 的工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kubelet"><span class="nav-number">2.</span> <span class="nav-text"> kubelet</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -239,37 +244,32 @@
     
     <div class="post-body" itemprop="articleBody"><p>又要开始分析一个疑难杂症了</p>
 <p>现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出</p>
-<h1 id="job-controller-的工作原理"><a href="#job-controller-的工作原理" class="headerlink" title="job-controller 的工作原理"></a>job-controller 的工作原理</h1><p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
+<h1 id="job-controller-的工作原理"><a class="markdownIt-Anchor" href="#job-controller-的工作原理"></a> job-controller 的工作原理</h1>
+<p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> job.NewJobController(</span><br><span class="line">    ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">    ctx.InformerFactory.Batch().V1().Jobs(),</span><br><span class="line">    ctx.ClientBuilder.ClientOrDie(<span class="string">&quot;job-controller&quot;</span>),</span><br><span class="line">).Run(<span class="keyword">int</span>(ctx.Options.ConcurrentJobSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
-
 <p>从启动代码中可以看出 job-controller 关注 pod 与 job 这两种资源的变化情况</p>
 <ul>
 <li>ctx.InformerFactory.Core().V1().Pods()</li>
 <li>ctx.InformerFactory.Batch().V1().Jobs()</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentJobSyncs&#x3D;5</span><br></pre></td></tr></table></figure>
-
 <p>启动 5 个 worker goroutine</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(jm.worker, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>在 worker 协程中，1s 执行一次 worker 方法</p>
 <p>worker 方法，实现从 queue 中获取待处理的对象（key），并调用 syncJob 方法处理之</p>
 <ul>
 <li>syncJob 处理成功</li>
 </ul>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jobInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc: jm.enqueueController,</span><br><span class="line">    UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> job := cur.(*batch.Job); !IsJobFinished(job) &#123;</span><br><span class="line">            jm.enqueueController(job)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    DeleteFunc: jm.enqueueController,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc:    jm.addPod,</span><br><span class="line">    UpdateFunc: jm.updatePod,</span><br><span class="line">    DeleteFunc: jm.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<h1 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h1><p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
+<h1 id="kubelet"><a class="markdownIt-Anchor" href="#kubelet"></a> kubelet</h1>
+<p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
 <p>我们知道 kubelet 通过 PLEG 来感知节点上 container 的状态，另外 job pod 的 restart policy 目前仅支持两种 Never / onFailure，一般来说默认选择 onFailure 比较合适</p>
 <p>这样业务容器在正常退出后（exit 0），kubelet pleg 感知到后，再加上 onFailure 的策略，正常情况下会 killing pod，job-controller 感知到 pod 减少后，即完成数又增加了 1，即可成功结束</p>
 <p>看下 kubelet 的代码确认逻辑</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Get all the pods.</span></span><br><span class="line">podList, err := g.runtime.GetPods(<span class="literal">true</span>)</span><br><span class="line">ShouldContainerBeRestarted</span><br><span class="line"></span><br><span class="line"><span class="comment">// Check RestartPolicy for dead container</span></span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyNever &#123;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure &#123;</span><br><span class="line">    <span class="comment">// Check the exit code.</span></span><br><span class="line">    <span class="keyword">if</span> status.ExitCode == <span class="number">0</span> &#123;</span><br><span class="line">        glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already successfully ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
 <p>如此情况下需要 KillPod</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> keepCount == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(changes.ContainersToStart) == <span class="number">0</span> &#123;</span><br><span class="line">    changes.KillPod = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>所以正常情况下 job 控制的 pod，重启策略为 RestartPolicyOnFailure，如是正常退出的情况，则该 container 无需重启，而再加上述的判断，则当前 pod 需要被删除</p>
 <p>调用该 killPodWithSyncResult 方法</p>
 <p>经过如此分析，可能出现的问题原因及疑点</p>
@@ -333,13 +333,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

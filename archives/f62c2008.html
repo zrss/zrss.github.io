@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="以如下 nccl 版本为例分析  pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime pytorch 1.13, cuda 11.6.2, nccl 2.14.3  1python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;  rdma 和网络相关知识 https:&#x2F;&#x2F;www.d">
+    <meta name="description" content="以如下 nccl 版本为例分析  pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime pytorch 1.13, cuda 11.6.2, nccl 2.14.3  1python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;  rdma 和网络相关知识  https:&#x2F;&#x2F;www.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="reading nccl">
 <meta property="og:url" content="https://zrss.github.io/archives/f62c2008.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="以如下 nccl 版本为例分析  pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime pytorch 1.13, cuda 11.6.2, nccl 2.14.3  1python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;  rdma 和网络相关知识 https:&#x2F;&#x2F;www.d">
+<meta property="og:description" content="以如下 nccl 版本为例分析  pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime pytorch 1.13, cuda 11.6.2, nccl 2.14.3  1python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;  rdma 和网络相关知识  https:&#x2F;&#x2F;www.">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zrss.github.io/images/nccl-ib-connect-accept.drawio.svg">
 <meta property="og:image" content="https://zrss.github.io/images/nccl-ib-send-recv.drawio.svg">
@@ -67,6 +67,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -126,7 +131,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#rdma-%E5%92%8C%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">rdma 和网络相关知识</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-net"><span class="nav-number">2.</span> <span class="nav-text">nccl net</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#net-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text">net 整体流程概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nccl-net-ib"><span class="nav-number">2.2.</span> <span class="nav-text">nccl net ib</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#net-ib-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="nav-number">2.2.1.</span> <span class="nav-text">net ib 整体流程概述</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-recv-%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">nccl recv 流程说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E"><span class="nav-number">4.</span> <span class="nav-text">nccl 流程说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-ib-%E7%9B%B8%E5%85%B3%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AF%B4%E6%98%8E"><span class="nav-number">5.</span> <span class="nav-text">nccl ib 相关环境变量说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#net-ib-cc-%E4%BB%A3%E7%A0%81%E6%B3%A8%E9%87%8A"><span class="nav-number">6.</span> <span class="nav-text">net_ib.cc 代码注释</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#rdma-%E5%92%8C%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text"> rdma 和网络相关知识</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-net"><span class="nav-number">2.</span> <span class="nav-text"> nccl net</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#net-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text"> net 整体流程概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nccl-net-ib"><span class="nav-number">2.2.</span> <span class="nav-text"> nccl net ib</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#net-ib-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="nav-number">2.2.1.</span> <span class="nav-text"> net ib 整体流程概述</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-recv-%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text"> nccl recv 流程说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E"><span class="nav-number">4.</span> <span class="nav-text"> nccl 流程说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#nccl-ib-%E7%9B%B8%E5%85%B3%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AF%B4%E6%98%8E"><span class="nav-number">5.</span> <span class="nav-text"> nccl ib 相关环境变量说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#net_ibcc-%E4%BB%A3%E7%A0%81%E6%B3%A8%E9%87%8A"><span class="nav-number">6.</span> <span class="nav-text"> net_ib.cc 代码注释</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -139,7 +144,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -246,8 +251,8 @@
 <li>pytorch 1.13, cuda 11.6.2, nccl 2.14.3</li>
 </ul>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&quot;import torch;print(torch.cuda.nccl.version())&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="rdma-和网络相关知识"><a href="#rdma-和网络相关知识" class="headerlink" title="rdma 和网络相关知识"></a>rdma 和网络相关知识</h1><ol>
+<h1 id="rdma-和网络相关知识"><a class="markdownIt-Anchor" href="#rdma-和网络相关知识"></a> rdma 和网络相关知识</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="https://www.doc.ic.ac.uk/~jgiceva/teaching/ssc18-rdma.pdf">https://www.doc.ic.ac.uk/~jgiceva/teaching/ssc18-rdma.pdf</a>, rdma tutorial</li>
 <li><a target="_blank" rel="noopener" href="https://www.openfabrics.org/images/eventpresos/workshops2013/IBUG/2013_UserDay_Thur_1400_Bob-Russell-programming-concepts.pdf">https://www.openfabrics.org/images/eventpresos/workshops2013/IBUG/2013_UserDay_Thur_1400_Bob-Russell-programming-concepts.pdf</a>, ofa rdma program, 非常好, 五星推荐</li>
 <li><a target="_blank" rel="noopener" href="https://blog.zhaw.ch/icclab/infiniband-an-introduction-simple-ib-verbs-program-with-rdma-write/">https://blog.zhaw.ch/icclab/infiniband-an-introduction-simple-ib-verbs-program-with-rdma-write/</a>, 非常好</li>
@@ -263,7 +268,8 @@
 <li>RoCE: rdma over Converged Ethernet; rdma 的一种高性价比实现 (对于云厂商来说, 一般而言只要替换支持 RoCE 的网卡即可, 传输/交换网络设备不需要更换, 即可支持业务层 rdma)</li>
 <li>mlnx ofed: ib 驱动</li>
 <li>rdma: remote direct memory access, 远程直接访问内存</li>
-<li>rdma program<ul>
+<li>rdma program
+<ul>
 <li>qp: queue pair, 包括 send queue, recv queue; Rtr, ready to receive; Rts, ready to send; qp 状态机; qp 可以理解为 rdma 中的 client</li>
 <li>cq: completion queue, 用于获取 send/recv 结果</li>
 <li>mr: memory region, rdma 可操作的 memory region; rkey, 用于远程访问 mr 的 key; lkey, 用于本地读取 mr 的 key</li>
@@ -272,13 +278,15 @@
 </ul>
 </li>
 </ul>
-<h1 id="nccl-net"><a href="#nccl-net" class="headerlink" title="nccl net"></a>nccl net</h1><p>net.h, ncclNet 里边相当于网络接口定义, 例如定义了 ncclNetIsend 等接口</p>
+<h1 id="nccl-net"><a class="markdownIt-Anchor" href="#nccl-net"></a> nccl net</h1>
+<p>net.h, ncclNet 里边相当于网络接口定义, 例如定义了 ncclNetIsend 等接口</p>
 <p>而这些接口的具体又会有 netSocketIsend 与 netIBIsend 的实现，在如下两个对象中</p>
 <ul>
 <li>ncclNetSocket</li>
 <li>ncclNetIb</li>
 </ul>
-<h2 id="net-整体流程概述"><a href="#net-整体流程概述" class="headerlink" title="net 整体流程概述"></a>net 整体流程概述</h2><p><strong>socket server</strong></p>
+<h2 id="net-整体流程概述"><a class="markdownIt-Anchor" href="#net-整体流程概述"></a> net 整体流程概述</h2>
+<p><strong>socket server</strong></p>
 <ol>
 <li>listen</li>
 </ol>
@@ -296,23 +304,26 @@
 <li>recv</li>
 <li>test</li>
 </ol>
-<h2 id="nccl-net-ib"><a href="#nccl-net-ib" class="headerlink" title="nccl net ib"></a>nccl net ib</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/nv_peer_memory">https://github.com/Mellanox/nv_peer_memory</a><br><a target="_blank" rel="noopener" href="https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html">https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html</a>, <em>This module, originally maintained by Mellanox on GitHub, is now included with the NVIDIA Linux GPU driver</em></p>
+<h2 id="nccl-net-ib"><a class="markdownIt-Anchor" href="#nccl-net-ib"></a> nccl net ib</h2>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/nv_peer_memory">https://github.com/Mellanox/nv_peer_memory</a><br />
+<a target="_blank" rel="noopener" href="https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html">https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html</a>, <em>This module, originally maintained by Mellanox on GitHub, is now included with the NVIDIA Linux GPU driver</em></p>
 </blockquote>
 <ol>
 <li>net ib 相比与 net socket 的优势在于 net ib 通过 ibverbs api, 实现了 rdma (当然前提是主机上有能支持 rdma 的网卡); rdma 通过网卡直接读写远端的内存 (HOST MEM); 也就是达到了所谓的 OS bypass/CPU offload 效果, 能极大的提升通过网络传输数据的效率</li>
 <li>如果安装了 <code>nv_peer_mem</code> mod, net ib 可以通过网卡直接读写远端的 GPU MEM (DEV MEM); 另外高版本 (例如 470) 的 gpu driver 自带了 <code>nvidia-peermem</code> mod, 可以替代 <code>nv_peer_mem</code> 提供 GPU Direct RDMA 功能</li>
 </ol>
-<h3 id="net-ib-整体流程概述"><a href="#net-ib-整体流程概述" class="headerlink" title="net ib 整体流程概述"></a>net ib 整体流程概述</h3><ul>
+<h3 id="net-ib-整体流程概述"><a class="markdownIt-Anchor" href="#net-ib-整体流程概述"></a> net ib 整体流程概述</h3>
+<ul>
 <li>ib connect, send check / ib accept, recv check</li>
 </ul>
 <p>在这个阶段, 主要是发送方与接收方通过 socket 完成 rdma 通信初始化工作, 具体如 qp 初始化</p>
-<p><img src="/images/nccl-ib-connect-accept.drawio.svg" alt="ib connect/ib accept"></p>
+<p><img src="/images/nccl-ib-connect-accept.drawio.svg" alt="ib connect/ib accept" /></p>
 <ul>
 <li>recv/send</li>
 </ul>
 <p>在这个阶段, 主要是接收方将待接收数据的 mem addr 通过 fifo 数据结构 rdma 写入到发送方; 随后发送方根据 fifo 数据结构, 将数据 rdma 写入到接收方指示的 mem addr</p>
-<p><img src="/images/nccl-ib-send-recv.drawio.svg" alt="ib recv/ib send"></p>
+<p><img src="/images/nccl-ib-send-recv.drawio.svg" alt="ib recv/ib send" /></p>
 <p><strong>socket server</strong></p>
 <ol>
 <li>listen: 监听 bootstrap 网卡端口, 启动 socket server</li>
@@ -331,11 +342,12 @@
 <li>recv: <code>ibv_post_recv</code> 往 qp 的 recv queue 发 wr (cq 会通知是否完成); <code>ncclIbPostFifo</code>, 将 fifo 信息 (receiver 准备接收数据的 MEM 地址, rkey 等信息) rdma 到 sender fifo</li>
 <li>test: <code>ibv_poll_cq</code>, 从 cq 中获取已完成的 wr, 判断接收请求是否完成</li>
 </ol>
-<h1 id="nccl-recv-流程说明"><a href="#nccl-recv-流程说明" class="headerlink" title="nccl recv 流程说明"></a>nccl recv 流程说明</h1><p>交由 rdma 操作的 MEM 需要先 reg 为 memory region (mr), reg 动作在 <code>recvProxyConnect</code> 方法中执行</p>
+<h1 id="nccl-recv-流程说明"><a class="markdownIt-Anchor" href="#nccl-recv-流程说明"></a> nccl recv 流程说明</h1>
+<p>交由 rdma 操作的 MEM 需要先 reg 为 memory region (mr), reg 动作在 <code>recvProxyConnect</code> 方法中执行</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NCCLCHECK(ncclNetRegMr(comm, resources-&gt;netRecvComm, resources-&gt;buffers[p], resources-&gt;buffSizes[p], NCCL_NET_MAP_DEV_MEM(<span class="built_in">map</span>, buffs[p]) ? NCCL_PTR_CUDA : NCCL_PTR_HOST, &amp;resources-&gt;mhandles[p]));</span><br></pre></td></tr></table></figure>
-
 <p>随后执行 <code>recvProxyProgress</code> 方法, 涉及到网络通信的, 最终通过 <code>ncclNetIrecv</code> 方法执行接收数据的实现; <code>ncclNetIrecv</code> 在 net ib 中的实现为 <code>ncclIbIrecv</code></p>
-<h1 id="nccl-流程说明"><a href="#nccl-流程说明" class="headerlink" title="nccl 流程说明"></a>nccl 流程说明</h1><p>nccl 完整通信实现看下来的机制大致是</p>
+<h1 id="nccl-流程说明"><a class="markdownIt-Anchor" href="#nccl-流程说明"></a> nccl 流程说明</h1>
+<p>nccl 完整通信实现看下来的机制大致是</p>
 <ol>
 <li>nccl group 启动</li>
 <li>nccl proxy service 启动</li>
@@ -344,8 +356,10 @@
 <li>proxy 使用通信算子对应的具体实现来完成参数传递</li>
 </ol>
 <p>c++ 代码较为难读 … 先大致理解如上</p>
-<h1 id="nccl-ib-相关环境变量说明"><a href="#nccl-ib-相关环境变量说明" class="headerlink" title="nccl ib 相关环境变量说明"></a>nccl ib 相关环境变量说明</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html">https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html</a><br><a target="_blank" rel="noopener" href="https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/">https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/</a></p>
+<h1 id="nccl-ib-相关环境变量说明"><a class="markdownIt-Anchor" href="#nccl-ib-相关环境变量说明"></a> nccl ib 相关环境变量说明</h1>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html">https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html</a><br />
+<a target="_blank" rel="noopener" href="https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/">https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/</a></p>
 </blockquote>
 <p>RoCE</p>
 <ol>
@@ -356,7 +370,8 @@
 <li><strong>NCCL_IB_TC</strong>: qp.ah_attr.grh.traffic_class, traffic_class, Using this value, the originator of the packets specifies the required delivery priority for handling them by the routers</li>
 <li><strong>NCCL_IB_GID_INDEX</strong>: qp.ah_attr.grh.sgid_index, An index in the port’s GID table that will be used to identify the originator of the packet</li>
 </ol>
-<h1 id="net-ib-cc-代码注释"><a href="#net-ib-cc-代码注释" class="headerlink" title="net_ib.cc 代码注释"></a>net_ib.cc 代码注释</h1><p>net_ib.cc 代码注释, 尽量理解, 难免有误, 持续学习</p>
+<h1 id="net_ibcc-代码注释"><a class="markdownIt-Anchor" href="#net_ibcc-代码注释"></a> net_ib.cc 代码注释</h1>
+<p>net_ib.cc 代码注释, 尽量理解, 难免有误, 持续学习</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc">https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc</a></p>
 </blockquote>
@@ -412,13 +427,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#server-%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">server 高可用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#server-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">server 一致性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#worker-%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">worker 高可用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">4.</span> <span class="nav-text">summary</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#server-%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text"> server 高可用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#server-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text"> server 一致性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#worker-%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text"> worker 高可用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">4.</span> <span class="nav-text"> summary</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -243,23 +248,28 @@
 </blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/dmlc/ps-lite">https://github.com/dmlc/ps-lite</a></p>
 <p>总结李沐大神 ps-worker 的论文实现要点如下</p>
-<h1 id="server-高可用"><a href="#server-高可用" class="headerlink" title="server 高可用"></a>server 高可用</h1><ol>
+<h1 id="server-高可用"><a class="markdownIt-Anchor" href="#server-高可用"></a> server 高可用</h1>
+<ol>
 <li>多副本复制: 例如每次对 server 的修改或写入，均会复制到两个其他副本后再回复 ok。当然这会增加延迟，以及要求客户端错误重试</li>
 <li>一致性哈希: key-value datastore, improve load balancing and recovery</li>
 </ol>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://memcached.org/">https://memcached.org/</a> 也采用了类似的高可用策略</p>
 </blockquote>
-<h1 id="server-一致性"><a href="#server-一致性" class="headerlink" title="server 一致性"></a>server 一致性</h1><ol>
-<li>vector clock，记录时间点 (t) 发出的权重 (w) 的数据，使用 vector clock 便于实现各种一致性模型，given the potentially complex task dependency graph and<br>the need for fast recovery</li>
+<h1 id="server-一致性"><a class="markdownIt-Anchor" href="#server-一致性"></a> server 一致性</h1>
+<ol>
+<li>vector clock，记录时间点 (t) 发出的权重 (w) 的数据，使用 vector clock 便于实现各种一致性模型，given the potentially complex task dependency graph and<br />
+the need for fast recovery</li>
 </ol>
-<h1 id="worker-高可用"><a href="#worker-高可用" class="headerlink" title="worker 高可用"></a>worker 高可用</h1><p>论文中提到</p>
+<h1 id="worker-高可用"><a class="markdownIt-Anchor" href="#worker-高可用"></a> worker 高可用</h1>
+<p>论文中提到</p>
 <ul>
 <li>一般而言 worker 仅负责部分数据的计算，而部分数据往往不至于对模型的最终效果有很大影响</li>
 <li>假若每个 worker 数据量较大，恢复 worker 的代价较高，还不如恢复 server</li>
 </ul>
 <p>所以 worker 的高可用，还是交由算法设计者控制。可能算法设计者更愿意实现即使 worker 挂了，模型训练依然能够运行下去的算法</p>
-<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><p>parameter server 综合利用了现有技术（交叉），是领域型的 memcached/redis (这两都是 kv datastore)。当然 ps 是面向机器学习算法设计的，通过优化机器学习算法，使其适应 ps api，，解决了机器学习领域大规模训练的实际（工业界）问题</p>
+<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> summary</h1>
+<p>parameter server 综合利用了现有技术（交叉），是领域型的 memcached/redis (这两都是 kv datastore)。当然 ps 是面向机器学习算法设计的，通过优化机器学习算法，使其适应 ps api，，解决了机器学习领域大规模训练的实际（工业界）问题</p>
 <blockquote>
 <p>The novelty of the proposed system lies in the synergy achieved by picking the right systems techniques, adapting them to the machine learning algorithms, and modifying the machine learning algorithms to be more systemsfriendly. In particular, we can relax a number of otherwise hard systems constraints since the associated machine learning algorithms are quite tolerant to perturbations. The consequence is the first general purpose ML system capable of scaling to industrial scale sizes</p>
 </blockquote>
@@ -317,13 +327,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

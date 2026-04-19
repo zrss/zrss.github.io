@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ifconfig-vs-ethtool"><span class="nav-number">1.</span> <span class="nav-text">ifconfig vs ethtool</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E7%AB%AF%E5%8F%A3%E5%B8%B8%E7%94%A8%E6%9F%A5%E8%AF%A2%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">交换机端口常用查询命令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%98%AF%E5%90%A6%E5%87%BA%E7%8E%B0%E4%B8%A2%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text">查看是否出现丢包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E8%A1%8C%E6%96%B9%E5%90%91%E4%B8%A2%E5%8C%85-Input"><span class="nav-number">2.2.</span> <span class="nav-text">上行方向丢包 Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%A1%8C%E5%87%BA%E7%8E%B0%E4%B8%A2%E5%8C%85-Output"><span class="nav-number">2.3.</span> <span class="nav-text">下行出现丢包 Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%8E%A5%E5%8F%A3%E5%87%BA%E6%96%B9%E5%90%91%E9%98%9F%E5%88%97%E7%9A%84%E7%BC%93%E5%AD%98%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5"><span class="nav-number">2.4.</span> <span class="nav-text">查看接口出方向队列的缓存使用情况</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ifconfig-vs-ethtool"><span class="nav-number">1.</span> <span class="nav-text"> ifconfig vs ethtool</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E7%AB%AF%E5%8F%A3%E5%B8%B8%E7%94%A8%E6%9F%A5%E8%AF%A2%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text"> 交换机端口常用查询命令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%98%AF%E5%90%A6%E5%87%BA%E7%8E%B0%E4%B8%A2%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text"> 查看是否出现丢包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E8%A1%8C%E6%96%B9%E5%90%91%E4%B8%A2%E5%8C%85-input"><span class="nav-number">2.2.</span> <span class="nav-text"> 上行方向丢包 Input</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%A1%8C%E5%87%BA%E7%8E%B0%E4%B8%A2%E5%8C%85-output"><span class="nav-number">2.3.</span> <span class="nav-text"> 下行出现丢包 Output</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%8E%A5%E5%8F%A3%E5%87%BA%E6%96%B9%E5%90%91%E9%98%9F%E5%88%97%E7%9A%84%E7%BC%93%E5%AD%98%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5"><span class="nav-number">2.4.</span> <span class="nav-text"> 查看接口出方向队列的缓存使用情况</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -246,7 +251,8 @@
 <li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/dcqcn-parameters">https://enterprise-support.nvidia.com/s/article/dcqcn-parameters</a></li>
 <li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm">https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm</a></li>
 </ul>
-<h1 id="ifconfig-vs-ethtool"><a href="#ifconfig-vs-ethtool" class="headerlink" title="ifconfig vs ethtool"></a>ifconfig vs ethtool</h1><p><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/ibdev2netdev">https://enterprise-support.nvidia.com/s/article/ibdev2netdev</a></p>
+<h1 id="ifconfig-vs-ethtool"><a class="markdownIt-Anchor" href="#ifconfig-vs-ethtool"></a> ifconfig vs ethtool</h1>
+<p><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/ibdev2netdev">https://enterprise-support.nvidia.com/s/article/ibdev2netdev</a></p>
 <p><code>ibdev2netdev</code></p>
 <p>执行上述命令可查询得到 <em>it maps the adapter port to the net device</em></p>
 <p>对于 infiniband 类型的 link layer, 一般来说上述命令得到的是 ib0 设备, 即 IPoIB 虚拟网卡; 对于 ethernet 类型的 link layer，一般来说上述命令得到的是 ens[xxx] 网卡设备</p>
@@ -260,27 +266,26 @@
 </ul>
 <p>经过实际测试，在使用 rdma 网卡通信时，上述两值并没有明显的计数增加，而观察到 ethtool counters rx_bytes_phy / tx_bytes_phy 才有与实际流量相当的计数增加。所以可能早期（或者内核？） ifconfig 中获取到的数值，仅是网卡的其中某个计数器，而那个计数器又并不能代表真正的实际情况，所以可能 ifconfig 中的数值会是个误导。我们应使用 <code>ethtool -S ens[xxx]</code> 查看 rdma 网卡的统计信息。</p>
 <blockquote>
-<p>rx_bytes_phy, ConnectX-3 naming : rx_bytes<br>例如在 cx3 网卡时，当前主机安装的 ifconfig，取的的确就是“正确”的；而在 cx4/5/6 网卡，rx_bytes 的物理意义发生了变化，变为了记录 <em>Representor only: bytes received, that were handled by the hypervisor. supported from kernel 4.18</em></p>
+<p>rx_bytes_phy, ConnectX-3 naming : rx_bytes<br />
+例如在 cx3 网卡时，当前主机安装的 ifconfig，取的的确就是“正确”的；而在 cx4/5/6 网卡，rx_bytes 的物理意义发生了变化，变为了记录 <em>Representor only: bytes received, that were handled by the hypervisor. supported from kernel 4.18</em></p>
 </blockquote>
-<h1 id="交换机端口常用查询命令"><a href="#交换机端口常用查询命令" class="headerlink" title="交换机端口常用查询命令"></a>交换机端口常用查询命令</h1><p><a target="_blank" rel="noopener" href="https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444">https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444</a></p>
+<h1 id="交换机端口常用查询命令"><a class="markdownIt-Anchor" href="#交换机端口常用查询命令"></a> 交换机端口常用查询命令</h1>
+<p><a target="_blank" rel="noopener" href="https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444">https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/o3rnxl2trb1gxemmxdoj">https://www.infoq.cn/article/o3rnxl2trb1gxemmxdoj</a></p>
 <p>egress/ingress port</p>
-<h2 id="查看是否出现丢包"><a href="#查看是否出现丢包" class="headerlink" title="查看是否出现丢包"></a>查看是否出现丢包</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="查看是否出现丢包"><a class="markdownIt-Anchor" href="#查看是否出现丢包"></a> 查看是否出现丢包</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Input:                                                                      </span><br><span class="line">  Unicast:            11657620879,   Multicast:                     695     </span><br><span class="line">  Broadcast:                    0,   Jumbo:                           0     </span><br><span class="line">  Discard:                      0,   Frames:                          0     </span><br><span class="line">  Pause:                        0                                           </span><br><span class="line"></span><br><span class="line">  Total Error:                  0                                           </span><br><span class="line">  CRC:                          0,   Giants:                          0     </span><br><span class="line">  Jabbers:                      0,   Fragments:                       0     </span><br><span class="line">  Runts:                        0,   DropEvents:                      0     </span><br><span class="line">  Alignments:                   0,   Symbols:                         0     </span><br><span class="line">  Ignoreds:                     0                                           </span><br><span class="line"></span><br><span class="line">Output:                                                                     </span><br><span class="line">  Unicast:              536390526,   Multicast:                     695     </span><br><span class="line">  Broadcast:                    0,   Jumbo:                           0     </span><br><span class="line">  Discard:                      0,   Buffers Purged:                  0     </span><br><span class="line">  Pause:                 18913700</span><br></pre></td></tr></table></figure>
-
-<h2 id="上行方向丢包-Input"><a href="#上行方向丢包-Input" class="headerlink" title="上行方向丢包 Input"></a>上行方向丢包 Input</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer ingress-statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="上行方向丢包-input"><a class="markdownIt-Anchor" href="#上行方向丢包-input"></a> 上行方向丢包 Input</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer ingress-statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <p>查看入方向统计值</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Interface                   Dropped        Drop Rate   Drop Time                </span><br><span class="line">                     (Packets&#x2F;Bytes)        (pps&#x2F;bps)                           </span><br><span class="line">----------------------------------------------------------------                </span><br><span class="line">100GE1&#x2F;0&#x2F;1                         0                0          -                </span><br><span class="line">                                   0                0                           </span><br><span class="line">----------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-
-<h2 id="下行出现丢包-Output"><a href="#下行出现丢包-Output" class="headerlink" title="下行出现丢包 Output"></a>下行出现丢包 Output</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos queue statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="下行出现丢包-output"><a class="markdownIt-Anchor" href="#下行出现丢包-output"></a> 下行出现丢包 Output</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos queue statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <p>查看队列统计情况</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">----------------------------------------------------------------------------------------------                                           </span><br><span class="line">    4         0                   6             0                   0             0          -                                                                 </span><br><span class="line">      100000000                1092             0                   0             0                                                                            </span><br><span class="line">----------------------------------------------------------------------------------------------                                                                 </span><br></pre></td></tr></table></figure>
-
-<h2 id="查看接口出方向队列的缓存使用情况"><a href="#查看接口出方向队列的缓存使用情况" class="headerlink" title="查看接口出方向队列的缓存使用情况"></a>查看接口出方向队列的缓存使用情况</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer egress-usage interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="查看接口出方向队列的缓存使用情况"><a class="markdownIt-Anchor" href="#查看接口出方向队列的缓存使用情况"></a> 查看接口出方向队列的缓存使用情况</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer egress-usage interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <p>可以查看无损队列</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Egress Buffer Usage (KBytes) on single queue: (Current&#x2F;Total)                   </span><br><span class="line">*: Dynamic threshold                                                            </span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">Interface       Queue   Type        Guaranteed        Shared                    </span><br><span class="line"></span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">100GE1&#x2F;0&#x2F;1          0   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    1   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    2   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    3   Lossless           0&#x2F;1       0&#x2F;10156                    </span><br><span class="line">                    4   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    5   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    6   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    7   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">Lossless Service Pool (cells):  0&#x2F;0                                             </span><br><span class="line">Lossy    Service Pool (cells):  0&#x2F;151136                                        </span><br><span class="line">------------------------------------------------------------  </span><br></pre></td></tr></table></figure>
 
@@ -337,13 +342,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

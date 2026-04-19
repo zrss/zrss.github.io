@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中 遍历first &#x2F; prev &#x2F; next &#x2F; last 的实现 first 就是不断搜索 element 的 index &#x3D; 0 inode，直到 leaf page 为止 last 是不断搜索 element 的 index &#x3D; the count of inodes -">
+    <meta name="description" content="cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中  遍历 first &#x2F; prev &#x2F; next &#x2F; last 的实现 first 就是不断搜索 element 的 index &#x3D; 0 inode，直到 leaf page 为止 last 是不断搜索 element 的 index &#x3D; the count of inodes">
 <meta property="og:type" content="article">
 <meta property="og:title" content="boltdb-cursor">
 <meta property="og:url" content="https://zrss.github.io/archives/d7e71fec.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中 遍历first &#x2F; prev &#x2F; next &#x2F; last 的实现 first 就是不断搜索 element 的 index &#x3D; 0 inode，直到 leaf page 为止 last 是不断搜索 element 的 index &#x3D; the count of inodes -">
+<meta property="og:description" content="cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中  遍历 first &#x2F; prev &#x2F; next &#x2F; last 的实现 first 就是不断搜索 element 的 index &#x3D; 0 inode，直到 leaf page 为止 last 是不断搜索 element 的 index &#x3D; the count of inodes">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-10-29T15:54:07.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.045Z">
@@ -65,6 +65,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -124,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%81%8D%E5%8E%86"><span class="nav-number">1.</span> <span class="nav-text">遍历</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%90%9C%E7%B4%A2"><span class="nav-number">2.</span> <span class="nav-text">搜索</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-node"><span class="nav-number">3.</span> <span class="nav-text">获取 node</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%81%8D%E5%8E%86"><span class="nav-number">1.</span> <span class="nav-text"> 遍历</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%90%9C%E7%B4%A2"><span class="nav-number">2.</span> <span class="nav-text"> 搜索</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-node"><span class="nav-number">3.</span> <span class="nav-text"> 获取 node</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text"> 总结</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -239,13 +244,15 @@
     
     
     <div class="post-body" itemprop="articleBody"><p>cursor 从 B tree 的 root 开始，提供 B tree 的遍历和搜索实现，遍历过程记录到 stack 中</p>
-<h1 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h1><p>first / prev / next / last 的实现</p>
+<h1 id="遍历"><a class="markdownIt-Anchor" href="#遍历"></a> 遍历</h1>
+<p>first / prev / next / last 的实现</p>
 <p>first 就是不断搜索 element 的 index = 0 inode，直到 leaf page 为止</p>
 <p>last 是不断搜索 element 的 index = the count of inodes - 1，直到 leaf page 为止</p>
 <p>first 和 last 实现后，可相应实现 prev / next</p>
 <p>prev 当 inode 中可 – 时则直接回退一格，若为开头 inode，则上移，再 last</p>
 <p>next 当 inode 中可 ++ 时则直接前进一格，若为末尾 indoe，则上移，再 first</p>
-<h1 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h1><p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
+<h1 id="搜索"><a class="markdownIt-Anchor" href="#搜索"></a> 搜索</h1>
+<p><code>func (c *Cursor) search(key []byte, pgid pgid) &#123;&#125;</code></p>
 <blockquote>
 <p>nsearch(key)</p>
 </blockquote>
@@ -258,12 +265,13 @@
 <p>searchPage(key, p)</p>
 </blockquote>
 <p>实现同上述，不过是从 page 中读取</p>
-<h1 id="获取-node"><a href="#获取-node" class="headerlink" title="获取 node"></a>获取 node</h1><p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
+<h1 id="获取-node"><a class="markdownIt-Anchor" href="#获取-node"></a> 获取 node</h1>
+<p>根据 stack 获取 leaf node，如果已经是 node 且为 leaf 直接返回；不是的话从 stack[0] 开始，遍历到 leaf node，遍历过的 page 都读到 node 并缓存到关联的 bucket 中</p>
 <p>获取到 node 之后就可以 put 和 del key 了</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
+<h1 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h1>
+<p>所以 cursor 常见操作，由 bucket 创建出来，初始绑定 bucket root，从 root 开始搜索 key 值，返回后，c.node().put or del</p>
 <p>例如看个创建 bucket 的过程</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="keyword">var</span> value = bucket.write()</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, bucketLeafFlag)</span><br></pre></td></tr></table></figure>
-
 <p>例如看个写入 key / value 的过程</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Move cursor to correct position.</span></span><br><span class="line">c := b.Cursor()</span><br><span class="line">k, _, flags := c.seek(key)</span><br><span class="line"><span class="comment">// Return an error if there is an existing key with a bucket value.</span></span><br><span class="line"><span class="keyword">if</span> bytes.Equal(key, k) &amp;&amp; (flags&amp;bucketLeafFlag) != <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ErrIncompatibleValue</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Insert into node.</span></span><br><span class="line">key = cloneBytes(key)</span><br><span class="line">c.node().put(key, key, value, <span class="number">0</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
 
@@ -321,13 +329,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

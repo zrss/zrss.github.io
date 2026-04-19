@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">激活流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2-conda-env-path"><span class="nav-number">2.1.</span> <span class="nav-text">查询 conda env path</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#set-ld-library-path-inside-python"><span class="nav-number">3.</span> <span class="nav-text">set ld_library_path inside python</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text"> 源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text"> 激活流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2-conda-env-path"><span class="nav-number">2.1.</span> <span class="nav-text"> 查询 conda env path</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#set-ld_library_path-inside-python"><span class="nav-number">3.</span> <span class="nav-text"> set ld_library_path inside python</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -248,7 +253,6 @@
 <p>Conda makes environments first-class citizens, making it easy to create independent environments even for C libraries. Conda is written entirely in Python</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># conda environments:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">base                     /Users/huangzhesi/miniconda</span><br><span class="line">conda-dev             *  /Users/huangzhesi/miniconda/envs/conda-dev</span><br><span class="line">pandas                   /Users/huangzhesi/miniconda/envs/pandas</span><br><span class="line">pytorch-1.8              /Users/huangzhesi/miniconda/envs/pytorch-1.8</span><br><span class="line">pytorch-dev              /Users/huangzhesi/miniconda/envs/pytorch-dev</span><br><span class="line">tensorflow-1.x           /Users/huangzhesi/miniconda/envs/tensorflow-1.x</span><br></pre></td></tr></table></figure>
-
 <p>今天来探索下我们输入 <code>conda activate conda-dev</code> 命令后，实际上 conda 为了我们做什么</p>
 <p>先说结论</p>
 <ol>
@@ -261,7 +265,8 @@
 <p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/issues/308#issuecomment-36058087">https://github.com/conda/conda/issues/308#issuecomment-36058087</a></p>
 <p>the problem with activate setting LD_LIBRARY_PATH (even when conda packages themselves don’t need it) is that it might break other things on the users system.</p>
 </blockquote>
-<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/tree/4.12.0">https://github.com/conda/conda/tree/4.12.0</a></p>
+<h1 id="源码"><a class="markdownIt-Anchor" href="#源码"></a> 源码</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/conda/conda/tree/4.12.0">https://github.com/conda/conda/tree/4.12.0</a></p>
 <p><code>conda activate</code> 命令在 conda/activate.py 文件里边实现</p>
 <p>调用顺序如下</p>
 <ol>
@@ -271,17 +276,15 @@
 </ol>
 <p>最终返回一个 structure</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="string">&#x27;unset_vars&#x27;</span>: unset_vars,</span><br><span class="line">    <span class="string">&#x27;set_vars&#x27;</span>: set_vars,</span><br><span class="line">    <span class="string">&#x27;export_vars&#x27;</span>: export_vars,</span><br><span class="line">    <span class="string">&#x27;deactivate_scripts&#x27;</span>: deactivate_scripts,</span><br><span class="line">    <span class="string">&#x27;activate_scripts&#x27;</span>: activate_scripts,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>可见 <code>conda activate</code> 命令实际上会 <code>unset</code>，<code>set</code>，<code>export</code> vars，以达到激活环境的效果</p>
-<h1 id="激活流程"><a href="#激活流程" class="headerlink" title="激活流程"></a>激活流程</h1><h2 id="查询-conda-env-path"><a href="#查询-conda-env-path" class="headerlink" title="查询 conda env path"></a>查询 conda env path</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conda_prefix</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="keyword">return</span> abspath(sys.prefix)</span><br></pre></td></tr></table></figure>
-
+<h1 id="激活流程"><a class="markdownIt-Anchor" href="#激活流程"></a> 激活流程</h1>
+<h2 id="查询-conda-env-path"><a class="markdownIt-Anchor" href="#查询-conda-env-path"></a> 查询 conda env path</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conda_prefix</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="keyword">return</span> abspath(sys.prefix)</span><br></pre></td></tr></table></figure>
 <p><code>root_prefix</code> case = <code>conda_prefix</code> = <code>/Users/huangzhesi/miniconda</code></p>
 <p>prefix magic file = <code>&#123;conda_prefix&#125;/conda-meta/history</code></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># path is the prefix magic file</span></span><br><span class="line">        <span class="keyword">if</span> isfile(path):</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                fh = <span class="built_in">open</span>(path, <span class="string">&#x27;a+&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
 <p>测试 history file 是否有读写权限</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ls -alh /Users/huangzhesi/miniconda/conda-meta | grep <span class="built_in">history</span></span><br><span class="line">-rw-r--r--    1 huangzhesi  staff   8.2K 12 19 21:44 <span class="built_in">history</span></span><br></pre></td></tr></table></figure>
-
 <p>(1) 假若 history file 有读写权限，则 context envs dirs 按如下顺序</p>
 <ol>
 <li><code>/Users/huangzhesi/miniconda/envs</code></li>
@@ -294,7 +297,6 @@
 </ol>
 <p>从 context envs dirs 中查询待激活的 env</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name is the conda activate &#123;name&#125;</span></span><br><span class="line">    <span class="keyword">for</span> envs_dir <span class="keyword">in</span> envs_dirs:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isdir(envs_dir):</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        prefix = join(envs_dir, name)</span><br><span class="line">        <span class="keyword">if</span> isdir(prefix):</span><br><span class="line">            <span class="keyword">return</span> abspath(prefix)</span><br></pre></td></tr></table></figure>
-
 <p>到这里 prefix 就确定了 <code>prefix = locate_prefix_by_name(env_name_or_prefix)</code></p>
 <p><code>prefix = /Users/huangzhesi/miniconda/envs/conda-dev</code></p>
 <ul>
@@ -303,11 +305,10 @@
 </ul>
 <p>替换 <code>old_conda_prefix</code>，比如 base conda env</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">new_path = self.pathsep_join(</span><br><span class="line">    self._replace_prefix_in_path(old_conda_prefix, prefix))</span><br></pre></td></tr></table></figure>
-
 <p>需要设置的环境变量</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">env_vars_to_export = OrderedDict((</span><br><span class="line">    (<span class="string">&#x27;path&#x27;</span>, new_path),</span><br><span class="line">    (<span class="string">&#x27;conda_prefix&#x27;</span>, prefix),</span><br><span class="line">    (<span class="string">&#x27;conda_shlvl&#x27;</span>, new_conda_shlvl),</span><br><span class="line">    (<span class="string">&#x27;conda_default_env&#x27;</span>, conda_default_env),</span><br><span class="line">    (<span class="string">&#x27;conda_prompt_modifier&#x27;</span>, conda_prompt_modifier)))</span><br></pre></td></tr></table></figure>
-
-<h1 id="set-ld-library-path-inside-python"><a href="#set-ld-library-path-inside-python" class="headerlink" title="set ld_library_path inside python"></a>set ld_library_path inside python</h1><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python">https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python</a></p>
+<h1 id="set-ld_library_path-inside-python"><a class="markdownIt-Anchor" href="#set-ld_library_path-inside-python"></a> set ld_library_path inside python</h1>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python">https://stackoverflow.com/questions/6543847/setting-ld-library-path-from-inside-python</a></p>
 <p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/856116/changing-ld-library-path-at-runtime-for-ctypes">https://stackoverflow.com/questions/856116/changing-ld-library-path-at-runtime-for-ctypes</a></p>
 <p>比较 hack，不优雅 …</p>
 <p>如果 conda env 中安装的非 conda package，其依赖 shared libraries，没太好办法，手动设置 <code>LD_LIBRARY_PATH</code> 环境变量吧</p>
@@ -365,13 +366,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

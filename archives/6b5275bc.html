@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">1.</span> <span class="nav-text">summary</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">1.</span> <span class="nav-text"> summary</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,7 +246,6 @@
 <p>Tomcat 7 默认使用 BIO Http11Protocol</p>
 <p>注意到在 Http11Protocol 的 process 方法中（AbstractProtocol）有如下逻辑</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (processor.isUpgrade()) &#123;</span><br><span class="line">        <span class="comment">// Init WebSocket OPEN_READ processor httpUpgradeHandler is null</span></span><br><span class="line">        <span class="comment">// And when the second round came, upgradeDispatch will dispatch OPEN_READ status</span></span><br><span class="line">        <span class="comment">// ha, upgradeServletInputStream.onDataAvailable() will be called</span></span><br><span class="line">        state = processor.upgradeDispatch(status);</span><br><span class="line">        <span class="comment">// but, pay attention to that fact</span></span><br><span class="line">        <span class="comment">// WsFrameServer.onDataAvailable is a for loop so it will remain in it</span></span><br><span class="line">        <span class="comment">// that&#x27;s the reason why we can&#x27;t see the state of Upgraded return</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Init WebSocket OPEN_READ will go through here</span></span><br><span class="line">        state = processor.process(wrapper);</span><br><span class="line">        <span class="comment">// Finally adapter.service(request, response) will be called in processor.process</span></span><br><span class="line">        <span class="comment">// then the request will go through filter</span></span><br><span class="line">        <span class="comment">// Once it arrives the WsFilter</span></span><br><span class="line">        <span class="comment">// and it will call upgrade method with a WsHttpUpgradeHandler in WsFilter</span></span><br><span class="line">        <span class="comment">// That will instance a WsHttpUpgradeHandler and call action Upgrade hook</span></span><br><span class="line">        <span class="comment">// That&#x27;s the time httpUpgradeHandler be set to WsHttpUpgradeHandler and no more null value</span></span><br><span class="line">        <span class="comment">// So isUpgrade() return true and state will become</span></span><br><span class="line">        <span class="comment">// SocketState.UPGRADING</span></span><br><span class="line">        <span class="comment">// And it will create a new processor named upgradeProcessor to replace previous processor</span></span><br><span class="line">        <span class="comment">// in the state of SocketState.UPGRADING in following code</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isDebugEnabled()) &#123;</span><br><span class="line">        getLog().debug(<span class="string">&quot;Socket: [&quot;</span> + wrapper +</span><br><span class="line">                <span class="string">&quot;], Status in: [&quot;</span> + status +</span><br><span class="line">                <span class="string">&quot;], State out: [&quot;</span> + state + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">        <span class="comment">// it means that if it is a WebSocket Request</span></span><br><span class="line">        <span class="comment">// it turns out to be once debug info</span></span><br><span class="line">        <span class="comment">// Status in: OPEN_READ, State out: UPGRADING</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">while</span> (state == SocketState.UPGRADING);</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">if</span> (state == SocketState.UPGRADING) &#123;</span><br><span class="line">    <span class="comment">// Get the HTTP upgrade handler</span></span><br><span class="line">    HttpUpgradeHandler httpUpgradeHandler =</span><br><span class="line">            processor.getHttpUpgradeHandler();</span><br><span class="line">    <span class="comment">// Release the Http11 processor to be re-used</span></span><br><span class="line">    release(wrapper, processor, <span class="keyword">false</span>, <span class="keyword">false</span>);</span><br><span class="line">    <span class="comment">// Create the upgrade processor</span></span><br><span class="line">    processor = createUpgradeProcessor(</span><br><span class="line">            wrapper, httpUpgradeHandler);</span><br><span class="line">    <span class="comment">// Mark the connection as upgraded</span></span><br><span class="line">    wrapper.setUpgraded(<span class="keyword">true</span>);</span><br><span class="line">    <span class="comment">// Associate with the processor with the connection</span></span><br><span class="line">    connections.put(socket, processor);</span><br><span class="line">    <span class="comment">// Initialise the upgrade handler (which may trigger</span></span><br><span class="line">    <span class="comment">// some IO using the new protocol which is why the lines</span></span><br><span class="line">    <span class="comment">// above are necessary)</span></span><br><span class="line">    <span class="comment">// This cast should be safe. If it fails the error</span></span><br><span class="line">    <span class="comment">// handling for the surrounding try/catch will deal with</span></span><br><span class="line">    <span class="comment">// it.</span></span><br><span class="line">    httpUpgradeHandler.init((WebConnection) processor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>所以 Tomcat 7 WebSocket 实现上的时序是正确的，大致的请求处理流程如下</p>
 <ul>
 <li>Client 与 OS 特定端口建立 Connection …</li>
@@ -251,7 +255,8 @@
 <li>processor.process(wrapper) 返回 UPGRADING state</li>
 <li>Http11Protocol.process 创建新的 upgradeProcessor 以代替之前的 processor</li>
 <li>调用 WsHttpUpgradeHandler.init 方法</li>
-<li>init 方法执行<ul>
+<li>init 方法执行
+<ul>
 <li>在 sos 上注册 WsWriteListener 方法</li>
 <li>调用 onOpen 方法</li>
 <li>在 sis 上注册 WsReadListener 方法</li>
@@ -282,7 +287,8 @@
 <li>upgradeDispatch(OPEN_WRITE): onWritePossible(useDispatch: false)</li>
 <li>wsSession.getBasicRemote().sendText(…): onWritePossible(useDispatch: true)</li>
 </ul>
-<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><p>这块逻辑看的还不是特别清晰，主要是为了没有 OPEN_WRITE state 也是可以写入的这个结论</p>
+<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> summary</h1>
+<p>这块逻辑看的还不是特别清晰，主要是为了没有 OPEN_WRITE state 也是可以写入的这个结论</p>
 <p>所以完整的 WebSocket 请求流程</p>
 <ul>
 <li>客户端发起 WebSocket 请求时，需要新建一个链接</li>
@@ -350,13 +356,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

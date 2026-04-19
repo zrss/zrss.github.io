@@ -64,6 +64,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -133,7 +138,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -161,6 +166,160 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/5964173e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/5964173e.html" class="post-title-link" itemprop="url">WebSocket in Tomcat 7 (part 1)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-07-06 20:22:57" itemprop="dateCreated datePublished" datetime="2018-07-06T20:22:57Z">2018-07-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>又是一部折腾史</p>
+</blockquote>
+<p>之前提到了最近在基于 WebSocket 协议实现 WebTerminal 特性，无奈生产环境遇到了一个 weired bug，百思不得其解，只好看看 WebSocket 在 Tomcat 7 中是如何实现的</p>
+<blockquote>
+<p>环境/版本信息</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OS: macOS Sierra 10.12.6</span><br><span class="line">Tomcat: 7.0.88</span><br><span class="line">Intellij: 2016.2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>jenv 管理 java 版本</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; jenv versions</span><br><span class="line">  system</span><br><span class="line">* 1.6.0.65 (set by &#x2F;Users&#x2F;zrss&#x2F;.jenv&#x2F;version)</span><br><span class="line">  1.7.0.181</span><br><span class="line">  1.8.0.172</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当前 java 版本</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; jenv global</span><br><span class="line">1.6.0.65</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>ant 版本</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; ant -version</span><br><span class="line">Apache Ant(TM) version 1.9.12 compiled on June 19 2018</span><br></pre></td></tr></table></figure>
+<h1 id="set-up-tomcat-src-code-in-intellij"><a class="markdownIt-Anchor" href="#set-up-tomcat-src-code-in-intellij"></a> Set up Tomcat src code in Intellij</h1>
+<p>参考如下官方构建指南即可</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://tomcat.apache.org/tomcat-7.0-doc/building.html">http://tomcat.apache.org/tomcat-7.0-doc/building.html</a></p>
+</blockquote>
+<p>第一步当然是下载源码 <a target="_blank" rel="noopener" href="http://tomcat.apache.org/download-70.cgi#7.0.88">http://tomcat.apache.org/download-70.cgi#7.0.88</a><br />
+，当前源码地址 <a target="_blank" rel="noopener" href="http://mirrors.hust.edu.cn/apache/tomcat/tomcat-7/v7.0.88/src/apache-tomcat-7.0.88-src.tar.gz">http://mirrors.hust.edu.cn/apache/tomcat/tomcat-7/v7.0.88/src/apache-tomcat-7.0.88-src.tar.gz</a></p>
+<p>解压后目录结论如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">apache-tomcat-7.0.88-src</span><br><span class="line">├── BUILDING.txt</span><br><span class="line">├── CONTRIBUTING.md</span><br><span class="line">├── KEYS</span><br><span class="line">├── LICENSE</span><br><span class="line">├── NOTICE</span><br><span class="line">├── README.md</span><br><span class="line">├── RELEASE-NOTES</span><br><span class="line">├── RUNNING.txt</span><br><span class="line">├── STATUS.txt</span><br><span class="line">├── bin</span><br><span class="line">├── build.properties.default</span><br><span class="line">├── build.xml</span><br><span class="line">├── conf</span><br><span class="line">├── java</span><br><span class="line">├── modules</span><br><span class="line">├── res</span><br><span class="line">├── test</span><br><span class="line">└── webapps</span><br></pre></td></tr></table></figure>
+<p>Tomcat 诞生的年代比较久远，还是用的比较古老的构建工具 ant，复制 build.properties.default 至 build.properties</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp build.properties.default build.properties</span><br></pre></td></tr></table></figure>
+<p>Tomcat7 WebSocket 依赖 java7，因此需要设置 build.properties 中的 java7 path。取消该文件中的下述定义注释（54行），并填写相应 jdk 路径</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.7.home&#x3D;&#x2F;Library&#x2F;Java&#x2F;JavaVirtualMachines&#x2F;zulu-7.jdk&#x2F;Contents&#x2F;Home</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果使用 jenv 管理 java 版本，可使用如下命令查看当前 java 的 java_home path<br />
+/usr/libexec/java_home -v $(jenv version-name)</p>
+</blockquote>
+<p>确认当前 java 版本为 1.6</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; java -version</span><br><span class="line">java version &quot;1.6.0_65&quot;</span><br><span class="line">Java(TM) SE Runtime Environment (build 1.6.0_65-b14-468)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 20.65-b04-468, mixed mode)</span><br></pre></td></tr></table></figure>
+<p>设置 JAVA_HOME（make sure it is a 1.6 java’s home）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; export JAVA_HOME&#x3D;$(&#x2F;usr&#x2F;libexec&#x2F;java_home -v $(jenv version-name))</span><br><span class="line">&gt; echo $JAVA_HOME</span><br><span class="line">&#x2F;Library&#x2F;Java&#x2F;JavaVirtualMachines&#x2F;1.6.0.jdk&#x2F;Contents&#x2F;Home</span><br></pre></td></tr></table></figure>
+<p>当然国内的小伙伴还要多做一件事儿，那就是配置 proxy</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">proxy.use&#x3D;on</span><br><span class="line">proxy.host&#x3D;127.0.0.1</span><br><span class="line">proxy.port&#x3D;1081</span><br></pre></td></tr></table></figure>
+<p>这个 proxy 方案也是非常常见的了，shadowsocks (socks5) + privoxy (http)</p>
+<p>最后进入 Tomcat 源码目录执行 ant 命令构建</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src</span><br><span class="line">ant</span><br></pre></td></tr></table></figure>
+<p>jar 包下载顺利的话，无问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUILD SUCCESSFUL</span><br><span class="line">Total time: 23 seconds</span><br></pre></td></tr></table></figure>
+<h1 id="import-tomcat-src-to-intellij"><a class="markdownIt-Anchor" href="#import-tomcat-src-to-intellij"></a> Import Tomcat src to Intellij</h1>
+<p>在 Tomcat 源码目录执行，如若遇到因为 SSL 无法下载的依赖，手动下载之，并放入 testexist 路径（讲真，是个体力活儿，得有六七个包吧）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ant ide-eclipse</span><br></pre></td></tr></table></figure>
+<p>最后终于成功了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUILD SUCCESSFUL</span><br><span class="line">Total time: 1 second</span><br></pre></td></tr></table></figure>
+<p>构建 websocket eclipse</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ant ide-eclipse-websocket</span><br></pre></td></tr></table></figure>
+<p>顺利成功</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUILD SUCCESSFUL</span><br><span class="line">Total time: 1 second</span><br></pre></td></tr></table></figure>
+<p>到此可以开始导入 IntelliJ 了</p>
+<p>IntelliJ 欢迎页面选择 Import Project，在弹出框中选择 Tomcat 源码根路径，一路 Next 至 Select Eclipse projects to import，勾选上 tomcat-7.0.x 继续 Next，最后 Project SDK 选择 1.6 即可</p>
+<p>WebSocket 代码在如下路径</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src&#x2F;java&#x2F;org&#x2F;apache&#x2F;tomcat&#x2F;websocket</span><br></pre></td></tr></table></figure>
+<p>最后查看 Tomcat version 信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt; cd output&#x2F;build&#x2F;bin</span><br><span class="line">&gt; .&#x2F;version.sh</span><br><span class="line">Using CATALINA_BASE:   &#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src&#x2F;output&#x2F;build</span><br><span class="line">Using CATALINA_HOME:   &#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src&#x2F;output&#x2F;build</span><br><span class="line">Using CATALINA_TMPDIR: &#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src&#x2F;output&#x2F;build&#x2F;temp</span><br><span class="line">Using JRE_HOME:        &#x2F;Library&#x2F;Java&#x2F;JavaVirtualMachines&#x2F;1.6.0.jdk&#x2F;Contents&#x2F;Home</span><br><span class="line">Using CLASSPATH:       &#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src&#x2F;output&#x2F;build&#x2F;bin&#x2F;bootstrap.jar:&#x2F;Users&#x2F;zrss&#x2F;Documents&#x2F;Code&#x2F;Java&#x2F;apache-tomcat-7.0.88-src&#x2F;output&#x2F;build&#x2F;bin&#x2F;tomcat-juli.jar</span><br><span class="line">Server version: Apache Tomcat&#x2F;7.0.88</span><br><span class="line">Server built:   Jul 6 2018 14:30:23 UTC</span><br><span class="line">Server number:  7.0.88.0</span><br><span class="line">OS Name:        Mac OS X</span><br><span class="line">OS Version:     10.12.6</span><br><span class="line">Architecture:   x86_64</span><br><span class="line">JVM Version:    1.6.0_65-b14-468</span><br><span class="line">JVM Vendor:     Apple Inc.</span><br></pre></td></tr></table></figure>
+<p>至此 Tomcat 7 导入 IntelliJ 中 okay，可以愉快的查看代码了。当然查看 WebSocket 相关的实现时，在 IntelliJ Project Structure 中切换 SDK 至 1.7 即可</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -236,37 +395,32 @@
     <div class="post-body" itemprop="articleBody">
           <p>又要开始分析一个疑难杂症了</p>
 <p>现象是 100 完成数，40 并发度的 job 无法执行结束，两个 pod 一直处于 running 状态，查看发现 container 已退出</p>
-<h1 id="job-controller-的工作原理"><a href="#job-controller-的工作原理" class="headerlink" title="job-controller 的工作原理"></a>job-controller 的工作原理</h1><p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
+<h1 id="job-controller-的工作原理"><a class="markdownIt-Anchor" href="#job-controller-的工作原理"></a> job-controller 的工作原理</h1>
+<p>job-controller 较为短小精悍，属于 kube-controller-manager 代码中的一部分</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> job.NewJobController(</span><br><span class="line">    ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">    ctx.InformerFactory.Batch().V1().Jobs(),</span><br><span class="line">    ctx.ClientBuilder.ClientOrDie(<span class="string">&quot;job-controller&quot;</span>),</span><br><span class="line">).Run(<span class="keyword">int</span>(ctx.Options.ConcurrentJobSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
-
 <p>从启动代码中可以看出 job-controller 关注 pod 与 job 这两种资源的变化情况</p>
 <ul>
 <li>ctx.InformerFactory.Core().V1().Pods()</li>
 <li>ctx.InformerFactory.Batch().V1().Jobs()</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentJobSyncs&#x3D;5</span><br></pre></td></tr></table></figure>
-
 <p>启动 5 个 worker goroutine</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(jm.worker, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>在 worker 协程中，1s 执行一次 worker 方法</p>
 <p>worker 方法，实现从 queue 中获取待处理的对象（key），并调用 syncJob 方法处理之</p>
 <ul>
 <li>syncJob 处理成功</li>
 </ul>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jobInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc: jm.enqueueController,</span><br><span class="line">    UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> job := cur.(*batch.Job); !IsJobFinished(job) &#123;</span><br><span class="line">            jm.enqueueController(job)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    DeleteFunc: jm.enqueueController,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">    AddFunc:    jm.addPod,</span><br><span class="line">    UpdateFunc: jm.updatePod,</span><br><span class="line">    DeleteFunc: jm.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<h1 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h1><p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
+<h1 id="kubelet"><a class="markdownIt-Anchor" href="#kubelet"></a> kubelet</h1>
+<p>大致来看与 job-controller 的关系不大，可能还是 kubelet 的问题</p>
 <p>我们知道 kubelet 通过 PLEG 来感知节点上 container 的状态，另外 job pod 的 restart policy 目前仅支持两种 Never / onFailure，一般来说默认选择 onFailure 比较合适</p>
 <p>这样业务容器在正常退出后（exit 0），kubelet pleg 感知到后，再加上 onFailure 的策略，正常情况下会 killing pod，job-controller 感知到 pod 减少后，即完成数又增加了 1，即可成功结束</p>
 <p>看下 kubelet 的代码确认逻辑</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Get all the pods.</span></span><br><span class="line">podList, err := g.runtime.GetPods(<span class="literal">true</span>)</span><br><span class="line">ShouldContainerBeRestarted</span><br><span class="line"></span><br><span class="line"><span class="comment">// Check RestartPolicy for dead container</span></span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyNever &#123;</span><br><span class="line">    glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> pod.Spec.RestartPolicy == v1.RestartPolicyOnFailure &#123;</span><br><span class="line">    <span class="comment">// Check the exit code.</span></span><br><span class="line">    <span class="keyword">if</span> status.ExitCode == <span class="number">0</span> &#123;</span><br><span class="line">        glog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Already successfully ran container %q of pod %q, do nothing&quot;</span>, container.Name, format.Pod(pod))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
 <p>如此情况下需要 KillPod</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> keepCount == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(changes.ContainersToStart) == <span class="number">0</span> &#123;</span><br><span class="line">    changes.KillPod = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>所以正常情况下 job 控制的 pod，重启策略为 RestartPolicyOnFailure，如是正常退出的情况，则该 container 无需重启，而再加上述的判断，则当前 pod 需要被删除</p>
 <p>调用该 killPodWithSyncResult 方法</p>
 <p>经过如此分析，可能出现的问题原因及疑点</p>
@@ -374,69 +528,64 @@
 <li>非阿里 minikube 版本</li>
 <li>解决 minikube docker proxy not work 问题</li>
 </ul>
-<h1 id="Environment"><a href="#Environment" class="headerlink" title="Environment"></a>Environment</h1><ul>
+<h1 id="environment"><a class="markdownIt-Anchor" href="#environment"></a> Environment</h1>
+<ul>
 <li>OS: macOS Sierra 10.12.6</li>
 <li>minikube: v0.25.0</li>
 <li>VM Driver: virtualbox</li>
 <li>ISO version: minikube-v0.25.1.iso</li>
 </ul>
-<h1 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h1><p>macOS 安装 minikube 可以说很简单了</p>
+<h1 id="install"><a class="markdownIt-Anchor" href="#install"></a> Install</h1>
+<p>macOS 安装 minikube 可以说很简单了</p>
 <blockquote>
 <p>已安装 homebrew</p>
 </blockquote>
 <p>homebrew install minikube</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew cask install minikube</span><br></pre></td></tr></table></figure>
-
-<h1 id="Network"><a href="#Network" class="headerlink" title="Network"></a>Network</h1><p>国内的困难主要是这个</p>
+<h1 id="network"><a class="markdownIt-Anchor" href="#network"></a> Network</h1>
+<p>国内的困难主要是这个</p>
 <p>我使用的方案是 Shadowsocks + privoxy，相关的资料非常多，不赘述了</p>
 <p>privoxy 的配置如下 cat /usr/local/etc/privoxy/config</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">listen-address 0.0.0.0:1081</span><br><span class="line">forward-socks5 &#x2F; 127.0.0.1:1080 .</span><br></pre></td></tr></table></figure>
-
 <p>1080 端口为 socks5 的监听端口（即 Shadowsocks），privoxy 监听 1081 端口，将 1081 端口的 http 请求转发至 1080 socks5 监听端口上，这样就能让 http 请求也经过 socks5 转发了</p>
 <p>测试一下 privoxy 是否正常工作</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check process</span></span><br><span class="line">ps -ef | grep privoxy</span><br><span class="line"><span class="comment"># curl port</span></span><br><span class="line">curl http://127.0.0.0:1081</span><br><span class="line"><span class="comment"># netstat (recommended)</span></span><br><span class="line">netstat -an | grep 1081</span><br><span class="line"><span class="comment"># lsof</span></span><br><span class="line">lsof -i:1081</span><br></pre></td></tr></table></figure>
-
-<h1 id="Minikube-start"><a href="#Minikube-start" class="headerlink" title="Minikube start"></a>Minikube start</h1><p>使用上一步搭建好的 privoxy http 代理</p>
+<h1 id="minikube-start"><a class="markdownIt-Anchor" href="#minikube-start"></a> Minikube start</h1>
+<p>使用上一步搭建好的 privoxy http 代理</p>
 <p>我使用的终端为 iTerm，理论上系统自带 Terminal 也 ok</p>
 <p>设置 http / https 代理</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> https_proxy=https://127.0.0.1:1081</span><br></pre></td></tr></table></figure>
-
 <p>启动 minikube</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start</span><br></pre></td></tr></table></figure>
-
-<h1 id="Docker-proxy"><a href="#Docker-proxy" class="headerlink" title="Docker proxy"></a>Docker proxy</h1><p>minikube 下载完成 iso 后，再 bootstrap k8s cluster，cluster 起来之后，会启动一些 system 组件，比如 kube-addon-manager-minikube/ dashboard / dns 等，然而不幸的是这些 pod 会一直处于 ContainerCreating 的状态</p>
-<h2 id="查看-events"><a href="#查看-events" class="headerlink" title="查看 events"></a>查看 events</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe po kube-addon-manager-minikube -nkube-system</span><br></pre></td></tr></table></figure>
-
+<h1 id="docker-proxy"><a class="markdownIt-Anchor" href="#docker-proxy"></a> Docker proxy</h1>
+<p>minikube 下载完成 iso 后，再 bootstrap k8s cluster，cluster 起来之后，会启动一些 system 组件，比如 kube-addon-manager-minikube/ dashboard / dns 等，然而不幸的是这些 pod 会一直处于 ContainerCreating 的状态</p>
+<h2 id="查看-events"><a class="markdownIt-Anchor" href="#查看-events"></a> 查看 events</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe po kube-addon-manager-minikube -nkube-system</span><br></pre></td></tr></table></figure>
 <p>None</p>
-<h2 id="查看-kubelet-日志"><a href="#查看-kubelet-日志" class="headerlink" title="查看 kubelet 日志"></a>查看 kubelet 日志</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube logs kubelet</span><br></pre></td></tr></table></figure>
-
+<h2 id="查看-kubelet-日志"><a class="markdownIt-Anchor" href="#查看-kubelet-日志"></a> 查看 kubelet 日志</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube logs kubelet</span><br></pre></td></tr></table></figure>
 <p>发现端倪</p>
-<p>gcr.io/google_containers/pause-amd64:3.0，pause 容器无法 pull 下来</p>
+<p><a target="_blank" rel="noopener" href="http://gcr.io/google_containers/pause-amd64:3.0%EF%BC%8Cpause">gcr.io/google_containers/pause-amd64:3.0，pause</a> 容器无法 pull 下来</p>
 <p>继续搜索得知 minikube 可配置 docker proxy <a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md">https://github.com/kubernetes/minikube/blob/v0.25.0/docs/http_proxy.md</a></p>
 <p>遂停止 minikube 并以新参数启动之</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://127.0.0.1:1081 --docker-env HTTPS_PROXY=https://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br></pre></td></tr></table></figure>
-
 <p>呃，然而事实证明并不 work，遂登陆 vm</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br></pre></td></tr></table></figure>
-
 <p>尝试 curl 该 1081 端口</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl http://127.0.0.1:1081</span><br><span class="line">&gt;&gt; curl: (7) Failed to connect to 127.0.0.1 port 1081: Connection refused</span><br></pre></td></tr></table></figure>
-
 <p>可见 vm 中该端口并不通</p>
 <p>稍加思索，解决的思路应为在 virtualbox vm 中如何 connect back to host，因为 privoxy 实际上监听的是 host 的 1081 端口。几番搜索后，发现在 virtualbox vm 中可通过 10.0.2.2 IP connect back to host <a target="_blank" rel="noopener" href="https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os%EF%BC%8C%E7%99%BB%E9%99%86">https://superuser.com/questions/310697/connect-to-the-host-machine-from-a-virtualbox-guest-os，登陆</a> vm</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
-
 <p>果然能通了</p>
 <p>于是再次尝试修改 minikube 启动命令</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start --docker-env HTTP_PROXY=http://10.0.2.2:1081 --docker-env HTTPS_PROXY=https://10.0.2.2:1081</span><br></pre></td></tr></table></figure>
-
 <p>糟糕的是，仍然不 work …，所以问题集中到了 http_proxy 未生效上</p>
 <p>登陆 vm 查看 docker version / info，希望能获取到一些线索</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># version</span></span><br><span class="line">docker version</span><br><span class="line">Client:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:39:28 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line">Server:</span><br><span class="line"> Version:      17.09.0-ce</span><br><span class="line"> API version:  1.32 (minimum version 1.12)</span><br><span class="line"> Go version:   go1.8.3</span><br><span class="line"> Git commit:   afdb6d4</span><br><span class="line"> Built:        Tue Sep 26 22:45:38 2017</span><br><span class="line"> OS/Arch:      linux/amd64</span><br><span class="line"> Experimental: <span class="literal">false</span></span><br><span class="line"><span class="comment"># info</span></span><br><span class="line">docker info</span><br><span class="line">Containers: 0</span><br><span class="line">Running: 0</span><br><span class="line">Paused: 0</span><br><span class="line">Stopped: 0</span><br><span class="line">Images: 0</span><br><span class="line">Server Version: 17.09.0-ce</span><br><span class="line">Storage Driver: overlay2</span><br><span class="line"> Backing Filesystem: extfs</span><br><span class="line"> Supports d_type: <span class="literal">true</span></span><br><span class="line"> Native Overlay Diff: <span class="literal">true</span></span><br><span class="line">Logging Driver: json-file</span><br><span class="line">Cgroup Driver: cgroupfs</span><br><span class="line">Plugins:</span><br><span class="line"> Volume: <span class="built_in">local</span></span><br><span class="line"> Network: bridge host macvlan null overlay</span><br><span class="line"> Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog</span><br><span class="line">Swarm: inactive</span><br><span class="line">Runtimes: runc</span><br><span class="line">Default Runtime: runc</span><br><span class="line">Init Binary: docker-init</span><br><span class="line">containerd version: 06b9cb35161009dcb7123345749fef02f7cea8e0</span><br><span class="line">runc version: 3f2f8b84a77f73d38244dd690525642a72156c64</span><br><span class="line">init version: N/A (expected: )</span><br><span class="line">Security Options:</span><br><span class="line"> seccomp</span><br><span class="line">  Profile: default</span><br><span class="line">Kernel Version: 4.9.64</span><br><span class="line">Operating System: Buildroot 2017.11</span><br><span class="line">OSType: linux</span><br><span class="line">Architecture: x86_64</span><br><span class="line">CPUs: 2</span><br><span class="line">Total Memory: 1.953GiB</span><br><span class="line">Name: minikube</span><br><span class="line">ID: 6RR3:WAF4:FIGA:TTEG:5UE6:V3RD:JNQV:WQQ4:ER3T:ETKJ:ZVP4:2Z7M</span><br><span class="line">Docker Root Dir: /var/lib/docker</span><br><span class="line">Debug Mode (client): <span class="literal">false</span></span><br><span class="line">Debug Mode (server): <span class="literal">false</span></span><br><span class="line">Registry: https://index.docker.io/v1/</span><br><span class="line">Labels:</span><br><span class="line"> provider=virtualbox</span><br><span class="line">Experimental: <span class="literal">false</span></span><br><span class="line">Insecure Registries:</span><br><span class="line"> 10.96.0.0/12</span><br><span class="line"> 127.0.0.0/8</span><br><span class="line">Live Restore Enabled: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
-
 <p>然而似乎和问题并没有什么关联，http_proxy 和 docker daemon 有关，和 docker 没啥关系，所以在 version / info 中都未见 http_proxy 相关配置 <a target="_blank" rel="noopener" href="https://github.com/docker/distribution/issues/2397#issuecomment-330079118">https://github.com/docker/distribution/issues/2397#issuecomment-330079118</a></p>
 <p>追溯到这里，只能看看 minikube 代码中是如何使用 docker-env 这个传入参数的了</p>
-<h1 id="how-does-minikube-start"><a href="#how-does-minikube-start" class="headerlink" title="how does minikube start"></a>how does minikube start</h1><p>overall</p>
+<h1 id="how-does-minikube-start"><a class="markdownIt-Anchor" href="#how-does-minikube-start"></a> how does minikube start</h1>
+<p>overall</p>
 <ul>
 <li>startHost</li>
 <li>startK8S</li>
@@ -449,52 +598,42 @@
 <p>step by step 的过程省略，最后找到如下代码片段，显示 docker-env 实际上并不会生效</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157">https://github.com/kubernetes/minikube/blob/v0.25.0/cmd/minikube/cmd/start.go#L157</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">start := <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    host, err = cluster.StartHost(api, config)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        glog.Errorf(<span class="string">&quot;Error starting host: %s.\n\n Retrying.\n&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/machine/client.go#L114-L135</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> &amp;host.Host&#123;</span><br><span class="line">    ConfigVersion: version.ConfigVersion,</span><br><span class="line">    Name:          driver.GetMachineName(),</span><br><span class="line">    Driver:        driver,</span><br><span class="line">    DriverName:    driver.DriverName(),</span><br><span class="line">    HostOptions: &amp;host.Options&#123;</span><br><span class="line">        AuthOptions: &amp;auth.Options&#123;</span><br><span class="line">            CertDir:          api.certsDir,</span><br><span class="line">            CaCertPath:       filepath.Join(api.certsDir, <span class="string">&quot;ca.pem&quot;</span>),</span><br><span class="line">            CaPrivateKeyPath: filepath.Join(api.certsDir, <span class="string">&quot;ca-key.pem&quot;</span>),</span><br><span class="line">            ClientCertPath:   filepath.Join(api.certsDir, <span class="string">&quot;cert.pem&quot;</span>),</span><br><span class="line">            ClientKeyPath:    filepath.Join(api.certsDir, <span class="string">&quot;key.pem&quot;</span>),</span><br><span class="line">            ServerCertPath:   filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server.pem&quot;</span>),</span><br><span class="line">            ServerKeyPath:    filepath.Join(api.GetMachinesDir(), <span class="string">&quot;server-key.pem&quot;</span>),</span><br><span class="line">        &#125;,</span><br><span class="line">        EngineOptions: &amp;engine.Options&#123;</span><br><span class="line">            StorageDriver: <span class="string">&quot;aufs&quot;</span>,</span><br><span class="line">            TLSVerify:     <span class="literal">true</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        SwarmOptions: &amp;swarm.Options&#123;&#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
-
 <p>可见默认 SwarmOptions 是个空对象，其中值得注意的是 IsSwarm 的值为 false</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250">https://github.com/kubernetes/minikube/blob/v0.25.0/pkg/minikube/cluster/cluster.go#L243-L250</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">h, err := api.NewHost(config.VMDriver, data)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, errors.Wrap(err, <span class="string">&quot;Error creating new host&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">h.HostOptions.AuthOptions.CertDir = constants.GetMinipath()</span><br><span class="line">h.HostOptions.AuthOptions.StorePath = constants.GetMinipath()</span><br><span class="line">h.HostOptions.EngineOptions = engineOptions(config)</span><br></pre></td></tr></table></figure>
-
 <p>将 docker-env 赋值与 h.HostOptions.EngineOptions.Env</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232">https://github.com/kubernetes/minikube/blob/v0.25.0/vendor/github.com/docker/machine/libmachine/provision/boot2docker.go#L232</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">provisioner.SwarmOptions = swarmOptions</span><br><span class="line">provisioner.AuthOptions = authOptions</span><br><span class="line">provisioner.EngineOptions = engineOptions</span><br><span class="line">swarmOptions.Env = engineOptions.Env</span><br></pre></td></tr></table></figure>
-
 <p>最后将 docker-env 传与 swarmOptions.Env，而我们又知道 IsSwarm 的值为 false，因此实际上该配置并不会生效 … 社区真是给处于不自由网络地区的童鞋埋了个大坑 …</p>
-<h1 id="Back-to-Docker-proxy"><a href="#Back-to-Docker-proxy" class="headerlink" title="Back to Docker proxy"></a>Back to Docker proxy</h1><p>回到如何在 minikube 中配置 Docker proxy 的问题，实际上可以参考 Docker 官方的文档配置，使用 systemd</p>
+<h1 id="back-to-docker-proxy"><a class="markdownIt-Anchor" href="#back-to-docker-proxy"></a> Back to Docker proxy</h1>
+<p>回到如何在 minikube 中配置 Docker proxy 的问题，实际上可以参考 Docker 官方的文档配置，使用 systemd</p>
 <p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy">https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">minikube ssh</span><br><span class="line">sudo mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line">sudo vi /etc/systemd/system/docker.service.d/http-proxy.conf</span><br></pre></td></tr></table></figure>
-
 <p>输入如下内容并保存退出</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">&quot;HTTP_PROXY=http://10.0.2.2:1081&quot;</span> <span class="string">&quot;HTTPS_PROXY=https://10.0.2.2:1081&quot;</span></span><br></pre></td></tr></table></figure>
-
 <p>Flush changes &amp; Restart Docker</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
-
 <p>Verify that the configuration has been loaded</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl show --property=Environment docker</span><br></pre></td></tr></table></figure>
-
 <p>执行结束之后，此时在 vm 中</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
-
 <p>终于可以正常 pull image 了，system pod 也可以正常 running 起来了</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                                    READY     STATUS    RESTARTS   AGE</span><br><span class="line">kube-addon-manager-minikube             1/1       Running   4          12h</span><br><span class="line">kube-dns-54cccfbdf8-wfnxm               3/3       Running   3          12h</span><br><span class="line">kubernetes-dashboard-77d8b98585-t59gj   1/1       Running   1          12h</span><br><span class="line">storage-provisioner                     1/1       Running   1          12h</span><br></pre></td></tr></table></figure>
-
 <p>不过因为该改动并未固化到 iso 中，因此 minikube stop 之后改动会丢失 … 另外一个折中的办法</p>
-<h1 id="Another-method-for-Docker-proxy-recommended"><a href="#Another-method-for-Docker-proxy-recommended" class="headerlink" title="Another method for Docker proxy (recommended)"></a>Another method for Docker proxy (recommended)</h1><blockquote>
+<h1 id="another-method-for-docker-proxy-recommended"><a class="markdownIt-Anchor" href="#another-method-for-docker-proxy-recommended"></a> Another method for Docker proxy (recommended)</h1>
+<blockquote>
 <p>workaround</p>
 </blockquote>
 <p>之前我们知道，在 terminal 中 export http_proxy 之后，minikube 即可使用 proxy 访问网络资源，而在 minikube –help 中发现 minikube 可以 cache image，所以我们可以 cache 需要使用的 image 资源，如</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:1081</span><br><span class="line"><span class="built_in">export</span> no_proxy=<span class="variable">$no_proxy</span>,$(minikube ip)</span><br><span class="line">minikube cache add gcr.io/google_containers/pause-amd64:3.0</span><br></pre></td></tr></table></figure>
-
 <p>也可以解决问题，比如我目前 cache 的 image</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">minikube cache list</span><br><span class="line">gcr.io/google-containers/kube-addon-manager:v6.5</span><br><span class="line">gcr.io/google_containers/pause-amd64:3.0</span><br><span class="line">gcr.io/k8s-minikube/storage-provisioner:v1.8.1</span><br><span class="line">k8s.gcr.io/k8s-dns-dnsmasq-nanny-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-kube-dns-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/k8s-dns-sidecar-amd64:1.14.5</span><br><span class="line">k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.1</span><br></pre></td></tr></table></figure>
-
 <p>cache 这些 image 之后，就可以使得 kube-system 下面的 pod 都 running 了</p>
-<h1 id="minikube-logs-healthcheck-error"><a href="#minikube-logs-healthcheck-error" class="headerlink" title="minikube logs healthcheck error"></a>minikube logs healthcheck error</h1><p>使用 minikube 过程中发现其 logs 中一直有如下错误日志</p>
+<h1 id="minikube-logs-healthcheck-error"><a class="markdownIt-Anchor" href="#minikube-logs-healthcheck-error"></a> minikube logs healthcheck error</h1>
+<p>使用 minikube 过程中发现其 logs 中一直有如下错误日志</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jun 23 18:15:15 minikube localkube[3034]: E0623 18:15:15.392453    3034 healthcheck.go:317] Failed to start node healthz on 0: listen tcp: address 0: missing port <span class="keyword">in</span> address</span><br></pre></td></tr></table></figure>
-
 <p>查看了相关代码，似乎是正常现象，不过这个实现也是太奇怪了 … 可参考如下 issue，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288">https://github.com/kubernetes/minikube/issues/2609#issuecomment-399701288</a></p>
 
       
@@ -591,34 +730,29 @@
 <p>kubernetes/pkg/controller/volume/persistentvolume/pv_controller.go</p>
 </blockquote>
 <p>claim.Spec.VolumeName == nil 时</p>
-<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 volume.beta.kubernetes.io/storage-class 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
+<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 <a target="_blank" rel="noopener" href="http://volume.beta.kubernetes.io/storage-class">volume.beta.kubernetes.io/storage-class</a> 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
 <ul>
-<li>volume.beta.kubernetes.io/storage-class</li>
+<li><a target="_blank" rel="noopener" href="http://volume.beta.kubernetes.io/storage-class">volume.beta.kubernetes.io/storage-class</a></li>
 <li>Spec.StorageClassName</li>
 </ul>
 <p>在允许动态提供存储（enableDynamicProvisioning）的情况下，尝试去提供一个 volume</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newClaim, err := ctrl.setClaimProvisioner(claim, storageClass)</span><br></pre></td></tr></table></figure>
-
 <p>动态的 pvc 会增加如下 annotation</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">volume.beta.kubernetes.io/storage-provisioner: class.Provisioner</span><br><span class="line">pv.kubernetes.io/bound-by-controller: yes</span><br><span class="line">pv.kubernetes.io/provisioned-by: plugin.GetPluginName()</span><br></pre></td></tr></table></figure>
-
 <p>从存储提供服务获取 volume 的过程是异步的，当获取完成时，设置如下 annotation</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pv.kubernetes.io/bind-completed: yes</span><br></pre></td></tr></table></figure>
-
 <p>如果是其他可以直接 bind 的情况，在 bind 的方法中也会设置上述 annotation</p>
 <p>所以可以通过 pvc annotation</p>
 <ul>
-<li>pv.kubernetes.io/bound-by-controller: yes</li>
+<li><a target="_blank" rel="noopener" href="http://pv.kubernetes.io/bound-by-controller:">pv.kubernetes.io/bound-by-controller:</a> yes</li>
 </ul>
 <p>确认该 pvc 为动态创建还是直接使用</p>
 <p>不过该字段还有一种情况下可能被设置</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> claim.Name != volume.Spec.ClaimRef.Name || claim.Namespace != volume.Spec.ClaimRef.Namespace &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef.UID != <span class="string">&quot;&quot;</span> &amp;&amp; claim.UID != volume.Spec.ClaimRef.UID &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>volume 和 claim binding 时，发现 volume 与 claim 的字段不匹配</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Check if the claim was already bound (either by controller or by user)</span></span><br><span class="line">shouldBind := <span class="literal">false</span></span><br><span class="line"><span class="keyword">if</span> volume.Name != claim.Spec.VolumeName &#123;</span><br><span class="line">    shouldBind = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>clain 和 volume binding 时，也会出现这种情况，当 volume 与 claim 的字段不匹配时</p>
-<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 pv.kubernetes.io/bound-by-controller: yes 判断动态创建是否准确?</p>
+<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 <a target="_blank" rel="noopener" href="http://pv.kubernetes.io/bound-by-controller:">pv.kubernetes.io/bound-by-controller:</a> yes 判断动态创建是否准确?</p>
 
       
     </div>
@@ -709,7 +843,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>我们知道在 k8s 集群中，可以通过 kubeclt exec -ti 命令远程登录容器，以执行命令。而要在 Console 上实现这个特性的集成，需要依赖 websocket 协议 (<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6455)[https://tools.ietf.org/html/rfc6455]">https://tools.ietf.org/html/rfc6455)[https://tools.ietf.org/html/rfc6455]</a></p>
+          <p>我们知道在 k8s 集群中，可以通过 kubeclt exec -ti 命令远程登录容器，以执行命令。而要在 Console 上实现这个特性的集成，需要依赖 websocket 协议 (<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6455">https://tools.ietf.org/html/rfc6455</a>)[<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6455">https://tools.ietf.org/html/rfc6455</a>]</p>
 <p>下面全面回顾一下集成过程中涉及到的方方面面知识</p>
 <ul>
 <li>kube-apiserver</li>
@@ -717,44 +851,42 @@
 <li>tomcat</li>
 <li>webpack-dev-server</li>
 </ul>
-<h1 id="exec-in-kube-apiserver"><a href="#exec-in-kube-apiserver" class="headerlink" title="exec in kube-apiserver"></a>exec in kube-apiserver</h1><blockquote>
+<h1 id="exec-in-kube-apiserver"><a class="markdownIt-Anchor" href="#exec-in-kube-apiserver"></a> exec in kube-apiserver</h1>
+<blockquote>
 <p>to be cont.</p>
 </blockquote>
-<h1 id="404-nginx"><a href="#404-nginx" class="headerlink" title="404 nginx"></a>404 nginx</h1><p>Problem: websocket 404 through nginx</p>
+<h1 id="404-nginx"><a class="markdownIt-Anchor" href="#404-nginx"></a> 404 nginx</h1>
+<p>Problem: websocket 404 through nginx</p>
 <p>遇到的问题，本地开发完成之后，部署到环境中，websocket 请求在直接用 IP 访问时 okay，而经过了二级域名则不 okay。二级域名是由 Nginx 配置转发的。查看 Nginx 的配置</p>
 <p>Nginx 配置为通用的配置，即 upstream / server 的配置</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">upstream console &#123;</span><br><span class="line">    ip_hash;</span><br><span class="line">    server IP:PORT;</span><br><span class="line">    server IP:PORT;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    location &#x2F;serviceName &#123;</span><br><span class="line">        proxy_pass https:&#x2F;&#x2F;console;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>http 模块有如下配置</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    map $http_upgrade $connection_upgrade &#123;</span><br><span class="line">        default upgrade;</span><br><span class="line">        &#39;&#39;      close;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>参考该文档 <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_map_module.html">http://nginx.org/en/docs/http/ngx_http_map_module.html</a> 解读 map 的语义</p>
 <p>上述语句的语义为，动态设置 $connection_upgrade 变量的值，当请求头中 upgrade 值为 ‘’ 时，则 $connection_upgrade 值为 close，当 upgrade 值非空时，其值为 upgrade</p>
 <p>对于 websocket 请求来说，其第一个请求中会携带请求头</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Connection: upgrade</span><br><span class="line">Upgrade: websocket</span><br></pre></td></tr></table></figure>
-
 <p>根据 <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/websocket.html">http://nginx.org/en/docs/http/websocket.html</a> 文档说明</p>
 <blockquote>
 <p>As noted above, hop-by-hop headers including “Upgrade” and “Connection” are not passed from a client to proxied server</p>
 </blockquote>
 <p>Upgrade / Connection header 并不会由 client 传递至被代理的 server，因此在 nginx 的 server 配置处需要手动增加这两 header</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    location &#x2F;serviceName&#x2F;ws &#123;</span><br><span class="line">        proxy_pass https:&#x2F;&#x2F;console;</span><br><span class="line">        proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">        proxy_set_header Connection $connection_upgrade;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>之前 nginx 未这么配置，导致 ws 请求被转发至后端时，缺少了这两请求头，导致 tomcat wsservlet 没识别到这是 ws 请求，又没有其他的 filter 或 servlet 处理，因此返回了 404</p>
-<h1 id="websocket-in-tomcat"><a href="#websocket-in-tomcat" class="headerlink" title="websocket in tomcat"></a>websocket in tomcat</h1><blockquote>
+<h1 id="websocket-in-tomcat"><a class="markdownIt-Anchor" href="#websocket-in-tomcat"></a> websocket in tomcat</h1>
+<blockquote>
 <p>tomcat 7</p>
 </blockquote>
 <p>上述问题中 nginx 为公共组件，需要更改配置的话，要走流程，为了可以先行调试，所以考虑在 webserver 侧想想办法解决请求头的问题</p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>在 WsFilter 中判断请求为 ws 请求的要素</p>
+<h2 id="分析"><a class="markdownIt-Anchor" href="#分析"></a> 分析</h2>
+<p>在 WsFilter 中判断请求为 ws 请求的要素</p>
 <ul>
 <li>GET 请求</li>
 <li>header 中包含 Upgrade: websocket 值</li>
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isWebSocketUpgradeRequest</span><span class="params">(ServletRequest request,</span></span></span><br><span class="line"><span class="function"><span class="params">        ServletResponse response)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> ((request <span class="keyword">instanceof</span> HttpServletRequest) &amp;&amp;</span><br><span class="line">            (response <span class="keyword">instanceof</span> HttpServletResponse) &amp;&amp;</span><br><span class="line">            headerContainsToken((HttpServletRequest) request,</span><br><span class="line">                    Constants.UPGRADE_HEADER_NAME,</span><br><span class="line">                    Constants.UPGRADE_HEADER_VALUE) &amp;&amp;</span><br><span class="line">            <span class="string">&quot;GET&quot;</span>.equals(((HttpServletRequest) request).getMethod()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>在 WsServerContainer 中将该 Filter 加入到 servletContext 中，并设置其拦截所有请求</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fr.addMappingForUrlPatterns(types, <span class="keyword">true</span>, <span class="string">&quot;/*&quot;</span>);</span><br></pre></td></tr></table></figure>
-
 <p>而这个地方的调用在 WsServerContainer 构造函数中发生，继续探寻而上</p>
 <p>WsSci 实现了 ServletContainerInitializer 接口，在 onStartup 接口实现中构造了 WsServerContainer 类</p>
 <p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-8.0-doc/servletapi/javax/servlet/ServletContainerInitializer.html">https://tomcat.apache.org/tomcat-8.0-doc/servletapi/javax/servlet/ServletContainerInitializer.html</a></p>
@@ -770,33 +902,33 @@
 <blockquote>
 <p>to be cont.</p>
 </blockquote>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>实验时发现可行，所以可以认为描述符中的 filter 先于 WsFilter 执行</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/17086712/servlet-filters-order-of-execution">https://stackoverflow.com/questions/17086712/servlet-filters-order-of-execution</a></p>
-<h1 id="神奇的-http-proxy-middleware"><a href="#神奇的-http-proxy-middleware" class="headerlink" title="神奇的 http-proxy-middleware"></a>神奇的 http-proxy-middleware</h1><p>Problem: websocket hangs on pending status</p>
+<h2 id="解决方案"><a class="markdownIt-Anchor" href="#解决方案"></a> 解决方案</h2>
+<p>实验时发现可行，所以可以认为描述符中的 filter 先于 WsFilter 执行</p>
+<h2 id="参考"><a class="markdownIt-Anchor" href="#参考"></a> 参考</h2>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/17086712/servlet-filters-order-of-execution">https://stackoverflow.com/questions/17086712/servlet-filters-order-of-execution</a></p>
+<h1 id="神奇的-http-proxy-middleware"><a class="markdownIt-Anchor" href="#神奇的-http-proxy-middleware"></a> 神奇的 http-proxy-middleware</h1>
+<p>Problem: websocket hangs on pending status</p>
 <p>遇到的问题，本地开发调试时，websocket 一直处于 pending 状态。查看 proxy 的 debug 信息，一直没有 get 请求发送，网上漫天搜索 issue / stackoverflow 无果，遂强行不懂装懂看代码</p>
 <blockquote>
-<p>当然有 issue 是直接关联的，因一开始完全没经验，并未注意到实际上就是该 issue 导致的 ^_^</p>
+<p>当然有 issue 是直接关联的，因一开始完全没经验，并未注意到实际上就是该 issue 导致的 <sup>_</sup></p>
 </blockquote>
-<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p>团队开发 Console 使用的 dev tool 为</p>
+<h2 id="分析-2"><a class="markdownIt-Anchor" href="#分析-2"></a> 分析</h2>
+<p>团队开发 Console 使用的 dev tool 为</p>
 <ul>
 <li>webpakc-dev-server 2.2.0 (WDS)</li>
 </ul>
 <p>本地开发调试依赖 WDS，该组件集成了 proxy 的功能，可以将本地的请求转发至实际的后端。例如如下的 proxy 配置</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">    port: <span class="number">8888</span>,</span><br><span class="line">    proxy: &#123;</span><br><span class="line">        <span class="string">&quot;/api&quot;</span>: &#123;</span><br><span class="line">            target: <span class="string">&quot;http://127.0.0.1:50545&quot;</span>,</span><br><span class="line">            changeOrigin: <span class="literal">true</span>,</span><br><span class="line">            secure: <span class="literal">false</span>,</span><br><span class="line">            logLevel: <span class="string">&quot;debug&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>按上述配置，本地的 <a target="_blank" rel="noopener" href="http://localhost:8888/api">http://localhost:8888/api</a>… 请求会被转发至 <a target="_blank" rel="noopener" href="http://127.0.0.1:50545/api...%E3%80%82%E5%BD%93%E7%84%B6%E5%9C%A8%E5%AE%9E%E9%99%85%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E8%BF%87%E7%A8%8B%E4%B8%AD%EF%BC%8C%E8%A2%AB%E8%BD%AC%E5%8F%91%E8%87%B3%E7%9A%84%E5%9C%B0%E5%9D%80%E4%B8%80%E8%88%AC%E4%B8%BA%E5%90%8E%E5%8F%B0">http://127.0.0.1:50545/api...。当然在实际开发调试过程中，被转发至的地址一般为后台</a> API 接口地址，或者是后台代理服务器地址，这样也就实现了本地 Console 开发与后端分离</p>
+<p>按上述配置，本地的 <a target="_blank" rel="noopener" href="http://localhost:8888/api">http://localhost:8888/api</a>… 请求会被转发至 <a target="_blank" rel="noopener" href="http://127.0.0.1:50545/api">http://127.0.0.1:50545/api</a>…。当然在实际开发调试过程中，被转发至的地址一般为后台 API 接口地址，或者是后台代理服务器地址，这样也就实现了本地 Console 开发与后端分离</p>
 <p>websocket 协议的 proxy 需要打开 ws option，参考如下配置</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">    port: <span class="number">8888</span>,</span><br><span class="line">    proxy: &#123;</span><br><span class="line">        <span class="string">&quot;/api&quot;</span>: &#123;</span><br><span class="line">            target: <span class="string">&quot;http://127.0.0.1:50545&quot;</span>,</span><br><span class="line">            changeOrigin: <span class="literal">true</span>,</span><br><span class="line">            secure: <span class="literal">false</span>,</span><br><span class="line">            logLevel: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">            ws: <span class="literal">true</span> <span class="comment">// proxy websocket</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>WDS 在启动时，会使用 express <a target="_blank" rel="noopener" href="https://expressjs.com/en/4x/api.html">https://expressjs.com/en/4x/api.html</a> 启动一个 web-server</p>
 <p>express 是一个 web framework，类似 java 里的 struts，粗略来看可以定义路由被哪个 middleware 处理，以及处理逻辑</p>
 <p>继续回到 WDS 启动时，如果 WDS 定义了 proxy 配置，则监听所有路由，将路由的处理逻辑交给 proxyMiddleware 负责</p>
 <p>[<a target="_blank" rel="noopener" href="https://github.com/webpack/webpack-dev-server/blob/v2.2.0/lib/Server.js#L196-L228">https://github.com/webpack/webpack-dev-server/blob/v2.2.0/lib/Server.js#L196-L228</a>)</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">options.proxy.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">proxyConfigOrCallback</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> proxyConfig;</span><br><span class="line">    <span class="keyword">let</span> proxyMiddleware;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">typeof</span> proxyConfigOrCallback === <span class="string">&quot;function&quot;</span>) &#123;</span><br><span class="line">        proxyConfig = proxyConfigOrCallback();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        proxyConfig = proxyConfigOrCallback;</span><br><span class="line">    &#125;</span><br><span class="line">    proxyMiddleware = getProxyMiddleware(proxyConfig);</span><br><span class="line">    app.use(<span class="function"><span class="keyword">function</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">typeof</span> proxyConfigOrCallback === <span class="string">&quot;function&quot;</span>) &#123;</span><br><span class="line">            <span class="keyword">const</span> newProxyConfig = proxyConfigOrCallback();</span><br><span class="line">            <span class="keyword">if</span>(newProxyConfig !== proxyConfig) &#123;</span><br><span class="line">                proxyConfig = newProxyConfig;</span><br><span class="line">                proxyMiddleware = getProxyMiddleware(proxyConfig);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">const</span> bypass = <span class="keyword">typeof</span> proxyConfig.bypass === <span class="string">&quot;function&quot;</span>;</span><br><span class="line">        <span class="keyword">const</span> bypassUrl = bypass &amp;&amp; proxyConfig.bypass(req, res, proxyConfig) || <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span>(bypassUrl) &#123;</span><br><span class="line">            req.url = bypassUrl;</span><br><span class="line">            next();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span>(proxyMiddleware) &#123;</span><br><span class="line">            <span class="comment">// proxy request at here</span></span><br><span class="line">            <span class="keyword">return</span> proxyMiddleware(req, res, next);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            next();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
 <p>实际开发时，proxy 规则往往不仅仅配置一条，可能类似如下存在多条配置，其中第三条是 websocket api 请求的 proxy 配置</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">    port: <span class="number">8888</span>,</span><br><span class="line">    proxy: &#123;</span><br><span class="line">        <span class="string">&quot;/api&quot;</span>: &#123;</span><br><span class="line">            target: <span class="string">&quot;http://api.company.com:50545&quot;</span>,</span><br><span class="line">            changeOrigin: <span class="literal">true</span>,</span><br><span class="line">            secure: <span class="literal">false</span>,</span><br><span class="line">            logLevel: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;/account&quot;</span>: &#123;</span><br><span class="line">            target: <span class="string">&quot;http://iam.company.com&quot;</span>,</span><br><span class="line">            changeOrigin: <span class="literal">true</span>,</span><br><span class="line">            secure: <span class="literal">false</span>,</span><br><span class="line">            logLevel: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="string">&quot;/exec&quot;</span>: &#123;</span><br><span class="line">            target: <span class="string">&quot;http://api.company.com:50545&quot;</span>,</span><br><span class="line">            changeOrigin: <span class="literal">true</span>,</span><br><span class="line">            secure: <span class="literal">false</span>,</span><br><span class="line">            logLevel: <span class="string">&quot;debug&quot;</span>,</span><br><span class="line">            ws: <span class="literal">true</span>, <span class="comment">// proxy websocket</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>回顾之前所说 WDS 启动时，proxy 一旦配置，会将所有路由，逐一代理给 proxyMiddleware</p>
 <p>更具体来说对于上述例子，每一条 proxy 规则会创建一个 proxyMiddleware，而所有路由都将按 key 的字典序，逐一代理给 proxyMiddleware</p>
 <p>对于上述 proxy 配置的处理顺序为</p>
@@ -811,22 +943,23 @@
 <p>答案在 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L38-L50">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L38-L50</a> 中</p>
 <p>可以看到这段代码，如果 proxy 中 ws: true，那么创建该 proxyMiddleware 时会调用 catchUpgradeRequest 方法</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">catchUpgradeRequest</span>(<span class="params">server</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// subscribe once; don&#x27;t subscribe on every request...</span></span><br><span class="line">    <span class="comment">// https://github.com/chimurai/http-proxy-middleware/issues/113</span></span><br><span class="line">    <span class="keyword">if</span> (!wsInitialized) &#123;</span><br><span class="line">        server.on(<span class="string">&#x27;upgrade&#x27;</span>, wsUpgradeDebounced);</span><br><span class="line">        wsInitialized = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>在 catchUpgradeRequest 方法中，使用 server 对象监听 upgrade 事件，而 wsUpgradeDebounced 调用也很简单</p>
 <p>debounce 直译为节流：即持续操作时，不会触发，停止一段时间后才触发。多用于用户连续输入时，停止一段时间后的回调</p>
 <p>即使用 underscore 的 debounce 方法调用 handleUpgrade</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handleUpgrade</span>(<span class="params">req, socket, head</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// set to initialized when used externally</span></span><br><span class="line">    wsInitialized = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (shouldProxy(config.context, req)) &#123;</span><br><span class="line">        <span class="keyword">var</span> activeProxyOptions = prepareProxyRequest(req);</span><br><span class="line">        proxy.ws(req, socket, head, activeProxyOptions);</span><br><span class="line">        logger.info(<span class="string">&#x27;[HPM] Upgrading to WebSocket&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>ok，看到这，基本的逻辑都明白了，全流程走一遍</p>
-<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>按 websocket 协议来说，第一个请求为 connect upgrade 的请求，即为 http get 请求 (当然与一般的 http get 请求不同，实际上并不能等同认为是一个 http get 请求)，应能在 proxy debug 信息中看到这个 get 请求，而该 debug 信息是在 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L40">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L40</a> 及 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L66">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L66</a> 处被打印，L40 这处的打印非 websocket 请求，L66为 websocket 请求</p>
+<h2 id="原因"><a class="markdownIt-Anchor" href="#原因"></a> 原因</h2>
+<p>按 websocket 协议来说，第一个请求为 connect upgrade 的请求，即为 http get 请求 (当然与一般的 http get 请求不同，实际上并不能等同认为是一个 http get 请求)，应能在 proxy debug 信息中看到这个 get 请求，而该 debug 信息是在 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L40">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L40</a> 及 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L66">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L66</a> 处被打印，L40 这处的打印非 websocket 请求，L66为 websocket 请求</p>
 <p>L66 之所以未被打印，是因为未进入 catchUpgradeRequest 方法，而未进入该方法的原因，是因为在配置多条 proxy 规则时，如果按字典序来看，例子中的 /exec 排在最后，而普通 http 请求已被其他 proxyMiddleware 处理，那么就不会调用 next 方法交由下一个 proxyMiddleware 处理，因此 /exec 只有在发起 websocket 请求时才会经过</p>
 <p>而如果 <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L56">https://github.com/chimurai/http-proxy-middleware/blob/v0.17.3/lib/index.js#L56</a> 未被执行，即 http-server 若未监听 upgrade 请求，则 websocket 的 upgrade 请求一直不会被处理，因此出现了 pending 中的状态</p>
 <blockquote>
 <p>另外 app.use 无法拦截到 connect upgrade 请求</p>
 </blockquote>
 <p>所以需要一个 http request warm up websocket proxy <a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/207">https://github.com/chimurai/http-proxy-middleware/issues/207</a></p>
-<h2 id="解决方案-1"><a href="#解决方案-1" class="headerlink" title="解决方案"></a>解决方案</h2><p>对于例子中的 proxy 来说，浏览器中输入一个 404 未被任一 proxyMiddleware 处理的路由即可，比如 <a target="_blank" rel="noopener" href="http://localhost:8888/warmup%EF%BC%8C%E8%BF%99%E6%A0%B7%E8%BF%99%E4%B8%AA%E8%AF%B7%E6%B1%82%E4%BC%9A%E7%BB%8F%E8%BF%87%E6%89%80%E6%9C%89">http://localhost:8888/warmup，这样这个请求会经过所有</a> proxyMiddleware，在经过 websocket proxy 时触发 server listen on upgrade。后续 websocket 发起 connect 请求时，proxy debug 日志中就能看到 websocket http get 的输出，并且有 [HPM] Upgrading to WebSocket 的输出，websocket 本地开发时就能正常连接了</p>
-<h2 id="参考-1"><a href="#参考-1" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/expressjs/express/issues/2594">https://github.com/expressjs/express/issues/2594</a></p>
+<h2 id="解决方案-2"><a class="markdownIt-Anchor" href="#解决方案-2"></a> 解决方案</h2>
+<p>对于例子中的 proxy 来说，浏览器中输入一个 404 未被任一 proxyMiddleware 处理的路由即可，比如 <a target="_blank" rel="noopener" href="http://localhost:8888/warmup%EF%BC%8C%E8%BF%99%E6%A0%B7%E8%BF%99%E4%B8%AA%E8%AF%B7%E6%B1%82%E4%BC%9A%E7%BB%8F%E8%BF%87%E6%89%80%E6%9C%89">http://localhost:8888/warmup，这样这个请求会经过所有</a> proxyMiddleware，在经过 websocket proxy 时触发 server listen on upgrade。后续 websocket 发起 connect 请求时，proxy debug 日志中就能看到 websocket http get 的输出，并且有 [HPM] Upgrading to WebSocket 的输出，websocket 本地开发时就能正常连接了</p>
+<h2 id="参考-2"><a class="markdownIt-Anchor" href="#参考-2"></a> 参考</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/expressjs/express/issues/2594">https://github.com/expressjs/express/issues/2594</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/143">https://github.com/chimurai/http-proxy-middleware/issues/143</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/112">https://github.com/chimurai/http-proxy-middleware/issues/112</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/chimurai/http-proxy-middleware/issues/207">https://github.com/chimurai/http-proxy-middleware/issues/207</a></p>
@@ -930,43 +1063,38 @@
 <p>对于浏览器来说，访问 Alpha / Production 环境的最大不同，为 Remote Address 不同 (域名实际相同)</p>
 <p>那么是否有可能为成功的请求访问的 Alpha 环境，而不成功的请求 (被 cache 410 的请求) 访问的为 Production 环境？</p>
 <p>顺着这个可疑点开始搜索相关资料，了解到</p>
-<h1 id="Prefight-request"><a href="#Prefight-request" class="headerlink" title="Prefight request"></a>Prefight request</h1><p>客户端在发起 COR 请求时，会首先发起 prefight 请求，检查是否对端 Server 接受 COR 请求</p>
+<h1 id="prefight-request"><a class="markdownIt-Anchor" href="#prefight-request"></a> Prefight request</h1>
+<p>客户端在发起 COR 请求时，会首先发起 prefight 请求，检查是否对端 Server 接受 COR 请求</p>
 <p>client option request</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">OPTIONS &#x2F;resource&#x2F;foo </span><br><span class="line">Access-Control-Request-Method: DELETE </span><br><span class="line">Access-Control-Request-Headers: origin, x-requested-with</span><br><span class="line">Origin: https:&#x2F;&#x2F;foo.bar.org</span><br></pre></td></tr></table></figure>
-
 <p>if server accept this request then it will response a reponse body like</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HTTP&#x2F;1.1 200 OK</span><br><span class="line">Content-Length: 0</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Access-Control-Allow-Origin: https:&#x2F;&#x2F;foo.bar.org</span><br><span class="line">Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE</span><br><span class="line">Access-Control-Max-Age: 86400</span><br></pre></td></tr></table></figure>
-
 <p>好了，看到这，发现调查的方向有点偏了，切换 proxy 并不会导致 CORS 问题。切换代理之后，会导致后续请求由代理 A 切换至代理 B 转发，仅此而已</p>
-<h1 id="Can-it-be-cache-by-accidently"><a href="#Can-it-be-cache-by-accidently" class="headerlink" title="Can it be cache by accidently ?"></a>Can it be cache by accidently ?</h1><p>查看代码后，发现后端部分请求在某一时段，的确返回了 410 错误，而 410 错误时，会返回一个 html 页面结果，是否 nginx 对这个结果，设置了有效的 cache-control 导致，浏览器缓存了发生该错误时的请求？</p>
+<h1 id="can-it-be-cache-by-accidently"><a class="markdownIt-Anchor" href="#can-it-be-cache-by-accidently"></a> Can it be cache by accidently ?</h1>
+<p>查看代码后，发现后端部分请求在某一时段，的确返回了 410 错误，而 410 错误时，会返回一个 html 页面结果，是否 nginx 对这个结果，设置了有效的 cache-control 导致，浏览器缓存了发生该错误时的请求？</p>
 <p>查看 Nginx 的文档后发现，Nginx add_header 仅在特定的 http status code 生效</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Adds the specified field to a response header provided that the response code equals 200, 201 (1.3.10), 204, 206, 301, 302, 303, 304, 307 (1.1.16, 1.0.13), or 308 (1.13.0). The value can contain variables.</span><br></pre></td></tr></table></figure>
-
 <p>所以如果特定 http 请求，本应返回正常的 json 结构体，然而后台报错，抛出异常，而该异常又未被捕获，因此 http 请求最后获取到的是 tomcat 的 exception 页面，比如 410 的错误页面</p>
 <p>又因为未指定默认的 cache 方式，因此该返回没有 cache 相关的 http header，因此全凭浏览器的启发式 cache 策略，意外将该错误的 http 请求返回结果缓存下来</p>
 <p>为解决这个问题，可以在 <code>conf/web.xml</code> 中配置</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">security-constraint</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">web-resource-collection</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">web-resource-name</span>&gt;</span>HTTPSOnly<span class="tag">&lt;/<span class="name">web-resource-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">web-resource-collection</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">user-data-constraint</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">transport-guarantee</span>&gt;</span>CONFIDENTIAL<span class="tag">&lt;/<span class="name">transport-guarantee</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">user-data-constraint</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">security-constraint</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
 <p>即可，这样默认每个请求的返回头都会加上</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: private</span><br><span class="line">Expires: Thu, 01 Jan 1970 00:00:00 GMT</span><br></pre></td></tr></table></figure>
-
 <p>至于为何后端会概率性返回 410，那又是另外一个问题了，后续有机会再说</p>
-<h1 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h1><p>因此问题是这样的，对于返回“正常”的请求 Nginx 设置了如下</p>
+<h1 id="回顾"><a class="markdownIt-Anchor" href="#回顾"></a> 回顾</h1>
+<p>因此问题是这样的，对于返回“正常”的请求 Nginx 设置了如下</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: no-cache, no-store, must-revalidate</span><br><span class="line">Pragma: no-cache</span><br><span class="line">X-Content-Type-Options: nosniff</span><br><span class="line">X-Download-Options: noopen</span><br><span class="line">X-Frame-Options: SAMEORIGIN</span><br><span class="line">X-XSS-Protection: 1; mode&#x3D;block;</span><br><span class="line">Strict-Transport-Security: max-age&#x3D;31536000; includeSubdomains;</span><br></pre></td></tr></table></figure>
-
 <p>请求头</p>
 <p>对于静态资源文件，如 .html/.css/.js 等，Nginx 使用了 Expires 指令</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: max-age&#x3D;604800</span><br><span class="line">Expires: Sun, 27 May 2018 10:28:04 GMT</span><br><span class="line">X-Content-Type-Options: nosniff</span><br><span class="line">X-Download-Options: noopen</span><br><span class="line">X-Frame-Options: SAMEORIGIN</span><br><span class="line">X-XSS-Protection: 1; mode&#x3D;block;</span><br><span class="line">Strict-Transport-Security: max-age&#x3D;31536000; includeSubdomains;</span><br></pre></td></tr></table></figure>
-
 <p>因此增加或修改了</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: max-age&#x3D;604800</span><br><span class="line">Expires: Sun, 27 May 2018 10:28:04 GMT</span><br></pre></td></tr></table></figure>
-
 <p>返回请求头</p>
 <p>对于非“正常”的请求，使用 Tomcat CONFIDENTIAL 配置，使其返回请求头中默认携带</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cache-Control: private</span><br><span class="line">Expires: Thu, 01 Jan 1970 00:00:00 GMT</span><br></pre></td></tr></table></figure>
-
 <p>因此浏览器不会缓存错误的返回结果。当然这么配置之后，实际上是所有返回头均有上述字段，一般来说 Tomcat 前端会有 LB，最常见的如 Nginx，Nginx 对资源文件默认设置了 Expires，该指令会修改 Cache-Control / Expires，因此从通用的角度来说，足以解决缓存带来的各种烦人问题，又不至于太影响性能</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/410">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/410</a></p>
+<h1 id="参考"><a class="markdownIt-Anchor" href="#参考"></a> 参考</h1>
+<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/410">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/410</a></p>
 <p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Glossary/cacheable">https://developer.mozilla.org/en-US/docs/Glossary/cacheable</a></p>
 <p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request">https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request</a></p>
 <p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS</a></p>
@@ -1068,17 +1196,20 @@
 </blockquote>
 <p>the workflow of the scheduler in kubernetes，开门见山的说，所谓云主机管理也好，网络流量管理也好，总得有个调度员，控制虚拟机实际被运行于哪台物理机中，管理网络流量的走向等等，那么今天看的 scheduler 组件即为 k8s 中的 Pod 调度器组件</p>
 <p>概括的说，scheduler 发现有需要调度的 Pod 时，使用注册好的各种策略，进行备选节点筛选及排序，最后选出pod 应被运行于的节点，即完成了其任务</p>
-<h1 id="overview-of-scheduler"><a href="#overview-of-scheduler" class="headerlink" title="overview of scheduler"></a>overview of scheduler</h1><p>从入口看起，so that is<br>plugin/pkg/scheduler/scheduler.go</p>
+<h1 id="overview-of-scheduler"><a class="markdownIt-Anchor" href="#overview-of-scheduler"></a> overview of scheduler</h1>
+<p>从入口看起，so that is<br />
+plugin/pkg/scheduler/scheduler.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> wait.Until(sched.scheduleOne, <span class="number">0</span>, sched.config.StopEverything)</span><br></pre></td></tr></table></figure>
-
 <p>即无限执行 sched.scheduleOne，那么 sched.scheduleOne 又干了啥，主要的逻辑如下</p>
 <ul>
 <li>获取待调度的 Pod (sched.config.NextPod())</li>
 <li>获取该 Pod 被调度到的节点 (sched.schedule(pod))</li>
 <li>并发 bind the pod to its host</li>
 </ul>
-<h1 id="schedule-of-scheduler"><a href="#schedule-of-scheduler" class="headerlink" title="schedule of scheduler"></a>schedule of scheduler</h1><p>plugin/pkg/scheduler/core/generic_scheduler.go</p>
-<p>默认 schedule 的实现在 generic_scheduler.go 中，实现了调度接口方法 Schedule<br>Schedule 的方法又完成了下述两个过程</p>
+<h1 id="schedule-of-scheduler"><a class="markdownIt-Anchor" href="#schedule-of-scheduler"></a> schedule of scheduler</h1>
+<p>plugin/pkg/scheduler/core/generic_scheduler.go</p>
+<p>默认 schedule 的实现在 generic_scheduler.go 中，实现了调度接口方法 Schedule<br />
+Schedule 的方法又完成了下述两个过程</p>
 <ul>
 <li>predicates</li>
 <li>prioritizing</li>
@@ -1088,12 +1219,11 @@
 <p>得分排序函数实现</p>
 <p>plugin/scheduler/api/types.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h HostPriorityList)</span> <span class="title">Less</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> h[i].Score == h[j].Score &#123;</span><br><span class="line">		<span class="keyword">return</span> h[i].Host &lt; h[j].Host</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> h[i].Score &lt; h[j].Score</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>即 Score 升序排列，在 Score 相等时，host (节点名称) 的字典序在前的优先。得分相同的节点，有 lastNodeIndex round-robin 的方式选择节点</p>
 <p>plugin/pkg/scheduler/core/generic_scheduler.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">firstAfterMaxScore := sort.Search(<span class="built_in">len</span>(priorityList), <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> priorityList[i].Score &lt; maxScore &#125;)</span><br><span class="line">g.lastNodeIndexLock.Lock()</span><br><span class="line">ix := <span class="keyword">int</span>(g.lastNodeIndex % <span class="keyword">uint64</span>(firstAfterMaxScore))</span><br><span class="line">g.lastNodeIndex++</span><br><span class="line">g.lastNodeIndexLock.Unlock()</span><br></pre></td></tr></table></figure>
-
-<h1 id="F-A-Q-of-scheduler"><a href="#F-A-Q-of-scheduler" class="headerlink" title="F.A.Q of scheduler"></a>F.A.Q of scheduler</h1><ul>
+<h1 id="faq-of-scheduler"><a class="markdownIt-Anchor" href="#faq-of-scheduler"></a> F.A.Q of scheduler</h1>
+<ul>
 <li>scheduler 调度的单位是？</li>
 </ul>
 <p>Pod</p>
@@ -1107,29 +1237,24 @@
 <p>scheduler 的 config 中使用了 podInformer，仅关注未被 assigned 和非 Succeeded 或者 Failed 的 Pod</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// unassignedNonTerminatedPod selects pods that are unassigned and non-terminal.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">unassignedNonTerminatedPod</span><span class="params">(pod *v1.Pod)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(pod.Spec.NodeName) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>scheduler 为 podInformer 提供了 Pod add/update/delete 操作 podQueue 的方法，因此是在此处更新的 podQueue (add 和 update 逻辑实际相同)。另外 podQueue 内部有去重，如果是相同的 pod，则不再入队</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">podInformer.Informer().AddEventHandler(</span><br><span class="line">		cache.FilteringResourceEventHandler&#123;</span><br><span class="line">			FilterFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">				...</span><br><span class="line">			&#125;,</span><br><span class="line">			Handler: cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">				AddFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">					c.podQueue.Add(obj);</span><br><span class="line">				&#125;,</span><br><span class="line">				UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(oldObj, newObj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">					c.podQueue.Update(newObj);</span><br><span class="line">				&#125;,</span><br><span class="line">				DeleteFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">					c.podQueue.Delete(obj);</span><br><span class="line">				&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
-
 <p>注意 podInformer 还用于维护 scheduler 的 cache</p>
 <blockquote>
 <p>向节点中增加 Pod</p>
 </blockquote>
 <p>plugin/pkg/scheduler/schedulercache/cache.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cache *schedulerCache)</span> <span class="title">addPod</span><span class="params">(pod *v1.Pod)</span></span> &#123;</span><br><span class="line">	n, ok := cache.nodes[pod.Spec.NodeName]</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		n = NewNodeInfo()</span><br><span class="line">		cache.nodes[pod.Spec.NodeName] = n</span><br><span class="line">	&#125;</span><br><span class="line">	n.addPod(pod)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>计算节点资源</p>
 <p>plugin/pkg/scheduler/schedulercache/node_info.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// addPod adds pod information to this NodeInfo.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *NodeInfo)</span> <span class="title">addPod</span><span class="params">(pod *v1.Pod)</span></span> &#123;</span><br><span class="line">	res, non0_cpu, non0_mem := calculateResource(pod)</span><br><span class="line">	n.requestedResource.MilliCPU += res.MilliCPU</span><br><span class="line">	n.requestedResource.Memory += res.Memory</span><br><span class="line">	</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">// Consume ports when pods added.</span></span><br><span class="line">	n.updateUsedPorts(pod, <span class="literal">true</span>)</span><br><span class="line">	n.generation++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>scheduler 的 node 从哪里获取？</li>
 </ul>
 <p>套路与 Pod 一致，scheduler 使用了 nodeInformer，add/update/delete 操作 node cache，于是 scheduler 可见所有可使用的 node 资源</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Only nodes in the &quot;Ready&quot; condition with status == &quot;True&quot; are schedulable</span></span><br><span class="line">	nodeInformer.Informer().AddEventHandlerWithResyncPeriod(</span><br><span class="line">		cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">			AddFunc:    c.addNodeToCache,</span><br><span class="line">			UpdateFunc: c.updateNodeInCache,</span><br><span class="line">			DeleteFunc: c.deleteNodeFromCache,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="number">0</span>,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>scheduler 如何调度 pod 的？</li>
 </ul>
@@ -1147,16 +1272,17 @@
 <p>计算当前 node 的资源是否能满足 Pod Request，注意 init-container 是串行运行的，因此其所需要的资源，取各个资源维度的最大值，而其他正常的 container 为并行运行的，因此其所需要的资源，取各个资源维度的总和，最后一个 pod 所需要的资源，为 init-container 的最大值与正常 container 的资源总和的较大值</p>
 <p>plugin/pkg/scheduler/algorithm/predicates/predicates.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Returns a *schedulercache.Resource that covers the largest width in each</span></span><br><span class="line"><span class="comment">// resource dimension. Because init-containers run sequentially, we collect the</span></span><br><span class="line"><span class="comment">// max in each dimension iteratively. In contrast, we sum the resource vectors</span></span><br><span class="line"><span class="comment">// for regular containers since they run simultaneously.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Example:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Pod:</span></span><br><span class="line"><span class="comment">//   InitContainers</span></span><br><span class="line"><span class="comment">//     IC1:</span></span><br><span class="line"><span class="comment">//       CPU: 2</span></span><br><span class="line"><span class="comment">//       Memory: 1G</span></span><br><span class="line"><span class="comment">//     IC2:</span></span><br><span class="line"><span class="comment">//       CPU: 2</span></span><br><span class="line"><span class="comment">//       Memory: 3G</span></span><br><span class="line"><span class="comment">//   Containers</span></span><br><span class="line"><span class="comment">//     C1:</span></span><br><span class="line"><span class="comment">//       CPU: 2</span></span><br><span class="line"><span class="comment">//       Memory: 1G</span></span><br><span class="line"><span class="comment">//     C2:</span></span><br><span class="line"><span class="comment">//       CPU: 1</span></span><br><span class="line"><span class="comment">//       Memory: 1G</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Result: CPU: 3, Memory: 3G</span></span><br></pre></td></tr></table></figure>
-
 <p>PodMatchNodeSelector</p>
 <p>即 pod 只能被调度至 pod.Spec.NodeSelector 指定的节点上</p>
 <p>PodFitsHost</p>
 <p>即 pod 只能调度至 pod.Spec.NodeName 的节点上</p>
 <p>InterPodAffinityMatches</p>
 <ol>
-<li><p>检查当前 pod 如被调度到节点上，是否会破坏当前节点上的 pod 的反亲和性</p>
+<li>
+<p>检查当前 pod 如被调度到节点上，是否会破坏当前节点上的 pod 的反亲和性</p>
 </li>
-<li><p>检查当前 pod 如被调度到节点上，是否满足亲和性及反亲和性</p>
+<li>
+<p>检查当前 pod 如被调度到节点上，是否满足亲和性及反亲和性</p>
 </li>
 </ol>
 <p>CheckNodeMemoryPressurePredicate</p>
@@ -1171,7 +1297,6 @@
 <p>CalculateSpreadPriority</p>
 <p>plugin/pkg/scheduler/algorithm/priorities/selector_spreading.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CalculateSpreadPriority spreads pods across hosts and zones, considering pods belonging to the same service or replication controller.</span></span><br><span class="line"><span class="comment">// When a pod is scheduled, it looks for services, RCs or RSs that match the pod, then finds existing pods that match those selectors.</span></span><br><span class="line"><span class="comment">// It favors nodes that have fewer existing matching pods.</span></span><br></pre></td></tr></table></figure>
-
 <p>即 soft-anti-affinity</p>
 <p>BalancedResourceAllocationMap</p>
 <p>平衡节点资源分配</p>
@@ -1181,9 +1306,11 @@
 <li>binding ?</li>
 </ul>
 <ol>
-<li><p>调用 apiserver 接口发送 post binding 请求 sched.config.Binder.Bind(b)</p>
+<li>
+<p>调用 apiserver 接口发送 post binding 请求 sched.config.Binder.Bind(b)</p>
 </li>
-<li><p>binding 发送之后，调用 sched.config.SchedulerCache.FinishBinding(assumed)</p>
+<li>
+<p>binding 发送之后，调用 sched.config.SchedulerCache.FinishBinding(assumed)</p>
 </li>
 </ol>
 <p>FinishBinding 将 pod 信息附带 ttl 记入 cache，ttl 过期后，从 cache 中删除</p>
@@ -1192,20 +1319,21 @@
 <p>而另外一处 podInformer 则是设置已被调度的 pod 的 add/update/delete 的事件回调，用来同步 cache，若发现 assumePod 已被调度，则从 cache 中删除，又或者 assumePod 已过 ttl 被 cache 删除，则重新 cache.addPod</p>
 <p>plugin/pkg/scheduler/factory/factory.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// scheduled pod cache</span></span><br><span class="line">	podInformer.Informer().AddEventHandler(</span><br><span class="line">		cache.FilteringResourceEventHandler&#123;</span><br><span class="line">			FilterFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">				...</span><br><span class="line">			&#125;,</span><br><span class="line">			Handler: cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">				AddFunc:    c.addPodToCache,</span><br><span class="line">				UpdateFunc: c.updatePodInCache,</span><br><span class="line">				DeleteFunc: c.deletePodFromCache,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
-
-<h1 id="that’s-it"><a href="#that’s-it" class="headerlink" title="that’s it"></a>that’s it</h1><p>可见 scheduler 基于 informer，实时关注 pod 和 node 状态，获取到待调度的 pod 后，根据 predicate 和 prioritizing 策略，为 pod 选出合适的 node，最后并发完成 pod 和 node 的 binding，完成一次调度过程</p>
+<h1 id="thats-it"><a class="markdownIt-Anchor" href="#thats-it"></a> that’s it</h1>
+<p>可见 scheduler 基于 informer，实时关注 pod 和 node 状态，获取到待调度的 pod 后，根据 predicate 和 prioritizing 策略，为 pod 选出合适的 node，最后并发完成 pod 和 node 的 binding，完成一次调度过程</p>
 <p>更详细来说的话 (可能有误，欢迎大家交流斧正)</p>
-<h2 id="part-of-kube-scheduler"><a href="#part-of-kube-scheduler" class="headerlink" title="part of kube-scheduler"></a>part of kube-scheduler</h2><p>当有新的 pod 创建时，the podInformer of scheduler 一方面过滤未被调度且非 Succeed/Failed 状态的 pod， 触发 add 事件，scheduler 将其加入 podQueue 中等待调度，schedulerOne 方法循环执行，每次从 podQueue 中取出一个 pod，根据 predicates / priorities 策略选出 suggested host，assume 该 pod 被调度到 suggested host 上，更新 pod.Spec.NodeName 字段 (仅为后续 addPod，并不影响实际 etcd 中的 pod 对象)，随后开始并发 (goroutine) binding，即调用 kube-apiserver api post a binding RPC，随后 finishingBinding，在 cache 中记录该 pod</p>
+<h2 id="part-of-kube-scheduler"><a class="markdownIt-Anchor" href="#part-of-kube-scheduler"></a> part of kube-scheduler</h2>
+<p>当有新的 pod 创建时，the podInformer of scheduler 一方面过滤未被调度且非 Succeed/Failed 状态的 pod， 触发 add 事件，scheduler 将其加入 podQueue 中等待调度，schedulerOne 方法循环执行，每次从 podQueue 中取出一个 pod，根据 predicates / priorities 策略选出 suggested host，assume 该 pod 被调度到 suggested host 上，更新 pod.Spec.NodeName 字段 (仅为后续 addPod，并不影响实际 etcd 中的 pod 对象)，随后开始并发 (goroutine) binding，即调用 kube-apiserver api post a binding RPC，随后 finishingBinding，在 cache 中记录该 pod</p>
 <p>cache 会定时扫描其中的 assumedPods 信息，若 pod 被 assumed 且超过了 ttl，则删除该 pod (该 pod 所占用的节点资源也被释放)</p>
 <p>the podInformer of scheduler 另一方面过滤已被调度（pod.Spec.NodeName 非空）且非 Succeed/Failed 状态的 pod，触发 add/update/delete 事件等，观察到 assumedPod 被调度后，即从 cache 中删除该 pod</p>
-<h2 id="part-of-kube-apiserver"><a href="#part-of-kube-apiserver" class="headerlink" title="part of kube-apiserver"></a>part of kube-apiserver</h2><p>kube-apiserver 在接收到创建 binding 对象请求后，执行 assignPod 方法，最后在 setPodHostAndAnnotations 方法中，将 pod.Spec.NodeName 写入 etcd 中</p>
+<h2 id="part-of-kube-apiserver"><a class="markdownIt-Anchor" href="#part-of-kube-apiserver"></a> part of kube-apiserver</h2>
+<p>kube-apiserver 在接收到创建 binding 对象请求后，执行 assignPod 方法，最后在 setPodHostAndAnnotations 方法中，将 pod.Spec.NodeName 写入 etcd 中</p>
 <p>pkg/pod/registry/core/pod/storage/storage.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create ensures a pod is bound to a specific host.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *BindingREST)</span> <span class="title">Create</span><span class="params">(ctx genericapirequest.Context, obj runtime.Object, includeUninitialized <span class="keyword">bool</span>)</span> <span class="params">(out runtime.Object, err error)</span></span> &#123;</span><br><span class="line">	binding := obj.(*api.Binding)</span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> move me to a binding strategy</span></span><br><span class="line">	<span class="keyword">if</span> errs := validation.ValidatePodBinding(binding); <span class="built_in">len</span>(errs) != <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errs.ToAggregate()</span><br><span class="line">	&#125;</span><br><span class="line">	err = r.assignPod(ctx, binding.Name, binding.Target.Name, binding.Annotations)</span><br><span class="line">	out = &amp;metav1.Status&#123;Status: metav1.StatusSuccess&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="part-of-kubelet"><a href="#part-of-kubelet" class="headerlink" title="part of kubelet"></a>part of kubelet</h2><p>kubelet 启动时，list-watch apiserver</p>
+<h2 id="part-of-kubelet"><a class="markdownIt-Anchor" href="#part-of-kubelet"></a> part of kubelet</h2>
+<p>kubelet 启动时，list-watch apiserver</p>
 <p>pkg/kubelet/config/apiserver.go</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NewSourceApiserver creates a config source that watches and pulls from the apiserver.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSourceApiserver</span><span class="params">(c clientset.Interface, nodeName types.NodeName, updates <span class="keyword">chan</span>&lt;- <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	lw := cache.NewListWatchFromClient(c.Core().RESTClient(), <span class="string">&quot;pods&quot;</span>, metav1.NamespaceAll, fields.OneTermEqualSelector(api.PodHostField, <span class="keyword">string</span>(nodeName)))</span><br><span class="line">	newSourceApiserverFromLW(lw, updates)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>kubelet 使用 selector list-watch apiserver，这个 selector 即为 api.PodHostField=nodeName pod.Spec.NodeName=nodeName。kubelet list-watch 被调度本节点上的 pod，当触发 add/update/delete 后做相应的操作</p>
 
       
@@ -1300,7 +1428,8 @@
           <p>k8s 1.7 闲暇记录</p>
 <p>CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本</p>
 <p>k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能</p>
-<h1 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h1><p>Job 相比于 StatefulSet / Deployment 的特殊字段</p>
+<h1 id="job"><a class="markdownIt-Anchor" href="#job"></a> Job</h1>
+<p>Job 相比于 StatefulSet / Deployment 的特殊字段</p>
 <ul>
 <li>.spec.restartPolicy: 仅支持 OnFailed / Never，两种方式控制范围不同，前者当 Pod 容器失败退出时，重启容器，后者当 Pod 容器失败退出时，新建 Pod，会导致 Pod 中的所有容器重启</li>
 <li>.spec.completions: 完成数，即在 completion 个 pod 执行成功后，认为 Job 完成</li>
@@ -1326,11 +1455,10 @@
 <p>completions &gt;=1 &amp;&amp; parallelism &gt;=1</p>
 <p>Job 的接口</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;apis&#x2F;batch&#x2F;v1&#x2F;namespaces&#x2F;&#123;namespace&#125;&#x2F;jobs</span><br></pre></td></tr></table></figure>
-
 <p>Job example yaml</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">activeDeadlineSeconds:</span> <span class="number">100</span></span><br><span class="line">  <span class="attr">parallelism:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">completions:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">command:</span> [<span class="string">&quot;echo&quot;</span>, <span class="string">&quot;hello&quot;</span>]</span><br><span class="line">      <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="CronJob"><a href="#CronJob" class="headerlink" title="CronJob"></a>CronJob</h1><p>顾名思义，定时任务，支持类似 linux cron 的定时策略，定时调度 Job，可以这么理解 CronJob 控制 Job，而 Job 控制 Pod，Pod 完成具体的业务逻辑</p>
+<h1 id="cronjob"><a class="markdownIt-Anchor" href="#cronjob"></a> CronJob</h1>
+<p>顾名思义，定时任务，支持类似 linux cron 的定时策略，定时调度 Job，可以这么理解 CronJob 控制 Job，而 Job 控制 Pod，Pod 完成具体的业务逻辑</p>
 <p>CronJob 的特殊字段</p>
 <ul>
 <li>.spec.schedule: core of cronjob and it is like one line of a crontab (cron table) file，即定时策略配置，例如 */1 * * * *，每分钟调度一次 Job 执行</li>
@@ -1342,12 +1470,11 @@
 </ul>
 <p>注意 CronJob 在 1.7 中仍然为 Alpha 版本，接口为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;apis&#x2F;batch&#x2F;v2alpha1&#x2F;namespaces&#x2F;&#123;namespace&#125;&#x2F;cronjobs</span><br></pre></td></tr></table></figure>
-
 <p>CronJob example yaml</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v2alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">CronJob</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">schedule:</span> <span class="string">&quot;*/1 * * * *&quot;</span></span><br><span class="line">  <span class="attr">jobTemplate:</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">template:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">containers:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">            <span class="attr">args:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">date;</span> <span class="string">echo</span> <span class="string">Hello</span> <span class="string">from</span> <span class="string">the</span> <span class="string">Kubernetes</span> <span class="string">cluster</span></span><br><span class="line">          <span class="attr">restartPolicy:</span> <span class="string">OnFailure</span></span><br></pre></td></tr></table></figure>
-
 <p>由 CronJob 创建的 Job，在 Job 的 metadata 字段的 ObjectReference 有所体现，会写明是由 cronJob controller 控制</p>
-<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>查看了 job/cronjob 的功能后，我们发现 job 适合用来执行一些初始化 / 统计数据 / 备份 / 清理工作，即那些不需要一直运行的工作，需要长期运行的工作，当然还是 Deployment/StatefulSet 更合适了</p>
+<h1 id="overview"><a class="markdownIt-Anchor" href="#overview"></a> Overview</h1>
+<p>查看了 job/cronjob 的功能后，我们发现 job 适合用来执行一些初始化 / 统计数据 / 备份 / 清理工作，即那些不需要一直运行的工作，需要长期运行的工作，当然还是 Deployment/StatefulSet 更合适了</p>
 
       
     </div>
@@ -1442,19 +1569,15 @@
 <p>fresh new db file</p>
 <p>page 3 (start from 0) is a leaf page, it will be used as a root bucket</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    root     pgid   <span class="comment">// page id of the bucket&#x27;s root-level page</span></span><br><span class="line">    sequence <span class="keyword">uint64</span> <span class="comment">// monotonically incrementing, used by NextSequence()</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br></pre></td></tr></table></figure>
-
 <p>bucket 结构表示存储于文件中的 bucket</p>
 <p>另外 tx 会关联一个 Bucket 结构体</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    *bucket</span><br><span class="line">    tx       *Tx                <span class="comment">// the associated transaction</span></span><br><span class="line">    buckets  <span class="keyword">map</span>[<span class="keyword">string</span>]*Bucket <span class="comment">// subbucket cache</span></span><br><span class="line">    page     *page              <span class="comment">// inline page reference</span></span><br><span class="line">    rootNode *node              <span class="comment">// materialized node for the root page.</span></span><br><span class="line">    nodes    <span class="keyword">map</span>[pgid]*node     <span class="comment">// node cache</span></span><br><span class="line">    <span class="comment">// Sets the threshold for filling nodes when they split. By default,</span></span><br><span class="line">    <span class="comment">// the bucket will fill to 50% but it can be useful to increase this</span></span><br><span class="line">    <span class="comment">// amount if you know that your write workloads are mostly append-only.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// This is non-persisted across transactions so it must be set in every Tx.</span></span><br><span class="line">    FillPercent <span class="keyword">float64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>可见其中组合了 bucket 结构体</p>
 <p>写事务在初始化时，会使用 meta 锁，锁定住 meta 页的修改；随后将 meta 页拷贝至写事务内部存储；而实际上写事务开启时，会使用 rwlock，因此写事务并不会并发，另仅有写事务会修改 meta 页，所以此处的 meta 页拷贝存疑，似乎没必要</p>
 <p>init 方法为 beginTX 内部执行，读写事务都会执行，因此虽然写事务无需 copy meta page 然而读事务需要，因为写事务 commit 之后，会修改 meta page</p>
 <p>完成 meta 页的拷贝后，将 tx 的 root (Bucket) 初始化，并设置其 root bucket 为 meta 中的 root bucket; 第一个写事务的 txid 为 2，0、1 用于设置两个 meta 页</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">    p := db.pageInBuffer(buf[:], pgid(i))</span><br><span class="line">    p.id = pgid(i)</span><br><span class="line">    p.flags = metaPageFlag</span><br><span class="line">    <span class="comment">// Initialize the meta page.</span></span><br><span class="line">    m := p.meta()</span><br><span class="line">    m.magic = magic</span><br><span class="line">    m.version = version</span><br><span class="line">    m.pageSize = <span class="keyword">uint32</span>(db.pageSize)</span><br><span class="line">    m.freelist = <span class="number">2</span></span><br><span class="line">    m.root = bucket&#123;root: <span class="number">3</span>&#125;</span><br><span class="line">    m.pgid = <span class="number">4</span></span><br><span class="line">    m.txid = txid(i) <span class="comment">// 0 1 txid used</span></span><br><span class="line">    m.checksum = m.sum64()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>create bucket 时 cursor 从 root bucket page 开始遍历 bucket name 应存放的适当位置</p>
 <p>branch page 节点 / leaf page 节点</p>
 <p>数据存放于 leaf page 节点中</p>
@@ -1575,120 +1698,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b3b02fd2.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/b3b02fd2.html" class="post-title-link" itemprop="url">ssl tls and https</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-12-03 16:46:00" itemprop="dateCreated datePublished" datetime="2017-12-03T16:46:00Z">2017-12-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>安全方面的姿势，掌握略有不足，趁着空闲；另外也是为了不仅仅知道，curl 命令访问 https 接口的时候，需要携带三个证书，如此模糊的解释而努力<br>to be cont.</p>
-</blockquote>
-<p>搜索了一下网上已有很多现有资料，这里就重新回顾一下，当做我自己的姿势了</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/denji/golang-tls">https://github.com/denji/golang-tls</a></p>
-<p>首先看下 go 语言中，如何实现 server 端 HTTPS/TLS</p>
-<p><a target="_blank" rel="noopener" href="http://tonybai.com/2015/04/30/go-and-https/">http://tonybai.com/2015/04/30/go-and-https/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="comment">// &quot;fmt&quot;</span></span><br><span class="line">    <span class="comment">// &quot;io&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">HelloServer</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/plain&quot;</span>)</span><br><span class="line">    w.Write([]<span class="keyword">byte</span>(<span class="string">&quot;This is an example server.\n&quot;</span>))</span><br><span class="line">    <span class="comment">// fmt.Fprintf(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">    <span class="comment">// io.WriteString(w, &quot;This is an example server.\n&quot;)</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    http.HandleFunc(<span class="string">&quot;/hello&quot;</span>, HelloServer)</span><br><span class="line">    err := http.ListenAndServeTLS(<span class="string">&quot;:443&quot;</span>, <span class="string">&quot;server.crt&quot;</span>, <span class="string">&quot;server.key&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(<span class="string">&quot;ListenAndServe: &quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>443 为知名的 HTTPS 服务端口，那么 server.crt、server.key 这两个文件又是如何作用，哪来的呢？</p>
-<p>首先解释哪来的问题</p>
-<p>使用 openssl 生成私钥</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;RSA&quot; ≥ 2048-bit</span></span><br><span class="line">openssl genrsa -out server.key 2048</span><br></pre></td></tr></table></figure>
-
-<p>or 使用另外一种算法生成的私钥</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Key considerations for algorithm &quot;ECDSA&quot; ≥ secp384r1</span></span><br><span class="line"><span class="comment"># List ECDSA the supported curves (openssl ecparam -list_curves)</span></span><br><span class="line">openssl ecparam -genkey -name secp384r1 -out server.key</span><br></pre></td></tr></table></figure>
-
-<p>私钥生成好之后，使用私钥生成公钥（x509 自签发 crt）</p>
-<blockquote>
-<p>Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650</span><br></pre></td></tr></table></figure>
-
-<p>所以呢，server.key 是私钥，server.crt 是公钥，生成之后，就可以用来初始化 TLS server 了</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/8/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/10/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1712,13 +1721,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

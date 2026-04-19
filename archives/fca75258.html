@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="https:&#x2F;&#x2F;github.com&#x2F;linux-rdma&#x2F;perftest&#x2F;blob&#x2F;master&#x2F;src&#x2F;write_bw.c main 12user_param.verb &#x3D; WRITE;user_param.tst &#x3D; BW;  parser 12-c, --connection&#x3D;&lt;RC&#x2F;XRC&#x2F;UC&#x2F;DC&gt; Connection typ">
+    <meta name="description" content="https:&#x2F;&#x2F;github.com&#x2F;linux-rdma&#x2F;perftest&#x2F;blob&#x2F;master&#x2F;src&#x2F;write_bw.c main 12user_param.verb &#x3D; WRITE;user_param.tst &#x3D; BW; parser 12-c, --connection&#x3D;&lt;RC&#x2F;XRC&#x2F;UC&#x2F;DC&gt; Connection type">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ib_write_bw failed">
 <meta property="og:url" content="https://zrss.github.io/archives/fca75258.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="https:&#x2F;&#x2F;github.com&#x2F;linux-rdma&#x2F;perftest&#x2F;blob&#x2F;master&#x2F;src&#x2F;write_bw.c main 12user_param.verb &#x3D; WRITE;user_param.tst &#x3D; BW;  parser 12-c, --connection&#x3D;&lt;RC&#x2F;XRC&#x2F;UC&#x2F;DC&gt; Connection typ">
+<meta property="og:description" content="https:&#x2F;&#x2F;github.com&#x2F;linux-rdma&#x2F;perftest&#x2F;blob&#x2F;master&#x2F;src&#x2F;write_bw.c main 12user_param.verb &#x3D; WRITE;user_param.tst &#x3D; BW; parser 12-c, --connection&#x3D;&lt;RC&#x2F;XRC&#x2F;UC&#x2F;DC&gt; Connection type">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-11-20T20:00:00.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.034Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -135,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -248,20 +253,15 @@
     <div class="post-body" itemprop="articleBody"><p><a target="_blank" rel="noopener" href="https://github.com/linux-rdma/perftest/blob/master/src/write_bw.c">https://github.com/linux-rdma/perftest/blob/master/src/write_bw.c</a></p>
 <p>main</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_param.verb = WRITE;</span><br><span class="line">user_param.tst = BW;</span><br></pre></td></tr></table></figure>
-
 <p>parser</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-c, --connection&#x3D;&lt;RC&#x2F;XRC&#x2F;UC&#x2F;DC&gt; Connection type RC&#x2F;XRC&#x2F;UC&#x2F;DC (default RC)</span><br><span class="line">-s, --size&#x3D;&lt;size&gt; Size of message to exchange (default 65536)</span><br></pre></td></tr></table></figure>
-
 <p>init_perftest_params</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_SIZE_BW   (65536)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_SIZE_LAT  (2)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_CACHE_LINE_SIZE (64)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_PAGE_SIZE (4096)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEF_FLOWS (1)</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;size = (user_param-&gt;tst == BW ) ? DEF_SIZE_BW : DEF_SIZE_LAT;</span><br><span class="line"></span><br><span class="line">user_param-&gt;connection_type	= (user_param-&gt;connection_type == RawEth) ? RawEth : RC;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;cache_line_size	= get_cache_line_size();</span><br><span class="line">user_param-&gt;cycle_buffer = sysconf(_SC_PAGESIZE);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (user_param-&gt;cycle_buffer &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    user_param-&gt;cycle_buffer = DEF_PAGE_SIZE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">user_param-&gt;flows = DEF_FLOWS;</span><br></pre></td></tr></table></figure>
-
 <p><code>get_cache_line_size()</code></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line"> <span class="meta">#<span class="meta-keyword">if</span> !defined(__FreeBSD__)</span></span><br><span class="line">	size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);</span><br><span class="line">	<span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">if</span> defined(__sparc__) &amp;&amp; defined(__arch64__)</span></span><br><span class="line">		<span class="keyword">char</span>* file_name =</span><br><span class="line">			<span class="string">&quot;/sys/devices/system/cpu/cpu0/l2_cache_line_size&quot;</span>;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">		<span class="keyword">char</span>* file_name =</span><br><span class="line">			<span class="string">&quot;/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size&quot;</span>;</span><br><span class="line">		<span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">		FILE *fp;</span><br><span class="line">		<span class="keyword">char</span> line[<span class="number">10</span>];</span><br><span class="line">		fp = fopen(file_name, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">		<span class="keyword">if</span> (fp == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> DEF_CACHE_LINE_SIZE;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span>(fgets(line,<span class="number">10</span>,fp) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">			size = atoi(line);</span><br><span class="line">			fclose(fp);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">if</span> (size &lt;= <span class="number">0</span>)</span><br><span class="line">		size = DEF_CACHE_LINE_SIZE;</span><br></pre></td></tr></table></figure>
-
 <p><code>getconf LEVEL1_DCACHE_LINESIZE</code></p>
 <p>main -&gt; alloc_ctx</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ctx-&gt;size = user_param-&gt;size;</span><br><span class="line"></span><br><span class="line">num_of_qps_factor = (user_param-&gt;mr_per_qp) ? <span class="number">1</span> : user_param-&gt;num_of_qps;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* holds the size of maximum between msg size and cycle buffer,</span></span><br><span class="line"><span class="comment">* aligned to cache line,</span></span><br><span class="line"><span class="comment">* it is multiply by 2 for send and receive</span></span><br><span class="line"><span class="comment">* with reference to number of flows and number of QPs */</span></span><br><span class="line">ctx-&gt;buff_size = INC(BUFF_SIZE(ctx-&gt;size, ctx-&gt;cycle_buffer),</span><br><span class="line">				 ctx-&gt;cache_line_size) * <span class="number">2</span> * num_of_qps_factor * user_param-&gt;flows;</span><br></pre></td></tr></table></figure>
-
 <p>65536 = 64Kb</p>
 <p>generally, 16 pages</p>
 <p>root cause: ulimit -l is 16 (default) in container</p>
@@ -319,13 +319,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

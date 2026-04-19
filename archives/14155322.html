@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql&#x2F;driversql&#x2F;driver 中定义了 db driver 应实现的接口，其中明确了 ErrBadConn 的处理方式   The Connector.Connect and Driver.Open methods should never return ErrBadConn.  ErrBadConn should only be">
+    <meta name="description" content="https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql&#x2F;driver sql&#x2F;driver 中定义了 db driver 应实现的接口，其中明确了 ErrBadConn 的处理方式   The Connector.Connect and Driver.Open methods should never return ErrBadConn. ErrBadConn should only b">
 <meta property="og:type" content="article">
 <meta property="og:title" content="go db connection pool">
 <meta property="og:url" content="https://zrss.github.io/archives/14155322.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql&#x2F;driversql&#x2F;driver 中定义了 db driver 应实现的接口，其中明确了 ErrBadConn 的处理方式   The Connector.Connect and Driver.Open methods should never return ErrBadConn.  ErrBadConn should only be">
+<meta property="og:description" content="https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql&#x2F;driver sql&#x2F;driver 中定义了 db driver 应实现的接口，其中明确了 ErrBadConn 的处理方式   The Connector.Connect and Driver.Open methods should never return ErrBadConn. ErrBadConn should only b">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-09-25T18:27:41.000Z">
 <meta property="article:modified_time" content="2026-03-20T14:32:18.191Z">
@@ -65,6 +65,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -124,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#https-pkg-go-dev-database-sql-driver"><span class="nav-number">1.</span> <span class="nav-text">https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql&#x2F;driver</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#https-pkg-go-dev-database-sql"><span class="nav-number">2.</span> <span class="nav-text">https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#psql-BadConn"><span class="nav-number">3.</span> <span class="nav-text">psql BadConn</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#httpspkggodevdatabasesqldriver"><span class="nav-number">1.</span> <span class="nav-text"> https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql&#x2F;driver</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#httpspkggodevdatabasesql"><span class="nav-number">2.</span> <span class="nav-text"> https:&#x2F;&#x2F;pkg.go.dev&#x2F;database&#x2F;sql</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#psql-badconn"><span class="nav-number">3.</span> <span class="nav-text"> psql BadConn</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -238,10 +243,11 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="https-pkg-go-dev-database-sql-driver"><a href="#https-pkg-go-dev-database-sql-driver" class="headerlink" title="https://pkg.go.dev/database/sql/driver"></a><a target="_blank" rel="noopener" href="https://pkg.go.dev/database/sql/driver">https://pkg.go.dev/database/sql/driver</a></h1><p>sql/driver 中定义了 db driver 应实现的接口，其中明确了 <strong>ErrBadConn</strong> 的处理方式</p>
+    <div class="post-body" itemprop="articleBody"><h1 id="httpspkggodevdatabasesqldriver"><a class="markdownIt-Anchor" href="#httpspkggodevdatabasesqldriver"></a> <a target="_blank" rel="noopener" href="https://pkg.go.dev/database/sql/driver">https://pkg.go.dev/database/sql/driver</a></h1>
+<p>sql/driver 中定义了 db driver 应实现的接口，其中明确了 <strong>ErrBadConn</strong> 的处理方式</p>
 <blockquote>
 <ol>
-<li>The Connector.Connect and Driver.Open methods should never return ErrBadConn. </li>
+<li>The Connector.Connect and Driver.Open methods should never return ErrBadConn.</li>
 <li>ErrBadConn should only be returned from Validator, SessionResetter, or a query method if the connection is already in an invalid (e.g. closed) state.</li>
 </ol>
 <p><code>var ErrBadConn = errors.New(&quot;driver: bad connection&quot;)</code></p>
@@ -249,18 +255,18 @@
 <p>To prevent duplicate operations, ErrBadConn should NOT be returned if there’s a possibility that the database server might have performed the operation. Even if the server sends back an error, you shouldn’t return ErrBadConn.</p>
 </blockquote>
 <p>简而言之，当 sql driver 返回 ErrBadConn 错误时，sql package 应使用 new connection 重试</p>
-<h1 id="https-pkg-go-dev-database-sql"><a href="#https-pkg-go-dev-database-sql" class="headerlink" title="https://pkg.go.dev/database/sql"></a><a target="_blank" rel="noopener" href="https://pkg.go.dev/database/sql">https://pkg.go.dev/database/sql</a></h1><p>golang native db connection pool</p>
+<h1 id="httpspkggodevdatabasesql"><a class="markdownIt-Anchor" href="#httpspkggodevdatabasesql"></a> <a target="_blank" rel="noopener" href="https://pkg.go.dev/database/sql">https://pkg.go.dev/database/sql</a></h1>
+<p>golang native db connection pool</p>
 <p>connection retry 机制结合 golang native sql Query/Exec 实现理解</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/golang/go/issues/11978">https://github.com/golang/go/issues/11978</a></p>
 </blockquote>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// maxBadConnRetries is the number of maximum retries if the driver returns</span></span><br><span class="line"><span class="comment">// driver.ErrBadConn to signal a broken connection before forcing a new</span></span><br><span class="line"><span class="comment">// connection to be opened.</span></span><br><span class="line"><span class="keyword">const</span> maxBadConnRetries = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// QueryContext executes a query that returns rows, typically a SELECT.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">QueryContext</span><span class="params">(ctx context.Context, query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(*Rows, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> rows *Rows</span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxBadConnRetries; i++ &#123;</span><br><span class="line">		rows, err = db.query(ctx, query, args, cachedOrNewConn)</span><br><span class="line">		<span class="keyword">if</span> err != driver.ErrBadConn &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err == driver.ErrBadConn &#123;</span><br><span class="line">		<span class="keyword">return</span> db.query(ctx, query, args, alwaysNewConn)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> rows, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Query executes a query that returns rows, typically a SELECT.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">Query</span><span class="params">(query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(*Rows, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> db.QueryContext(context.Background(), query, args...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>Exec 实现</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ExecContext executes a query without returning any rows.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">ExecContext</span><span class="params">(ctx context.Context, query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(Result, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> res Result</span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxBadConnRetries; i++ &#123;</span><br><span class="line">		res, err = db.exec(ctx, query, args, cachedOrNewConn)</span><br><span class="line">		<span class="keyword">if</span> err != driver.ErrBadConn &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err == driver.ErrBadConn &#123;</span><br><span class="line">		<span class="keyword">return</span> db.exec(ctx, query, args, alwaysNewConn)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> res, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exec executes a query without returning any rows.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">Exec</span><span class="params">(query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(Result, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> db.ExecContext(context.Background(), query, args...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>综上 ErrBadConn 时，最多重试 2 次，使用 cached conn 或 new conn；超过重试次数，再尝试使用 new conn 1 次</p>
-<h1 id="psql-BadConn"><a href="#psql-BadConn" class="headerlink" title="psql BadConn"></a>psql BadConn</h1><p><a target="_blank" rel="noopener" href="https://www.postgresql.org/docs/10/app-psql.html#id-1.9.4.18.7">https://www.postgresql.org/docs/10/app-psql.html#id-1.9.4.18.7</a></p>
+<h1 id="psql-badconn"><a class="markdownIt-Anchor" href="#psql-badconn"></a> psql BadConn</h1>
+<p><a target="_blank" rel="noopener" href="https://www.postgresql.org/docs/10/app-psql.html#id-1.9.4.18.7">https://www.postgresql.org/docs/10/app-psql.html#id-1.9.4.18.7</a></p>
 <blockquote>
 <p>2 if the connection to the server went bad and the session was not interactive</p>
 </blockquote>
@@ -319,13 +325,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

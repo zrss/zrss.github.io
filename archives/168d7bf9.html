@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -135,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -239,13 +244,16 @@
     <div class="post-body" itemprop="articleBody"><p>THP</p>
 <p><a target="_blank" rel="noopener" href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/</a></p>
 <p>增加 page 大小, 从而减少 TLB 大小; 由于 walk TLB 开销较大, 所以是个优化</p>
-<p>THP 会让 os 申请连续的内存空间大小, 但如果申请不到, 则 os 会开始 compact, reclaim or page out other pages; </p>
+<p>THP 会让 os 申请连续的内存空间大小, 但如果申请不到, 则 os 会开始 compact, reclaim or page out other pages;</p>
 <blockquote>
 <p>That process is expensive and could cause latency spikes (up to seconds)</p>
 </blockquote>
 <p><code>cat /proc/buddyinfo</code></p>
 <blockquote>
-<p>Each column represents the number of pages of a certain order which are<br>available.  In this case, there are 0 chunks of 2^0<em>PAGE_SIZE available in<br>ZONE_DMA, 4 chunks of 2^1</em>PAGE_SIZE in ZONE_DMA, 101 chunks of 2^4*PAGE_SIZE<br>available in ZONE_NORMAL, etc…</p>
+<p>Each column represents the number of pages of a certain order which are<br />
+available.  In this case, there are 0 chunks of 2^0<em>PAGE_SIZE available in<br />
+ZONE_DMA, 4 chunks of 2^1</em>PAGE_SIZE in ZONE_DMA, 101 chunks of 2^4*PAGE_SIZE<br />
+available in ZONE_NORMAL, etc…</p>
 </blockquote>
 <p><a target="_blank" rel="noopener" href="https://andorian.blogspot.com/2014/03/making-sense-of-procbuddyinfo.html">https://andorian.blogspot.com/2014/03/making-sense-of-procbuddyinfo.html</a></p>
 
@@ -299,13 +307,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

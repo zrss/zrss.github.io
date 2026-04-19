@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="pod spec of volcano jobhttps:&#x2F;&#x2F;github.com&#x2F;volcano-sh&#x2F;volcano&#x2F;blob&#x2F;v1.3.0&#x2F;pkg&#x2F;controllers&#x2F;job&#x2F;job_controller_util.go 12345678910111213141516171819202122232425262728import (    v1 &quot;k8s.io&#x2F;api&#x2F;core&#x2F;">
+    <meta name="description" content="pod spec of volcano job https:&#x2F;&#x2F;github.com&#x2F;volcano-sh&#x2F;volcano&#x2F;blob&#x2F;v1.3.0&#x2F;pkg&#x2F;controllers&#x2F;job&#x2F;job_controller_util.go 12345678910111213141516171819202122232425262728import (    v1 &quot;k8s.io&#x2F;api&#x2F;cor">
 <meta property="og:type" content="article">
 <meta property="og:title" content="pod spec of volcano job and sysctl">
 <meta property="og:url" content="https://zrss.github.io/archives/d2d36a67.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="pod spec of volcano jobhttps:&#x2F;&#x2F;github.com&#x2F;volcano-sh&#x2F;volcano&#x2F;blob&#x2F;v1.3.0&#x2F;pkg&#x2F;controllers&#x2F;job&#x2F;job_controller_util.go 12345678910111213141516171819202122232425262728import (    v1 &quot;k8s.io&#x2F;api&#x2F;core&#x2F;">
+<meta property="og:description" content="pod spec of volcano job https:&#x2F;&#x2F;github.com&#x2F;volcano-sh&#x2F;volcano&#x2F;blob&#x2F;v1.3.0&#x2F;pkg&#x2F;controllers&#x2F;job&#x2F;job_controller_util.go 12345678910111213141516171819202122232425262728import (    v1 &quot;k8s.io&#x2F;api&#x2F;cor">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-07-18T16:58:54.000Z">
 <meta property="article:modified_time" content="2026-03-20T14:32:18.204Z">
@@ -65,6 +65,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -124,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#pod-spec-of-volcano-job"><span class="nav-number">1.</span> <span class="nav-text">pod spec of volcano job</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#sysctl-of-pod-spec"><span class="nav-number">2.</span> <span class="nav-text">sysctl of pod spec</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#pod-spec-of-volcano-job"><span class="nav-number">1.</span> <span class="nav-text"> pod spec of volcano job</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#sysctl-of-pod-spec"><span class="nav-number">2.</span> <span class="nav-text"> sysctl of pod spec</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -247,15 +252,14 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="pod-spec-of-volcano-job"><a href="#pod-spec-of-volcano-job" class="headerlink" title="pod spec of volcano job"></a>pod spec of volcano job</h1><p><a target="_blank" rel="noopener" href="https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go">https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go</a></p>
+    <div class="post-body" itemprop="articleBody"><h1 id="pod-spec-of-volcano-job"><a class="markdownIt-Anchor" href="#pod-spec-of-volcano-job"></a> pod spec of volcano job</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go">https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go</a></p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    v1 <span class="string">&quot;k8s.io/api/core/v1&quot;</span></span><br><span class="line">    ...</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// MakePodName append podname,jobname,taskName and index and returns the string.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakePodName</span><span class="params">(jobName <span class="keyword">string</span>, taskName <span class="keyword">string</span>, index <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fmt.Sprintf(jobhelpers.PodNameFmt, jobName, taskName, index)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">createJobPod</span><span class="params">(job *batch.Job, template *v1.PodTemplateSpec, ix <span class="keyword">int</span>)</span> *<span class="title">v1</span>.<span class="title">Pod</span></span> &#123;</span><br><span class="line">	templateCopy := template.DeepCopy()</span><br><span class="line"></span><br><span class="line">	pod := &amp;v1.Pod&#123;</span><br><span class="line">		ObjectMeta: metav1.ObjectMeta&#123;</span><br><span class="line">			Name:      jobhelpers.MakePodName(job.Name, template.Name, ix),</span><br><span class="line">			Namespace: job.Namespace,</span><br><span class="line">			OwnerReferences: []metav1.OwnerReference&#123;</span><br><span class="line">				*metav1.NewControllerRef(job, helpers.JobKind),</span><br><span class="line">			&#125;,</span><br><span class="line">			Labels:      templateCopy.Labels,</span><br><span class="line">			Annotations: templateCopy.Annotations,</span><br><span class="line">		&#125;,</span><br><span class="line">		Spec: templateCopy.Spec,</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="sysctl-of-pod-spec"><a href="#sysctl-of-pod-spec" class="headerlink" title="sysctl of pod spec"></a>sysctl of pod spec</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/">https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/</a></p>
+<h1 id="sysctl-of-pod-spec"><a class="markdownIt-Anchor" href="#sysctl-of-pod-spec"></a> sysctl of pod spec</h1>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/">https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: sysctl-example</span><br><span class="line">spec:</span><br><span class="line">  securityContext:</span><br><span class="line">    sysctls:</span><br><span class="line">    - name: net.ipv4.ip_local_port_range</span><br><span class="line">      value: &quot;30000 50000&quot;</span><br></pre></td></tr></table></figure>
-
 <p>find out current ip local port range</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;ip_local_port_range</span><br></pre></td></tr></table></figure>
-
 <p><a target="_blank" rel="noopener" href="https://www.thegeekdiary.com/how-to-reserve-a-port-range-for-a-third-party-application-in-centos-rhel/">https://www.thegeekdiary.com/how-to-reserve-a-port-range-for-a-third-party-application-in-centos-rhel/</a></p>
 <blockquote>
 <p>Note: ip_local_port_range and ip_local_reserved_ports settings are independent and both are considered by the kernel when determining which ports are available for <strong>automatic port assignments</strong>.</p>
@@ -315,13 +319,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

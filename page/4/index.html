@@ -64,6 +64,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -133,7 +138,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -161,6 +166,123 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/14155322.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/14155322.html" class="post-title-link" itemprop="url">go db connection pool</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-25 18:27:41" itemprop="dateCreated datePublished" datetime="2021-09-25T18:27:41Z">2021-09-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-20 14:32:18" itemprop="dateModified" datetime="2026-03-20T14:32:18Z">2026-03-20</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="httpspkggodevdatabasesqldriver"><a class="markdownIt-Anchor" href="#httpspkggodevdatabasesqldriver"></a> <a target="_blank" rel="noopener" href="https://pkg.go.dev/database/sql/driver">https://pkg.go.dev/database/sql/driver</a></h1>
+<p>sql/driver 中定义了 db driver 应实现的接口，其中明确了 <strong>ErrBadConn</strong> 的处理方式</p>
+<blockquote>
+<ol>
+<li>The Connector.Connect and Driver.Open methods should never return ErrBadConn.</li>
+<li>ErrBadConn should only be returned from Validator, SessionResetter, or a query method if the connection is already in an invalid (e.g. closed) state.</li>
+</ol>
+<p><code>var ErrBadConn = errors.New(&quot;driver: bad connection&quot;)</code></p>
+<p>ErrBadConn should be returned by a driver to signal to the sql package that a driver.Conn is in a bad state (such as the server having earlier closed the connection) and <strong>the sql package</strong> should retry on a new connection.</p>
+<p>To prevent duplicate operations, ErrBadConn should NOT be returned if there’s a possibility that the database server might have performed the operation. Even if the server sends back an error, you shouldn’t return ErrBadConn.</p>
+</blockquote>
+<p>简而言之，当 sql driver 返回 ErrBadConn 错误时，sql package 应使用 new connection 重试</p>
+<h1 id="httpspkggodevdatabasesql"><a class="markdownIt-Anchor" href="#httpspkggodevdatabasesql"></a> <a target="_blank" rel="noopener" href="https://pkg.go.dev/database/sql">https://pkg.go.dev/database/sql</a></h1>
+<p>golang native db connection pool</p>
+<p>connection retry 机制结合 golang native sql Query/Exec 实现理解</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/issues/11978">https://github.com/golang/go/issues/11978</a></p>
+</blockquote>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// maxBadConnRetries is the number of maximum retries if the driver returns</span></span><br><span class="line"><span class="comment">// driver.ErrBadConn to signal a broken connection before forcing a new</span></span><br><span class="line"><span class="comment">// connection to be opened.</span></span><br><span class="line"><span class="keyword">const</span> maxBadConnRetries = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// QueryContext executes a query that returns rows, typically a SELECT.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">QueryContext</span><span class="params">(ctx context.Context, query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(*Rows, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> rows *Rows</span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxBadConnRetries; i++ &#123;</span><br><span class="line">		rows, err = db.query(ctx, query, args, cachedOrNewConn)</span><br><span class="line">		<span class="keyword">if</span> err != driver.ErrBadConn &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err == driver.ErrBadConn &#123;</span><br><span class="line">		<span class="keyword">return</span> db.query(ctx, query, args, alwaysNewConn)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> rows, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Query executes a query that returns rows, typically a SELECT.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">Query</span><span class="params">(query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(*Rows, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> db.QueryContext(context.Background(), query, args...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Exec 实现</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ExecContext executes a query without returning any rows.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">ExecContext</span><span class="params">(ctx context.Context, query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(Result, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> res Result</span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxBadConnRetries; i++ &#123;</span><br><span class="line">		res, err = db.exec(ctx, query, args, cachedOrNewConn)</span><br><span class="line">		<span class="keyword">if</span> err != driver.ErrBadConn &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err == driver.ErrBadConn &#123;</span><br><span class="line">		<span class="keyword">return</span> db.exec(ctx, query, args, alwaysNewConn)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> res, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exec executes a query without returning any rows.</span></span><br><span class="line"><span class="comment">// The args are for any placeholder parameters in the query.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">Exec</span><span class="params">(query <span class="keyword">string</span>, args ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(Result, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> db.ExecContext(context.Background(), query, args...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>综上 ErrBadConn 时，最多重试 2 次，使用 cached conn 或 new conn；超过重试次数，再尝试使用 new conn 1 次</p>
+<h1 id="psql-badconn"><a class="markdownIt-Anchor" href="#psql-badconn"></a> psql BadConn</h1>
+<p><a target="_blank" rel="noopener" href="https://www.postgresql.org/docs/10/app-psql.html#id-1.9.4.18.7">https://www.postgresql.org/docs/10/app-psql.html#id-1.9.4.18.7</a></p>
+<blockquote>
+<p>2 if the connection to the server went bad and the session was not interactive</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -240,11 +362,11 @@
 </ol>
 <p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/api_docs/python/tf/pad">https://www.tensorflow.org/api_docs/python/tf/pad</a></p>
 <blockquote>
-<p>paddings is an integer tensor with shape [n, 2], where n is the rank of tensor. </p>
+<p>paddings is an integer tensor with shape [n, 2], where n is the rank of tensor.</p>
 </blockquote>
 <p>each dimension D</p>
 <ul>
-<li>paddings[D, 0]: add before tensor </li>
+<li>paddings[D, 0]: add before tensor</li>
 <li>paddings[D, 1]: add after tensor</li>
 </ul>
 <p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/api_docs/python/tf/expand_dims">https://www.tensorflow.org/api_docs/python/tf/expand_dims</a></p>
@@ -338,14 +460,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="Docker-Resource-Limit"><a href="#Docker-Resource-Limit" class="headerlink" title="Docker Resource Limit"></a>Docker Resource Limit</h1><h2 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#cpu">https://docs.docker.com/config/containers/resource_constraints/#cpu</a></p>
+          <h1 id="docker-resource-limit"><a class="markdownIt-Anchor" href="#docker-resource-limit"></a> Docker Resource Limit</h1>
+<h2 id="cpu"><a class="markdownIt-Anchor" href="#cpu"></a> CPU</h2>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#cpu">https://docs.docker.com/config/containers/resource_constraints/#cpu</a></p>
 <ul>
 <li><code>--cpu-period</code>: CFS 调度算法中的 cpu 时间分片，默认为 100ms</li>
 <li><code>--cpu-quota</code>: CFS quota，在每个 cpu period 分片中，在 cpu 限流前，docker container 能使用的 cpu 时间</li>
 <li><code>--cpuset-cpus</code>: docker container binding to cpu core</li>
 <li><code>--cpu-shares</code>: Set this flag to a value greater or less than the default of 1024 to increase or reduce the container’s weight, and give it access to a greater or lesser proportion of the host machine’s CPU cycles. This is only enforced when CPU cycles are constrained. When plenty of CPU cycles are available, all containers use as much CPU as they need. In that way, this is a <strong>soft limit</strong>.</li>
 </ul>
-<h2 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory">https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory</a></p>
+<h2 id="memory"><a class="markdownIt-Anchor" href="#memory"></a> Memory</h2>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory">https://docs.docker.com/config/containers/resource_constraints/#limit-a-containers-access-to-memory</a></p>
 <ul>
 <li><code>--memory</code>: The maximum amount of memory the container can use (cgroup limit)</li>
 <li><code>--memory-swap</code>:</li>
@@ -357,7 +482,8 @@
 <li>容器只要 1 pid 进程未退出，则容器不会退出</li>
 </ol>
 <p>OOM 始终针对的是进程，而非容器</p>
-<h2 id="Docker-Container-OOMKilled-status"><a href="#Docker-Container-OOMKilled-status" class="headerlink" title="Docker Container OOMKilled status"></a>Docker Container OOMKilled status</h2><ol>
+<h2 id="docker-container-oomkilled-status"><a class="markdownIt-Anchor" href="#docker-container-oomkilled-status"></a> Docker Container OOMKilled status</h2>
+<ol>
 <li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container">https://stackoverflow.com/questions/48618431/what-does-oom-kill-disable-do-for-a-docker-container</a></li>
 <li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/issues/14440#issuecomment-119243820">https://github.com/moby/moby/issues/14440#issuecomment-119243820</a></li>
 <li><a target="_blank" rel="noopener" href="https://plumbr.io/blog/java/oomkillers-in-docker-are-more-complex-than-you-thought">https://plumbr.io/blog/java/oomkillers-in-docker-are-more-complex-than-you-thought</a></li>
@@ -383,8 +509,10 @@
 <li>dockerd 在处理 OOM 事件时，记录 container oom 事件</li>
 <li>dockerd 在处理 Exit 事件时，将 OOMKilled = true 写入容器的 status</li>
 </ol>
-<h1 id="K8S-Resource-Limit"><a href="#K8S-Resource-Limit" class="headerlink" title="K8S Resource Limit"></a>K8S Resource Limit</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run">https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run</a></p>
-<h2 id="CPU-Docker-Container-config"><a href="#CPU-Docker-Container-config" class="headerlink" title="CPU (Docker Container config)"></a>CPU (Docker Container config)</h2><blockquote>
+<h1 id="k8s-resource-limit"><a class="markdownIt-Anchor" href="#k8s-resource-limit"></a> K8S Resource Limit</h1>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run">https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-limits-are-run</a></p>
+<h2 id="cpu-docker-container-config"><a class="markdownIt-Anchor" href="#cpu-docker-container-config"></a> CPU (Docker Container config)</h2>
+<blockquote>
 <p>CPU is always requested as an absolute quantity, never as a relative quantity; 0.1 is the same amount of CPU on a single-core, dual-core, or 48-core machine.</p>
 </blockquote>
 <ul>
@@ -392,24 +520,28 @@
 </ul>
 <p>例如 requests 为 180，则 <code>--cpu-shares=184320</code></p>
 <ul>
-<li><p><code>--cpu-period</code>: 100</p>
+<li>
+<p><code>--cpu-period</code>: 100</p>
 </li>
-<li><p><code>--cpu-quota</code>: limits.cpu * 100</p>
+<li>
+<p><code>--cpu-quota</code>: limits.cpu * 100</p>
 </li>
 </ul>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://stackoverflow.com/a/63352630">https://stackoverflow.com/a/63352630</a></p>
-<p> The resulting value is the total amount of CPU time in microseconds that a container can use every <strong>100ms</strong>. A container cannot use more than its share of CPU time during this interval.</p>
+<p>The resulting value is the total amount of CPU time in microseconds that a container can use every <strong>100ms</strong>. A container cannot use more than its share of CPU time during this interval.</p>
 <p>The default quota period is 100ms. The minimum resolution of CPU quota is 1ms.</p>
 </blockquote>
 <p>cpu 时间分片为 period，quota 为实际每个 period 周期中，可使用的 cpu time；假若受到 qutoa 限制的 cpu 任务，在当前 period 的 quota 仍未完成，则当前任务挂起，等待下个 period 继续执行</p>
 <p>multi cpu 机器注意 quota 可以是 period 的倍数，例如限制 container 使用 0.5 cpu，则 <code>--cpu-quota=50</code>，假若主机有 20 cpu，限制 container 使用 10 cpu，则 <code>--cpu-quota=10*100=1000</code></p>
-<h2 id="Memory-Docker-Container-config"><a href="#Memory-Docker-Container-config" class="headerlink" title="Memory (Docker Container config)"></a>Memory (Docker Container config)</h2><ul>
+<h2 id="memory-docker-container-config"><a class="markdownIt-Anchor" href="#memory-docker-container-config"></a> Memory (Docker Container config)</h2>
+<ul>
 <li><code>--memory</code>: int({limits.memory})</li>
 <li><code>--memory-swap</code>: int({limits.memory})</li>
 </ul>
 <p>the container does not have access to swap</p>
-<h2 id="K8s-OOM-Watcher"><a href="#K8s-OOM-Watcher" class="headerlink" title="K8s OOM Watcher"></a>K8s OOM Watcher</h2><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go">https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go</a></p>
+<h2 id="k8s-oom-watcher"><a class="markdownIt-Anchor" href="#k8s-oom-watcher"></a> K8s OOM Watcher</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go">https://github.com/kubernetes/kubernetes/blob/v1.22.1/pkg/kubelet/oom/oom_watcher_linux.go</a></p>
 <ul>
 <li>/dev/kmsg</li>
 </ul>
@@ -418,7 +550,6 @@
 </blockquote>
 <p>当 kubelet 观测到节点发生 system oom 时（非 cgroup oom），生成 event；可通过 kubectl 工具查询</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get event --field-selector type&#x3D;Warning,reason&#x3D;SystemOOM</span><br></pre></td></tr></table></figure>
-
 <p>如下 PR 尝试将 pod 内进程 oom 关联至 pod，未合入</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/issues/100483">https://github.com/kubernetes/kubernetes/issues/100483</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/pull/100487">https://github.com/kubernetes/kubernetes/pull/100487</a></p>
@@ -528,7 +659,6 @@ InitContainer --&gt; TrainingContainer
 InitContainer --&gt; SidecarContainer
 </code>
 </pre>
-
 <p>InitContainer and SidecarContainer act like system container and they are transparent to the TrainingContainer</p>
 <p>TrainingJob(process) of user is running at TrainingContainer</p>
 <p>we can do the init env action at InitContainer, such as download data, and the upload action can be done at SidecarContainer</p>
@@ -636,15 +766,14 @@ InitContainer --&gt; SidecarContainer
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="pod-spec-of-volcano-job"><a href="#pod-spec-of-volcano-job" class="headerlink" title="pod spec of volcano job"></a>pod spec of volcano job</h1><p><a target="_blank" rel="noopener" href="https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go">https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go</a></p>
+          <h1 id="pod-spec-of-volcano-job"><a class="markdownIt-Anchor" href="#pod-spec-of-volcano-job"></a> pod spec of volcano job</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go">https://github.com/volcano-sh/volcano/blob/v1.3.0/pkg/controllers/job/job_controller_util.go</a></p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    v1 <span class="string">&quot;k8s.io/api/core/v1&quot;</span></span><br><span class="line">    ...</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// MakePodName append podname,jobname,taskName and index and returns the string.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakePodName</span><span class="params">(jobName <span class="keyword">string</span>, taskName <span class="keyword">string</span>, index <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fmt.Sprintf(jobhelpers.PodNameFmt, jobName, taskName, index)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">createJobPod</span><span class="params">(job *batch.Job, template *v1.PodTemplateSpec, ix <span class="keyword">int</span>)</span> *<span class="title">v1</span>.<span class="title">Pod</span></span> &#123;</span><br><span class="line">	templateCopy := template.DeepCopy()</span><br><span class="line"></span><br><span class="line">	pod := &amp;v1.Pod&#123;</span><br><span class="line">		ObjectMeta: metav1.ObjectMeta&#123;</span><br><span class="line">			Name:      jobhelpers.MakePodName(job.Name, template.Name, ix),</span><br><span class="line">			Namespace: job.Namespace,</span><br><span class="line">			OwnerReferences: []metav1.OwnerReference&#123;</span><br><span class="line">				*metav1.NewControllerRef(job, helpers.JobKind),</span><br><span class="line">			&#125;,</span><br><span class="line">			Labels:      templateCopy.Labels,</span><br><span class="line">			Annotations: templateCopy.Annotations,</span><br><span class="line">		&#125;,</span><br><span class="line">		Spec: templateCopy.Spec,</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="sysctl-of-pod-spec"><a href="#sysctl-of-pod-spec" class="headerlink" title="sysctl of pod spec"></a>sysctl of pod spec</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/">https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/</a></p>
+<h1 id="sysctl-of-pod-spec"><a class="markdownIt-Anchor" href="#sysctl-of-pod-spec"></a> sysctl of pod spec</h1>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/">https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: sysctl-example</span><br><span class="line">spec:</span><br><span class="line">  securityContext:</span><br><span class="line">    sysctls:</span><br><span class="line">    - name: net.ipv4.ip_local_port_range</span><br><span class="line">      value: &quot;30000 50000&quot;</span><br></pre></td></tr></table></figure>
-
 <p>find out current ip local port range</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;ip_local_port_range</span><br></pre></td></tr></table></figure>
-
 <p><a target="_blank" rel="noopener" href="https://www.thegeekdiary.com/how-to-reserve-a-port-range-for-a-third-party-application-in-centos-rhel/">https://www.thegeekdiary.com/how-to-reserve-a-port-range-for-a-third-party-application-in-centos-rhel/</a></p>
 <blockquote>
 <p>Note: ip_local_port_range and ip_local_reserved_ports settings are independent and both are considered by the kernel when determining which ports are available for <strong>automatic port assignments</strong>.</p>
@@ -753,17 +882,17 @@ InitContainer --&gt; SidecarContainer
 <li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine">https://stackoverflow.com/questions/52346262/how-to-call-cancel-when-using-exec-commandcontext-in-a-goroutine</a></li>
 </ul>
 <blockquote>
-<p><a target="_blank" rel="noopener" href="https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them">https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them</a>.</p>
+<p><a target="_blank" rel="noopener" href="https://blog.golang.org/context#:~:text=A%20Context%20is%20safe%20for,to%20signal%20all%20of%20them">https://blog.golang.org/context#:~:text=A Context is safe for,to signal all of them</a>.</p>
 <p>A Context is safe for simultaneous use by multiple goroutines. Code can pass a single Context to any number of goroutines and cancel that Context to signal all of them.</p>
 </blockquote>
-<h1 id="project-structure"><a href="#project-structure" class="headerlink" title="project structure"></a>project structure</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── cmd</span><br><span class="line">│   └── command.go</span><br><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── main.go</span><br><span class="line">└── pkg</span><br><span class="line">    └── run</span><br><span class="line">        └── long_run_cli.go</span><br><span class="line"></span><br><span class="line">3 directories, 5 files</span><br></pre></td></tr></table></figure>
-
-<h1 id="main-go"><a href="#main-go" class="headerlink" title="main.go"></a>main.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/cmd&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)</span><br><span class="line"></span><br><span class="line">	ctx := context.Background()</span><br><span class="line">	ctx, cancel := context.WithCancel(ctx)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-c:</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	cmd.Execute(ctx)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="command-go"><a href="#command-go" class="headerlink" title="command.go"></a>command.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cmd</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/spf13/cobra&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/pkg/run&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> rootCmd = &amp;cobra.Command&#123;</span><br><span class="line">	Use:   <span class="string">&quot;long run cli&quot;</span>,</span><br><span class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">		cli := run.New()</span><br><span class="line">		err := cli.LongRun(cmd.Context())</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;cli run err: %v\n&quot;</span>, err)</span><br><span class="line">			<span class="keyword">if</span> exitError, ok := err.(*exec.ExitError); ok &#123;</span><br><span class="line">				fmt.Printf(<span class="string">&quot;exit code: %d\n&quot;</span>, exitError.ExitCode())</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Execute</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := rootCmd.ExecuteContext(ctx); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;err: %v\n&quot;</span>, err)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="long-run-cli-go"><a href="#long-run-cli-go" class="headerlink" title="long_run_cli.go"></a>long_run_cli.go</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> run</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> CLI <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cli CLI)</span> <span class="title">LongRun</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	cmd := exec.CommandContext(ctx, <span class="string">&quot;sleep&quot;</span>, <span class="string">&quot;30&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> cmd.Run()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> *<span class="title">CLI</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;CLI&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h1 id="project-structure"><a class="markdownIt-Anchor" href="#project-structure"></a> project structure</h1>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── cmd</span><br><span class="line">│   └── command.go</span><br><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── main.go</span><br><span class="line">└── pkg</span><br><span class="line">    └── run</span><br><span class="line">        └── long_run_cli.go</span><br><span class="line"></span><br><span class="line">3 directories, 5 files</span><br></pre></td></tr></table></figure>
+<h1 id="maingo"><a class="markdownIt-Anchor" href="#maingo"></a> main.go</h1>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/cmd&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)</span><br><span class="line"></span><br><span class="line">	ctx := context.Background()</span><br><span class="line">	ctx, cancel := context.WithCancel(ctx)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-c:</span><br><span class="line">			cancel()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	cmd.Execute(ctx)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="commandgo"><a class="markdownIt-Anchor" href="#commandgo"></a> command.go</h1>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cmd</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/spf13/cobra&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;zs/toolkit-cli/pkg/run&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> rootCmd = &amp;cobra.Command&#123;</span><br><span class="line">	Use:   <span class="string">&quot;long run cli&quot;</span>,</span><br><span class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">		cli := run.New()</span><br><span class="line">		err := cli.LongRun(cmd.Context())</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;cli run err: %v\n&quot;</span>, err)</span><br><span class="line">			<span class="keyword">if</span> exitError, ok := err.(*exec.ExitError); ok &#123;</span><br><span class="line">				fmt.Printf(<span class="string">&quot;exit code: %d\n&quot;</span>, exitError.ExitCode())</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Execute</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := rootCmd.ExecuteContext(ctx); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;err: %v\n&quot;</span>, err)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="long_run_cligo"><a class="markdownIt-Anchor" href="#long_run_cligo"></a> long_run_cli.go</h1>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> run</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;os/exec&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> CLI <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cli CLI)</span> <span class="title">LongRun</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	cmd := exec.CommandContext(ctx, <span class="string">&quot;sleep&quot;</span>, <span class="string">&quot;30&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> cmd.Run()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> *<span class="title">CLI</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;CLI&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/exec#CommandContext">https://pkg.go.dev/os/exec#CommandContext</a></p>
 <blockquote>
 <p>The provided context is used to kill the process (by calling os.Process.Kill) if the context becomes done before the command completes on its own.</p>
@@ -872,13 +1001,12 @@ InitContainer --&gt; SidecarContainer
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="get-exit-code-of-pipeline-command-in-background"><a href="#get-exit-code-of-pipeline-command-in-background" class="headerlink" title="get exit code of pipeline command in background"></a>get exit code of pipeline command in background</h1><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process">https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process</a></p>
+          <h1 id="get-exit-code-of-pipeline-command-in-background"><a class="markdownIt-Anchor" href="#get-exit-code-of-pipeline-command-in-background"></a> get exit code of pipeline command in background</h1>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process">https://stackoverflow.com/questions/37257668/get-exit-code-of-a-piped-background-process</a></p>
 <p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0">https://stackoverflow.com/questions/35842600/tee-resets-exit-status-is-always-0</a></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">  $</span><span class="bash">&#123;someCommand&#125; 2&gt;&amp;1 | tee -a training.log</span></span><br><span class="line">  exit $&#123;PIPESTATUS[0]&#125;</span><br><span class="line">&#125; &amp;</span><br><span class="line"></span><br><span class="line">wait $!</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
-
 <p>回显</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127</span><br></pre></td></tr></table></figure>
-
 <p>综上 wait 即使指定的是 pid，然而内部代码实现依然会 wait pid 对应的 job，这点 wait 的文档里边说的比较隐晦</p>
 <p><a target="_blank" rel="noopener" href="https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html">https://www.gnu.org/software/bash/manual/html_node/Job-Control-Builtins.html</a></p>
 <blockquote>
@@ -887,20 +1015,18 @@ InitContainer --&gt; SidecarContainer
 <p>注意 <strong>return the exit status of the last command waited for</strong></p>
 <p>所以上述代码，wait 命令实际上获取到的是 tee 命令的退出码</p>
 <p>在 shell 中获取 pipeline command status 的简易方法似乎只能通过 <code>$&#123;PIPESTATUS[0]&#125;</code></p>
-<h1 id="get-pid-of-pipeline-command-in-background"><a href="#get-pid-of-pipeline-command-in-background" class="headerlink" title="get pid of pipeline command in background"></a>get pid of pipeline command in background</h1><p>进一步的，我们想获取 someCommand 的 pid，有办法么，尝试做如下改造</p>
+<h1 id="get-pid-of-pipeline-command-in-background"><a class="markdownIt-Anchor" href="#get-pid-of-pipeline-command-in-background"></a> get pid of pipeline command in background</h1>
+<p>进一步的，我们想获取 someCommand 的 pid，有办法么，尝试做如下改造</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    $&#123;someCommand&#125; 2&gt;&amp;1 &amp;</span><br><span class="line">    pid_someCommand=$!</span><br><span class="line">    wait $&#123;pid_someCommand&#125;</span><br><span class="line">    exit $?</span><br><span class="line">&#125; | tee -a training.log &amp;</span><br><span class="line"></span><br><span class="line">wait $!</span><br><span class="line">echo $&#123;PIPESTATUS[0]&#125;</span><br></pre></td></tr></table></figure>
-
 <p>回显</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0</span><br></pre></td></tr></table></figure>
-
 <p>but not work</p>
 <p>最后只能使用 <code>ps -ef | grep someCommand</code> 的终极大法，加上通过 subshell pid 作为 parent id 过滤</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">someCommand=&quot;python test.py&quot;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">  $</span><span class="bash">&#123;someCommand&#125; 2&gt;&amp;1 | tee -a training.log</span></span><br><span class="line">  exit $&#123;PIPESTATUS[0]&#125;</span><br><span class="line">&#125; &amp;</span><br><span class="line">someCommand_job_pid=$!</span><br><span class="line"></span><br><span class="line">someCommand_pid=`ps -efj | awk -v parent_pid=$&#123;someCommand_job_pid&#125; &#x27;$3==parent_pid &#123; print $0 &#125;&#x27; | grep &quot;$&#123;someCommand&#125;&quot; | awk &#x27;&#123; print $2 &#125;&#x27;`</span><br><span class="line">echo someCommand_pid $&#123;someCommand_pid&#125;</span><br><span class="line"></span><br><span class="line">wait $&#123;someCommand_job_pid&#125;</span><br><span class="line">echo $?</span><br></pre></td></tr></table></figure>
-
 <p>回显</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">someCommand_pid 55863</span><br><span class="line">127</span><br></pre></td></tr></table></figure>
-
-<h1 id="test-py"><a href="#test-py" class="headerlink" title="test.py"></a>test.py</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">time.sleep(<span class="number">5</span>)</span><br><span class="line">sys.exit(<span class="number">127</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="testpy"><a class="markdownIt-Anchor" href="#testpy"></a> <a target="_blank" rel="noopener" href="http://test.py">test.py</a></h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">time.sleep(<span class="number">5</span>)</span><br><span class="line">sys.exit(<span class="number">127</span>)</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -999,9 +1125,10 @@ InitContainer --&gt; SidecarContainer
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="log-output-format-sample"><a href="#log-output-format-sample" class="headerlink" title="log output format sample"></a>log output format sample</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO[2021-07-04 15:26:26]main.go:28 have a nice day                               zs&#x3D;log</span><br><span class="line">INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                     zs&#x3D;log</span><br></pre></td></tr></table></figure>
-
-<h1 id="code-sample"><a href="#code-sample" class="headerlink" title="code sample"></a>code sample</h1><p>show timestamp</p>
+          <h1 id="log-output-format-sample"><a class="markdownIt-Anchor" href="#log-output-format-sample"></a> log output format sample</h1>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO[2021-07-04 15:26:26]main.go:28 have a nice day                               zs&#x3D;log</span><br><span class="line">INFO[2021-07-04 15:26:26]main.go:29 zs gogogo                                     zs&#x3D;log</span><br></pre></td></tr></table></figure>
+<h1 id="code-sample"><a class="markdownIt-Anchor" href="#code-sample"></a> code sample</h1>
+<p>show timestamp</p>
 <ul>
 <li><a target="_blank" rel="noopener" href="https://github.com/Sirupsen/logrus/issues/415">https://github.com/Sirupsen/logrus/issues/415</a></li>
 </ul>
@@ -1016,23 +1143,22 @@ InitContainer --&gt; SidecarContainer
 </ul>
 <p>have a little overhead, add filename and line number</p>
 <ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922">https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922</a> </li>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922">https://github.com/sirupsen/logrus/issues/63#issuecomment-548792922</a></li>
 <li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#logging-method-name">https://github.com/sirupsen/logrus#logging-method-name</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go">https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go</a> </li>
+<li><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go">https://github.com/sirupsen/logrus/blob/master/example_custom_caller_test.go</a></li>
 </ul>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;path&quot;</span></span><br><span class="line">	<span class="string">&quot;runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;strconv&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/sirupsen/logrus&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> log = logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter := &amp;logrus.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   <span class="literal">true</span>,</span><br><span class="line">		TimestampFormat: <span class="string">&quot;2006-01-02 15:04:05&quot;</span>,</span><br><span class="line">		CallerPrettyfier: <span class="function"><span class="keyword">func</span><span class="params">(f *runtime.Frame)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">			_, filename := path.Split(f.File)</span><br><span class="line">			<span class="comment">// do not log func name</span></span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, filename + <span class="string">&quot;:&quot;</span> + strconv.Itoa(f.Line)</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.SetFormatter(formatter)</span><br><span class="line">	log.SetReportCaller(<span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger := log.WithField(<span class="string">&quot;zs&quot;</span>, <span class="string">&quot;log&quot;</span>)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(<span class="string">&quot;have a nice day&quot;</span>)</span><br><span class="line">	contextLogger.Infof(<span class="string">&quot;%s gogogo&quot;</span>, <span class="string">&quot;zs&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="third-party-formatter"><a href="#third-party-formatter" class="headerlink" title="third-party formatter"></a>third-party formatter</h1><p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#formatters">https://github.com/sirupsen/logrus#formatters</a></p>
+<h1 id="third-party-formatter"><a class="markdownIt-Anchor" href="#third-party-formatter"></a> third-party formatter</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/sirupsen/logrus#formatters">https://github.com/sirupsen/logrus#formatters</a></p>
 <ul>
 <li><a target="_blank" rel="noopener" href="https://github.com/x-cray/logrus-prefixed-formatter">https://github.com/x-cray/logrus-prefixed-formatter</a></li>
 </ul>
-<h2 id="log-output-format-sample-1"><a href="#log-output-format-sample-1" class="headerlink" title="log output format sample"></a>log output format sample</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[2021-07-04 15:50:26]  INFO log: have a nice day</span><br><span class="line">[2021-07-04 15:50:26]  INFO log: zs gogogo</span><br></pre></td></tr></table></figure>
-
-<h2 id="code-sample-1"><a href="#code-sample-1" class="headerlink" title="code sample"></a>code sample</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;github.com&#x2F;sirupsen&#x2F;logrus&quot;</span><br><span class="line">	prefixed &quot;github.com&#x2F;x-cray&#x2F;logrus-prefixed-formatter&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var log &#x3D; logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter :&#x3D; &amp;prefixed.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   true,</span><br><span class="line">		TimestampFormat: &quot;2006-01-02 15:04:05&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.Formatter &#x3D; formatter</span><br><span class="line"></span><br><span class="line">	contextLogger :&#x3D; log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(&quot;have a nice day&quot;)</span><br><span class="line">	contextLogger.Infof(&quot;%s gogogo&quot;, &quot;zs&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h2 id="log-output-format-sample-2"><a class="markdownIt-Anchor" href="#log-output-format-sample-2"></a> log output format sample</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[2021-07-04 15:50:26]  INFO log: have a nice day</span><br><span class="line">[2021-07-04 15:50:26]  INFO log: zs gogogo</span><br></pre></td></tr></table></figure>
+<h2 id="code-sample-2"><a class="markdownIt-Anchor" href="#code-sample-2"></a> code sample</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;github.com&#x2F;sirupsen&#x2F;logrus&quot;</span><br><span class="line">	prefixed &quot;github.com&#x2F;x-cray&#x2F;logrus-prefixed-formatter&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	var log &#x3D; logrus.New()</span><br><span class="line"></span><br><span class="line">	formatter :&#x3D; &amp;prefixed.TextFormatter&#123;</span><br><span class="line">		FullTimestamp:   true,</span><br><span class="line">		TimestampFormat: &quot;2006-01-02 15:04:05&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	log.Formatter &#x3D; formatter</span><br><span class="line"></span><br><span class="line">	contextLogger :&#x3D; log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br><span class="line"></span><br><span class="line">	contextLogger.Info(&quot;have a nice day&quot;)</span><br><span class="line">	contextLogger.Infof(&quot;%s gogogo&quot;, &quot;zs&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>as previous code show</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contextLogger :&#x3D; log.WithField(&quot;prefix&quot;, &quot;log&quot;)</span><br></pre></td></tr></table></figure>
-
 <p>u can prefix a <em>log</em> key and colon before the msg output</p>
 
       
@@ -1133,14 +1259,16 @@ InitContainer --&gt; SidecarContainer
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="docker-security"><a href="#docker-security" class="headerlink" title="docker security"></a>docker security</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/">https://docs.docker.com/engine/security/</a></p>
+          <h1 id="docker-security"><a class="markdownIt-Anchor" href="#docker-security"></a> docker security</h1>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/">https://docs.docker.com/engine/security/</a></p>
 <p>docker security 总的来说，一个是使用了 <code>kernel namespace</code> 技术，为每个 container 创建了 <code>process</code>, <code>network</code> 等 namepsace，使得多个 container 不会有很大的相互影响</p>
 <p>另外一个方面是使用了 <code>control groups</code> 技术，用于限制 container 所使用的各类资源</p>
 <blockquote>
 <p>ensure that each container gets its fair share of memory, CPU, disk I/O</p>
 </blockquote>
 <p>简单理解，比如 cpu 资源，<code>cgroup</code> 用于避免某个 container 不当使用（或者恶意 or 无意代码 bug）cpu，导致其他 container 没法正常使用 cpu 的场景</p>
-<h1 id="container-root-user"><a href="#container-root-user" class="headerlink" title="container root user"></a>container root user</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/userns-remap/">https://docs.docker.com/engine/security/userns-remap/</a></p>
+<h1 id="container-root-user"><a class="markdownIt-Anchor" href="#container-root-user"></a> container root user</h1>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/security/userns-remap/">https://docs.docker.com/engine/security/userns-remap/</a></p>
 <p>container 中不建议使用 <code>root</code> 用户执行进程，很大部分原因因为容器内的 uid gid 会映射到 host 上，举个例子，一旦容器内的进程逃逸到 host 上，那么它也有 <code>root</code> 用户的权限</p>
 <blockquote>
 <p>虽然说容器内的进程逃逸，是很严重的安全问题，docker 社区会第一时间修复</p>
@@ -1255,141 +1383,8 @@ InitContainer --&gt; SidecarContainer
 <p>Single Root I/O Virtualization (SR-IOV) network</p>
 <p><a target="_blank" rel="noopener" href="https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html">https://docs.openshift.com/container-platform/4.6/networking/hardware_networks/about-sriov.html</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/k8snetworkplumbingwg/sriov-cni">https://github.com/k8snetworkplumbingwg/sriov-cni</a></p>
-<p><a target="_blank" rel="noopener" href="https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV">https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes%20Using%20SR-IOV">https://docs.mellanox.com/display/MLNXOFEDv461000/Kubernetes Using SR-IOV</a></p>
 <p><a target="_blank" rel="noopener" href="https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5">https://community.mellanox.com/s/article/kubernetes-ipoib-sriov-networking-with-connectx4-connectx5</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/84d885dc.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/84d885dc.html" class="post-title-link" itemprop="url">learning golang again</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-05-31 00:57:11" itemprop="dateCreated datePublished" datetime="2021-05-31T00:57:11Z">2021-05-31</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-20 14:32:18" itemprop="dateModified" datetime="2026-03-20T14:32:18Z">2026-03-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>691</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Type-size"><a href="#Type-size" class="headerlink" title="Type size"></a>Type size</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://golang.org/ref/spec#Size_and_alignment_guarantees">https://golang.org/ref/spec#Size_and_alignment_guarantees</a></p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go">https://github.com/ardanlabs/gotraining-studyguide/blob/master/go/language/struct.go</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type example struct &#123;</span><br><span class="line">	flag    bool</span><br><span class="line">	counter int16</span><br><span class="line">	pi      float32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>字节对齐系数 <code>#pragma pack(n)</code></p>
-<ul>
-<li>成员对齐</li>
-<li>结构体对齐</li>
-</ul>
-<p>对齐系数规则</p>
-<blockquote>
-<ol>
-<li>For a variable x of any type: unsafe.Alignof(x) is at least 1.</li>
-<li>For a variable x of struct type: unsafe.Alignof(x) is the largest of all the values unsafe.Alignof(x.f) for each field f of x, but at least 1.</li>
-<li>For a variable x of array type: unsafe.Alignof(x) is the same as the alignment of a variable of the array’s element type.</li>
-</ol>
-</blockquote>
-<p>layout</p>
-<ul>
-<li>bool(0)</li>
-<li>int16(2)</li>
-<li>float32(4)</li>
-</ul>
-<p>8 bytes</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align">https://eddycjy.gitbook.io/golang/di-1-ke-za-tan/go-memory-align</a></p>
-</blockquote>
-<p>//TODO list</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://draveness.me/golang/">https://draveness.me/golang/</a></li>
-<li><a target="_blank" rel="noopener" href="https://golang.design/under-the-hood/">https://golang.design/under-the-hood/</a></li>
-</ul>
 
       
     </div>
@@ -1431,13 +1426,13 @@ InitContainer --&gt; SidecarContainer
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

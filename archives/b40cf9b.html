@@ -66,6 +66,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -135,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,34 +246,29 @@
 <p>kubernetes/pkg/controller/volume/persistentvolume/pv_controller.go</p>
 </blockquote>
 <p>claim.Spec.VolumeName == nil 时</p>
-<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 volume.beta.kubernetes.io/storage-class 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
+<p>storage-controller 会从已有的 volume 中查找符合该 claim 的 volume，如果没找到该 volume，则从 claim 的 annotation 中获取 <a target="_blank" rel="noopener" href="http://volume.beta.kubernetes.io/storage-class">volume.beta.kubernetes.io/storage-class</a> 字段 / 或从 Spec.StorageClassName 获取 storage-class 的值</p>
 <ul>
-<li>volume.beta.kubernetes.io/storage-class</li>
+<li><a target="_blank" rel="noopener" href="http://volume.beta.kubernetes.io/storage-class">volume.beta.kubernetes.io/storage-class</a></li>
 <li>Spec.StorageClassName</li>
 </ul>
 <p>在允许动态提供存储（enableDynamicProvisioning）的情况下，尝试去提供一个 volume</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newClaim, err := ctrl.setClaimProvisioner(claim, storageClass)</span><br></pre></td></tr></table></figure>
-
 <p>动态的 pvc 会增加如下 annotation</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">volume.beta.kubernetes.io/storage-provisioner: class.Provisioner</span><br><span class="line">pv.kubernetes.io/bound-by-controller: yes</span><br><span class="line">pv.kubernetes.io/provisioned-by: plugin.GetPluginName()</span><br></pre></td></tr></table></figure>
-
 <p>从存储提供服务获取 volume 的过程是异步的，当获取完成时，设置如下 annotation</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pv.kubernetes.io/bind-completed: yes</span><br></pre></td></tr></table></figure>
-
 <p>如果是其他可以直接 bind 的情况，在 bind 的方法中也会设置上述 annotation</p>
 <p>所以可以通过 pvc annotation</p>
 <ul>
-<li>pv.kubernetes.io/bound-by-controller: yes</li>
+<li><a target="_blank" rel="noopener" href="http://pv.kubernetes.io/bound-by-controller:">pv.kubernetes.io/bound-by-controller:</a> yes</li>
 </ul>
 <p>确认该 pvc 为动态创建还是直接使用</p>
 <p>不过该字段还有一种情况下可能被设置</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> claim.Name != volume.Spec.ClaimRef.Name || claim.Namespace != volume.Spec.ClaimRef.Namespace &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> volume.Spec.ClaimRef.UID != <span class="string">&quot;&quot;</span> &amp;&amp; claim.UID != volume.Spec.ClaimRef.UID &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>volume 和 claim binding 时，发现 volume 与 claim 的字段不匹配</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Check if the claim was already bound (either by controller or by user)</span></span><br><span class="line">shouldBind := <span class="literal">false</span></span><br><span class="line"><span class="keyword">if</span> volume.Name != claim.Spec.VolumeName &#123;</span><br><span class="line">    shouldBind = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>clain 和 volume binding 时，也会出现这种情况，当 volume 与 claim 的字段不匹配时</p>
-<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 pv.kubernetes.io/bound-by-controller: yes 判断动态创建是否准确?</p>
+<p>目前实践经验不足，还不是特别明白这是什么情况下才会出现的，使用 <a target="_blank" rel="noopener" href="http://pv.kubernetes.io/bound-by-controller:">pv.kubernetes.io/bound-by-controller:</a> yes 判断动态创建是否准确?</p>
 
     </div>
 
@@ -323,13 +323,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

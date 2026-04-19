@@ -67,6 +67,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -240,31 +245,26 @@
     <div class="post-body" itemprop="articleBody"><p><a target="_blank" rel="noopener" href="https://github.com/open-mpi/ompi/issues/6691#issuecomment-497245597">https://github.com/open-mpi/ompi/issues/6691#issuecomment-497245597</a></p>
 <p>ess_hnp_module.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">orte_set_attribute(&amp;transports, ORTE_RML_TRANSPORT_TYPE, ORTE_ATTR_LOCAL, orte_mgmt_transport, OPAL_STRING);</span><br><span class="line">orte_mgmt_conduit = orte_rml.open_conduit(&amp;transports);</span><br><span class="line">orte_set_attribute(&amp;transports, ORTE_RML_TRANSPORT_TYPE, ORTE_ATTR_LOCAL, orte_coll_transport, OPAL_STRING);</span><br><span class="line">orte_coll_conduit = orte_rml.open_conduit(&amp;transports);</span><br></pre></td></tr></table></figure>
-
 <p>rml: resource message layer</p>
 <p>根据 attr 选择 rtmod, 返回的为 mod 在 array 中的 index</p>
 <blockquote>
-<p>Open conduit - call each component and see if they can provide a<br>conduit that can satisfy all these attributes - return the conduit id<br>(a negative value indicates error)</p>
+<p>Open conduit - call each component and see if they can provide a<br />
+conduit that can satisfy all these attributes - return the conduit id<br />
+(a negative value indicates error)</p>
 </blockquote>
 <p>rml_base_stubs.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orte_rml_API_open_conduit</span><br></pre></td></tr></table></figure>
-
 <p>遍历 active 的 rml mod, 调用各个 rml mod 的 open_conduit, 例如 oob (rml_oob_component.c), 返回 mod 之后，存入 array，返回 array index</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">open_conduit()</span><br><span class="line"></span><br><span class="line">orte_get_attribute(attributes, ORTE_RML_TRANSPORT_TYPE, (void**)&amp;comp_attrib, OPAL_STRING)</span><br></pre></td></tr></table></figure>
-
 <p>从 attr 里获取 key 值，即 orte_mgmt_transport or orte_coll_transport, 确定是否指定了 oob</p>
 <p>继续获取 routed mod</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orte_get_attribute(attributes, ORTE_RML_ROUTED_ATTRIB, (<span class="keyword">void</span>**)&amp;comp_attrib, OPAL_STRING);</span><br></pre></td></tr></table></figure>
-
 <p>根据设置的 routed mod (NULL 则按优先级) 分配 routed mod</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">md-&gt;routed = orte_routed.assign_module(comp_attrib);</span><br></pre></td></tr></table></figure>
-
 <p>orte_mca_params.c</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">orte_mgmt_transport &#x3D; &quot;oob&quot; &#x2F;&#x2F; default</span><br><span class="line"></span><br><span class="line">--mca orte_mgmt_transport </span><br><span class="line"></span><br><span class="line">ORTE management messages</span><br><span class="line"></span><br><span class="line">orte_coll_transport &#x3D; &quot;fabric,ethernet&quot; &#x2F;&#x2F; default</span><br><span class="line"></span><br><span class="line">--mca orte_coll_transports</span><br><span class="line"></span><br><span class="line">ORTE collectives</span><br></pre></td></tr></table></figure>
-
 <p>plm_base_launch_support.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">param = <span class="literal">NULL</span>;</span><br><span class="line"><span class="keyword">if</span> (ORTE_SUCCESS != (rc = orte_regx.nidmap_create(orte_node_pool, &amp;param))) &#123;</span><br><span class="line">    ORTE_ERROR_LOG(rc);</span><br><span class="line">    <span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="literal">NULL</span> != orte_node_regex) &#123;</span><br><span class="line">    <span class="built_in">free</span>(orte_node_regex);</span><br><span class="line">&#125;</span><br><span class="line">orte_node_regex = param;</span><br><span class="line"><span class="comment">/* if this is too long, then we&#x27;ll have to do it with</span></span><br><span class="line"><span class="comment"> * a phone home operation instead */</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">strlen</span>(param) &lt; orte_plm_globals.node_regex_threshold) &#123;</span><br><span class="line">    opal_argv_append(argc, argv, <span class="string">&quot;-&quot;</span>OPAL_MCA_CMD_LINE_ID);</span><br><span class="line">    opal_argv_append(argc, argv, <span class="string">&quot;orte_node_regex&quot;</span>);</span><br><span class="line">    opal_argv_append(argc, argv, orte_node_regex);</span><br><span class="line">    <span class="comment">/* mark that the nidmap has been communicated */</span></span><br><span class="line">    orte_nidmap_communicated = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>orte_node_pool</p>
 <p><code>node_regex_threshold</code> = 1024 default len</p>
 <p>Resource Allocation Subsystem (RAS)</p>
@@ -323,13 +323,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

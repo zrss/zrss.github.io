@@ -64,6 +64,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -133,7 +138,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -161,6 +166,171 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/a1778563.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/a1778563.html" class="post-title-link" itemprop="url">k8s-subpath-and-s3fs</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-05 10:11:38" itemprop="dateCreated datePublished" datetime="2020-04-05T10:11:38Z">2020-04-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>k8s subPath and s3 fuse mount (s3fs)</p>
+<p>意识流分析，致敬一个生产环境中的问题，真是看了很多代码</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/s3fs-fuse/s3fs-fuse">https://github.com/s3fs-fuse/s3fs-fuse</a></p>
+<p>实现了 fuse 接口，底层对接 s3 协议</p>
+<p>打开 s3fs info 日志，观察可知</p>
+<p>fuse 周期性触发</p>
+<ol>
+<li>s3fs_getattr
+<ol>
+<li>check_object_access
+<ol>
+<li>get_object_attribute
+<ol>
+<li>s3 head request</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>check_parent_object_access</li>
+</ol>
+</li>
+<li>s3fs_opendir
+<ol>
+<li>check_object_access
+<ol>
+<li>check_parent_object_access</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>s3fs_readdir 方法，该方法底层会调用 list_bucket func，到s3 server查询对象列表
+<ol>
+<li>查询到有新的对象后，会 add 到本地 stat cache，并且下载到本地</li>
+</ol>
+</li>
+</ol>
+<p>所以使用 s3fs mount s3 bucket 到本地时，s3fs 会周期性同步远端的数据到本地，写入时，也会同步到远端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -SIGUSR2 <span class="variable">$&#123;s3fs_pid&#125;</span></span><br></pre></td></tr></table></figure>
+<p>可以动态调整 s3fs 日志级别，s3fs 默认日志输出到 /var/log/messages</p>
+<p>messages.2.gz 文件解压，可以使用 <code>gzip -d messages.2.gz</code></p>
+<hr />
+<p>生产环境出了一个诡异的问题</p>
+<p>server / worker 两个实例，在不同节点，挂载了同一个桶</p>
+<p>k8s subPath 方式挂载子对象，例如 test-bucket/output1</p>
+<p>在开始阶段 server s3fs 会上传 test-bucket/output1 文件夹，两次</p>
+<p>而 worker s3fs 不会</p>
+<p>debug 了一会儿，直接原因与 s3 对象的权限相关，用户创建的对象，s3fs mount 时，没权限 head，但是又能 list 到</p>
+<p>s3fs 如果 list 该对象为非空时，可正常读写该对象下的内容，也与验证结果符合 -.0</p>
+<hr />
+<p>分割线，前边是一些分析</p>
+<p>k8s subPath</p>
+<p>subPath 是相对于 volume root path 的一个 sub path，用于挂载 volume 内的子目录</p>
+<p>实现上首先会将 volume 挂载于节点的 pod volume 路径下</p>
+<ol>
+<li>再去 open subPath，open 之后，成为 kubelet 进程下的一个 fd</li>
+<li>接下来创建 volume-subpaths 下的一个路径（文件名与 volumeMount index 一致），并且判断 subPath 是文件还是文件夹
+<ol>
+<li>文件夹，mkdir 一把</li>
+<li>文件，写一个空文件</li>
+</ol>
+</li>
+<li>最后将该 fd mount 到上述创建的路径中</li>
+</ol>
+<p>不明点，在 1 步骤上，实际上 subPath 为 noObject；从文件系统的角度不确定它为文件夹，还是对象，而 kubelet 却执行成功了，并顺利挂载到容器中</p>
+<p>从 s3fs 的日志，对 subPath 首先执行了</p>
+<ol>
+<li>s3fs_mkdir，mode 0750</li>
+<li>s3fs_chmod，mode 40777</li>
+</ol>
+<p>即触发了两次 s3 PUT.OBJECT 的操作</p>
+<p>这块就不深入分析了为何如此了</p>
+<p>感叹一下，系统层层调用之后，问题定位需要极其清晰的思路，大胆假设，小心求证；解决问题的思路是第一重要的</p>
+<hr />
+<p>另外 s3fs 1.80 版本 err ret 不打印错误信息，只打印了个 response code，这个也比较伤，建议升级到当前最新版本<br />
+s3fs 1.86，会把错误信息也打印出来</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -332,13 +502,11 @@
 <p><code>KUBERNETES_SERVICE_HOST</code></p>
 <p><code>KUBERNETES_SERVICE_PORT</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--class=...</span><br><span class="line">--master k8s://https://%s:%s</span><br><span class="line">--deploy-mode cluster/client</span><br><span class="line">--conf spark.kubernetes.namespace=default</span><br><span class="line">--conf spark.app.name=spark-pi</span><br><span class="line">SparkPi.jar (MainApplicationFile: MainFile is the path to a bundled JAR, Python, or R file of the application.)</span><br></pre></td></tr></table></figure>
-
 <p>SPARK_HOME/bin/spark-submit args</p>
 <p>Spark-on-k8s-operator controller run the <code>spark-submit</code> scripts</p>
 <p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html</a></p>
 <p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#cluster-mode</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ bin/spark-submit \</span><br><span class="line">    --master k8s://https://&lt;k8s-apiserver-host&gt;:&lt;k8s-apiserver-port&gt; \</span><br><span class="line">    --deploy-mode cluster</span><br><span class="line">    --name spark-pi \</span><br><span class="line">    --class org.apache.spark.examples.SparkPi \</span><br><span class="line">    --conf spark.executor.instances=5 \</span><br><span class="line">    --conf spark.kubernetes.container.image=&lt;spark-image&gt; \</span><br><span class="line">    <span class="built_in">local</span>:///path/to/examples.jar</span><br></pre></td></tr></table></figure>
-
 <p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management">https://spark.apache.org/docs/2.3.1/running-on-kubernetes.html#dependency-management</a></p>
 <p>client mode is not supported in 2.3.1 (cluster manager)</p>
 <p>but it seems work in 2.4</p>
@@ -346,7 +514,6 @@
 <p>Dependencies Jars and Files</p>
 <p>logs</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n=&lt;namespace&gt; logs -f &lt;driver-pod-name&gt;</span><br></pre></td></tr></table></figure>
-
 <p><a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md">https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/design.md</a></p>
 
       
@@ -567,15 +734,14 @@
 <p><a target="_blank" rel="noopener" href="https://amazonaws-china.com/sagemaker/pricing/instance-types/">https://amazonaws-china.com/sagemaker/pricing/instance-types/</a></p>
 <p>性能最好的实例类型当前为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ml.p3dn.24xlarge</span><br><span class="line">vCPU: 96  </span><br><span class="line">GPUs: 8xV100  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
-
 <p>EC2 对应的实例类型为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">p3dn.24xlarge   </span><br><span class="line">GPUs: 8   </span><br><span class="line">vCPU: 96  </span><br><span class="line">Mem(GiB): 768 </span><br><span class="line">GPU Mem(GiB): 256 </span><br><span class="line">GPU P2P: NVLink  </span><br><span class="line">Storage(GB): 2 x 900 NVMe SSD    </span><br><span class="line">Dedicated EBS Bandwidth: 14 Gbps </span><br><span class="line">Networking Performance: 100 Gigabit</span><br></pre></td></tr></table></figure>
-
 <p>100 Gigabit 由 AWS efa 提供，提供 OS-bypass 通信能力，应该就是 Infiniband 网络</p>
 <p>启动训练过程 (Script Mode)</p>
 <ul>
 <li>上传本地代码至 S3</li>
-<li>调用 Sagemaker 创建训练作业接口<ul>
+<li>调用 Sagemaker 创建训练作业接口
+<ul>
 <li>创建 EC2 实例</li>
 <li>在 EC2 实例上启动 Sagemaker 系统进程</li>
 <li>下载数据集</li>
@@ -773,7 +939,8 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="hikari-轻量级数据库连接池"><a href="#hikari-轻量级数据库连接池" class="headerlink" title="hikari 轻量级数据库连接池"></a>hikari 轻量级数据库连接池</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources</a></p>
+          <h1 id="hikari-轻量级数据库连接池"><a class="markdownIt-Anchor" href="#hikari-轻量级数据库连接池"></a> hikari 轻量级数据库连接池</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources</a></p>
 <p>这句话挺有趣，言简意赅</p>
 <blockquote>
 <p>More threads only perform better when blocking creates opportunities for executing.</p>
@@ -784,23 +951,28 @@
 <p>如果有 IO 阻塞等情况，使得线程在自己的时间片中，不能充分使用 CPU core，这样通过线程切换技术，可以提高 CPU core 的使用率，最终来看提高了性能 (吞吐量)</p>
 <p>因此 PostgresSQL 项目给出了一个连接数计算的参考公式</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">connections &#x3D; ((core_count * 2) + effective_spindle_count)</span><br></pre></td></tr></table></figure>
-
 <blockquote>
-<p>Effective spindle count is zero if<br>the active data set is fully cached, and approaches the actual number of spindles<br>as the cache hit rate falls</p>
+<p>Effective spindle count is zero if<br />
+the active data set is fully cached, and approaches the actual number of spindles<br />
+as the cache hit rate falls</p>
 </blockquote>
 <p>effective_spindle_count 即 IO 等待时间的估计值</p>
-<h1 id="hikari-特殊的优化手段介绍"><a href="#hikari-特殊的优化手段介绍" class="headerlink" title="hikari 特殊的优化手段介绍"></a>hikari 特殊的优化手段介绍</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole">https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole</a></p>
+<h1 id="hikari-特殊的优化手段介绍"><a class="markdownIt-Anchor" href="#hikari-特殊的优化手段介绍"></a> hikari 特殊的优化手段介绍</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole">https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole</a></p>
 <ul>
 <li>修改代码: 生成更优的字节码</li>
 <li>实现特定的数据结构: 更好的性能</li>
 </ul>
-<h1 id="连接池的一些问题"><a href="#连接池的一些问题" class="headerlink" title="连接池的一些问题"></a>连接池的一些问题</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking</a></p>
-<h2 id="一个线程获取多个数据库连接（饿死）"><a href="#一个线程获取多个数据库连接（饿死）" class="headerlink" title="一个线程获取多个数据库连接（饿死）"></a>一个线程获取多个数据库连接（饿死）</h2><p>可能的优化方案</p>
+<h1 id="连接池的一些问题"><a class="markdownIt-Anchor" href="#连接池的一些问题"></a> 连接池的一些问题</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking</a></p>
+<h2 id="一个线程获取多个数据库连接饿死"><a class="markdownIt-Anchor" href="#一个线程获取多个数据库连接饿死"></a> 一个线程获取多个数据库连接（饿死）</h2>
+<p>可能的优化方案</p>
 <ul>
 <li>设置保证不会出现饿死情况的 pool size = Tn x (Cm - 1) + 1, Tn 为线程数, Cm 为每个线程最大获取的连接数</li>
 <li>如果当前线程已经获取过数据库连接，再调用 getConnection 时，返回该线程当前的 connection，而不是返回新的 connection</li>
 </ul>
-<h1 id="hikari-的一些配置项"><a href="#hikari-的一些配置项" class="headerlink" title="hikari 的一些配置项"></a>hikari 的一些配置项</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby">https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby</a></p>
+<h1 id="hikari-的一些配置项"><a class="markdownIt-Anchor" href="#hikari-的一些配置项"></a> hikari 的一些配置项</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby">https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby</a></p>
 <p><strong>leakDetectionThreshold</strong>: connection 泄漏告警，getConnection 后，在 leakDetectionThreshold 时间前，未调用 close 方法，会日志打印告警</p>
 <p>慢 SQL (10s 以上执行时间) 会导致该告警</p>
 <p><strong>idleTimeout</strong> = idleTimeout = 600s</p>
@@ -829,18 +1001,20 @@
 <p>This property controls the maximum number of milliseconds that a client (that’s you) will wait for a connection from the pool.</p>
 </blockquote>
 <p>getConnection 的超时时间</p>
-<h1 id="与-Scala-Slick-结合"><a href="#与-Scala-Slick-结合" class="headerlink" title="与 Scala Slick 结合"></a>与 Scala Slick 结合</h1><p>增加 slick-hikari 依赖</p>
+<h1 id="与-scala-slick-结合"><a class="markdownIt-Anchor" href="#与-scala-slick-结合"></a> 与 Scala Slick 结合</h1>
+<p>增加 slick-hikari 依赖</p>
 <p><a target="_blank" rel="noopener" href="http://slick.lightbend.com/doc/3.2.1/gettingstarted.html#adding-slick-to-your-project">http://slick.lightbend.com/doc/3.2.1/gettingstarted.html#adding-slick-to-your-project</a></p>
 <p>增加 typesafe config 配置项</p>
 <p><a target="_blank" rel="noopener" href="http://slick.lightbend.com/doc/3.2.1/database.html#connection-pools">http://slick.lightbend.com/doc/3.2.1/database.html#connection-pools</a></p>
-<p>注意到 slick 将 hikari 的初始化方法封装了一层，另外该文档有一些错误，建议直接参考 hikari 的 readme.md 说明，也没几个核心参数</p>
+<p>注意到 slick 将 hikari 的初始化方法封装了一层，另外该文档有一些错误，建议直接参考 hikari 的 <a target="_blank" rel="noopener" href="http://readme.md">readme.md</a> 说明，也没几个核心参数</p>
 <p><a target="_blank" rel="noopener" href="http://slick.lightbend.com/doc/3.2.1/api/index.html#slick.jdbc.JdbcBackend$DatabaseFactoryDef@forConfig(String,Config,Driver,ClassLoader):Database">http://slick.lightbend.com/doc/3.2.1/api/index.html#slick.jdbc.JdbcBackend$DatabaseFactoryDef@forConfig(String,Config,Driver,ClassLoader):Database</a></p>
 <p>Slick 这个 O (or function) RM 怎么说呢，一言难尽，表达式太弱 (当然可能是我不熟悉如此灵魂的 function 写法)，生成的 SQL 语句非最优。举个例子</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(<span class="number">1</span>), <span class="keyword">count</span>(<span class="keyword">distinct</span> job_name), * <span class="keyword">from</span> A, B, C</span><br></pre></td></tr></table></figure>
-
 <p>就没法实现，要么写成子查询，要么只能分开并发执行，or 直接写 sql 语句 …</p>
-<h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>注意到 slick 维护一个内部线程池，用于执行数据库相关的异步操作，通过 numThreads 参数指定最大线程数</p>
-<h2 id="Database-forConfig"><a href="#Database-forConfig" class="headerlink" title="Database.forConfig()"></a>Database.forConfig()</h2><p>numThreads: 用于执行数据库相关的异步操作的线程数</p>
+<h2 id="线程池"><a class="markdownIt-Anchor" href="#线程池"></a> 线程池</h2>
+<p>注意到 slick 维护一个内部线程池，用于执行数据库相关的异步操作，通过 numThreads 参数指定最大线程数</p>
+<h2 id="databaseforconfig"><a class="markdownIt-Anchor" href="#databaseforconfig"></a> Database.forConfig()</h2>
+<p>numThreads: 用于执行数据库相关的异步操作的线程数</p>
 <p>maxConnections = numThreads * 5</p>
 <p>minimumIdle = numThreads</p>
 <p>因此以 Slick numThreads = 16 为例</p>
@@ -848,7 +1022,8 @@
 <li>maximumPoolSize = 16 * 5 = 80</li>
 <li>minimumIdle = 16</li>
 </ul>
-<h1 id="hikari-summary"><a href="#hikari-summary" class="headerlink" title="hikari summary"></a>hikari summary</h1><p>关键配置项</p>
+<h1 id="hikari-summary"><a class="markdownIt-Anchor" href="#hikari-summary"></a> hikari summary</h1>
+<p>关键配置项</p>
 <ul>
 <li>minimumIdle 决定了连接池中的最小 idle 连接数，当 idle 连接少于该阈值时，hikari 会尽快补齐</li>
 <li>idleTimeout (10min) 决定了 idle 连接的存活时间</li>
@@ -948,31 +1123,26 @@
           <p><a target="_blank" rel="noopener" href="https://github.com/open-mpi/ompi/issues/6691#issuecomment-497245597">https://github.com/open-mpi/ompi/issues/6691#issuecomment-497245597</a></p>
 <p>ess_hnp_module.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">orte_set_attribute(&amp;transports, ORTE_RML_TRANSPORT_TYPE, ORTE_ATTR_LOCAL, orte_mgmt_transport, OPAL_STRING);</span><br><span class="line">orte_mgmt_conduit = orte_rml.open_conduit(&amp;transports);</span><br><span class="line">orte_set_attribute(&amp;transports, ORTE_RML_TRANSPORT_TYPE, ORTE_ATTR_LOCAL, orte_coll_transport, OPAL_STRING);</span><br><span class="line">orte_coll_conduit = orte_rml.open_conduit(&amp;transports);</span><br></pre></td></tr></table></figure>
-
 <p>rml: resource message layer</p>
 <p>根据 attr 选择 rtmod, 返回的为 mod 在 array 中的 index</p>
 <blockquote>
-<p>Open conduit - call each component and see if they can provide a<br>conduit that can satisfy all these attributes - return the conduit id<br>(a negative value indicates error)</p>
+<p>Open conduit - call each component and see if they can provide a<br />
+conduit that can satisfy all these attributes - return the conduit id<br />
+(a negative value indicates error)</p>
 </blockquote>
 <p>rml_base_stubs.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orte_rml_API_open_conduit</span><br></pre></td></tr></table></figure>
-
 <p>遍历 active 的 rml mod, 调用各个 rml mod 的 open_conduit, 例如 oob (rml_oob_component.c), 返回 mod 之后，存入 array，返回 array index</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">open_conduit()</span><br><span class="line"></span><br><span class="line">orte_get_attribute(attributes, ORTE_RML_TRANSPORT_TYPE, (void**)&amp;comp_attrib, OPAL_STRING)</span><br></pre></td></tr></table></figure>
-
 <p>从 attr 里获取 key 值，即 orte_mgmt_transport or orte_coll_transport, 确定是否指定了 oob</p>
 <p>继续获取 routed mod</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orte_get_attribute(attributes, ORTE_RML_ROUTED_ATTRIB, (<span class="keyword">void</span>**)&amp;comp_attrib, OPAL_STRING);</span><br></pre></td></tr></table></figure>
-
 <p>根据设置的 routed mod (NULL 则按优先级) 分配 routed mod</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">md-&gt;routed = orte_routed.assign_module(comp_attrib);</span><br></pre></td></tr></table></figure>
-
 <p>orte_mca_params.c</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">orte_mgmt_transport &#x3D; &quot;oob&quot; &#x2F;&#x2F; default</span><br><span class="line"></span><br><span class="line">--mca orte_mgmt_transport </span><br><span class="line"></span><br><span class="line">ORTE management messages</span><br><span class="line"></span><br><span class="line">orte_coll_transport &#x3D; &quot;fabric,ethernet&quot; &#x2F;&#x2F; default</span><br><span class="line"></span><br><span class="line">--mca orte_coll_transports</span><br><span class="line"></span><br><span class="line">ORTE collectives</span><br></pre></td></tr></table></figure>
-
 <p>plm_base_launch_support.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">param = <span class="literal">NULL</span>;</span><br><span class="line"><span class="keyword">if</span> (ORTE_SUCCESS != (rc = orte_regx.nidmap_create(orte_node_pool, &amp;param))) &#123;</span><br><span class="line">    ORTE_ERROR_LOG(rc);</span><br><span class="line">    <span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="literal">NULL</span> != orte_node_regex) &#123;</span><br><span class="line">    <span class="built_in">free</span>(orte_node_regex);</span><br><span class="line">&#125;</span><br><span class="line">orte_node_regex = param;</span><br><span class="line"><span class="comment">/* if this is too long, then we&#x27;ll have to do it with</span></span><br><span class="line"><span class="comment"> * a phone home operation instead */</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">strlen</span>(param) &lt; orte_plm_globals.node_regex_threshold) &#123;</span><br><span class="line">    opal_argv_append(argc, argv, <span class="string">&quot;-&quot;</span>OPAL_MCA_CMD_LINE_ID);</span><br><span class="line">    opal_argv_append(argc, argv, <span class="string">&quot;orte_node_regex&quot;</span>);</span><br><span class="line">    opal_argv_append(argc, argv, orte_node_regex);</span><br><span class="line">    <span class="comment">/* mark that the nidmap has been communicated */</span></span><br><span class="line">    orte_nidmap_communicated = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>orte_node_pool</p>
 <p><code>node_regex_threshold</code> = 1024 default len</p>
 <p>Resource Allocation Subsystem (RAS)</p>
@@ -1068,23 +1238,17 @@
     <div class="post-body" itemprop="articleBody">
           <p><a target="_blank" rel="noopener" href="https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-python">managing python version</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create --name dl python=3.6</span><br></pre></td></tr></table></figure>
-
 <p>activate your env [dl]</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda info --envs</span><br><span class="line">conda activate dl</span><br></pre></td></tr></table></figure>
-
 <p>PyCharm with anaconda</p>
 <p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=building#easy-build">build the latest openmpi</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># download the openmpi-v4.0.0.tar.gz from the official website</span></span><br><span class="line"><span class="comment"># untar and run configure</span></span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/openmpi --enable-orterun-prefix-by-default</span><br><span class="line"><span class="comment"># make and install</span></span><br><span class="line">make -j $(nproc) all</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-
 <p>verify openmpi</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpirun -np 4 --bind-to none --map-by slot hostname</span><br></pre></td></tr></table></figure>
-
 <p>install tensorflow</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/anaconda3/envs/dl/bin/pip --proxy http://127.0.0.1:1081 install tensorflow==1.13.1</span><br></pre></td></tr></table></figure>
-
 <p>install horovod</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HOROVOD_WITH_TENSORFLOW=1 /anaconda3/envs/dl/bin/pip install -v --no-cache-dir horovod==0.16.2</span><br></pre></td></tr></table></figure>
-
 <p>ref <a target="_blank" rel="noopener" href="https://github.com/horovod/horovod/blob/master/Dockerfile">horovod Dockerfile</a></p>
 
       
@@ -1178,122 +1342,8 @@
     <div class="post-body" itemprop="articleBody">
           <p>recomplie mxnet</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DEBUG=1 <span class="keyword">in</span> comfig.mk, <span class="keyword">then</span> recompile the whole framework.</span><br></pre></td></tr></table></figure>
-
 <p><a target="_blank" rel="noopener" href="https://github.com/apache/incubator-mxnet/issues/6796#issuecomment-311310985">https://github.com/apache/incubator-mxnet/issues/6796#issuecomment-311310985</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j $(nproc) YOU_OPTIONS will compile parallelly</span><br><span class="line">gdb --args python YOU_ARGS can debug with gdb</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/9ca10b5e.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/9ca10b5e.html" class="post-title-link" itemprop="url">horovod-tf</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2019-05-19 10:44:40" itemprop="dateCreated datePublished" datetime="2019-05-19T10:44:40Z">2019-05-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>408</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>0.16.2</p>
-</blockquote>
-<p>horovod 启动流程</p>
-<p>hvd.init() 发生了什么</p>
-<p>HorovodBasics -&gt; init -&gt; horovod_init -&gt; InitializeHorovodOnce</p>
-<p>启动线程</p>
-<p>BackgroundThreadLoop</p>
-<p>MPI 初始化</p>
-<p>MPI_Comm_dup</p>
-<p>MPI_Comm_rank 获取当前进程的 RANK</p>
-<p>MPI_Comm_size 获取 local size</p>
-<p>两次 AllGather, 把 rank 与 size 分发到所有进程</p>
-<p>检查是否同构，即 size 是否相同</p>
-<p>rank 0 初始化 MessageTable</p>
-<p>initialization_done = true 初始化结束</p>
-<p>主线程等待</p>
-<p>initialization_done = true</p>
-<p>背景线程持续 RunLoopOnce</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (RunLoopOnce(state, is_coordinator));</span><br></pre></td></tr></table></figure>
-
-<p>从 message_queue 中获取数据</p>
-<p>DistributedOptimizer</p>
 
       
     </div>
@@ -1335,13 +1385,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

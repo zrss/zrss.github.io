@@ -64,6 +64,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -133,7 +138,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -161,6 +166,97 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ab66f1ba.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/ab66f1ba.html" class="post-title-link" itemprop="url">modelarts python sdk job demo</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-09 01:15:32" itemprop="dateCreated datePublished" datetime="2023-05-09T01:15:32Z">2023-05-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> modelarts.session <span class="keyword">import</span> Session</span><br><span class="line"><span class="keyword">from</span> modelarts.estimatorV2 <span class="keyword">import</span> Estimator</span><br><span class="line"><span class="keyword">from</span> modelarts.train_params <span class="keyword">import</span> OutputData</span><br><span class="line"><span class="keyword">from</span> modelarts.train_params <span class="keyword">import</span> InputData</span><br><span class="line"></span><br><span class="line">session = Session(access_key=<span class="string">&#x27;XXX&#x27;</span>,secret_key=<span class="string">&#x27;YYY&#x27;</span>, project_id=<span class="string">&#x27;ZZZ&#x27;</span>, region_name=<span class="string">&#x27;cn-north-4&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># list job</span></span><br><span class="line"><span class="comment"># job_list = Estimator.get_job_list(session=session, offset=0, limit=10, sort_by=&quot;create_time&quot;, order=&quot;desc&quot;)</span></span><br><span class="line"><span class="comment"># print(job_list)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># create a basic training job</span></span><br><span class="line">estimator = Estimator(session=session,</span><br><span class="line">                      job_description=<span class="string">&#x27;This is a basic training job&#x27;</span>,</span><br><span class="line">                      user_image_url=<span class="string">&quot;deep-learning-demo/mpi:3.0.0-cuda10.2&quot;</span>, <span class="comment"># main container 的容器镜像地址</span></span><br><span class="line">                      user_command=<span class="string">&quot;echo hello-world&quot;</span>,  <span class="comment"># main container 的启动命令</span></span><br><span class="line">                      outputs=[OutputData(obs_path=<span class="string">&quot;obs://zs-modelarts/pytorch/model/&quot;</span>, name=<span class="string">&quot;model&quot;</span>, local_path=<span class="string">&quot;/model&quot;</span>, access_method=<span class="string">&quot;env&quot;</span>)],</span><br><span class="line">                      log_url=<span class="string">&quot;obs://zs-modelarts/pytorch/log/&quot;</span>, <span class="comment"># 训练作业日志转存 obs 路径</span></span><br><span class="line">                      train_instance_type=<span class="string">&quot;modelarts.p3.large.public.free&quot;</span>, <span class="comment"># 公共资源池</span></span><br><span class="line">                      train_instance_count=<span class="number">1</span> <span class="comment"># 训练作业节点个数</span></span><br><span class="line">                      )</span><br><span class="line"></span><br><span class="line">job_instance = estimator.fit(job_name=<span class="string">&quot;job-0&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># get job id in job_instance</span></span><br><span class="line">print(job_instance.job_id)</span><br><span class="line"></span><br><span class="line"><span class="comment"># view the training job log</span></span><br><span class="line"><span class="comment"># estimator = Estimator(session=session, job_id=&quot;2bfc13b6-782e-45ad-ae90-476dfa97591a&quot;)</span></span><br><span class="line"><span class="comment"># info = estimator.get_job_log()</span></span><br><span class="line"><span class="comment"># print(info)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># view the training job metrics</span></span><br><span class="line"><span class="comment"># estimator = Estimator(session=session, job_id=&quot;2bfc13b6-782e-45ad-ae90-476dfa97591a&quot;)</span></span><br><span class="line"><span class="comment"># info = estimator.get_job_metrics()</span></span><br><span class="line"><span class="comment"># print(info)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># delete the training job metrics</span></span><br><span class="line"><span class="comment"># Estimator.delete_job_by_id(session=session, job_id=&quot;2bfc13b6-782e-45ad-ae90-476dfa97591a&quot;)</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -243,7 +339,8 @@
 <li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/dcqcn-parameters">https://enterprise-support.nvidia.com/s/article/dcqcn-parameters</a></li>
 <li><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm">https://enterprise-support.nvidia.com/s/article/DCQCN-CC-algorithm</a></li>
 </ul>
-<h1 id="ifconfig-vs-ethtool"><a href="#ifconfig-vs-ethtool" class="headerlink" title="ifconfig vs ethtool"></a>ifconfig vs ethtool</h1><p><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/ibdev2netdev">https://enterprise-support.nvidia.com/s/article/ibdev2netdev</a></p>
+<h1 id="ifconfig-vs-ethtool"><a class="markdownIt-Anchor" href="#ifconfig-vs-ethtool"></a> ifconfig vs ethtool</h1>
+<p><a target="_blank" rel="noopener" href="https://enterprise-support.nvidia.com/s/article/ibdev2netdev">https://enterprise-support.nvidia.com/s/article/ibdev2netdev</a></p>
 <p><code>ibdev2netdev</code></p>
 <p>执行上述命令可查询得到 <em>it maps the adapter port to the net device</em></p>
 <p>对于 infiniband 类型的 link layer, 一般来说上述命令得到的是 ib0 设备, 即 IPoIB 虚拟网卡; 对于 ethernet 类型的 link layer，一般来说上述命令得到的是 ens[xxx] 网卡设备</p>
@@ -257,27 +354,26 @@
 </ul>
 <p>经过实际测试，在使用 rdma 网卡通信时，上述两值并没有明显的计数增加，而观察到 ethtool counters rx_bytes_phy / tx_bytes_phy 才有与实际流量相当的计数增加。所以可能早期（或者内核？） ifconfig 中获取到的数值，仅是网卡的其中某个计数器，而那个计数器又并不能代表真正的实际情况，所以可能 ifconfig 中的数值会是个误导。我们应使用 <code>ethtool -S ens[xxx]</code> 查看 rdma 网卡的统计信息。</p>
 <blockquote>
-<p>rx_bytes_phy, ConnectX-3 naming : rx_bytes<br>例如在 cx3 网卡时，当前主机安装的 ifconfig，取的的确就是“正确”的；而在 cx4/5/6 网卡，rx_bytes 的物理意义发生了变化，变为了记录 <em>Representor only: bytes received, that were handled by the hypervisor. supported from kernel 4.18</em></p>
+<p>rx_bytes_phy, ConnectX-3 naming : rx_bytes<br />
+例如在 cx3 网卡时，当前主机安装的 ifconfig，取的的确就是“正确”的；而在 cx4/5/6 网卡，rx_bytes 的物理意义发生了变化，变为了记录 <em>Representor only: bytes received, that were handled by the hypervisor. supported from kernel 4.18</em></p>
 </blockquote>
-<h1 id="交换机端口常用查询命令"><a href="#交换机端口常用查询命令" class="headerlink" title="交换机端口常用查询命令"></a>交换机端口常用查询命令</h1><p><a target="_blank" rel="noopener" href="https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444">https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444</a></p>
+<h1 id="交换机端口常用查询命令"><a class="markdownIt-Anchor" href="#交换机端口常用查询命令"></a> 交换机端口常用查询命令</h1>
+<p><a target="_blank" rel="noopener" href="https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444">https://support.huawei.com/enterprise/zh/doc/EDOC1100153180/e4418444</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/o3rnxl2trb1gxemmxdoj">https://www.infoq.cn/article/o3rnxl2trb1gxemmxdoj</a></p>
 <p>egress/ingress port</p>
-<h2 id="查看是否出现丢包"><a href="#查看是否出现丢包" class="headerlink" title="查看是否出现丢包"></a>查看是否出现丢包</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="查看是否出现丢包"><a class="markdownIt-Anchor" href="#查看是否出现丢包"></a> 查看是否出现丢包</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Input:                                                                      </span><br><span class="line">  Unicast:            11657620879,   Multicast:                     695     </span><br><span class="line">  Broadcast:                    0,   Jumbo:                           0     </span><br><span class="line">  Discard:                      0,   Frames:                          0     </span><br><span class="line">  Pause:                        0                                           </span><br><span class="line"></span><br><span class="line">  Total Error:                  0                                           </span><br><span class="line">  CRC:                          0,   Giants:                          0     </span><br><span class="line">  Jabbers:                      0,   Fragments:                       0     </span><br><span class="line">  Runts:                        0,   DropEvents:                      0     </span><br><span class="line">  Alignments:                   0,   Symbols:                         0     </span><br><span class="line">  Ignoreds:                     0                                           </span><br><span class="line"></span><br><span class="line">Output:                                                                     </span><br><span class="line">  Unicast:              536390526,   Multicast:                     695     </span><br><span class="line">  Broadcast:                    0,   Jumbo:                           0     </span><br><span class="line">  Discard:                      0,   Buffers Purged:                  0     </span><br><span class="line">  Pause:                 18913700</span><br></pre></td></tr></table></figure>
-
-<h2 id="上行方向丢包-Input"><a href="#上行方向丢包-Input" class="headerlink" title="上行方向丢包 Input"></a>上行方向丢包 Input</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer ingress-statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="上行方向丢包-input"><a class="markdownIt-Anchor" href="#上行方向丢包-input"></a> 上行方向丢包 Input</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer ingress-statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <p>查看入方向统计值</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Interface                   Dropped        Drop Rate   Drop Time                </span><br><span class="line">                     (Packets&#x2F;Bytes)        (pps&#x2F;bps)                           </span><br><span class="line">----------------------------------------------------------------                </span><br><span class="line">100GE1&#x2F;0&#x2F;1                         0                0          -                </span><br><span class="line">                                   0                0                           </span><br><span class="line">----------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-
-<h2 id="下行出现丢包-Output"><a href="#下行出现丢包-Output" class="headerlink" title="下行出现丢包 Output"></a>下行出现丢包 Output</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos queue statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="下行出现丢包-output"><a class="markdownIt-Anchor" href="#下行出现丢包-output"></a> 下行出现丢包 Output</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos queue statistics interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <p>查看队列统计情况</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">----------------------------------------------------------------------------------------------                                           </span><br><span class="line">    4         0                   6             0                   0             0          -                                                                 </span><br><span class="line">      100000000                1092             0                   0             0                                                                            </span><br><span class="line">----------------------------------------------------------------------------------------------                                                                 </span><br></pre></td></tr></table></figure>
-
-<h2 id="查看接口出方向队列的缓存使用情况"><a href="#查看接口出方向队列的缓存使用情况" class="headerlink" title="查看接口出方向队列的缓存使用情况"></a>查看接口出方向队列的缓存使用情况</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer egress-usage interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
-
+<h2 id="查看接口出方向队列的缓存使用情况"><a class="markdownIt-Anchor" href="#查看接口出方向队列的缓存使用情况"></a> 查看接口出方向队列的缓存使用情况</h2>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display qos buffer egress-usage interface 100GE1&#x2F;0&#x2F;1</span><br></pre></td></tr></table></figure>
 <p>可以查看无损队列</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Egress Buffer Usage (KBytes) on single queue: (Current&#x2F;Total)                   </span><br><span class="line">*: Dynamic threshold                                                            </span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">Interface       Queue   Type        Guaranteed        Shared                    </span><br><span class="line"></span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">100GE1&#x2F;0&#x2F;1          0   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    1   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    2   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    3   Lossless           0&#x2F;1       0&#x2F;10156                    </span><br><span class="line">                    4   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    5   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    6   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">                    7   Lossy              0&#x2F;1          0&#x2F;5*                    </span><br><span class="line">------------------------------------------------------------                    </span><br><span class="line">Lossless Service Pool (cells):  0&#x2F;0                                             </span><br><span class="line">Lossy    Service Pool (cells):  0&#x2F;151136                                        </span><br><span class="line">------------------------------------------------------------  </span><br></pre></td></tr></table></figure>
 
@@ -376,8 +472,8 @@
 <li>pytorch 1.13, cuda 11.6.2, nccl 2.14.3</li>
 </ul>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&quot;import torch;print(torch.cuda.nccl.version())&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="rdma-和网络相关知识"><a href="#rdma-和网络相关知识" class="headerlink" title="rdma 和网络相关知识"></a>rdma 和网络相关知识</h1><ol>
+<h1 id="rdma-和网络相关知识"><a class="markdownIt-Anchor" href="#rdma-和网络相关知识"></a> rdma 和网络相关知识</h1>
+<ol>
 <li><a target="_blank" rel="noopener" href="https://www.doc.ic.ac.uk/~jgiceva/teaching/ssc18-rdma.pdf">https://www.doc.ic.ac.uk/~jgiceva/teaching/ssc18-rdma.pdf</a>, rdma tutorial</li>
 <li><a target="_blank" rel="noopener" href="https://www.openfabrics.org/images/eventpresos/workshops2013/IBUG/2013_UserDay_Thur_1400_Bob-Russell-programming-concepts.pdf">https://www.openfabrics.org/images/eventpresos/workshops2013/IBUG/2013_UserDay_Thur_1400_Bob-Russell-programming-concepts.pdf</a>, ofa rdma program, 非常好, 五星推荐</li>
 <li><a target="_blank" rel="noopener" href="https://blog.zhaw.ch/icclab/infiniband-an-introduction-simple-ib-verbs-program-with-rdma-write/">https://blog.zhaw.ch/icclab/infiniband-an-introduction-simple-ib-verbs-program-with-rdma-write/</a>, 非常好</li>
@@ -393,7 +489,8 @@
 <li>RoCE: rdma over Converged Ethernet; rdma 的一种高性价比实现 (对于云厂商来说, 一般而言只要替换支持 RoCE 的网卡即可, 传输/交换网络设备不需要更换, 即可支持业务层 rdma)</li>
 <li>mlnx ofed: ib 驱动</li>
 <li>rdma: remote direct memory access, 远程直接访问内存</li>
-<li>rdma program<ul>
+<li>rdma program
+<ul>
 <li>qp: queue pair, 包括 send queue, recv queue; Rtr, ready to receive; Rts, ready to send; qp 状态机; qp 可以理解为 rdma 中的 client</li>
 <li>cq: completion queue, 用于获取 send/recv 结果</li>
 <li>mr: memory region, rdma 可操作的 memory region; rkey, 用于远程访问 mr 的 key; lkey, 用于本地读取 mr 的 key</li>
@@ -402,13 +499,15 @@
 </ul>
 </li>
 </ul>
-<h1 id="nccl-net"><a href="#nccl-net" class="headerlink" title="nccl net"></a>nccl net</h1><p>net.h, ncclNet 里边相当于网络接口定义, 例如定义了 ncclNetIsend 等接口</p>
+<h1 id="nccl-net"><a class="markdownIt-Anchor" href="#nccl-net"></a> nccl net</h1>
+<p>net.h, ncclNet 里边相当于网络接口定义, 例如定义了 ncclNetIsend 等接口</p>
 <p>而这些接口的具体又会有 netSocketIsend 与 netIBIsend 的实现，在如下两个对象中</p>
 <ul>
 <li>ncclNetSocket</li>
 <li>ncclNetIb</li>
 </ul>
-<h2 id="net-整体流程概述"><a href="#net-整体流程概述" class="headerlink" title="net 整体流程概述"></a>net 整体流程概述</h2><p><strong>socket server</strong></p>
+<h2 id="net-整体流程概述"><a class="markdownIt-Anchor" href="#net-整体流程概述"></a> net 整体流程概述</h2>
+<p><strong>socket server</strong></p>
 <ol>
 <li>listen</li>
 </ol>
@@ -426,23 +525,26 @@
 <li>recv</li>
 <li>test</li>
 </ol>
-<h2 id="nccl-net-ib"><a href="#nccl-net-ib" class="headerlink" title="nccl net ib"></a>nccl net ib</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/nv_peer_memory">https://github.com/Mellanox/nv_peer_memory</a><br><a target="_blank" rel="noopener" href="https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html">https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html</a>, <em>This module, originally maintained by Mellanox on GitHub, is now included with the NVIDIA Linux GPU driver</em></p>
+<h2 id="nccl-net-ib"><a class="markdownIt-Anchor" href="#nccl-net-ib"></a> nccl net ib</h2>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mellanox/nv_peer_memory">https://github.com/Mellanox/nv_peer_memory</a><br />
+<a target="_blank" rel="noopener" href="https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html">https://download.nvidia.com/XFree86/Linux-x86_64/470.42.01/README/nvidia-peermem.html</a>, <em>This module, originally maintained by Mellanox on GitHub, is now included with the NVIDIA Linux GPU driver</em></p>
 </blockquote>
 <ol>
 <li>net ib 相比与 net socket 的优势在于 net ib 通过 ibverbs api, 实现了 rdma (当然前提是主机上有能支持 rdma 的网卡); rdma 通过网卡直接读写远端的内存 (HOST MEM); 也就是达到了所谓的 OS bypass/CPU offload 效果, 能极大的提升通过网络传输数据的效率</li>
 <li>如果安装了 <code>nv_peer_mem</code> mod, net ib 可以通过网卡直接读写远端的 GPU MEM (DEV MEM); 另外高版本 (例如 470) 的 gpu driver 自带了 <code>nvidia-peermem</code> mod, 可以替代 <code>nv_peer_mem</code> 提供 GPU Direct RDMA 功能</li>
 </ol>
-<h3 id="net-ib-整体流程概述"><a href="#net-ib-整体流程概述" class="headerlink" title="net ib 整体流程概述"></a>net ib 整体流程概述</h3><ul>
+<h3 id="net-ib-整体流程概述"><a class="markdownIt-Anchor" href="#net-ib-整体流程概述"></a> net ib 整体流程概述</h3>
+<ul>
 <li>ib connect, send check / ib accept, recv check</li>
 </ul>
 <p>在这个阶段, 主要是发送方与接收方通过 socket 完成 rdma 通信初始化工作, 具体如 qp 初始化</p>
-<p><img src="/images/nccl-ib-connect-accept.drawio.svg" alt="ib connect/ib accept"></p>
+<p><img src="/images/nccl-ib-connect-accept.drawio.svg" alt="ib connect/ib accept" /></p>
 <ul>
 <li>recv/send</li>
 </ul>
 <p>在这个阶段, 主要是接收方将待接收数据的 mem addr 通过 fifo 数据结构 rdma 写入到发送方; 随后发送方根据 fifo 数据结构, 将数据 rdma 写入到接收方指示的 mem addr</p>
-<p><img src="/images/nccl-ib-send-recv.drawio.svg" alt="ib recv/ib send"></p>
+<p><img src="/images/nccl-ib-send-recv.drawio.svg" alt="ib recv/ib send" /></p>
 <p><strong>socket server</strong></p>
 <ol>
 <li>listen: 监听 bootstrap 网卡端口, 启动 socket server</li>
@@ -461,11 +563,12 @@
 <li>recv: <code>ibv_post_recv</code> 往 qp 的 recv queue 发 wr (cq 会通知是否完成); <code>ncclIbPostFifo</code>, 将 fifo 信息 (receiver 准备接收数据的 MEM 地址, rkey 等信息) rdma 到 sender fifo</li>
 <li>test: <code>ibv_poll_cq</code>, 从 cq 中获取已完成的 wr, 判断接收请求是否完成</li>
 </ol>
-<h1 id="nccl-recv-流程说明"><a href="#nccl-recv-流程说明" class="headerlink" title="nccl recv 流程说明"></a>nccl recv 流程说明</h1><p>交由 rdma 操作的 MEM 需要先 reg 为 memory region (mr), reg 动作在 <code>recvProxyConnect</code> 方法中执行</p>
+<h1 id="nccl-recv-流程说明"><a class="markdownIt-Anchor" href="#nccl-recv-流程说明"></a> nccl recv 流程说明</h1>
+<p>交由 rdma 操作的 MEM 需要先 reg 为 memory region (mr), reg 动作在 <code>recvProxyConnect</code> 方法中执行</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NCCLCHECK(ncclNetRegMr(comm, resources-&gt;netRecvComm, resources-&gt;buffers[p], resources-&gt;buffSizes[p], NCCL_NET_MAP_DEV_MEM(<span class="built_in">map</span>, buffs[p]) ? NCCL_PTR_CUDA : NCCL_PTR_HOST, &amp;resources-&gt;mhandles[p]));</span><br></pre></td></tr></table></figure>
-
 <p>随后执行 <code>recvProxyProgress</code> 方法, 涉及到网络通信的, 最终通过 <code>ncclNetIrecv</code> 方法执行接收数据的实现; <code>ncclNetIrecv</code> 在 net ib 中的实现为 <code>ncclIbIrecv</code></p>
-<h1 id="nccl-流程说明"><a href="#nccl-流程说明" class="headerlink" title="nccl 流程说明"></a>nccl 流程说明</h1><p>nccl 完整通信实现看下来的机制大致是</p>
+<h1 id="nccl-流程说明"><a class="markdownIt-Anchor" href="#nccl-流程说明"></a> nccl 流程说明</h1>
+<p>nccl 完整通信实现看下来的机制大致是</p>
 <ol>
 <li>nccl group 启动</li>
 <li>nccl proxy service 启动</li>
@@ -474,8 +577,10 @@
 <li>proxy 使用通信算子对应的具体实现来完成参数传递</li>
 </ol>
 <p>c++ 代码较为难读 … 先大致理解如上</p>
-<h1 id="nccl-ib-相关环境变量说明"><a href="#nccl-ib-相关环境变量说明" class="headerlink" title="nccl ib 相关环境变量说明"></a>nccl ib 相关环境变量说明</h1><blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html">https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html</a><br><a target="_blank" rel="noopener" href="https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/">https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/</a></p>
+<h1 id="nccl-ib-相关环境变量说明"><a class="markdownIt-Anchor" href="#nccl-ib-相关环境变量说明"></a> nccl ib 相关环境变量说明</h1>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html">https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2143/user-guide/docs/env.html</a><br />
+<a target="_blank" rel="noopener" href="https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/">https://www.rdmamojo.com/2013/01/12/ibv_modify_qp/</a></p>
 </blockquote>
 <p>RoCE</p>
 <ol>
@@ -486,7 +591,8 @@
 <li><strong>NCCL_IB_TC</strong>: qp.ah_attr.grh.traffic_class, traffic_class, Using this value, the originator of the packets specifies the required delivery priority for handling them by the routers</li>
 <li><strong>NCCL_IB_GID_INDEX</strong>: qp.ah_attr.grh.sgid_index, An index in the port’s GID table that will be used to identify the originator of the packet</li>
 </ol>
-<h1 id="net-ib-cc-代码注释"><a href="#net-ib-cc-代码注释" class="headerlink" title="net_ib.cc 代码注释"></a>net_ib.cc 代码注释</h1><p>net_ib.cc 代码注释, 尽量理解, 难免有误, 持续学习</p>
+<h1 id="net_ibcc-代码注释"><a class="markdownIt-Anchor" href="#net_ibcc-代码注释"></a> net_ib.cc 代码注释</h1>
+<p>net_ib.cc 代码注释, 尽量理解, 难免有误, 持续学习</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc">https://github.com/NVIDIA/nccl/blob/v2.14.3-1/src/transport/net_ib.cc</a></p>
 </blockquote>
@@ -583,43 +689,40 @@
     <div class="post-body" itemprop="articleBody">
           <ul>
 <li>windows 11</li>
-<li>wsl2<ul>
+<li>wsl2
+<ul>
 <li>ubuntu 18.04</li>
 <li>nvidia driver 531.68</li>
 <li>cuda 11.6.2</li>
 </ul>
 </li>
 </ul>
-<h1 id="pytorch-1-13-1-docker-image"><a href="#pytorch-1-13-1-docker-image" class="headerlink" title="pytorch 1.13.1 docker image"></a>pytorch 1.13.1 docker image</h1><p>docker image</p>
+<h1 id="pytorch-1131-docker-image"><a class="markdownIt-Anchor" href="#pytorch-1131-docker-image"></a> pytorch 1.13.1 docker image</h1>
+<p>docker image</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime</span><br></pre></td></tr></table></figure>
-
 <p>view nccl version of pytorch</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run -ti --rm pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime bash</span><br><span class="line"></span><br><span class="line">python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;</span><br></pre></td></tr></table></figure>
-
-<h1 id="pytorch-1-13-1"><a href="#pytorch-1-13-1" class="headerlink" title="pytorch 1.13.1"></a>pytorch 1.13.1</h1><p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1">https://github.com/pytorch/pytorch/tree/v1.13.1</a></p>
+<h1 id="pytorch-1131"><a class="markdownIt-Anchor" href="#pytorch-1131"></a> pytorch 1.13.1</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1">https://github.com/pytorch/pytorch/tree/v1.13.1</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1#from-source">https://github.com/pytorch/pytorch/tree/v1.13.1#from-source</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging">https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging</a></p>
 <p><a href="https://zrss.github.io/archives/5a3d0ab7.html">https://zrss.github.io/archives/5a3d0ab7.html</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python&#x3D;3.8</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line">conda install -c pytorch magma-cuda116</span><br><span class="line">conda install mkl mkl-include</span><br><span class="line"></span><br><span class="line">export CMAKE_PREFIX_PATH&#x3D;$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))&#x2F;..&#x2F;&quot;&#125;</span><br><span class="line"></span><br><span class="line">CUDACXX&#x3D;&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;bin&#x2F;nvcc MAX_JOBS&#x3D;8 python setup.py develop</span><br></pre></td></tr></table></figure>
-
 <p>如果 setup 过程中出现如下日志</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Building wheel torch-1.13.0a0+git49444c3</span><br><span class="line">-- Building version 1.13.0a0+git49444c3</span><br><span class="line">Could not find any of CMakeLists.txt, Makefile, setup.py, LICENSE, LICENSE.md, LICENSE.txt in &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;ios-cmake</span><br><span class="line">Did you run &#39;git submodule update --init --recursive --jobs 0&#39;?</span><br></pre></td></tr></table></figure>
-
 <p>可以重新 update submodule，再做尝试</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git submodule deinit -f .</span><br><span class="line">git clean -xdf</span><br><span class="line">python setup.py clean</span><br><span class="line">git submodule update --init --recursive --jobs 0</span><br></pre></td></tr></table></figure>
-
 <p>如果 setup 过程中出现如下日志，可以减小 jobs 数（例如上述的 case 为 8），再做尝试</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FAILED: third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;c++ -DFBGEMM_STATIC -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;cpuinfo&#x2F;include -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;third_party&#x2F;asmjit&#x2F;src -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;include -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;benchmark&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;googletest&#x2F;googlemock&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;googletest&#x2F;googletest&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;protobuf&#x2F;src -isystem &#x2F;root&#x2F;tools&#x2F;miniconda3&#x2F;envs&#x2F;pytorch-dev&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;gemmlowp -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;neon2sse -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;XNNPACK&#x2F;include -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -Wall -Wextra -Werror -Wno-deprecated-declarations -O3 -DNDEBUG -fPIC -fvisibility&#x3D;hidden -m64 -mavx2 -mf16c -mfma -std&#x3D;c++14 -Wno-uninitialized -MD -MT third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o -MF third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o.d -o third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o -c &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc</span><br><span class="line">c++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
-
-<h1 id="nccl-v2-14-3-1"><a href="#nccl-v2-14-3-1" class="headerlink" title="nccl v2.14.3-1"></a>nccl v2.14.3-1</h1><p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/tree/v2.14.3-1">https://github.com/NVIDIA/nccl/tree/v2.14.3-1</a></p>
+<h1 id="nccl-v2143-1"><a class="markdownIt-Anchor" href="#nccl-v2143-1"></a> nccl v2.14.3-1</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/tree/v2.14.3-1">https://github.com/NVIDIA/nccl/tree/v2.14.3-1</a></p>
 <p>make (generate header)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd nccl</span><br><span class="line">make -j 8 src.build</span><br></pre></td></tr></table></figure>
-
 <p>如果 make 过程中出现如下日志，可以减小 make 所使用的核数（例如上述的 case 为 8 核），再做尝试</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
-
 <p>将 <code>build/include/nccl.h</code> 文件拷贝至 <code>src</code> 目录下</p>
-<h2 id="vscode-nccl-in-wsl"><a href="#vscode-nccl-in-wsl" class="headerlink" title="vscode nccl in wsl"></a>vscode nccl in wsl</h2><ol>
+<h2 id="vscode-nccl-in-wsl"><a class="markdownIt-Anchor" href="#vscode-nccl-in-wsl"></a> vscode nccl in wsl</h2>
+<ol>
 <li>config wsl for vscode</li>
 </ol>
 <p><a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/cpp/config-wsl">https://code.visualstudio.com/docs/cpp/config-wsl</a></p>
@@ -730,7 +833,6 @@
 </ol>
 <p>完成上述配置后发现 <code>docker info</code> 非常慢，并且尝试 <code>docker run</code> 容器镜像会有如下报错</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker: Error response from daemon: all SubConns are in TransientFailure, latest connection error: connection error: desc &#x3D; &quot;transport: Error while dialing dial unix:&#x2F;&#x2F;&#x2F;run&#x2F;containerd&#x2F;containerd.sock: timeout&quot;: unavailable.</span><br></pre></td></tr></table></figure>
-
 <p>参考 <a target="_blank" rel="noopener" href="https://github.com/sous-chefs/docker/issues/1062">https://github.com/sous-chefs/docker/issues/1062</a> 发现疑似 master 分支的 systemd 配置引入了不兼容修改，导致使用 master 分支的 systemd 配置，无法完全启动 docker engine 18.09.9。修改 systemd 配置为 <a target="_blank" rel="noopener" href="https://github.com/moby/moby/tree/v18.09.9/contrib/init/systemd">https://github.com/moby/moby/tree/v18.09.9/contrib/init/systemd</a> 后，<code>docker info</code> 以及 <code>docker run</code> 功能恢复正常</p>
 
       
@@ -825,26 +927,22 @@
           <p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/signal#hdr-Default_behavior_of_signals_in_Go_programs">https://pkg.go.dev/os/signal#hdr-Default_behavior_of_signals_in_Go_programs</a></p>
 <p><a target="_blank" rel="noopener" href="https://pkg.go.dev/os/signal#hdr-Changing_the_behavior_of_signals_in_Go_programs">https://pkg.go.dev/os/signal#hdr-Changing_the_behavior_of_signals_in_Go_programs</a></p>
 <blockquote>
-<p>By default, a synchronous signal is converted into a run-time panic. A SIGHUP, SIGINT, or SIGTERM signal causes the program to exit. </p>
-<p>Notify disables the default behavior for a given set of asynchronous signals and instead delivers them over one or more registered channels. Specifically, it applies to the signals SIGHUP, SIGINT, SIGQUIT, SIGABRT, and SIGTERM. </p>
+<p>By default, a synchronous signal is converted into a run-time panic. A SIGHUP, SIGINT, or SIGTERM signal causes the program to exit.</p>
+<p>Notify disables the default behavior for a given set of asynchronous signals and instead delivers them over one or more registered channels. Specifically, it applies to the signals SIGHUP, SIGINT, SIGQUIT, SIGABRT, and SIGTERM.</p>
 </blockquote>
 <p>但是别忘了会有 race 的情况, 下边通过 bash shell 脚本来启动 golang 进程做一个示例</p>
 <p>test-signal</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">	<span class="string">&quot;os/signal&quot;</span></span><br><span class="line">	<span class="string">&quot;syscall&quot;</span></span><br><span class="line">	<span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	signalCh := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">2</span>)</span><br><span class="line">	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;notify signals\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		sig := &lt;- signalCh</span><br><span class="line">		fmt.Printf(<span class="string">&quot;receive signal %v\n&quot;</span>, sig)</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	fmt.Printf(<span class="string">&quot;wait signal\n&quot;</span>)</span><br><span class="line">	time.Sleep(time.Minute)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>test1.sh</p>
+<p><a target="_blank" rel="noopener" href="http://test1.sh">test1.sh</a></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">./test-signal &amp;</span><br><span class="line">pid=$!</span><br><span class="line"></span><br><span class="line">echo &quot;test-signal pid: $pid&quot;</span><br><span class="line"></span><br><span class="line">kill $pid</span><br><span class="line">wait $pid</span><br><span class="line"></span><br><span class="line">exit_code=$?</span><br><span class="line">echo &quot;test-signal exit_code: $exit_code&quot;</span><br></pre></td></tr></table></figure>
-
-<p>test2.sh</p>
+<p><a target="_blank" rel="noopener" href="http://test2.sh">test2.sh</a></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">./test-signal &amp;</span><br><span class="line">pid=$!</span><br><span class="line"></span><br><span class="line">echo &quot;test-signal pid: $pid&quot;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> important</span></span><br><span class="line">sleep 1</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"></span><br><span class="line"><span class="bash"><span class="built_in">kill</span> <span class="variable">$pid</span></span></span><br><span class="line">wait $pid</span><br><span class="line"></span><br><span class="line">exit_code=$?</span><br><span class="line">echo &quot;test-signal exit_code: $exit_code&quot;</span><br></pre></td></tr></table></figure>
-
-<p>test1.sh 的执行结果</p>
+<p><a target="_blank" rel="noopener" href="http://test1.sh">test1.sh</a> 的执行结果</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test-signal pid: 4878</span><br><span class="line">test1.sh: line 7:  4878 Terminated: 15          .&#x2F;test-signal</span><br><span class="line">test-signal exit_code: 143</span><br></pre></td></tr></table></figure>
-
-<p>test2.sh 的执行结果</p>
+<p><a target="_blank" rel="noopener" href="http://test2.sh">test2.sh</a> 的执行结果</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">test-signal pid: 4880</span><br><span class="line">notify signals</span><br><span class="line">wait signal</span><br><span class="line">receive signal terminated</span><br></pre></td></tr></table></figure>
-
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><ol>
+<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h1>
+<ol>
 <li>golang 程序处理 TERM 信号的默认行为是退出, 且退出码为 143 (128 + 15), 15 为 TERM</li>
 <li>使用 signal.Notify 可以修改 golang 程序处理 TERM 信号的默认行为; 但是如果 golang 程序启动后过快接收到 TERM 信号 (在 signal.Notify 执行完成之前), 则会导致程序直接退出 (默认行为)</li>
 </ol>
@@ -946,23 +1044,18 @@
 <p><a target="_blank" rel="noopener" href="https://github.com/jinzhu/gorm/blob/v1.9.16/logger.go">https://github.com/jinzhu/gorm/blob/v1.9.16/logger.go</a></p>
 <p>gorm v1 print log</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">print</span><span class="params">(v ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	s.logger.Print(v...)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">log</span><span class="params">(v ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> s != <span class="literal">nil</span> &amp;&amp; s.logMode == detailedLogMode &#123;</span><br><span class="line">		s.<span class="built_in">print</span>(<span class="built_in">append</span>([]<span class="keyword">interface</span>&#123;&#125;&#123;<span class="string">&quot;log&quot;</span>, fileWithLineNum()&#125;, v...)...)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">slog</span><span class="params">(sql <span class="keyword">string</span>, t time.Time, vars ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> s.logMode == detailedLogMode &#123;</span><br><span class="line">		s.<span class="built_in">print</span>(<span class="string">&quot;sql&quot;</span>, fileWithLineNum(), NowFunc().Sub(t), sql, vars, s.RowsAffected)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>gorm v1 print error</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AddError add error to the db</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">AddError</span><span class="params">(err error)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> err != ErrRecordNotFound &#123;</span><br><span class="line">			<span class="keyword">if</span> s.logMode == defaultLogMode &#123;</span><br><span class="line">				<span class="keyword">go</span> s.<span class="built_in">print</span>(<span class="string">&quot;error&quot;</span>, fileWithLineNum(), err)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				s.log(err)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			errors := Errors(s.GetErrors())</span><br><span class="line">			errors = errors.Add(err)</span><br><span class="line">			<span class="keyword">if</span> <span class="built_in">len</span>(errors) &gt; <span class="number">1</span> &#123;</span><br><span class="line">				err = errors</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		s.Error = err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>gorm v1 print sql</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// trace print sql log</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(scope *Scope)</span> <span class="title">trace</span><span class="params">(t time.Time)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(scope.SQL) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		scope.db.slog(scope.SQL, t, scope.SQLVars...)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>因此在打开 gorm v1 LogMode 的时候</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LogMode set log mode, `true` for detailed logs, `false` for no log, default, will only print error logs</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DB)</span> <span class="title">LogMode</span><span class="params">(enable <span class="keyword">bool</span>)</span> *<span class="title">DB</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> enable &#123;</span><br><span class="line">		s.logMode = detailedLogMode</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		s.logMode = noLogMode</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>会进入到 <code>s.print log</code>, <code>s.print sql</code> 的打印逻辑</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.soberkoder.com/go-gorm-logging/">https://www.soberkoder.com/go-gorm-logging/</a></p>
 </blockquote>
 <p>如若需要自定义 gorm v1 logger 可以参考如下代码段</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// GormLogger struct</span></span><br><span class="line"><span class="keyword">type</span> GormLogger <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Print - Log Formatter</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*GormLogger)</span> <span class="title">Print</span><span class="params">(v ...<span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">  <span class="keyword">if</span> v[<span class="number">0</span>] == <span class="string">&quot;sql&quot;</span> &#123;</span><br><span class="line">    log.WithFields(</span><br><span class="line">      log.Fields&#123;</span><br><span class="line">        <span class="string">&quot;module&quot;</span>:        <span class="string">&quot;gorm&quot;</span>,</span><br><span class="line">        <span class="string">&quot;type&quot;</span>:          <span class="string">&quot;sql&quot;</span>,</span><br><span class="line">        <span class="string">&quot;rows_returned&quot;</span>: v[<span class="number">5</span>],</span><br><span class="line">        <span class="string">&quot;src&quot;</span>:           v[<span class="number">1</span>],</span><br><span class="line">        <span class="comment">//&quot;values&quot;:        v[4],</span></span><br><span class="line">        <span class="string">&quot;duration&quot;</span>:      v[<span class="number">2</span>],</span><br><span class="line">      &#125;,</span><br><span class="line">    ).Info(v[<span class="number">3</span>])</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    log.WithFields(log.Fields&#123;<span class="string">&quot;module&quot;</span>: <span class="string">&quot;gorm&quot;</span>, <span class="string">&quot;type&quot;</span>: <span class="string">&quot;log&quot;</span>, <span class="string">&quot;src&quot;</span>: v[<span class="number">1</span>]&#125;).Print(v[<span class="number">2</span>:]...)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>另外也可以根据 <code>duration</code> 实现客户端的 slow sql 打印</p>
 
       
@@ -1063,28 +1156,28 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><blockquote>
+          <h1 id="docker"><a class="markdownIt-Anchor" href="#docker"></a> docker</h1>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/run/#foreground">https://docs.docker.com/engine/reference/run/#foreground</a></p>
-<p>-t : Allocate a pseudo-tty<br>-i : Keep STDIN open even if not attached</p>
+<p>-t : Allocate a pseudo-tty<br />
+-i : Keep STDIN open even if not attached</p>
 </blockquote>
 <p><code>docker run -t</code></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:bionic-20200713</span><br><span class="line"></span><br><span class="line">docker run -t --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">root@9a7a115ff8d2:/# ls</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>启动容器无 <code>-i</code> 参数时，执行 <code>ls</code> 等命令无回显，执行 <code>exit</code> 命令无法退出 container terminal</p>
 <p><code>docker run -i</code></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -i --rm ubuntu:bionic-20200713 /bin/bash</span><br><span class="line">echo hello</span><br><span class="line">hello</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
-
 <p>启动容器无 <code>-t</code> 参数时，缺少常用的 terminal 功能，例如无当前登陆用户提示；但执行 <code>ls</code> 等命令正常有回显，且执行 <code>exit</code> 命令可退出</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag">https://stackoverflow.com/questions/48368411/what-is-docker-run-it-flag</a></p>
 <p>Without <code>-t</code> tag one can still interact with the container, but with it, you’ll have a nicer, more features terminal.</p>
 </blockquote>
-<h1 id="k8s"><a href="#k8s" class="headerlink" title="k8s"></a>k8s</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core</a></p>
+<h1 id="k8s"><a class="markdownIt-Anchor" href="#k8s"></a> k8s</h1>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core</a></p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Variables for interactive containers, these have very specialized use-cases (e.g. debugging)</span></span><br><span class="line"><span class="comment">// and shouldn&#x27;t be used for general purpose containers.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Whether this container should allocate a buffer for stdin in the container runtime. If this</span></span><br><span class="line"><span class="comment">// is not set, reads from stdin in the container will always result in EOF.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">Stdin <span class="keyword">bool</span> <span class="string">`json:&quot;stdin,omitempty&quot; protobuf:&quot;varint,16,opt,name=stdin&quot;`</span></span><br><span class="line"><span class="comment">// Whether the container runtime should close the stdin channel after it has been opened by</span></span><br><span class="line"><span class="comment">// a single attach. When stdin is true the stdin stream will remain open across multiple attach</span></span><br><span class="line"><span class="comment">// sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the</span></span><br><span class="line"><span class="comment">// first client attaches to stdin, and then remains open and accepts data until the client disconnects,</span></span><br><span class="line"><span class="comment">// at which time stdin is closed and remains closed until the container is restarted. If this</span></span><br><span class="line"><span class="comment">// flag is false, a container processes that reads from stdin will never receive an EOF.</span></span><br><span class="line"><span class="comment">// Default is false</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">StdinOnce <span class="keyword">bool</span> <span class="string">`json:&quot;stdinOnce,omitempty&quot; protobuf:&quot;varint,17,opt,name=stdinOnce&quot;`</span></span><br><span class="line"><span class="comment">// Whether this container should allocate a TTY for itself, also requires &#x27;stdin&#x27; to be true.</span></span><br><span class="line"><span class="comment">// Default is false.</span></span><br><span class="line"><span class="comment">// +optional</span></span><br><span class="line">TTY <span class="keyword">bool</span> <span class="string">`json:&quot;tty,omitempty&quot; protobuf:&quot;varint,18,opt,name=tty&quot;`</span></span><br></pre></td></tr></table></figure>
-
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">config := &amp;runtimeapi.ContainerConfig&#123;</span><br><span class="line">	Metadata: &amp;runtimeapi.ContainerMetadata&#123;</span><br><span class="line">		Name:    container.Name,</span><br><span class="line">		Attempt: restartCountUint32,</span><br><span class="line">	&#125;,</span><br><span class="line">	Image:       &amp;runtimeapi.ImageSpec&#123;Image: imageRef&#125;,</span><br><span class="line">	Command:     command,</span><br><span class="line">	Args:        args,</span><br><span class="line">	WorkingDir:  container.WorkingDir,</span><br><span class="line">	Labels:      newContainerLabels(container, pod),</span><br><span class="line">	Annotations: newContainerAnnotations(container, pod, restartCount, opts),</span><br><span class="line">	Devices:     makeDevices(opts),</span><br><span class="line">	Mounts:      m.makeMounts(opts, container),</span><br><span class="line">	LogPath:     containerLogsPath,</span><br><span class="line">	Stdin:       container.Stdin,</span><br><span class="line">	StdinOnce:   container.StdinOnce,</span><br><span class="line">	Tty:         container.TTY,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="use-conda-env-in-docker"><a href="#use-conda-env-in-docker" class="headerlink" title="use conda env in docker"></a>use conda env in docker</h1><blockquote>
+<h1 id="use-conda-env-in-docker"><a class="markdownIt-Anchor" href="#use-conda-env-in-docker"></a> use conda env in docker</h1>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://pythonspeed.com/articles/activate-conda-dockerfile/">https://pythonspeed.com/articles/activate-conda-dockerfile/</a></p>
 <p><a target="_blank" rel="noopener" href="https://docs.conda.io/projects/conda/en/latest/commands/run.html">https://docs.conda.io/projects/conda/en/latest/commands/run.html</a></p>
 </blockquote>
@@ -1179,7 +1272,8 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="mlnx-cx-adapter-card-firmware"><a href="#mlnx-cx-adapter-card-firmware" class="headerlink" title="mlnx cx adapter card firmware"></a>mlnx cx adapter card firmware</h1><blockquote>
+          <h1 id="mlnx-cx-adapter-card-firmware"><a class="markdownIt-Anchor" href="#mlnx-cx-adapter-card-firmware"></a> mlnx cx adapter card firmware</h1>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/connectx4ib/">https://network.nvidia.com/support/firmware/connectx4ib/</a></p>
 </blockquote>
 <ul>
@@ -1202,7 +1296,8 @@
 <li>22.28.2006 – newer</li>
 <li>22.28.1002 – old</li>
 </ul>
-<h1 id="mlnx-ofed"><a href="#mlnx-ofed" class="headerlink" title="mlnx ofed"></a>mlnx ofed</h1><p>容器镜像中安装的 mlnx ofed，与宿主机中安装的 mlnx ofed 有何联系？</p>
+<h1 id="mlnx-ofed"><a class="markdownIt-Anchor" href="#mlnx-ofed"></a> mlnx ofed</h1>
+<p>容器镜像中安装的 mlnx ofed，与宿主机中安装的 mlnx ofed 有何联系？</p>
 <p>其实并无联系，仅仅与宿主机 mlnx 网卡型号，及其 firmware 版本有关系</p>
 <p>以 mlnx ofed LTS version 5.4-3.1.0.0 为例，在其 Release Notes 中明确提到了该 ofed 配套的 firmware 版本</p>
 <blockquote>
@@ -1211,17 +1306,20 @@
 <p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/networking/display/MLNXOFEDv543100/Release+Notes">https://docs.nvidia.com/networking/display/MLNXOFEDv543100/Release+Notes</a></p>
 <p>支持的网卡及其速率</p>
 <ul>
-<li>ConnectX-4<ul>
+<li>ConnectX-4
+<ul>
 <li>Infiniband: …</li>
 <li>Ethernet: 100Gb, …</li>
 </ul>
 </li>
-<li>ConnectX-5<ul>
+<li>ConnectX-5
+<ul>
 <li>Infiniband: …</li>
 <li>Ethernet: 100Gb, …</li>
 </ul>
 </li>
-<li>ConnectX-6 Dx<ul>
+<li>ConnectX-6 Dx
+<ul>
 <li>Ethernet: 100Gb, …</li>
 </ul>
 </li>
@@ -1244,7 +1342,8 @@
 <th>Additional Firmware Version Supported</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>cx4</td>
 <td>12.28.2006</td>
 <td>12.28.2006</td>
@@ -1259,7 +1358,8 @@
 <td>22.31.2006</td>
 <td>22.31.1014</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>该 mlnx ofed 5.4-3.1.0.0 驱动要求的 <strong>最小</strong> firmware 版本，但是注意到 mlnx ofed 从 5.4 版本才开始增加 <code>minimum supported versions</code> 的描述</p>
 <p>与之相比，mlnx ofed LTS version 4.9-4.1.7.0 驱动要求的 firmware 版本如下</p>
 <blockquote>
@@ -1273,7 +1373,8 @@
 <th>Additional Firmware Version Supported</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>cx4</td>
 <td>12.28.2006</td>
 <td>12.27.4000</td>
@@ -1288,8 +1389,10 @@
 <td>22.28.2006</td>
 <td>NA</td>
 </tr>
-</tbody></table>
-<h1 id="identifying-adapter-cards"><a href="#identifying-adapter-cards" class="headerlink" title="identifying adapter cards"></a>identifying adapter cards</h1><p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/identification/">https://network.nvidia.com/support/firmware/identification/</a></p>
+</tbody>
+</table>
+<h1 id="identifying-adapter-cards"><a class="markdownIt-Anchor" href="#identifying-adapter-cards"></a> identifying adapter cards</h1>
+<p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/identification/">https://network.nvidia.com/support/firmware/identification/</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ibv_devinfo</span><br></pre></td></tr></table></figure>
 
       
@@ -1388,16 +1491,18 @@
 <li>python-3.7.13</li>
 <li>pytorch-1.8.1</li>
 </ul>
-<h1 id="1-准备-context-文件夹"><a href="#1-准备-context-文件夹" class="headerlink" title="1. 准备 context 文件夹"></a>1. 准备 context 文件夹</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p context</span><br></pre></td></tr></table></figure>
-
-<h2 id="1-1-准备文件"><a href="#1-1-准备文件" class="headerlink" title="1.1. 准备文件"></a>1.1. 准备文件</h2><h3 id="1-1-1-pip-conf"><a href="#1-1-1-pip-conf" class="headerlink" title="1.1.1. pip.conf"></a>1.1.1. pip.conf</h3><blockquote>
+<h1 id="1-准备-context-文件夹"><a class="markdownIt-Anchor" href="#1-准备-context-文件夹"></a> 1. 准备 context 文件夹</h1>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p context</span><br></pre></td></tr></table></figure>
+<h2 id="11-准备文件"><a class="markdownIt-Anchor" href="#11-准备文件"></a> 1.1. 准备文件</h2>
+<h3 id="111-pipconf"><a class="markdownIt-Anchor" href="#111-pipconf"></a> 1.1.1. pip.conf</h3>
+<blockquote>
 <p>使用华为开源镜像站 pypi 配置</p>
 <p><a target="_blank" rel="noopener" href="https://mirrors.huaweicloud.com/home">https://mirrors.huaweicloud.com/home</a></p>
 </blockquote>
 <p>文件内容如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">index-url = https://repo.huaweicloud.com/repository/pypi/simple</span><br><span class="line">trusted-host = repo.huaweicloud.com</span><br><span class="line">timeout = 120</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-1-2-torch-whl"><a href="#1-1-2-torch-whl" class="headerlink" title="1.1.2. torch*.whl"></a>1.1.2. torch*.whl</h3><blockquote>
+<h3 id="112-torchwhl"><a class="markdownIt-Anchor" href="#112-torchwhl"></a> 1.1.2. torch*.whl</h3>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/previous-versions/#v181">https://pytorch.org/get-started/previous-versions/#v181</a></p>
 </blockquote>
 <p>在该地址上 <a target="_blank" rel="noopener" href="https://download.pytorch.org/whl/torch_stable.html">https://download.pytorch.org/whl/torch_stable.html</a> 搜索并下载如下 whl</p>
@@ -1406,129 +1511,35 @@
 <li>torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</li>
 <li>torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</li>
 </ul>
-<h3 id="1-1-3-Miniconda3"><a href="#1-1-3-Miniconda3" class="headerlink" title="1.1.3. Miniconda3"></a>1.1.3. Miniconda3</h3><blockquote>
+<h3 id="113-miniconda3"><a class="markdownIt-Anchor" href="#113-miniconda3"></a> 1.1.3. Miniconda3</h3>
+<blockquote>
 <p><a target="_blank" rel="noopener" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a></p>
 <p>Miniconda3-py37_4.12.0-Linux-x86_64.sh</p>
 </blockquote>
 <p>使用该地址 <a target="_blank" rel="noopener" href="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh">https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh</a>, 下载 miniconda3 安装文件</p>
-<h2 id="1-2-context-文件夹内容"><a href="#1-2-context-文件夹内容" class="headerlink" title="1.2. context 文件夹内容"></a>1.2. context 文件夹内容</h2><p>将上述文件放置在 context 文件夹内</p>
+<h2 id="12-context-文件夹内容"><a class="markdownIt-Anchor" href="#12-context-文件夹内容"></a> 1.2. context 文件夹内容</h2>
+<p>将上述文件放置在 context 文件夹内</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">├── Miniconda3-py37_4.12.0-Linux-x86_64.sh</span><br><span class="line">├── pip.conf</span><br><span class="line">├── torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">├── torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">└── torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-
-<h1 id="2-编写容器镜像-Dockerfile-文件"><a href="#2-编写容器镜像-Dockerfile-文件" class="headerlink" title="2. 编写容器镜像 Dockerfile 文件"></a>2. 编写容器镜像 Dockerfile 文件</h1><p>在 context 文件夹内新建名为 <strong>Dockerfile</strong> 的空文件，并将下述文件内容写入其中</p>
+<h1 id="2-编写容器镜像-dockerfile-文件"><a class="markdownIt-Anchor" href="#2-编写容器镜像-dockerfile-文件"></a> 2. 编写容器镜像 Dockerfile 文件</h1>
+<p>在 context 文件夹内新建名为 <strong>Dockerfile</strong> 的空文件，并将下述文件内容写入其中</p>
 <figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 容器镜像构建主机需要连通公网</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础容器镜像, https://github.com/NVIDIA/nvidia-docker/wiki/CUDA</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds</span></span><br><span class="line"><span class="comment"># require Docker Engine &gt;= 17.05</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># builder stage</span></span><br><span class="line"><span class="keyword">FROM</span> nvidia/cuda:<span class="number">10.2</span>-runtime-ubuntu18.<span class="number">04</span> AS builder</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础容器镜像的默认用户已经是 root</span></span><br><span class="line"><span class="comment"># USER root</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用华为开源镜像站提供的 pypi 配置</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> mkdir -p /root/.pip/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> pip.conf /root/.pip/pip.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拷贝待安装文件到基础容器镜像中的 /tmp 目录</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> Miniconda3-py37_4.12.0-Linux-x86_64.sh \</span></span><br><span class="line"><span class="bash">     torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     ./tmp</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># https://conda.io/projects/conda/en/latest/user-guide/install/linux.html#installing-on-linux</span></span><br><span class="line"><span class="comment"># 安装 Miniconda3 到基础容器镜像的 /home/ma-user/miniconda3 目录中</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> bash /tmp/Miniconda3-py37_4.12.0-Linux-x86_64.sh -b -p /home/ma-user/miniconda3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 Miniconda3 默认 python 环境 (即 /home/ma-user/miniconda3/bin/pip) 安装 torch*.whl</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">cd</span> /tmp &amp;&amp; \</span></span><br><span class="line"><span class="bash">    /home/ma-user/miniconda3/bin/pip install --no-cache-dir \</span></span><br><span class="line"><span class="bash">    /tmp/torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">    /tmp/torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">    /tmp/torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建最终容器镜像</span></span><br><span class="line"><span class="keyword">FROM</span> nvidia/cuda:<span class="number">10.2</span>-runtime-ubuntu18.<span class="number">04</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 vim / curl 工具（依然使用华为开源镜像站）</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> cp -a /etc/apt/sources.list /etc/apt/sources.list.bak &amp;&amp; \</span></span><br><span class="line"><span class="bash">    sed -i <span class="string">&quot;s@http://.*archive.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="bash">    sed -i <span class="string">&quot;s@http://.*security.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get update &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get install -y vim curl &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get clean &amp;&amp; \</span></span><br><span class="line"><span class="bash">    mv /etc/apt/sources.list.bak /etc/apt/sources.list</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加 ma-user 用户 (uid = 1000, gid = 100)</span></span><br><span class="line"><span class="comment"># 注意到基础容器镜像已存在 gid = 100 的组，因此 ma-user 用户可直接使用</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从上述 builder stage 中拷贝 /home/ma-user/miniconda3 目录到当前容器镜像的同名目录</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --chown=ma-user --from=builder /home/ma-user/miniconda3 /home/ma-user/miniconda3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置容器镜像预置环境变量</span></span><br><span class="line"><span class="comment"># 请务必设置 PYTHONUNBUFFERED=1, 以免日志丢失</span></span><br><span class="line"><span class="keyword">ENV</span> PATH=$PATH:/home/ma-<span class="keyword">user</span>/miniconda3/bin \</span><br><span class="line">    PYTHONUNBUFFERED=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置容器镜像默认用户与工作目录</span></span><br><span class="line"><span class="keyword">USER</span> ma-<span class="keyword">user</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /home/ma-user</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="3-构建容器镜像"><a href="#3-构建容器镜像" class="headerlink" title="3. 构建容器镜像"></a>3. 构建容器镜像</h1><p>context 文件夹内容如下</p>
+<h1 id="3-构建容器镜像"><a class="markdownIt-Anchor" href="#3-构建容器镜像"></a> 3. 构建容器镜像</h1>
+<p>context 文件夹内容如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">├── Dockerfile</span><br><span class="line">├── Miniconda3-py37_4.12.0-Linux-x86_64.sh</span><br><span class="line">├── pip.conf</span><br><span class="line">├── torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">├── torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">└── torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-
 <p>执行如下命令构建容器镜像</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 执行构建容器镜像命令之前，请务必切换到 context 目录内</span></span><br><span class="line">cd context</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 执行构建容器镜像命令</span></span><br><span class="line">docker build . -t swr.cn-north-4.myhuaweicloud.com/deep-learning-demo/pytorch:1.8.1-cuda10.2</span><br></pre></td></tr></table></figure>
-
 <p>容器镜像构建成功后，可通过如下命令查询到对应的容器镜像地址</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep pytorch | grep 1.8.1-cuda10.2</span><br></pre></td></tr></table></figure>
-
-<h1 id="3-pytorch-verification-code"><a href="#3-pytorch-verification-code" class="headerlink" title="3. pytorch verification code"></a>3. pytorch verification code</h1><p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/locally/#linux-verification">https://pytorch.org/get-started/locally/#linux-verification</a></p>
-<p>验证示例代码：pytorch-verification.py</p>
+<h1 id="3-pytorch-verification-code"><a class="markdownIt-Anchor" href="#3-pytorch-verification-code"></a> 3. pytorch verification code</h1>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/locally/#linux-verification">https://pytorch.org/get-started/locally/#linux-verification</a></p>
+<p>验证示例代码：<a target="_blank" rel="noopener" href="http://pytorch-verification.py">pytorch-verification.py</a></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line">x = torch.randn(<span class="number">5</span>, <span class="number">3</span>)</span><br><span class="line">print(x)</span><br><span class="line"></span><br><span class="line">available_dev = torch.device(<span class="string">&quot;cuda&quot;</span>) <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> torch.device(<span class="string">&quot;cpu&quot;</span>)</span><br><span class="line">y = torch.randn(<span class="number">5</span>, <span class="number">3</span>).to(available_dev)</span><br><span class="line">print(y)</span><br></pre></td></tr></table></figure>
-
-<h1 id="4-boot-command-in-modelarts-training-service"><a href="#4-boot-command-in-modelarts-training-service" class="headerlink" title="4. boot command in modelarts training service"></a>4. boot command in modelarts training service</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/home/ma-user/miniconda3/bin/python $&#123;MA_JOB_DIR&#125;/code/pytorch-verification.py</span><br></pre></td></tr></table></figure>
-
+<h1 id="4-boot-command-in-modelarts-training-service"><a class="markdownIt-Anchor" href="#4-boot-command-in-modelarts-training-service"></a> 4. boot command in modelarts training service</h1>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/home/ma-user/miniconda3/bin/python $&#123;MA_JOB_DIR&#125;/code/pytorch-verification.py</span><br></pre></td></tr></table></figure>
 <p>cpu 训练作业日志显示示例</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tensor([[ 0.8945, -0.6946,  0.3807],</span><br><span class="line">        [ 0.6665,  0.3133,  0.8285],</span><br><span class="line">        [-0.5353, -0.1730, -0.5419],</span><br><span class="line">        [ 0.4870,  0.5183,  0.2505],</span><br><span class="line">        [ 0.2679, -0.4996,  0.7919]])</span><br><span class="line">tensor([[ 0.9692,  0.4652,  0.5659],</span><br><span class="line">        [ 2.2032,  1.4157, -0.1755],</span><br><span class="line">        [-0.6296,  0.5466,  0.6994],</span><br><span class="line">        [ 0.2353, -0.0089, -1.9546],</span><br><span class="line">        [ 0.9319,  1.1781, -0.4587]])</span><br></pre></td></tr></table></figure>
-
 <p>gpu 训练作业日志显示示例</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tensor([[-0.2874, -0.3475,  0.1848],</span><br><span class="line">        [-0.1660, -0.5038, -0.5470],</span><br><span class="line">        [ 0.1289, -0.2400,  2.0829],</span><br><span class="line">        [ 1.6870, -0.0492,  0.1189],</span><br><span class="line">        [ 0.4800, -0.3611, -0.9572]])</span><br><span class="line">tensor([[-0.6710,  0.4095, -0.7370],</span><br><span class="line">        [ 1.4353,  0.9093,  1.7551],</span><br><span class="line">        [ 1.3477, -0.0499,  0.2404],</span><br><span class="line">        [ 1.7489, -1.0203, -0.7875],</span><br><span class="line">        [-1.2104,  0.4593,  1.1365]], device=&#x27;cuda:0&#x27;)</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/705102b6.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/705102b6.html" class="post-title-link" itemprop="url">docker container metrics</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-06-12 15:05:00" itemprop="dateCreated datePublished" datetime="2022-06-12T15:05:00Z">2022-06-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>189</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/runmetrics/#tips-for-high-performance-metric-collection">https://docs.docker.com/config/containers/runmetrics/#tips-for-high-performance-metric-collection</a></p>
-<p><a target="_blank" rel="noopener" href="https://docs.docker.com/config/containers/runmetrics/#collect-metrics-when-a-container-exits">https://docs.docker.com/config/containers/runmetrics/#collect-metrics-when-a-container-exits</a></p>
 
       
     </div>
@@ -1570,13 +1581,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

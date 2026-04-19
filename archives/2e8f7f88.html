@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="etcd v3.1.9  从 etcd 启动参数中生成 Cluster ID 和 Member ID1cl, err &#x3D; membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)  上述方法从 –initial-cluster-token and –initial-cluster 这个两个启">
+    <meta name="description" content="etcd v3.1.9   从 etcd 启动参数中生成 Cluster ID 和 Member ID 1cl, err &#x3D; membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap) 上述方法从 –initial-cluster-token and –initial-cluster 这个两个">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Cluster ID 和 Member ID 的生成规则">
 <meta property="og:url" content="https://zrss.github.io/archives/2e8f7f88.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="etcd v3.1.9  从 etcd 启动参数中生成 Cluster ID 和 Member ID1cl, err &#x3D; membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)  上述方法从 –initial-cluster-token and –initial-cluster 这个两个启">
+<meta property="og:description" content="etcd v3.1.9   从 etcd 启动参数中生成 Cluster ID 和 Member ID 1cl, err &#x3D; membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap) 上述方法从 –initial-cluster-token and –initial-cluster 这个两个">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-10-03T00:00:00.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.062Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%8E-etcd-%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0%E4%B8%AD%E7%94%9F%E6%88%90-Cluster-ID-%E5%92%8C-Member-ID"><span class="nav-number">1.</span> <span class="nav-text">从 etcd 启动参数中生成 Cluster ID 和 Member ID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Member-Add-%E7%94%9F%E6%88%90%E7%9A%84-Member-ID"><span class="nav-number">2.</span> <span class="nav-text">Member Add 生成的 Member ID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%8E-etcd-%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0%E4%B8%AD%E7%94%9F%E6%88%90-cluster-id-%E5%92%8C-member-id"><span class="nav-number">1.</span> <span class="nav-text"> 从 etcd 启动参数中生成 Cluster ID 和 Member ID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#member-add-%E7%94%9F%E6%88%90%E7%9A%84-member-id"><span class="nav-number">2.</span> <span class="nav-text"> Member Add 生成的 Member ID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text"> 总结</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -249,26 +254,24 @@
     <div class="post-body" itemprop="articleBody"><blockquote>
 <p>etcd v3.1.9</p>
 </blockquote>
-<h1 id="从-etcd-启动参数中生成-Cluster-ID-和-Member-ID"><a href="#从-etcd-启动参数中生成-Cluster-ID-和-Member-ID" class="headerlink" title="从 etcd 启动参数中生成 Cluster ID 和 Member ID"></a>从 etcd 启动参数中生成 Cluster ID 和 Member ID</h1><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cl, err = membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)</span><br></pre></td></tr></table></figure>
-
+<h1 id="从-etcd-启动参数中生成-cluster-id-和-member-id"><a class="markdownIt-Anchor" href="#从-etcd-启动参数中生成-cluster-id-和-member-id"></a> 从 etcd 启动参数中生成 Cluster ID 和 Member ID</h1>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cl, err = membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)</span><br></pre></td></tr></table></figure>
 <p>上述方法从 –initial-cluster-token and –initial-cluster 这个两个启动参数中生成 Cluster ID 和各个 Member ID</p>
 <p>NewClusterFromURLsMap 这个方法中调用 NewMember 生成 Member ID</p>
 <p>首先来看 NewMember 方法</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func NewMember(name string, peerURLs types.URLs, clusterName string, now *time.Time) *Member</span><br></pre></td></tr></table></figure>
-
 <p>核心思路</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b []<span class="keyword">byte</span>: peerUrls + clusterName + time</span><br><span class="line">hash := sha1.Sum(b)</span><br><span class="line">memberID: binary.BigEndian.Uint64(hash[:<span class="number">8</span>])</span><br></pre></td></tr></table></figure>
-
 <p>Member ID 根据 peerUrls / clusterName / current_time 的 sha1 sum 值，取其前 8 个 bytes，为 16 位的 hex 数</p>
 <p>回到 NewClusterFromURLsMap 方法中的 NewMember（代码如下）可见最后一个参数为 nil，即不加入时间因素，因此 NewClusterFromURLsMap 生成的 Member ID 是固定的</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m := NewMember(name, urls, token, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
-
-<h1 id="Member-Add-生成的-Member-ID"><a href="#Member-Add-生成的-Member-ID" class="headerlink" title="Member Add 生成的 Member ID"></a>Member Add 生成的 Member ID</h1><p>直接从 server 端看起 —— etcdserver/api/v3rpc/member.go 中的 MemberAdd 方法</p>
+<h1 id="member-add-生成的-member-id"><a class="markdownIt-Anchor" href="#member-add-生成的-member-id"></a> Member Add 生成的 Member ID</h1>
+<p>直接从 server 端看起 —— etcdserver/api/v3rpc/member.go 中的 MemberAdd 方法</p>
 <p>可见如下代码</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">urls, err := types.NewURLs(r.PeerURLs)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, rpctypes.ErrGRPCMemberBadURLs</span><br><span class="line">&#125;</span><br><span class="line">now := time.Now()</span><br><span class="line">m := membership.NewMember(<span class="string">&quot;&quot;</span>, urls, <span class="string">&quot;&quot;</span>, &amp;now)</span><br><span class="line"><span class="keyword">if</span> err = cs.server.AddMember(ctx, *m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, togRPCError(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>m := membership.NewMember(“”, urls, “”, &amp;now) 加入了当前时间，因此 Member ID 是不确定的</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>cluster ID 仅生成一次，此后不会变化</p>
+<h1 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h1>
+<p>cluster ID 仅生成一次，此后不会变化</p>
 <p>通过 etcd 启动参数生成 (initial-cluster) 的 Member ID 固定</p>
 <p>通过 Member add 生成的 Member ID 不确定</p>
 <p>Member add 的时候，没有传递 member 的 name，因此 member add 成功时，member list 出来的 member item，新加入的 member 其 name 为空，且没有 client url，因该 member 尚未 publish 其 client url 到集群中</p>
@@ -326,13 +329,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

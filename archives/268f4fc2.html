@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zrss.github.io/images/rayjob-init-container.svg">
 <meta property="article:published_time" content="2026-03-24T23:53:44.000Z">
-<meta property="article:modified_time" content="2026-03-27T12:51:08.877Z">
+<meta property="article:modified_time" content="2026-03-31T14:56:54.376Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="ray">
 <meta name="twitter:card" content="summary">
@@ -66,6 +66,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -211,7 +216,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-27 12:51:08" itemprop="dateModified" datetime="2026-03-27T12:51:08Z">2026-03-27</time>
+      <time title="修改时间：2026-03-31 14:56:54" itemprop="dateModified" datetime="2026-03-31T14:56:54Z">2026-03-31</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -248,7 +253,7 @@
     
     
     <div class="post-body" itemprop="articleBody"><p>在 KubeRay 里，Ray Job 由 Ray Cluster 承载与管理，真正的难点往往在于 <strong>如何把 Ray Job 与 Ray Cluster 的生命周期对齐</strong>。</p>
-<p><img src="/images/rayjob-init-container.svg" alt="rayjob-raycluster"></p>
+<p><img src="/images/rayjob-init-container.svg" alt="rayjob-raycluster" /></p>
 <p>先看通用 Job：常用 init container 拉数据、下发配置等；<strong>init 失败即整次 Job 失败</strong>，这很直观。</p>
 <p>Ray Job 不同：它并不是「那一组实际跑在集群里的 Pod」——资源实体是 Ray Cluster；所谓 Ray Job 的 init container，也落在 Cluster 侧。结果是 <strong>Job 侧的 init 语义，会和 Cluster 的 init / bootstrap 语义绑在一起</strong>。</p>
 <ul>
@@ -257,7 +262,8 @@
 </ul>
 <p>也是在借助大模型拆解 issue、梳理场景，并对照代码与线上行为逐项验证的过程中，才逐渐理解：Ray Job 对 init container 的生命周期管理，很难用一套简单直白、一步到位的规则实现。</p>
 <blockquote>
-<p>1h vibe issue, 8h vibe coding<br>70M tokens cost</p>
+<p>1h vibe issue, 8h vibe coding<br />
+70M tokens cost</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/ray-project/kuberay/issues/4637">https://github.com/ray-project/kuberay/issues/4637</a></p>
 </blockquote>
 <p>两种典型模式：</p>
@@ -271,7 +277,7 @@
 <li><strong>沿用已有</strong> Cluster：Ray Job 结束 <strong>不改变</strong> Cluster 的生命周期（Cluster 可能继续服务其他任务或由别处托管）。</li>
 </ul>
 <p>回到 <strong>Ray Job 自定义 init 失败</strong>——这发生在 <strong>Job 新建并绑定的专属 Cluster</strong> 上。Job 结束后如果 Cluster 长期保留，语义上确实容易别扭；而更合理的模式通常是 <strong>短时间保留现场</strong>（以收集日志和进行问题诊断），然后自动回收这个临时 Cluster。这本质上是一种「单次 Job + 一套临时 Cluster」的短生命期部署方式，与长期共用 Cluster 是两套完全不同的心智模型。</p>
-<p>不过需要注意，<strong>当前 Ray Job 实际上并不支持这样的能力</strong>：Job 自定义 init 失败后，系统还不会自动实现「短暂保留现场再回收 Cluster」的行为。可以继续 vibe issue, 基于 issue vibe coding。</p>
+<p>不过需要注意，<strong>当前 Ray Job 实际上并不支持这样的能力</strong>：Job 自定义 init 失败后，Job 仍然处于 initializing 状态，系统还不会自动实现「短暂保留现场再回收 Cluster」的行为。可以继续 vibe issue, 基于 issue vibe coding。</p>
 
     </div>
 
@@ -293,6 +299,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/archives/5982b47d.html" rel="next" title="PPO">
+                  PPO <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -323,13 +332,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

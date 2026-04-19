@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="k8s 1.7 闲暇记录 CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本 k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能 JobJob 相比于 StatefulSet &#x2F; Deployment 的特殊字段  .spec.restartPolicy: 仅支持 OnFailed">
+    <meta name="description" content="k8s 1.7 闲暇记录 CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本 k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能  Job Job 相比于 StatefulSet &#x2F; Deployment 的特殊字段  .spec.restartPolicy: 仅支持 OnFail">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Job 与 CronJob">
 <meta property="og:url" content="https://zrss.github.io/archives/e0d55f2c.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="k8s 1.7 闲暇记录 CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本 k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能 JobJob 相比于 StatefulSet &#x2F; Deployment 的特殊字段  .spec.restartPolicy: 仅支持 OnFailed">
+<meta property="og:description" content="k8s 1.7 闲暇记录 CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本 k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能  Job Job 相比于 StatefulSet &#x2F; Deployment 的特殊字段  .spec.restartPolicy: 仅支持 OnFail">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-04-01T16:52:38.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.053Z">
@@ -65,6 +65,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -124,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Job"><span class="nav-number">1.</span> <span class="nav-text">Job</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CronJob"><span class="nav-number">2.</span> <span class="nav-text">CronJob</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">3.</span> <span class="nav-text">Overview</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#job"><span class="nav-number">1.</span> <span class="nav-text"> Job</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cronjob"><span class="nav-number">2.</span> <span class="nav-text"> CronJob</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#overview"><span class="nav-number">3.</span> <span class="nav-text"> Overview</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,7 +246,8 @@
     <div class="post-body" itemprop="articleBody"><p>k8s 1.7 闲暇记录</p>
 <p>CronJob 一直到 1.8 才开启，1.7 以下的集群需在 apiserver 的启动参数中增加变量，显示开启特定的 api 版本</p>
 <p>k8s 中的 job 一般说来需要业务自身做到幂等，或者即使会被重复执行而不影响功能</p>
-<h1 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h1><p>Job 相比于 StatefulSet / Deployment 的特殊字段</p>
+<h1 id="job"><a class="markdownIt-Anchor" href="#job"></a> Job</h1>
+<p>Job 相比于 StatefulSet / Deployment 的特殊字段</p>
 <ul>
 <li>.spec.restartPolicy: 仅支持 OnFailed / Never，两种方式控制范围不同，前者当 Pod 容器失败退出时，重启容器，后者当 Pod 容器失败退出时，新建 Pod，会导致 Pod 中的所有容器重启</li>
 <li>.spec.completions: 完成数，即在 completion 个 pod 执行成功后，认为 Job 完成</li>
@@ -267,11 +273,10 @@
 <p>completions &gt;=1 &amp;&amp; parallelism &gt;=1</p>
 <p>Job 的接口</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;apis&#x2F;batch&#x2F;v1&#x2F;namespaces&#x2F;&#123;namespace&#125;&#x2F;jobs</span><br></pre></td></tr></table></figure>
-
 <p>Job example yaml</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">activeDeadlineSeconds:</span> <span class="number">100</span></span><br><span class="line">  <span class="attr">parallelism:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">completions:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">        <span class="attr">command:</span> [<span class="string">&quot;echo&quot;</span>, <span class="string">&quot;hello&quot;</span>]</span><br><span class="line">      <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="CronJob"><a href="#CronJob" class="headerlink" title="CronJob"></a>CronJob</h1><p>顾名思义，定时任务，支持类似 linux cron 的定时策略，定时调度 Job，可以这么理解 CronJob 控制 Job，而 Job 控制 Pod，Pod 完成具体的业务逻辑</p>
+<h1 id="cronjob"><a class="markdownIt-Anchor" href="#cronjob"></a> CronJob</h1>
+<p>顾名思义，定时任务，支持类似 linux cron 的定时策略，定时调度 Job，可以这么理解 CronJob 控制 Job，而 Job 控制 Pod，Pod 完成具体的业务逻辑</p>
 <p>CronJob 的特殊字段</p>
 <ul>
 <li>.spec.schedule: core of cronjob and it is like one line of a crontab (cron table) file，即定时策略配置，例如 */1 * * * *，每分钟调度一次 Job 执行</li>
@@ -283,12 +288,11 @@
 </ul>
 <p>注意 CronJob 在 1.7 中仍然为 Alpha 版本，接口为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;apis&#x2F;batch&#x2F;v2alpha1&#x2F;namespaces&#x2F;&#123;namespace&#125;&#x2F;cronjobs</span><br></pre></td></tr></table></figure>
-
 <p>CronJob example yaml</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v2alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">CronJob</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">schedule:</span> <span class="string">&quot;*/1 * * * *&quot;</span></span><br><span class="line">  <span class="attr">jobTemplate:</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">template:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">containers:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">            <span class="attr">args:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">date;</span> <span class="string">echo</span> <span class="string">Hello</span> <span class="string">from</span> <span class="string">the</span> <span class="string">Kubernetes</span> <span class="string">cluster</span></span><br><span class="line">          <span class="attr">restartPolicy:</span> <span class="string">OnFailure</span></span><br></pre></td></tr></table></figure>
-
 <p>由 CronJob 创建的 Job，在 Job 的 metadata 字段的 ObjectReference 有所体现，会写明是由 cronJob controller 控制</p>
-<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>查看了 job/cronjob 的功能后，我们发现 job 适合用来执行一些初始化 / 统计数据 / 备份 / 清理工作，即那些不需要一直运行的工作，需要长期运行的工作，当然还是 Deployment/StatefulSet 更合适了</p>
+<h1 id="overview"><a class="markdownIt-Anchor" href="#overview"></a> Overview</h1>
+<p>查看了 job/cronjob 的功能后，我们发现 job 适合用来执行一些初始化 / 统计数据 / 备份 / 清理工作，即那些不需要一直运行的工作，需要长期运行的工作，当然还是 Deployment/StatefulSet 更合适了</p>
 
     </div>
 
@@ -344,13 +348,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

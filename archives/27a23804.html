@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="hikari 轻量级数据库连接池https:&#x2F;&#x2F;github.com&#x2F;brettwooldridge&#x2F;HikariCP&#x2F;wiki&#x2F;About-Pool-Sizing#limited-resources 这句话挺有趣，言简意赅  More threads only perform better when blocking creates opportunities for executing.  h">
+    <meta name="description" content="hikari 轻量级数据库连接池 https:&#x2F;&#x2F;github.com&#x2F;brettwooldridge&#x2F;HikariCP&#x2F;wiki&#x2F;About-Pool-Sizing#limited-resources 这句话挺有趣，言简意赅  More threads only perform better when blocking creates opportunities for executing.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hikari connection pool">
 <meta property="og:url" content="https://zrss.github.io/archives/27a23804.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="hikari 轻量级数据库连接池https:&#x2F;&#x2F;github.com&#x2F;brettwooldridge&#x2F;HikariCP&#x2F;wiki&#x2F;About-Pool-Sizing#limited-resources 这句话挺有趣，言简意赅  More threads only perform better when blocking creates opportunities for executing.  h">
+<meta property="og:description" content="hikari 轻量级数据库连接池 https:&#x2F;&#x2F;github.com&#x2F;brettwooldridge&#x2F;HikariCP&#x2F;wiki&#x2F;About-Pool-Sizing#limited-resources 这句话挺有趣，言简意赅  More threads only perform better when blocking creates opportunities for executing.">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-09-14T10:25:47.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.052Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-%E8%BD%BB%E9%87%8F%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text">hikari 轻量级数据库连接池</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-%E7%89%B9%E6%AE%8A%E7%9A%84%E4%BC%98%E5%8C%96%E6%89%8B%E6%AE%B5%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">hikari 特殊的优化手段介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">连接池的一些问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8B%E8%8E%B7%E5%8F%96%E5%A4%9A%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%EF%BC%88%E9%A5%BF%E6%AD%BB%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">一个线程获取多个数据库连接（饿死）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-%E7%9A%84%E4%B8%80%E4%BA%9B%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">4.</span> <span class="nav-text">hikari 的一些配置项</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8E-Scala-Slick-%E7%BB%93%E5%90%88"><span class="nav-number">5.</span> <span class="nav-text">与 Scala Slick 结合</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">5.1.</span> <span class="nav-text">线程池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Database-forConfig"><span class="nav-number">5.2.</span> <span class="nav-text">Database.forConfig()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-summary"><span class="nav-number">6.</span> <span class="nav-text">hikari summary</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-%E8%BD%BB%E9%87%8F%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text"> hikari 轻量级数据库连接池</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-%E7%89%B9%E6%AE%8A%E7%9A%84%E4%BC%98%E5%8C%96%E6%89%8B%E6%AE%B5%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text"> hikari 特殊的优化手段介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text"> 连接池的一些问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8B%E8%8E%B7%E5%8F%96%E5%A4%9A%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E9%A5%BF%E6%AD%BB"><span class="nav-number">3.1.</span> <span class="nav-text"> 一个线程获取多个数据库连接（饿死）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-%E7%9A%84%E4%B8%80%E4%BA%9B%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">4.</span> <span class="nav-text"> hikari 的一些配置项</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8E-scala-slick-%E7%BB%93%E5%90%88"><span class="nav-number">5.</span> <span class="nav-text"> 与 Scala Slick 结合</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">5.1.</span> <span class="nav-text"> 线程池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#databaseforconfig"><span class="nav-number">5.2.</span> <span class="nav-text"> Database.forConfig()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hikari-summary"><span class="nav-number">6.</span> <span class="nav-text"> hikari summary</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -237,7 +242,8 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="hikari-轻量级数据库连接池"><a href="#hikari-轻量级数据库连接池" class="headerlink" title="hikari 轻量级数据库连接池"></a>hikari 轻量级数据库连接池</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources</a></p>
+    <div class="post-body" itemprop="articleBody"><h1 id="hikari-轻量级数据库连接池"><a class="markdownIt-Anchor" href="#hikari-轻量级数据库连接池"></a> hikari 轻量级数据库连接池</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#limited-resources</a></p>
 <p>这句话挺有趣，言简意赅</p>
 <blockquote>
 <p>More threads only perform better when blocking creates opportunities for executing.</p>
@@ -248,23 +254,28 @@
 <p>如果有 IO 阻塞等情况，使得线程在自己的时间片中，不能充分使用 CPU core，这样通过线程切换技术，可以提高 CPU core 的使用率，最终来看提高了性能 (吞吐量)</p>
 <p>因此 PostgresSQL 项目给出了一个连接数计算的参考公式</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">connections &#x3D; ((core_count * 2) + effective_spindle_count)</span><br></pre></td></tr></table></figure>
-
 <blockquote>
-<p>Effective spindle count is zero if<br>the active data set is fully cached, and approaches the actual number of spindles<br>as the cache hit rate falls</p>
+<p>Effective spindle count is zero if<br />
+the active data set is fully cached, and approaches the actual number of spindles<br />
+as the cache hit rate falls</p>
 </blockquote>
 <p>effective_spindle_count 即 IO 等待时间的估计值</p>
-<h1 id="hikari-特殊的优化手段介绍"><a href="#hikari-特殊的优化手段介绍" class="headerlink" title="hikari 特殊的优化手段介绍"></a>hikari 特殊的优化手段介绍</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole">https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole</a></p>
+<h1 id="hikari-特殊的优化手段介绍"><a class="markdownIt-Anchor" href="#hikari-特殊的优化手段介绍"></a> hikari 特殊的优化手段介绍</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole">https://github.com/brettwooldridge/HikariCP/wiki/Down-the-Rabbit-Hole</a></p>
 <ul>
 <li>修改代码: 生成更优的字节码</li>
 <li>实现特定的数据结构: 更好的性能</li>
 </ul>
-<h1 id="连接池的一些问题"><a href="#连接池的一些问题" class="headerlink" title="连接池的一些问题"></a>连接池的一些问题</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking</a></p>
-<h2 id="一个线程获取多个数据库连接（饿死）"><a href="#一个线程获取多个数据库连接（饿死）" class="headerlink" title="一个线程获取多个数据库连接（饿死）"></a>一个线程获取多个数据库连接（饿死）</h2><p>可能的优化方案</p>
+<h1 id="连接池的一些问题"><a class="markdownIt-Anchor" href="#连接池的一些问题"></a> 连接池的一些问题</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking">https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing#pool-locking</a></p>
+<h2 id="一个线程获取多个数据库连接饿死"><a class="markdownIt-Anchor" href="#一个线程获取多个数据库连接饿死"></a> 一个线程获取多个数据库连接（饿死）</h2>
+<p>可能的优化方案</p>
 <ul>
 <li>设置保证不会出现饿死情况的 pool size = Tn x (Cm - 1) + 1, Tn 为线程数, Cm 为每个线程最大获取的连接数</li>
 <li>如果当前线程已经获取过数据库连接，再调用 getConnection 时，返回该线程当前的 connection，而不是返回新的 connection</li>
 </ul>
-<h1 id="hikari-的一些配置项"><a href="#hikari-的一些配置项" class="headerlink" title="hikari 的一些配置项"></a>hikari 的一些配置项</h1><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby">https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby</a></p>
+<h1 id="hikari-的一些配置项"><a class="markdownIt-Anchor" href="#hikari-的一些配置项"></a> hikari 的一些配置项</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby">https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby</a></p>
 <p><strong>leakDetectionThreshold</strong>: connection 泄漏告警，getConnection 后，在 leakDetectionThreshold 时间前，未调用 close 方法，会日志打印告警</p>
 <p>慢 SQL (10s 以上执行时间) 会导致该告警</p>
 <p><strong>idleTimeout</strong> = idleTimeout = 600s</p>
@@ -293,18 +304,20 @@
 <p>This property controls the maximum number of milliseconds that a client (that’s you) will wait for a connection from the pool.</p>
 </blockquote>
 <p>getConnection 的超时时间</p>
-<h1 id="与-Scala-Slick-结合"><a href="#与-Scala-Slick-结合" class="headerlink" title="与 Scala Slick 结合"></a>与 Scala Slick 结合</h1><p>增加 slick-hikari 依赖</p>
+<h1 id="与-scala-slick-结合"><a class="markdownIt-Anchor" href="#与-scala-slick-结合"></a> 与 Scala Slick 结合</h1>
+<p>增加 slick-hikari 依赖</p>
 <p><a target="_blank" rel="noopener" href="http://slick.lightbend.com/doc/3.2.1/gettingstarted.html#adding-slick-to-your-project">http://slick.lightbend.com/doc/3.2.1/gettingstarted.html#adding-slick-to-your-project</a></p>
 <p>增加 typesafe config 配置项</p>
 <p><a target="_blank" rel="noopener" href="http://slick.lightbend.com/doc/3.2.1/database.html#connection-pools">http://slick.lightbend.com/doc/3.2.1/database.html#connection-pools</a></p>
-<p>注意到 slick 将 hikari 的初始化方法封装了一层，另外该文档有一些错误，建议直接参考 hikari 的 readme.md 说明，也没几个核心参数</p>
+<p>注意到 slick 将 hikari 的初始化方法封装了一层，另外该文档有一些错误，建议直接参考 hikari 的 <a target="_blank" rel="noopener" href="http://readme.md">readme.md</a> 说明，也没几个核心参数</p>
 <p><a target="_blank" rel="noopener" href="http://slick.lightbend.com/doc/3.2.1/api/index.html#slick.jdbc.JdbcBackend$DatabaseFactoryDef@forConfig(String,Config,Driver,ClassLoader):Database">http://slick.lightbend.com/doc/3.2.1/api/index.html#slick.jdbc.JdbcBackend$DatabaseFactoryDef@forConfig(String,Config,Driver,ClassLoader):Database</a></p>
 <p>Slick 这个 O (or function) RM 怎么说呢，一言难尽，表达式太弱 (当然可能是我不熟悉如此灵魂的 function 写法)，生成的 SQL 语句非最优。举个例子</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(<span class="number">1</span>), <span class="keyword">count</span>(<span class="keyword">distinct</span> job_name), * <span class="keyword">from</span> A, B, C</span><br></pre></td></tr></table></figure>
-
 <p>就没法实现，要么写成子查询，要么只能分开并发执行，or 直接写 sql 语句 …</p>
-<h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>注意到 slick 维护一个内部线程池，用于执行数据库相关的异步操作，通过 numThreads 参数指定最大线程数</p>
-<h2 id="Database-forConfig"><a href="#Database-forConfig" class="headerlink" title="Database.forConfig()"></a>Database.forConfig()</h2><p>numThreads: 用于执行数据库相关的异步操作的线程数</p>
+<h2 id="线程池"><a class="markdownIt-Anchor" href="#线程池"></a> 线程池</h2>
+<p>注意到 slick 维护一个内部线程池，用于执行数据库相关的异步操作，通过 numThreads 参数指定最大线程数</p>
+<h2 id="databaseforconfig"><a class="markdownIt-Anchor" href="#databaseforconfig"></a> Database.forConfig()</h2>
+<p>numThreads: 用于执行数据库相关的异步操作的线程数</p>
 <p>maxConnections = numThreads * 5</p>
 <p>minimumIdle = numThreads</p>
 <p>因此以 Slick numThreads = 16 为例</p>
@@ -312,7 +325,8 @@
 <li>maximumPoolSize = 16 * 5 = 80</li>
 <li>minimumIdle = 16</li>
 </ul>
-<h1 id="hikari-summary"><a href="#hikari-summary" class="headerlink" title="hikari summary"></a>hikari summary</h1><p>关键配置项</p>
+<h1 id="hikari-summary"><a class="markdownIt-Anchor" href="#hikari-summary"></a> hikari summary</h1>
+<p>关键配置项</p>
 <ul>
 <li>minimumIdle 决定了连接池中的最小 idle 连接数，当 idle 连接少于该阈值时，hikari 会尽快补齐</li>
 <li>idleTimeout (10min) 决定了 idle 连接的存活时间</li>
@@ -373,13 +387,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

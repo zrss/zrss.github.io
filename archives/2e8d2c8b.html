@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="计算 Replica 及 Slot 数 创建 ConfigMap   hostfile  1[mpiJobName]-worker-i slots&#x3D;[8]  [mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod kubexec.sh 12345#!&#x2F;bin&#x2F;shset -xPOD_NAME&#x3D;$1shift&#x2F;opt&#x2F;kub">
+    <meta name="description" content="计算 Replica 及 Slot 数 创建 ConfigMap   hostfile  1[mpiJobName]-worker-i slots&#x3D;[8] [mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod kubexec.sh 12345#!&#x2F;bin&#x2F;shset -xPOD_NAME&#x3D;$1shift&#x2F;opt&#x2F;kube">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mpi operator">
 <meta property="og:url" content="https://zrss.github.io/archives/2e8d2c8b.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="计算 Replica 及 Slot 数 创建 ConfigMap   hostfile  1[mpiJobName]-worker-i slots&#x3D;[8]  [mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod kubexec.sh 12345#!&#x2F;bin&#x2F;shset -xPOD_NAME&#x3D;$1shift&#x2F;opt&#x2F;kub">
+<meta property="og:description" content="计算 Replica 及 Slot 数 创建 ConfigMap   hostfile  1[mpiJobName]-worker-i slots&#x3D;[8] [mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod kubexec.sh 12345#!&#x2F;bin&#x2F;shset -xPOD_NAME&#x3D;$1shift&#x2F;opt&#x2F;kube">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-01-19T10:51:00.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.057Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -135,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -244,11 +249,9 @@
 <li>hostfile</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[mpiJobName]-worker-i slots&#x3D;[8]</span><br></pre></td></tr></table></figure>
-
 <p>[mpiJobName]-worker-i i.e. ${POD_NAME} of statefulset’s pod</p>
-<p>kubexec.sh</p>
+<p><a target="_blank" rel="noopener" href="http://kubexec.sh">kubexec.sh</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line">POD_NAME=<span class="variable">$1</span></span><br><span class="line"><span class="built_in">shift</span></span><br><span class="line">/opt/kube/kubectl <span class="built_in">exec</span> <span class="variable">$&#123;POD_NAME&#125;</span> -- /bin/sh -c <span class="string">&quot;$*&quot;</span></span><br></pre></td></tr></table></figure>
-
 <ol>
 <li>创建 Statefulset</li>
 </ol>
@@ -257,13 +260,12 @@
 <li>创建 Launcher (Job)</li>
 </ol>
 <p>Statefulset ready 后，创建 Launcher (Job)</p>
-<p>设置 env OMPI_MCA_plm_rsh_agent 为 kubexec.sh</p>
+<p>设置 env OMPI_MCA_plm_rsh_agent 为 <a target="_blank" rel="noopener" href="http://kubexec.sh">kubexec.sh</a></p>
 <p>即使用 <code>kubectl exec $&#123;POD_NAME&#125; -- /bin/sh -c &quot;$*&quot;</code> 作为 ssh_agent</p>
 <p><a target="_blank" rel="noopener" href="https://www.open-mpi.org/faq/?category=rsh#rsh-not-ssh">rsh-not-ssh</a></p>
 <p>所以 openmpi 是有个潜在要求的，要么是支持 IPoIB，or 要有 IP 网络，纯 IB 网络不行</p>
 <p>当然 SDP (Socket Direct Protocol) 能加速 Socket 又是另外一个话题了</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># server side</span></span><br><span class="line">/etc/init.d/sshd stop</span><br><span class="line">env LD_PRELOAD=/usr/lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/u/etc/libsdp.conf /etc/init.d/sshd start</span><br><span class="line"><span class="comment"># client side</span></span><br><span class="line">LD_PRELOAD=/usr//lib64/libsdp.so</span><br><span class="line">LIBSDP_CONFIG_FILE=/etc/libsdp.conf scp &lt;file&gt; &lt;user&gt;@&lt;IPoIBaddr&gt;:&lt;dir&gt;</span><br></pre></td></tr></table></figure>
-
 <p>Running ssh, scp over SDP</p>
 <p><code>lsmod | grep sdp</code></p>
 <p><code>sdpnetstat -S</code></p>
@@ -324,13 +326,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

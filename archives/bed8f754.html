@@ -67,6 +67,11 @@
 
 
 
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
 
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
@@ -124,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Knative-serving"><span class="nav-number">1.</span> <span class="nav-text">Knative serving</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#controller"><span class="nav-number">1.1.</span> <span class="nav-text">controller</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#services"><span class="nav-number">1.1.1.</span> <span class="nav-text">services</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#configuration"><span class="nav-number">1.1.2.</span> <span class="nav-text">configuration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#revision"><span class="nav-number">1.1.3.</span> <span class="nav-text">revision</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#routes"><span class="nav-number">1.1.4.</span> <span class="nav-text">routes</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">2.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Issues"><span class="nav-number">3.</span> <span class="nav-text">Issues</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#knative-serving"><span class="nav-number">1.</span> <span class="nav-text"> Knative serving</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#controller"><span class="nav-number">1.1.</span> <span class="nav-text"> controller</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#services"><span class="nav-number">1.1.1.</span> <span class="nav-text"> services</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#configuration"><span class="nav-number">1.1.2.</span> <span class="nav-text"> configuration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#revision"><span class="nav-number">1.1.3.</span> <span class="nav-text"> revision</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#routes"><span class="nav-number">1.1.4.</span> <span class="nav-text"> routes</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">2.</span> <span class="nav-text"> Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#issues"><span class="nav-number">3.</span> <span class="nav-text"> Issues</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -137,7 +142,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -241,8 +246,10 @@
     <div class="post-body" itemprop="articleBody"><p>也许 kubernetes 对于开发者来说仍然过于复杂，另外现实系统中，又对服务发布后的流量管理有诸多需求</p>
 <p>Knative 的出现，似乎是要真正实现 PAAS on the kubernetes</p>
 <p>开发者仅需要关心如何编写代码 (write code) ，其他的所有，交给 Knative 吧（Maybe）</p>
-<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=F4_2gxTtLaQ&t=849s">One Platform for Your Functions, Applications, and Containers (Cloud Next ‘18)</a></p>
-<h1 id="Knative-serving"><a href="#Knative-serving" class="headerlink" title="Knative serving"></a>Knative serving</h1><h2 id="controller"><a href="#controller" class="headerlink" title="controller"></a>controller</h2><ul>
+<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=F4_2gxTtLaQ&amp;t=849s">One Platform for Your Functions, Applications, and Containers (Cloud Next ‘18)</a></p>
+<h1 id="knative-serving"><a class="markdownIt-Anchor" href="#knative-serving"></a> Knative serving</h1>
+<h2 id="controller"><a class="markdownIt-Anchor" href="#controller"></a> controller</h2>
+<ul>
 <li>revision</li>
 <li>configuration</li>
 <li>services</li>
@@ -253,15 +260,13 @@
 <p>提到 list-watch 而又不能不提到 kubernetes 中的杰出 api sdk 实现——informer</p>
 <p>基于已日渐稳定的 kubernetes，knative 目前实现的简洁直接</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctrlr.Run(threadsPerController, stopCh)</span><br></pre></td></tr></table></figure>
-
 <p>每个 controller 启动 2 (threadsPerController) 个 goroutine 处理 list-watch 获得的 CRD 更新信息</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; threadiness; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> wait.Until(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> c.processNextWorkItem(syncHandler) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, time.Second, stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>syncHandler 由各个不同的 controller 传入</p>
 <p>下面简单分析 knative serving 模块的几个 controller</p>
-<h3 id="services"><a href="#services" class="headerlink" title="services"></a>services</h3><p>根据 knative 的 simple demo app，开始的时候，我们需要使用 yaml 创建一个 service，这是所有 knative 奇妙之旅的开端 getting-started-knative-app</p>
+<h3 id="services"><a class="markdownIt-Anchor" href="#services"></a> services</h3>
+<p>根据 knative 的 simple demo app，开始的时候，我们需要使用 yaml 创建一个 service，这是所有 knative 奇妙之旅的开端 getting-started-knative-app</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">serving.knative.dev/v1alpha1</span> <span class="comment"># Current version of Knative</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloworld-go</span> <span class="comment"># The name of the app</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span> <span class="comment"># The namespace the app will use</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">runLatest:</span></span><br><span class="line">    <span class="attr">configuration:</span></span><br><span class="line">      <span class="attr">revisionTemplate:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">container:</span></span><br><span class="line">            <span class="attr">image:</span> <span class="string">gcr.io/knative-samples/helloworld-go</span> <span class="comment"># The URL to the image of the app</span></span><br><span class="line">            <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">TARGET</span> <span class="comment"># The environment variable printed out by the sample app</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&quot;Go Sample v1&quot;</span></span><br></pre></td></tr></table></figure>
-
 <p>services 的 reconcile 首先会查询</p>
 <p>service 对应的 configuration (its name is the same with service-name) 是否存在</p>
 <ul>
@@ -273,14 +278,16 @@
 <li>不存在，创建之</li>
 <li>存在，reconcile 之</li>
 </ul>
-<h3 id="configuration"><a href="#configuration" class="headerlink" title="configuration"></a>configuration</h3><p>获取对应的 rev</p>
+<h3 id="configuration"><a class="markdownIt-Anchor" href="#configuration"></a> configuration</h3>
+<p>获取对应的 rev</p>
 <p>[config-name]-[config.spec.Generation]: helloworld-go-00001</p>
 <ul>
 <li>不存在，创建之</li>
 </ul>
 <p>随后更新 configuration 的 status</p>
 <p>所以可以看到在 configuration 中其实实现了 app 的多版本管理，每次 configuration 的修改（Generation + 1）均会生成一个新的 revision</p>
-<h3 id="revision"><a href="#revision" class="headerlink" title="revision"></a>revision</h3><p>revision 关注下述几种资源，在下述资源有变化时，将变化加入 queue 中，等待 revision 2 个 goroutine 处理之</p>
+<h3 id="revision"><a class="markdownIt-Anchor" href="#revision"></a> revision</h3>
+<p>revision 关注下述几种资源，在下述资源有变化时，将变化加入 queue 中，等待 revision 2 个 goroutine 处理之</p>
 <ul>
 <li>revisionInformer</li>
 <li>deploymentInformer</li>
@@ -298,13 +305,10 @@
 <p>并调用 kube-apiserver api 创建 deployment</p>
 <p>注意到在创建 deployment 时，revision controller 需要连接至该 deployment 的镜像仓库，获取其 digest，因此如果 revision controller 所在节点的网络受限的话，revision 的 status 可能会提示如下信息</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:03:43Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Deploying</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-29T19:04:13Z</span></span><br><span class="line">    <span class="attr">message:</span> <span class="string">&#x27;Get https://gcr.io/v2/: dial tcp: i/o timeout&#x27;</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">ContainerMissing</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
-<p>即连接镜像仓库（如示例中的连接 gcr.io 超时），导致 revision notReady，正常工作的 revision 状态如下</p>
+<p>即连接镜像仓库（如示例中的连接 <a target="_blank" rel="noopener" href="http://gcr.io">gcr.io</a> 超时），导致 revision notReady，正常工作的 revision 状态如下</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:36:46Z</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;True&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
 <p>非 active 的 revision 状态如下</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">status:</span></span><br><span class="line">  <span class="attr">conditions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ResourcesAvailable</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Updating</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">Unknown</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">ContainerHealthy</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">lastTransitionTime:</span> <span class="number">2018-08-30T09:09:18Z</span></span><br><span class="line">    <span class="attr">reason:</span> <span class="string">Inactive</span></span><br><span class="line">    <span class="attr">status:</span> <span class="string">&quot;False&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Ready</span></span><br></pre></td></tr></table></figure>
-
 <p>若找到其对应的 deployment</p>
 <p>则根据 rev 的状态，决定 deployment replica 的数量</p>
 <ul>
@@ -318,7 +322,8 @@
 <li>Ready [status: Unknown, reason: Updating]</li>
 </ul>
 <p>如果不相同，调用 kube-apiserver api 更新 deployment</p>
-<h3 id="routes"><a href="#routes" class="headerlink" title="routes"></a>routes</h3><p>routes 获取其对应的 kubernetes svc</p>
+<h3 id="routes"><a class="markdownIt-Anchor" href="#routes"></a> routes</h3>
+<p>routes 获取其对应的 kubernetes svc</p>
 <p>[route-name] 例如 helloworld-go</p>
 <ul>
 <li>不存在，创建之</li>
@@ -329,7 +334,8 @@
 <li>不存在，创建之</li>
 <li>否则，更新之</li>
 </ul>
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>controller of serving</p>
+<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h1>
+<p>controller of serving</p>
 <ul>
 <li>services controller</li>
 <li>configuration controller</li>
@@ -340,7 +346,8 @@
 <p>services controller 负责创建 configuration 和 routes 资源</p>
 <p>configuration controller 负责创建 revision 资源</p>
 <p>routes controller 负责创建 Istio VirtualService 资源</p>
-<h1 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h1><p>Knative 还处于较为年轻的阶段，花了两天时间最后成功在内网环境上成功运行了其 simple demo app。目前在需要使用 proxy 访问公网网络的情况下，如何配置 knative，其文档中还没有相关的说明</p>
+<h1 id="issues"><a class="markdownIt-Anchor" href="#issues"></a> Issues</h1>
+<p>Knative 还处于较为年轻的阶段，花了两天时间最后成功在内网环境上成功运行了其 simple demo app。目前在需要使用 proxy 访问公网网络的情况下，如何配置 knative，其文档中还没有相关的说明</p>
 <p>目前为止尝试 knative 的一些 debug 经历，可参看下述 issues</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/knative/docs/issues/365">Knative http proxy sample</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/knative/serving/issues/1954">istio-statsd-prom-bridge pod crash due to unknown short flag</a></p>
@@ -401,13 +408,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

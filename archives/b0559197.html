@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="Creating an Image Filesystem Changesethttps:&#x2F;&#x2F;github.com&#x2F;moby&#x2F;moby&#x2F;blob&#x2F;master&#x2F;image&#x2F;spec&#x2F;v1.md#creating-an-image-filesystem-changeset 描述了如何 Creating an Image Filesystem Changeset 每层 layers file 仅可能有如">
+    <meta name="description" content="Creating an Image Filesystem Changeset https:&#x2F;&#x2F;github.com&#x2F;moby&#x2F;moby&#x2F;blob&#x2F;master&#x2F;image&#x2F;spec&#x2F;v1.md#creating-an-image-filesystem-changeset 描述了如何 Creating an Image Filesystem Changeset 每层 layers file 仅可能">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Layer files Content">
 <meta property="og:url" content="https://zrss.github.io/archives/b0559197.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="Creating an Image Filesystem Changesethttps:&#x2F;&#x2F;github.com&#x2F;moby&#x2F;moby&#x2F;blob&#x2F;master&#x2F;image&#x2F;spec&#x2F;v1.md#creating-an-image-filesystem-changeset 描述了如何 Creating an Image Filesystem Changeset 每层 layers file 仅可能有如">
+<meta property="og:description" content="Creating an Image Filesystem Changeset https:&#x2F;&#x2F;github.com&#x2F;moby&#x2F;moby&#x2F;blob&#x2F;master&#x2F;image&#x2F;spec&#x2F;v1.md#creating-an-image-filesystem-changeset 描述了如何 Creating an Image Filesystem Changeset 每层 layers file 仅可能">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-11-17T11:47:49.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.036Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Creating-an-Image-Filesystem-Changeset"><span class="nav-number">1.</span> <span class="nav-text">Creating an Image Filesystem Changeset</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Loading-an-Image-Filesystem-Changeset"><span class="nav-number">2.</span> <span class="nav-text">Loading an Image Filesystem Changeset</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Owner-and-Group"><span class="nav-number">3.</span> <span class="nav-text">Owner and Group</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Permission"><span class="nav-number">4.</span> <span class="nav-text">Permission</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Scan-Image-Tar-Archive"><span class="nav-number">5.</span> <span class="nav-text">Scan Image Tar Archive</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">6.</span> <span class="nav-text">Summary</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#creating-an-image-filesystem-changeset"><span class="nav-number">1.</span> <span class="nav-text"> Creating an Image Filesystem Changeset</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#loading-an-image-filesystem-changeset"><span class="nav-number">2.</span> <span class="nav-text"> Loading an Image Filesystem Changeset</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#owner-and-group"><span class="nav-number">3.</span> <span class="nav-text"> Owner and Group</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#permission"><span class="nav-number">4.</span> <span class="nav-text"> Permission</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#scan-image-tar-archive"><span class="nav-number">5.</span> <span class="nav-text"> Scan Image Tar Archive</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#summary"><span class="nav-number">6.</span> <span class="nav-text"> Summary</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -220,7 +225,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.3k</span>
+      <span>2.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -237,7 +242,8 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="Creating-an-Image-Filesystem-Changeset"><a href="#Creating-an-Image-Filesystem-Changeset" class="headerlink" title="Creating an Image Filesystem Changeset"></a>Creating an Image Filesystem Changeset</h1><p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/blob/master/image/spec/v1.md#creating-an-image-filesystem-changeset">https://github.com/moby/moby/blob/master/image/spec/v1.md#creating-an-image-filesystem-changeset</a></p>
+    <div class="post-body" itemprop="articleBody"><h1 id="creating-an-image-filesystem-changeset"><a class="markdownIt-Anchor" href="#creating-an-image-filesystem-changeset"></a> Creating an Image Filesystem Changeset</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/blob/master/image/spec/v1.md#creating-an-image-filesystem-changeset">https://github.com/moby/moby/blob/master/image/spec/v1.md#creating-an-image-filesystem-changeset</a></p>
 <p>描述了如何 Creating an Image Filesystem Changeset</p>
 <p>每层 layers file 仅可能有如下的情况</p>
 <ul>
@@ -247,40 +253,43 @@
 </ul>
 <p>例如</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Added:      &#x2F;etc&#x2F;my-app.d&#x2F;default.cfg</span><br><span class="line">Modified:   &#x2F;bin&#x2F;my-app-tools</span><br><span class="line">Deleted:    &#x2F;etc&#x2F;my-app-config</span><br></pre></td></tr></table></figure>
-
 <p>对于 changeset 来说，会生成如下文件</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;etc&#x2F;my-app.d&#x2F;default.cfg</span><br><span class="line">&#x2F;bin&#x2F;my-app-tools</span><br><span class="line">&#x2F;etc&#x2F;.wh.my-app-config</span><br></pre></td></tr></table></figure>
-
 <blockquote>
 <p>.wh. i.e. without</p>
 </blockquote>
-<h1 id="Loading-an-Image-Filesystem-Changeset"><a href="#Loading-an-Image-Filesystem-Changeset" class="headerlink" title="Loading an Image Filesystem Changeset"></a>Loading an Image Filesystem Changeset</h1><p>那么我们又如何 Loading an Image Filesystem Changeset</p>
+<h1 id="loading-an-image-filesystem-changeset"><a class="markdownIt-Anchor" href="#loading-an-image-filesystem-changeset"></a> Loading an Image Filesystem Changeset</h1>
+<p>那么我们又如何 Loading an Image Filesystem Changeset</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/moby/moby/blob/master/image/spec/v1.md#loading-an-image-filesystem-changeset">https://github.com/moby/moby/blob/master/image/spec/v1.md#loading-an-image-filesystem-changeset</a></p>
 <ol>
 <li>找到 the root ancestor changeset</li>
-<li>从 root ancestor changeset 开始，逐级解压 layer’s filesystem changeset archive 到目录 (将被使用来作为 the root of a container filesystem)<br> 1.1 每层解压之后再遍历一次目录，删除已被标记删除的目录 removing any files with the prefix .wh. and the corresponding file or directory named without this prefix</li>
+<li>从 root ancestor changeset 开始，逐级解压 layer’s filesystem changeset archive 到目录 (将被使用来作为 the root of a container filesystem)<br />
+1.1 每层解压之后再遍历一次目录，删除已被标记删除的目录 removing any files with the prefix .wh. and the corresponding file or directory named without this prefix</li>
 </ol>
-<h1 id="Owner-and-Group"><a href="#Owner-and-Group" class="headerlink" title="Owner and Group"></a>Owner and Group</h1><p>另外尝试改变文件属主</p>
+<h1 id="owner-and-group"><a class="markdownIt-Anchor" href="#owner-and-group"></a> Owner and Group</h1>
+<p>另外尝试改变文件属主</p>
 <p>changeset 也算作文件 update</p>
-<p>untar 的时候注意 –same-owner</p>
+<p>untar 的时候注意 --same-owner</p>
 <p>这里有个新问题，就是 docker load 是如何处理 Image Filesystem Changeset 中的属主的</p>
 <p>实际测试得需要 root 用户 <code>tar --same-owner -xvf</code> 才行, 解压出来的属主和 group 也仅为 id 值，毕竟宿主机上不一定有该 owner 和 group</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ash-3.2$ ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x   3 zrss  staff  102 11 17 19:24 .</span><br><span class="line">drwxr-xr-x  10 zrss  staff  340 11 17 18:39 ..</span><br><span class="line">drwxr-xr-x  13 101   101    442 11 17 19:25 var</span><br></pre></td></tr></table></figure>
-
 <blockquote>
 <p>101 nginx</p>
 </blockquote>
-<h1 id="Permission"><a href="#Permission" class="headerlink" title="Permission"></a>Permission</h1><p>改变文件权限</p>
+<h1 id="permission"><a class="markdownIt-Anchor" href="#permission"></a> Permission</h1>
+<p>改变文件权限</p>
 <p>changeset 也算作文件 update</p>
 <p>直接解压即可，可以保留原权限</p>
-<h1 id="Scan-Image-Tar-Archive"><a href="#Scan-Image-Tar-Archive" class="headerlink" title="Scan Image Tar Archive"></a>Scan Image Tar Archive</h1><p>业界做法扫描 layer，</p>
+<h1 id="scan-image-tar-archive"><a class="markdownIt-Anchor" href="#scan-image-tar-archive"></a> Scan Image Tar Archive</h1>
+<p>业界做法扫描 layer，</p>
 <p><a target="_blank" rel="noopener" href="https://docs.docker.com/ee/dtr/user/manage-images/scan-images-for-vulnerabilities/">https://docs.docker.com/ee/dtr/user/manage-images/scan-images-for-vulnerabilities/</a></p>
 <p>而不是将 layer combine 成 container root fs 之后，再全文件扫描</p>
 <p>当然可能因为是病毒扫描，这样做比较简单</p>
 <p>话说有没有必要组成 root fs 之后再扫描呢，因为毕竟可能之前 layer 的漏洞，在下一 layer 被修复了，感觉可能是会误报的 ? 细节上不知道可以如何实现</p>
 <p>倒是可以看下 coreos clair 是如何实现的</p>
 <p>🙄 其实也是一样的，把 layer 解压之后，扫文件，比对数据库</p>
-<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>其实是有点儿疑惑的, 业界镜像扫描解决方案 (当然是针对病毒扫描) 都是直接扫描 image layer</p>
+<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h1>
+<p>其实是有点儿疑惑的, 业界镜像扫描解决方案 (当然是针对病毒扫描) 都是直接扫描 image layer</p>
 <p>暂未发现有按照 Loading an Image Filesystem Changeset 描述的过程那样，挂载出 container root fs 之后，再扫描的解决方案</p>
 <p>当然描述的过程感觉其实只是好理解，实际上 dockerd 再组织镜像 root fs 时，是需要根据不同的 storage driver 的实现，调用不同的命令实现的挂载 (或者换一个说法，storage driver 本质上实现了描述的过程 …)</p>
 <ol>
@@ -288,7 +297,6 @@
 </ol>
 <p><a target="_blank" rel="noopener" href="https://terriblecode.com/blog/how-docker-images-work-union-file-systems-for-dummies/">https://terriblecode.com/blog/how-docker-images-work-union-file-systems-for-dummies/</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir base diff overlay workdir</span><br><span class="line">sudo mount \</span><br><span class="line">    -t overlay \</span><br><span class="line">    -o lowerdir=base,upperdir=diff,workdir=workdir \</span><br><span class="line">    overlay \</span><br><span class="line">    overlay</span><br></pre></td></tr></table></figure>
-
 <p>这哥们没讲太细</p>
 <ol start="2">
 <li>aufs</li>
@@ -354,13 +362,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 

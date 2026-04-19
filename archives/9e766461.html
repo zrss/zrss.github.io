@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3  Main 检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan str">
+    <meta name="description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3   Main  检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan s">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ETCD V2 的启动过程">
 <meta property="og:url" content="https://zrss.github.io/archives/9e766461.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3  Main 检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan str">
+<meta property="og:description" content="简单的源码阅读 链接: https:&#x2F;&#x2F;github.com&#x2F;coreos&#x2F;etcd&#x2F;tree&#x2F;release-2.3   Main  检查运行 arch parse 启动配置参数 设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志） 声明停止通道 var stopped &lt;-chan s">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-10-03T00:00:01.000Z">
 <meta property="article:modified_time" content="2026-03-19T16:21:19.041Z">
@@ -64,6 +64,11 @@
   
 
 
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
 
 
 
@@ -123,7 +128,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Main"><span class="nav-number">1.</span> <span class="nav-text">Main</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startEtcd"><span class="nav-number">2.</span> <span class="nav-text">startEtcd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdserver-NewServer"><span class="nav-number">3.</span> <span class="nav-text">etcdserver.NewServer</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#main"><span class="nav-number">1.</span> <span class="nav-text"> Main</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startetcd"><span class="nav-number">2.</span> <span class="nav-text"> startEtcd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcdservernewserver"><span class="nav-number">3.</span> <span class="nav-text"> etcdserver.NewServer</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -136,7 +141,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">136</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -250,7 +255,8 @@
 <p>简单的源码阅读</p>
 <p>链接: <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd/tree/release-2.3">https://github.com/coreos/etcd/tree/release-2.3</a></p>
 </blockquote>
-<h1 id="Main"><a href="#Main" class="headerlink" title="Main"></a>Main</h1><ol>
+<h1 id="main"><a class="markdownIt-Anchor" href="#main"></a> Main</h1>
+<ol>
 <li>检查运行 arch</li>
 <li>parse 启动配置参数</li>
 <li>设置日志级别（参考 admin guide debug part，可以打开 debug 级别日志，亦可单独打开特定 package 的 debug 日志）</li>
@@ -259,22 +265,20 @@
 </ol>
 <p>检查数据目录是否存在，若存在日志提示 (<strong>只有 data-dir 存在</strong>，就会打印如下日志)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">the server is already initialized as member before, starting as etcd member...</span><br></pre></td></tr></table></figure>
-
 <p>不管数据目录存在与否，均如此启动</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stopped, err = startEtcd(cfg)</span><br></pre></td></tr></table></figure>
-
 <p>最后获取到停止信号停止</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// etcd process stpo</span></span><br><span class="line">&lt;-stoped</span><br></pre></td></tr></table></figure>
-
-<h1 id="startEtcd"><a href="#startEtcd" class="headerlink" title="startEtcd"></a>startEtcd</h1><p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
+<h1 id="startetcd"><a class="markdownIt-Anchor" href="#startetcd"></a> startEtcd</h1>
+<p>首先会从 initial-cluster 中初始化 peer 信息，利用这些 peer 信息新建 peer listener，主要方法为 rafthttp.NewListener</p>
 <p>接下来使用 listen-client-url 新建 client listener，这块直接使用 net.Listen 方法，开启 tcp 服务；然后判断系统文件描述符限制，如果 &lt; 150，则 panic，然后限制 listener 的数量为 系统描述符限制 - 150</p>
 <p>初始化 net.Listen 的 keepAliveListener</p>
 <p>初始化 etcd server config</p>
 <p>初始化 etcdserver</p>
 <p>启动 etcdserver</p>
-<hr>
+<hr />
 <p>注册操作系统终止回调函数 osutil.RegisterInterruptHandler(s.Stop)</p>
-<hr>
+<hr />
 <p>使用 cors 初始化 clientHandler</p>
 <p>使用 etcdhttp 初始化 peerHandler</p>
 <p>goroutine 为每个 peer listener 开启 http 服务 处理请求，5 min read timeout</p>
@@ -282,9 +286,10 @@
 <p>etcdhttp/peer.go</p>
 <p>etcdhttp/client.go</p>
 <p>其实是 http server，待阅读</p>
-<hr>
+<hr />
 <p>最后，返回停止通道及错误</p>
-<h1 id="etcdserver-NewServer"><a href="#etcdserver-NewServer" class="headerlink" title="etcdserver.NewServer"></a>etcdserver.NewServer</h1><p>初始化 etcdserver</p>
+<h1 id="etcdservernewserver"><a class="markdownIt-Anchor" href="#etcdservernewserver"></a> etcdserver.NewServer</h1>
+<p>初始化 etcdserver</p>
 <p>集群信息存在 /0</p>
 <p>key 信息存在 /1</p>
 <p>检查数据目录版本，并更新数据目录</p>
@@ -296,7 +301,6 @@
 <p>打印启动参数 <code>cfg.Print()</code></p>
 <p>启动 raftnode</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id, n, s, w &#x3D; startNode(cfg, cl, nil)</span><br></pre></td></tr></table></figure>
-
 
     </div>
 
@@ -351,13 +355,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">360k</span>
+    <span title="站点总字数">366k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:27</span>
+    <span title="站点阅读时长">5:33</span>
   </span>
 </div>
 
