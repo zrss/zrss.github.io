@@ -10,6 +10,8 @@ tags:
 
 [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
 
+## PPO
+
 **两阶段循环**
 
 为什么可以“多轮”
@@ -183,11 +185,11 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t
 | $c_2$ | $0.01$ | 熵系数（鼓励探索，防止过早收敛） |
 | $K$ | $3 \sim 10$ | 每个 Batch 的重复训练次数（Epochs） |
 
-### 4. RLHF 中的 PPO
+## RLHF-PPO
 
 在很多 LLM 对齐/偏好优化的工程实现里，会看到 “PPO + reference model（参考模型）”。这很容易让人误以为 reference model 是 PPO 论文（Schulman 2017）的一部分；但严格来说，它是 **RLHF 场景下额外加入的约束/正则**，用来防止策略为了刷 reward 而跑飞（reward hacking、语言退化、分布崩坏等）。
 
-#### 4.1. RLHF 训练 flow
+### 1. RLHF 训练 flow
 
 SFT → RM → PPO
 
@@ -197,7 +199,7 @@ SFT → RM → PPO
 2. **Reward Model（RM）**：用偏好数据训练一个打分器 $R(x,y)$（或 $r_\phi(x,y)$），告诉策略“什么更好”。
 3. **PPO-RLHF**：从 $\pi_{\text{SFT}}$ 初始化可训练策略 $\pi_\theta$，用 PPO 提高 $R$，同时用 **KL-to-reference** 把 $\pi_\theta$ 拴在 $\pi_{ref}$ 附近。
 
-而 **PPO-RLHF 的实现**，通常就是把“文本生成”当成一条轨迹上的序列决策，然后复用前边提到的 PPO 两阶段循环：
+而 **PPO-RLHF 的实现**，通常就是把“文本生成”当成一条轨迹上的序列决策，然后复用上一章 `## PPO` 里提到的两阶段循环：
 
 * **自回归 MDP（最常见的设定）**：第 $t$ 步的“动作”是下一个 token $y_t$；状态可以抽象成 $(x,y_{<t})$。
 * **Rollout**：用 $\pi_{\theta_{old}}$ 采样一批 completions（得到 token 轨迹与 logprob）。
@@ -208,7 +210,7 @@ SFT → RM → PPO
 
 一句话总结：**RM 给方向，$\pi_{ref}$ + KL 给长期护栏，PPO（尤其 clipping）给短期稳定更新**。
 
-#### 4.2. 两个“旧策略”不要混
+### 2. 两个“旧策略”不要混
 
 PPO 里你一定会遇到旧策略，但它通常指的是：
 
@@ -222,7 +224,7 @@ PPO 里你一定会遇到旧策略，但它通常指的是：
 
 * **$\pi_{ref}$（RLHF 的 reference policy/model）**：冻结的锚点模型（常见做法是 SFT 后的模型），用于给当前策略加一个 “别偏太远” 的约束；它通常在一段训练期间 **保持不变** 或更新频率很低。
 
-#### 4.3. KL-to-reference：把“别跑飞”写进目标
+### 3. KL-to-reference：把“别跑飞”写进目标
 
 以 PPO-RLHF 常见写法为例，会把 reward 加上一个 KL 惩罚（或等价的 reward shaping）：
 
@@ -276,7 +278,7 @@ $$
 
 直觉上：如果某个 token 在当前策略下的概率比 reference 更大（$\log \pi_\theta - \log \pi_{ref} > 0$），那它会产生负的 shaping reward（惩罚），从而抑制策略在该方向上“越走越远”。
 
-#### 4.4. 推荐阅读（理解 RLHF 的最短路径）
+### 4. 推荐阅读（理解 RLHF 的最短路径）
 
 * Ouyang et al., 2022. *Training language models to follow instructions with human feedback (InstructGPT).*（SFT → RM → PPO，以及 KL/reference 的由来）
 * Stiennon et al., 2020. *Learning to summarize with human feedback.*（更早期、端到端的 RLHF 案例）
@@ -286,17 +288,15 @@ $$
 
 * Rafailov et al., 2023. *Direct Preference Optimization (DPO).*（绕开 RM 与 PPO，但同样体现 anchor/reference 的思想）
 
-### 5. 从 PPO / RLHF 到 GRPO
+## GRPO
 
-//todo
-
-前面我们把 **PPO** 讲成“稳定的策略更新框架”，把 **RLHF** 讲成“RM + KL-to-reference + PPO”的常见落地形态。下一步很自然的问题是：当你进入 **数学推理 / 可验证奖励** 这类场景时，训练目标仍然可以用 PPO 的 clipped objective，但 **优势（advantage）与 baseline 的估计**往往会变得更棘手。
+前面我们把 **PPO** 讲成“稳定的策略更新框架”，把 **RLHF-PPO** 讲成“RM + KL-to-reference + PPO”的常见落地形态。下一步很自然的问题是：当你进入 **数学推理 / 可验证奖励** 这类场景时，训练目标仍然可以用 PPO 的 clipped objective，但 **优势（advantage）与 baseline 的估计**往往会变得更棘手。
 
 **GRPO（Group Relative Policy Optimization）** 是在 [DeepSeekMath](https://arxiv.org/abs/2402.03300) 里提出的、**PPO 的一个变体**：动机之一是让 RL 在 LLM 场景里更省资源，同时处理 “reward 往往只在序列末出现、但 value 需要 token 级别监督” 这类不匹配。
 
-后续再展开学习
+先把直觉记住（细节与公式之后再展开）：
 
 * **仍然很 PPO**：整体还是围绕 clipped ratio 的策略更新思路在转（可以把它理解成“骨架仍在 PPO”）。
 * **关键变化：去掉 value模型 / critic**：GRPO **不再额外训练一个与 policy 同量级的 value function** 来给每个 token 做 baseline。
 * **用 group 做相对基线**：对同一个问题 $q$，先从旧策略采样一组输出 $\{o_1,\dots,o_G\}$，再用 **组内相对比较** 来构造优势（论文强调这与 reward model 常见的“同题对比训练”更一致）。
-* **KL 处理方式也可能不同**：论文里也讨论了与 PPO 场景下 KL penalty 不同的正则化思路（读 4.1 小节时对照实现会更清晰）。
+* **KL 处理方式也可能不同**：论文里也讨论了与 PPO 场景下 KL penalty 不同的正则化思路（读 DeepSeekMath 的 **§4.1** 时对照实现会更清晰）。
