@@ -8,9 +8,9 @@ toc:
 tags:
 ---
 
-[Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
-
 ## PPO
+
+[Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
 
 **两阶段循环**
 
@@ -185,7 +185,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t
 | $c_2$ | $0.01$ | 熵系数（鼓励探索，防止过早收敛） |
 | $K$ | $3 \sim 10$ | 每个 Batch 的重复训练次数（Epochs） |
 
-## RLHF-PPO
+## RLHF 中的 PPO
 
 在很多 LLM 对齐/偏好优化的工程实现里，会看到 “PPO + reference model（参考模型）”。这很容易让人误以为 reference model 是 PPO 论文（Schulman 2017）的一部分；但严格来说，它是 **RLHF 场景下额外加入的约束/正则**，用来防止策略为了刷 reward 而跑飞（reward hacking、语言退化、分布崩坏等）。
 
@@ -199,7 +199,7 @@ SFT → RM → PPO
 2. **Reward Model（RM）**：用偏好数据训练一个打分器 $R(x,y)$（或 $r_\phi(x,y)$），告诉策略“什么更好”。
 3. **PPO-RLHF**：从 $\pi_{\text{SFT}}$ 初始化可训练策略 $\pi_\theta$，用 PPO 提高 $R$，同时用 **KL-to-reference** 把 $\pi_\theta$ 拴在 $\pi_{ref}$ 附近。
 
-而 **PPO-RLHF 的实现**，通常就是把“文本生成”当成一条轨迹上的序列决策，然后复用上一章 `## PPO` 里提到的两阶段循环：
+而 **PPO-RLHF 的实现**，通常就是把“文本生成”当成一条轨迹上的序列决策，然后复用前边提到的 PPO 两阶段循环：
 
 * **自回归 MDP（最常见的设定）**：第 $t$ 步的“动作”是下一个 token $y_t$；状态可以抽象成 $(x,y_{<t})$。
 * **Rollout**：用 $\pi_{\theta_{old}}$ 采样一批 completions（得到 token 轨迹与 logprob）。
@@ -288,15 +288,15 @@ $$
 
 * Rafailov et al., 2023. *Direct Preference Optimization (DPO).*（绕开 RM 与 PPO，但同样体现 anchor/reference 的思想）
 
-## GRPO
+## GRPO：从 PPO / RLHF 再往前走一小步
 
-前面我们把 **PPO** 讲成“稳定的策略更新框架”，把 **RLHF-PPO** 讲成“RM + KL-to-reference + PPO”的常见落地形态。下一步很自然的问题是：当你进入 **数学推理 / 可验证奖励** 这类场景时，训练目标仍然可以用 PPO 的 clipped objective，但 **优势（advantage）与 baseline 的估计**往往会变得更棘手。
+前面我们把 **PPO** 讲成“稳定的策略更新框架”，把 **RLHF** 讲成“RM + KL-to-reference + PPO”的常见落地形态。下一步很自然的问题是：当你进入 **数学推理 / 可验证奖励** 这类场景时，训练目标仍然可以用 PPO 的 clipped objective，但 **优势（advantage）与 baseline 的估计**往往会变得更棘手。
 
 **GRPO（Group Relative Policy Optimization）** 是在 [DeepSeekMath](https://arxiv.org/abs/2402.03300) 里提出的、**PPO 的一个变体**：动机之一是让 RL 在 LLM 场景里更省资源，同时处理 “reward 往往只在序列末出现、但 value 需要 token 级别监督” 这类不匹配。
 
-先把直觉记住（细节与公式之后再展开）：
+后续再展开学习
 
 * **仍然很 PPO**：整体还是围绕 clipped ratio 的策略更新思路在转（可以把它理解成“骨架仍在 PPO”）。
 * **关键变化：去掉 value模型 / critic**：GRPO **不再额外训练一个与 policy 同量级的 value function** 来给每个 token 做 baseline。
 * **用 group 做相对基线**：对同一个问题 $q$，先从旧策略采样一组输出 $\{o_1,\dots,o_G\}$，再用 **组内相对比较** 来构造优势（论文强调这与 reward model 常见的“同题对比训练”更一致）。
-* **KL 处理方式也可能不同**：论文里也讨论了与 PPO 场景下 KL penalty 不同的正则化思路（读 DeepSeekMath 的 **§4.1** 时对照实现会更清晰）。
+* **KL 处理方式也可能不同**：论文里也讨论了与 PPO 场景下 KL penalty 不同的正则化思路（读 4.1 小节时对照实现会更清晰）。
