@@ -8,7 +8,7 @@ toc:
 tags:
 ---
 
-## PPO
+# 1. PPO
 
 [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
 
@@ -21,7 +21,7 @@ tags:
 * **安全护栏**：在每一轮优化中，PPO 会计算新策略和采样时的旧策略的概率比。如果这个比值超出了设定的范围（比如 $0.8 \sim 1.2$），梯度就会被“截断”。
 * **效果**：这确保了即使在这一批数据上反复“薅羊毛”优化，新策略也不会跑得离旧策略太远，从而保证了训练的稳定性。
 
-### 1. 采样阶段 (Sampling Phase)
+## 1.1. 采样阶段 (Sampling Phase)
 
 * **动作**：让当前的策略 $\pi_{\theta_{old}}$ 在环境中运行一段时间。
 * **产出**：收集一批轨迹数据（包括状态 $s$、动作 $a$、奖励 $r$ 等）。
@@ -29,7 +29,7 @@ tags:
 
 在这个阶段，神经网络的参数是固定不动的（即 $\theta_{old}$）。Actor (策略网络)：在环境中根据概率分布选择动作。数据收集：把 $(s_t, a_t, r_t, s_{t+1})$ 存入一个临时的 Buffer。目标：收集足够数量的轨迹（比如 2048 个时间步）。
 
-#### 1.1. 计算“标签” (Preprocessing)
+### 1.1.1. 计算“标签” (Preprocessing)
 
 在开始训练前，利用收集到的数据计算两个关键值：
 * $\hat{A}_t$ (Advantage)：优势函数，用来衡量这个动作比平均水平好多少。
@@ -54,12 +54,12 @@ $R_t$ (Returns)：作为 Critic 网络的监督信号（标签）。
 2. 通过 $\hat{A}_t + V(s_t)$，便可反向推导出这一步动作对应的“目标回报” $R_t$。
 3. 价值损失 (Value Loss) 就变成了：$MSE(V_{new}(s_t), R_t)$。
 
-##### 总结
+### 1.1.2. 小结
 
 * Actor：利用 $\hat{A}_t$（相对好坏）来决定 $\theta$ 的更新方向。
 * Critic：利用 $R_t$（绝对得分）来修正自己对世界的认知。
 
-### 2. 优化阶段 (Optimization Phase)
+## 1.2. 优化阶段 (Optimization Phase)
 
 **多轮优化 (Several Epochs)**：
 * **动作**：将刚才采样的这一批数据反复输入神经网络进行多次梯度更新。
@@ -72,13 +72,13 @@ $R_t$ (Returns)：作为 Critic 网络的监督信号（标签）。
 * 补偿机制：通过概率比率 $r_t(\theta)$，对数据分布偏差做重要性采样修正。
 * 约束：重要性采样要求两个分布不能差太远，否则方差会爆炸。这正是 $L^{CLIP}$ 存在的根本原因——它在数学上维护了重要性采样的有效区间。
 
-#### 2.1. 优势估计
+### 1.2.1. 优势估计
 
 通常采用 GAE (Generalized Advantage Estimation)。
 
 简单来说，优势函数 $\hat{A}_t$ 的目标是回答：“在状态 $s_t$ 下采取动作 $a_t$，比平均情况（即 Baseline）好多少？”
 
-##### 2.1.1. 计算时序差分残差（Temporal Difference Error）
+#### 1.2.1.1. 计算时序差分残差（Temporal Difference Error）
 
 首先计算每一个时间步的即时偏差 $\delta_t$。它衡量了“实际观测到的奖励 + 下一步的估值”与“当前估值”之间的差距：
 
@@ -88,7 +88,7 @@ $$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
 * $V(s_{t+1})$：神经网络（Critic）对下一步状态的估值。
 * $V(s_t)$：神经网络（Critic）对当前状态的估值。
 
-##### 2.1.2. 累加衰减
+#### 1.2.1.2. 累加衰减
 
 > [0, T)
 
@@ -110,7 +110,7 @@ $$
 
 这就是 $\lambda$ 用于在偏差（Bias）和方差（Variance）之间做权衡的物理意义。PPO 选取 $\lambda = 0.95$ 它在“相信神经网络的估值”和“相信实际观测到的奖励”之间取了一个折中。
 
-##### 2.1.3. 标准化 (Advantage Normalization)
+#### 1.2.1.3. 标准化 (Advantage Normalization)
 
 在算出 $T$ 个时间步的所有 $\hat{A}_t$ 后，工程上通常会进行一次标准化处理：
 
@@ -121,7 +121,7 @@ $$
 * 稳定梯度：在一个 Batch 中，优势值的数值跨度可能很大。标准化后，它们的均值为 0，标准差为 1。
 * 逻辑闭环：这确保了在一个 Batch 里，大约有一半的动作会被认为是“好于平均”（正值，增加概率），另一半是“差于平均”（负值，减小概率）。这对于 Adam 优化器的稳定收敛极其重要。
 
-##### 总结计算流程
+#### 1.2.1.4. 总结计算流程
 
 $$r_t(\theta) = \frac{\pi_\theta(a_t | s_t)}{\pi_{\theta_{old}}(a_t | s_t)}$$
 
@@ -131,7 +131,7 @@ $$r_t(\theta) = \frac{\pi_\theta(a_t | s_t)}{\pi_{\theta_{old}}(a_t | s_t)}$$
 3. 对整个 Batch 进行标准化。
 4. 将算好的 $\hat{A}$ 输入 $L^{CLIP}$ 进行优化。
 
-#### 2.2. 损失函数
+### 1.2.2. 损失函数
 
 > 优势估计 $\hat{A}_t$ 和概率比率 $r_t(\theta)$ 都准备好了，进入 PPO 执行阶段构建 Loss 函数并进行参数更新
 
@@ -152,7 +152,7 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t
 
 > MSE 均方误差
 
-##### 2.2.1. 执行 Adam 更新
+#### 1.2.2.1. 执行 Adam 更新
 
 > Adam 优化器, 梯度下降 (Gradient Descent)
 
@@ -169,12 +169,14 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t
 
 > 注：虽然 PPO 的理论目标是最大化奖励，但在代码实现中，通常会对总目标函数取负值，将其转化为最小化损失，从而用 Adam 等优化器做梯度更新。
 
-##### 2.2.2. 更新旧策略 ($\theta_{old} \leftarrow \theta$)
+#### 1.2.2.2. 更新旧策略
+
+$\theta_{old} \leftarrow \theta$
 
 当 $K$ 次迭代结束，这一批数据的价值就被“榨干”了。
 此时，把当前的最新参数 $\theta$ 赋值给 $\theta_{old}$。然后清空缓存的数据，回到环境里，开启下一轮 $N \times T$ 的数据采集。
 
-### 3. Hyperparameters 参考
+## 1.3. Hyperparameters 参考
 
 | 参数 | 常用值 | 作用 |
 | :--- | :--- | :--- |
@@ -185,11 +187,11 @@ $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t
 | $c_2$ | $0.01$ | 熵系数（鼓励探索，防止过早收敛） |
 | $K$ | $3 \sim 10$ | 每个 Batch 的重复训练次数（Epochs） |
 
-## RLHF 中的 PPO
+# 2. RLHF 中的 PPO
 
 在很多 LLM 对齐/偏好优化的工程实现里，会看到 “PPO + reference model（参考模型）”。这很容易让人误以为 reference model 是 PPO 论文（Schulman 2017）的一部分；但严格来说，它是 **RLHF 场景下额外加入的约束/正则**，用来防止策略为了刷 reward 而跑飞（reward hacking、语言退化、分布崩坏等）。
 
-### 1. RLHF 训练 flow
+## 2.1. RLHF 训练 flow
 
 SFT → RM → PPO
 
@@ -210,7 +212,7 @@ SFT → RM → PPO
 
 一句话总结：**RM 给方向，$\pi_{ref}$ + KL 给长期护栏，PPO（尤其 clipping）给短期稳定更新**。
 
-### 2. 两个“旧策略”不要混
+## 2.2. 两个“旧策略”不要混
 
 PPO 里几乎总会涉及旧策略，但它通常指的是：
 
@@ -224,7 +226,7 @@ PPO 里几乎总会涉及旧策略，但它通常指的是：
 
 * **$\pi_{ref}$（RLHF 的 reference policy/model）**：冻结的锚点模型（常见做法是 SFT 后的模型），用于给当前策略加一个 “别偏太远” 的约束；它通常在一段训练期间 **保持不变** 或更新频率很低。
 
-### 3. KL-to-reference：把“别跑飞”写进目标
+## 2.3. KL-to-reference：把“别跑飞”写进目标
 
 以 PPO-RLHF 常见写法为例，会把 reward 加上一个 KL 惩罚（或等价的 reward shaping）：
 
@@ -278,7 +280,7 @@ $$
 
 直觉上：如果某个 token 在当前策略下的概率比 reference 更大（$\log \pi_\theta - \log \pi_{ref} > 0$），那它会产生负的 shaping reward（惩罚），从而抑制策略在该方向上“越走越远”。
 
-### 4. 推荐阅读（理解 RLHF 的最短路径）
+## 2.4. 推荐阅读
 
 * Ouyang et al., 2022. *Training language models to follow instructions with human feedback (InstructGPT).*（SFT → RM → PPO，以及 KL/reference 的由来）
 * Stiennon et al., 2020. *Learning to summarize with human feedback.*（更早期、端到端的 RLHF 案例）
@@ -288,7 +290,7 @@ $$
 
 * Rafailov et al., 2023. *Direct Preference Optimization (DPO).*（绕开 RM 与 PPO，但同样体现 anchor/reference 的思想）
 
-## GRPO：从 PPO / RLHF 再往前走一小步
+# 3. GRPO：从 PPO / RLHF 再往前走一小步
 
 前文将 **PPO** 概括为“稳定的策略更新框架”，将 **RLHF** 概括为“RM + KL-to-reference + PPO”的常见落地形态。进一步地，在 **数学推理 / 可验证奖励** 这类场景里，训练目标仍然可以用 PPO 的 clipped objective，但 **优势（advantage）与 baseline 的估计**往往会变得更棘手。
 
