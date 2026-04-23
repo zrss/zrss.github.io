@@ -296,9 +296,127 @@ $$
 
 **GRPO（Group Relative Policy Optimization）** 是在 [DeepSeekMath](https://arxiv.org/abs/2402.03300) 里提出的、**PPO 的一个变体**：动机之一是让 RL 在 LLM 场景里更省资源，同时处理 “reward 往往只在序列末出现、但 value 需要 token 级别监督” 这类不匹配。
 
-后续再展开学习
+这一节我按“从 PPO 视角推出来”的方式把 GRPO 的核心写清楚：**它仍然用 PPO 的 ratio + clip 来做稳定更新，但把 critic/value baseline 换成了「同题采样组内」的相对基线**。
 
 * **仍然很 PPO**：整体还是围绕 clipped ratio 的策略更新思路在转（可以把它理解成“骨架仍在 PPO”）。
 * **关键变化：去掉 value模型 / critic**：GRPO **不再额外训练一个与 policy 同量级的 value function** 来给每个 token 做 baseline。
 * **用 group 做相对基线**：对同一个问题 $q$，先从旧策略采样一组输出 $\{o_1,\dots,o_G\}$，再用 **组内相对比较** 来构造优势（论文强调这与 reward model 常见的“同题对比训练”更一致）。
 * **KL 处理方式也可能不同**：论文里也讨论了与 PPO 场景下 KL penalty 不同的正则化思路（读 4.1 小节时对照实现会更清晰）。
+
+## 3.1. 训练数据形态：同一个 prompt 采样一组
+
+把单条 RLHF 样本写成 $(q, o)$：
+
+* $q$：问题 / prompt
+* $o$：一次完整的输出序列（completion），长度为 $T$
+
+GRPO 的一个关键设定是：**对同一个 $q$，从旧策略采样 $G$ 条输出**：
+
+$$
+o_1,\dots,o_G \sim \pi_{\theta_{old}}(\cdot|q)
+$$
+
+然后对每条输出打分得到标量奖励（常见是 sequence-level）：
+
+$$
+r_i \triangleq R(q, o_i),\quad i=1,\dots,G
+$$
+
+> 在数学推理/可验证任务里，$R$ 往往是 rule-based（对/错、部分分、格式约束等）或 “RM + verifier + 规则” 的组合；它通常更像“末端一次性”信号，而不是密集的 token-level reward。
+
+## 3.2. 组内相对基线：用同题均值/标准差构造 advantage
+
+在 PPO 里我们常用 critic 给 baseline：$\hat{A}_t \approx Q(s_t,a_t)-V(s_t)$。但对 LLM 这种“奖励末端给、价值却要逐 token 监督”的设置，value 训练既贵又容易引入偏差（尤其当 reward 很稀疏）。
+
+GRPO 的做法是：**不训练 $V$，直接在同一个 $q$ 的组内做相对标准化**。最直观的一种（也最常见的工程落地）是：
+
+$$
+\mu_q = \frac{1}{G}\sum_{j=1}^G r_j,\qquad
+\sigma_q = \sqrt{\frac{1}{G}\sum_{j=1}^G (r_j-\mu_q)^2} + \varepsilon
+$$
+
+$$
+A_i \triangleq \frac{r_i - \mu_q}{\sigma_q}
+$$
+
+解释一下这个 $A_i$：
+
+* **它是“相对优势”**：同一道题里，高于组均值的输出会得到正优势（鼓励），低于均值的得到负优势（抑制）。
+* **它天然做了尺度归一**：不同题的 reward 尺度可能不同（0/1、0/100、log score…），用组内标准差能把不同样本的梯度量级拉到同一量纲。
+
+> 你可以把它类比成你前面写的 advantage normalization，只是这里的 normalization 不是在“全 batch”，而是在“同 prompt 的 group 内”做。
+
+一个常见的细节：虽然 $r_i$ 是序列级分数，但优化是 token 级 logprob。工程上通常直接把 **同一个 $A_i$ 广播到这条序列的每个 token**，等价于“这条输出整体好/坏，整条序列的 token 都一起被上调/下调概率”，写成：
+
+$$
+A_{i,t} \equiv A_i,\quad t=1,\dots,T_i
+$$
+
+## 3.3. 还是 PPO：ratio + clip 的策略更新目标
+
+对每条输出 $o_i=(y_{i,1},\dots,y_{i,T_i})$，我们可以写出 token 级的 ratio（沿用 PPO 的重要性采样比）：
+
+$$
+r_{i,t}(\theta) \triangleq
+\frac{\pi_\theta(y_{i,t}\mid q, y_{i,<t})}{\pi_{\theta_{old}}(y_{i,t}\mid q, y_{i,<t})}
+$$
+
+那么 GRPO 的“PPO 样式” clipped objective 可以写成（对所有样本、所有 token 求平均）：
+
+$$
+L^{GRPO}(\theta)=
+\hat{\mathbb{E}}_{i,t}\left[
+\min\Big(
+r_{i,t}(\theta) A_i,\;
+\text{clip}(r_{i,t}(\theta),1-\epsilon,1+\epsilon)A_i
+\Big)
+\right]
+$$
+
+你会发现它和你在 1.2.2 写的 $L^{CLIP}$ **形状完全一致**，只不过：
+
+* PPO 的 $\hat{A}_t$ 来自 GAE + critic（或至少来自某种时间分解）
+* GRPO 的 $A_i$ 来自 **同题 group 的相对基线**（没有 critic）
+
+## 3.4. KL 正则：仍然可以用 reference 作为长期护栏
+
+GRPO 并不排斥 “reference model + KL” 这个工程护栏。常见做法依旧是把 KL 以 shaping 的方式加进 reward 或直接加进目标。
+
+沿用你前面 token 级 logprob 差的写法，对每个 token：
+
+$$
+r^{KL}_{i,t} \triangleq -\beta\Big(\log \pi_\theta(y_{i,t}\mid q,y_{i,<t})-\log \pi_{ref}(y_{i,t}\mid q,y_{i,<t})\Big)
+$$
+
+然后把序列的“有效奖励”写成：
+
+$$
+r_i' = r_i + \sum_{t=1}^{T_i} r^{KL}_{i,t}
+$$
+
+再用 $r_i'$ 去算组内的 $\mu_q,\sigma_q,A_i$（或者只把 KL 当作单独 penalty 项，工程上两种都见过）。直觉上：**group 相对基线解决“不要 critic 也能构造稳定方向”，KL 解决“不要跑飞”**。
+
+## 3.5. 一段“对照 PPO”的结论
+
+把 GRPO 和 PPO-RLHF 放在同一张心智模型里：
+
+* **相同点（都像 PPO）**：都有 ratio + clip，所以都允许对同一批 rollout 做多轮 epoch 更新。
+* **不同点 1：baseline 来源**：
+  * PPO：$V(s)$（critic）提供 baseline，优势有时间结构（GAE）
+  * GRPO：同题 group 的均值/方差提供 baseline，优势更像“同题排序/对比”的信号
+* **不同点 2：资源与稳定性 trade-off**：
+  * 去掉 critic 通常更省显存/算力、实现也更直接
+  * 但会更依赖：采样组大小 $G$、reward 的区分度、以及 KL/clip 的护栏强度
+
+## 3.6. 实现要点
+
+* **$G$ 的作用很关键**：$G$ 太小，$\mu_q,\sigma_q$ 噪声大；太大则 rollout 成本上升。实践里会把 $G$ 作为“用采样换稳定”的旋钮。
+* **$\sigma_q$ 保护**：当同组 reward 全相等（比如全错、全对），$\sigma_q \approx 0$，需要加 $\varepsilon$，否则优势会爆。
+* **长度偏置**：如果把同一个 $A_i$ 广播到 token，再对 token 平均，长序列会贡献更多项。常见缓解：对每条序列先按 token 平均再按样本平均（或对每条样本按长度归一）。
+* **old policy 的 logprob 要缓存**：和 PPO 一样，rollout 时必须存 $\log \pi_{\theta_{old}}(y_{i,t}|q,y_{i,<t})$，优化阶段才能算 ratio。
+* **reward 在 group 内算 baseline**：baseline 的计算单位是 “同一个 $q$ 的 group”，不要把不同 prompt 混一起算均值/方差（否则失去“相对比较”的意义）。
+
+## 3.7. 推荐阅读（GRPO 相关）
+
+* Shao et al., 2024. *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models.*（GRPO 提出与动机）
+* 如果你关心“无 critic 的 PPO 变体/相对优势”的谱系，可以把 GRPO 放到“对比学习式偏好信号 + KL 护栏 + clipped update”的框架里去理解：它更像把“对比/排序”当成 advantage 的来源，而不是显式学习 $V$。
