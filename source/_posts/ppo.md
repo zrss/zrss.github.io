@@ -378,7 +378,7 @@ $$
 * PPO 的 $\hat{A}_t$ 来自 GAE + critic（或至少来自某种时间分解）
 * GRPO 的 $A_i$ 来自 **同题 group 的相对基线**（没有 critic）
 
-## 3.4. KL 正则：仍然可以用 reference 作为长期护栏
+## 3.4. KL 正则：仍然可以用 reference model 作为长期护栏
 
 GRPO 并不排斥 “reference model + KL” 这个工程护栏。常见做法依旧是把 KL 以 shaping 的方式加进 reward 或直接加进目标。
 
@@ -396,7 +396,7 @@ $$
 
 再用 $r_i'$ 去算组内的 $\mu_q,\sigma_q,A_i$（或者只把 KL 当作单独 penalty 项，工程上两种都见过）。直觉上：**group 相对基线解决“不要 critic 也能构造稳定方向”，KL 解决“不要跑飞”**。
 
-## 3.5. 一段“对照 PPO”的结论
+## 3.5. 对比 PPO
 
 把 GRPO 和 PPO-RLHF 放在同一张心智模型里：
 
@@ -416,7 +416,7 @@ $$
 * **old policy 的 logprob 要缓存**：和 PPO 一样，rollout 时必须存 $\log \pi_{\theta_{old}}(y_{i,t}|q,y_{i,<t})$，优化阶段才能算 ratio。
 * **reward 在 group 内算 baseline**：baseline 的计算单位是 “同一个 $q$ 的 group”，不要把不同 prompt 混一起算均值/方差（否则失去“相对比较”的意义）。
 
-## 3.7. 推荐阅读（GRPO 相关）
+## 3.7. 推荐阅读
 
 * Shao et al., 2024. *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models.*（GRPO 提出与动机）
 * 如果你关心“无 critic 的 PPO 变体/相对优势”的谱系，可以把 GRPO 放到“对比学习式偏好信号 + KL 护栏 + clipped update”的框架里去理解：它更像把“对比/排序”当成 advantage 的来源，而不是显式学习 $V$。
