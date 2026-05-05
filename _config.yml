@@ -124,6 +124,8 @@ theme_config:
       enable: false
     katex:
       enable: true
+  mermaid:
+    enable: true
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment

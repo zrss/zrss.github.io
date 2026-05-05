@@ -135,7 +135,7 @@ $$r_t(\theta) = \frac{\pi_\theta(a_t | s_t)}{\pi_{\theta_{old}}(a_t | s_t)}$$
 
 > 优势估计 $\hat{A}_t$ 和概率比率 $r_t(\theta)$ 都准备好了，进入 PPO 执行阶段构建 Loss 函数并进行参数更新
 
-Adam 优化器并不是只优化策略，它其实是在同时优化三个目标。
+Adam 更新时并不是「三个互不相关的 loss 各算各的」，而是把 **策略裁剪项、价值拟合项、熵项** 合成 **一个标量目标**（再按实现约定取正/取负）做一次反传。
 
 总损失函数 $L^{CLIP+VF+S}_t$ 通常长这样：
 
@@ -143,12 +143,14 @@ $$
 L_t^{total}(\theta) = L_t^{CLIP}(\theta) - c_1 L_t^{VF}(\theta) + c_2 S[\pi_\theta](s_t)
 $$
 
+其中 **价值项前面是减号、熵项前面是加号**（与 $c_1,c_2$ 一起决定「多拟合价值 / 多鼓励随机」的强度）。如框图里写「L_clip + L_V + 熵」往往只是 **并列这三类成分都会进同一轮梯度**，**不**表示数学上三项都是同号的「单纯相加」——具体 `+` / `-` 以代码里 `loss = …` 的写法为准（常见做法是对「要最大化的 **surrogate**（**代理目标**：用样本可算的式子近似真实策略改进）」整体取负再交给优化器 `minimize`）。
+
 $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon) \hat{A}_t \right) \right]$$
 
 这三个部分分工明确：
 * $L_t^{CLIP}(\theta)$ (策略损失)：利用 $\hat{A}_t$ 和 $r_t(\theta)$ 进行裁剪优化。直观上，它会在优势为正时提高动作概率，同时用 clip 限制单次更新幅度，避免策略变化过快。
 * $L_t^{VF}(\theta)$ (价值损失)：通常是均方误差 $MSE(V_\theta(s_t), V_{target})$。它负责让 Critic 的状态价值预测更贴近目标回报（更准确）。
-* $S[\pi_\theta](s_t)$ (熵奖励)：鼓励策略保持一定的随机性，避免分布过早塌缩到少数动作上，从而保留探索空间。
+* $S[\pi_\theta](s_t)$（**entropy bonus**，熵奖励 / 熵正则项）：在目标里加一项与策略分布的 **Shannon 熵** 成正比的奖励，鼓励动作分布别太快变成「几乎总选某几个动作」；直观上就是 **多留一点随机性、减缓过早收敛**（文献与代码里也常写 *entropy regularization*、*policy entropy*）。
 
 > MSE 均方误差
 
@@ -184,7 +186,7 @@ $\theta_{old} \leftarrow \theta$
 | $\gamma$ | $0.99$ | 长期奖励折扣因子 |
 | $\lambda$ | $0.95$ | GAE 平衡因子 |
 | $c_1$ | $0.5$ | 价值损失权重（MSE 权重） |
-| $c_2$ | $0.01$ | 熵系数（鼓励探索，防止过早收敛） |
+| $c_2$ | $0.01$ | **entropy coefficient**（熵项权重）：调大则更鼓励探索、策略更「散」；调小则更贴 reward、更易早收敛 |
 | $K$ | $3 \sim 10$ | 每个 Batch 的重复训练次数（Epochs） |
 
 # 2. RLHF 中的 PPO
@@ -208,9 +210,19 @@ SFT → RM → PPO
 * **Reward / shaping**：把 RM 分数与 KL shaping 组合成每步可用的标量回报信号（工程上常见是把 KL 摊到 token；RM 可能是序列末一次性给分，也可能有更细的 shaping，取决于实现）。
   * **reward shaping** 在这里可以直观理解为：不只给“最后好不好”的稀疏信号，而是**额外构造/改写一组更密、更及时的逐步回报**，让 PPO 在生成过程中更容易学、也更可控；其中 **per-token 的 KL 项**就是很典型的 shaping。
   * **RM shaping** 则更具体：指把 reward model 的偏好信号**从“只在结尾给一次分”**，扩展成**更稠密的过程性反馈**（例如分段打分、对关键子结构/步骤给增量奖励、或把可验证规则与 RM 组合成逐步项）。不同系统差异很大；设计不当也可能让模型去“刷 RM shaping”而不是真正提升偏好质量，因此通常仍会配合 **KL-to-reference** 与谨慎的系数/裁剪。
-* **Optimization**：在同一批数据上算优势（GAE）、跑 $L^{CLIP}$ + value loss + entropy，重复 $K$ 个 epoch；最后更新 $\theta_{old}\leftarrow\theta$，进入下一轮 rollout。
+* **Optimization**：在同一批数据上算优势（GAE），再按实现把 **$L^{CLIP}$、value loss、entropy bonus** 合成 **一个标量 loss** 做 $K$ 个 epoch；最后更新 $\theta_{old}\leftarrow\theta$，进入下一轮 rollout。
 
 一句话总结：**RM 给方向，$\pi_{ref}$ + KL 给长期护栏，PPO（尤其 clipping）给短期稳定更新**。
+
+### 2.1.1. 模块框图
+
+下图按常见实现，把模块分成两类：
+
+一类是 **在进入 PPO 对齐之前就已经训好、此阶段通常不再更新的模型**：**reference**（多为 SFT 得到的 **$\pi_{ref}$**，作锚点）与 **reward model**（在偏好数据上训好的打分器）。工程图里常把它们画成 **external / frozen**：参数固定，只提供 **KL-to-reference** 与 **reward / scoring** 等信号。
+
+另一类是 **当前正在被 PPO 更新的策略网络**：**Rollout** 用 **$\pi_{\theta_{old}}$** 采样——它不是另一套独立权重，而是与 **Actor** 同一组参数、上一轮留下的**策略快照**。**Actor** 与 **Critic**（常为同一 **backbone** 上的 **policy / value head**）把各步里由 **RM、KL** 等拼出的标量 reward 写成 **$r_t$**，再经 **GAE**、**PPO loss** **反传**更新 **$\theta$**；最后 **$\theta_{old}\leftarrow\theta$**，进入下一轮 **rollout**。
+
+![PPO-RLHF 模块关系](/images/ppo-rlhf-modules.svg)
 
 ## 2.2. 两个“旧策略”不要混
 
