@@ -67,6 +67,9 @@ Deployment target is configured in `_config.yml` under `deploy`.
 
 ## 7) Common troubleshooting
 
+- **GitHub Pages 不更新（只 push 了 `hexo` 分支）**  
+  线上站点来自 **`master` 分支**里 `hexo generate` 的产物。改完文章后请在 `hexo` 分支执行 `npx hexo generate && npx hexo deploy`（或 `npx hexo deploy`，会先生成再推），才会把 `public/` 推到 `master`。
+
 - **Template error (`escape_html` undefined)**  
   Ensure `scripts/helpers/escape-html-compat.js` exists, then restart Hexo server.
 
