@@ -140,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -168,6 +168,332 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ac031db9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/ac031db9.html" class="post-title-link" itemprop="url">H800</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-26 11:00:00" itemprop="dateCreated datePublished" datetime="2023-11-26T11:00:00Z">2023-11-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="terms"><a class="markdownIt-Anchor" href="#terms"></a> Terms</h1>
+<ul>
+<li>SXM: Server PCI Express Module, a high bandwidth socket solution for connecting Nvidia Compute Accelerators to a system</li>
+<li>NVL: NVLink is a wire-based serial multi-lane near-range communications link developed by Nvidia. Unlike PCI Express, a device can consist of multiple NVLinks, and devices use mesh networking to communicate instead of a central hub.</li>
+<li>PCIe: PCI Express (Peripheral Component Interconnect Express), officially abbreviated as PCIe or PCI-e,[1] is a high-speed serial computer expansion bus standard</li>
+</ul>
+<p>from Wikipedia</p>
+<h1 id="h800-vs-h100"><a class="markdownIt-Anchor" href="#h800-vs-h100"></a> H800 vs H100</h1>
+<blockquote>
+<ol>
+<li>
+<p><a target="_blank" rel="noopener" href="https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet">https://resources.nvidia.com/en-us-tensor-core/nvidia-tensor-core-gpu-datasheet</a></p>
+</li>
+<li>
+<p>NVIDIA H100 Tensor Core GPU</p>
+</li>
+<li>
+<p>H800 没找到 NVIDIA 官网 Specification, 只能从代理商和一些B站UP主看到的数据</p>
+</li>
+</ol>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>H800 SXM</th>
+<th>H100 SXM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP64</td>
+<td>1 teraFLOPS</td>
+<td>34 teraFLOPS</td>
+</tr>
+<tr>
+<td>FP64 Tensor Core</td>
+<td>1 teraFLOPS</td>
+<td>67 teraFLOPS</td>
+</tr>
+<tr>
+<td>FP32</td>
+<td>67 teraFLOPS</td>
+<td>67 teraFLOPS</td>
+</tr>
+<tr>
+<td>TF32 Tensor Core</td>
+<td>989 teraFLOPS</td>
+<td>989 teraFLOPS</td>
+</tr>
+<tr>
+<td>BFLOAT16 Tensor Core</td>
+<td>1,979 teraFLOPS</td>
+<td>1,979 teraFLOPS</td>
+</tr>
+<tr>
+<td>FP16 Tensor Core</td>
+<td>1,979 teraFLOPS</td>
+<td>1,979 teraFLOPS</td>
+</tr>
+<tr>
+<td>FP8 Tensor Core</td>
+<td>3,958 teraFLOPS</td>
+<td>3,958 teraFLOPS</td>
+</tr>
+<tr>
+<td>INT8 Tensor Core</td>
+<td>3,958 TOPS</td>
+<td>3,958 TOPS</td>
+</tr>
+<tr>
+<td>GPU memory</td>
+<td>80GB</td>
+<td>80GB</td>
+</tr>
+<tr>
+<td>GPU memory bandwidth</td>
+<td>3.35TB/s</td>
+<td>3.35TB/s</td>
+</tr>
+<tr>
+<td>Interconnect</td>
+<td>NVLink 400GB/s PCIe Gen5: 128GB/s</td>
+<td>NVLink 900GB/s PCIe Gen5: 128GB/s</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>H800 FP64 算力限制</li>
+</ul>
+<h1 id="driver"><a class="markdownIt-Anchor" href="#driver"></a> Driver</h1>
+<p><a target="_blank" rel="noopener" href="https://resources.nvidia.com/en-us-tensor-core/gtc22-whitepaper-hopper">https://resources.nvidia.com/en-us-tensor-core/gtc22-whitepaper-hopper</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.nvidia.com/content/dam/en-zz/Solutions/gtcs22/data-center/h100/PB-11133-001_v01.pdf">https://www.nvidia.com/content/dam/en-zz/Solutions/gtcs22/data-center/h100/PB-11133-001_v01.pdf</a></p>
+<p>Software Specifications</p>
+<table>
+<thead>
+<tr>
+<th>Specification</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Driver support</td>
+<td>Linux: R520 or later</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cuda"><a class="markdownIt-Anchor" href="#cuda"></a> CUDA</h1>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/datacenter/tesla/drivers/index.html#cuda-arch-matrix">https://docs.nvidia.com/datacenter/tesla/drivers/index.html#cuda-arch-matrix</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>CUDA Capabilities</th>
+<th>First CUDA Toolkit Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hopper</td>
+<td>9.0</td>
+<td>CUDA 11.8<br>CUDA 12.0</td>
+</tr>
+</tbody>
+</table>
+<h1 id="tensorflow"><a class="markdownIt-Anchor" href="#tensorflow"></a> TensorFlow</h1>
+<p><a target="_blank" rel="noopener" href="https://www.tensorflow.org/install/source#tested_build_configurations">https://www.tensorflow.org/install/source#tested_build_configurations</a></p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Python version</th>
+<th>Compiler</th>
+<th>Build tools</th>
+<th>cuDNN</th>
+<th>CUDA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tensorflow-2.15.0</td>
+<td>3.9-3.11</td>
+<td>Clang 16.0.0</td>
+<td>Bazel 6.1.0</td>
+<td>8.8</td>
+<td>12.2</td>
+</tr>
+<tr>
+<td>tensorflow-2.14.0</td>
+<td>3.9-3.11</td>
+<td>Clang 16.0.0</td>
+<td>Bazel 6.1.0</td>
+<td>8.7</td>
+<td>11.8</td>
+</tr>
+<tr>
+<td>tensorflow-2.13.0</td>
+<td>3.8-3.11</td>
+<td>Clang 16.0.0</td>
+<td>Bazel 5.3.0</td>
+<td>8.6</td>
+<td>11.8</td>
+</tr>
+<tr>
+<td>tensorflow-2.12.0</td>
+<td>3.8-3.11</td>
+<td>GCC 9.3.1</td>
+<td>Bazel 5.3.0</td>
+<td>8.6</td>
+<td>11.8</td>
+</tr>
+<tr>
+<td>tensorflow-2.11.0</td>
+<td>3.7-3.10</td>
+<td>GCC 9.3.1</td>
+<td>Bazel 5.3.0</td>
+<td>8.1</td>
+<td>11.2</td>
+</tr>
+<tr>
+<td>tensorflow-2.6.0</td>
+<td>3.6-3.9</td>
+<td>GCC 7.3.1</td>
+<td>Bazel 3.7.2</td>
+<td>8.1</td>
+<td>11.2</td>
+</tr>
+</tbody>
+</table>
+<p>candidates on H800</p>
+<ul>
+<li>&gt;= tensorflow-2.12.0</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://hub.docker.com/r/tensorflow/tensorflow/tags">docker images</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull tensorflow/tensorflow:2.14.0-gpu</span><br><span class="line">docker pull tensorflow/tensorflow:2.13.0-gpu</span><br><span class="line">docker pull tensorflow/tensorflow:2.12.0-gpu</span><br></pre></td></tr></table></figure>
+<h1 id="pytorch"><a class="markdownIt-Anchor" href="#pytorch"></a> PyTorch</h1>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/previous-versions/">https://pytorch.org/get-started/previous-versions/</a></p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>CUDA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1.13.1</td>
+<td>11.6, 11.7</td>
+</tr>
+<tr>
+<td>v2.0.0</td>
+<td>11.7, 11.8</td>
+</tr>
+<tr>
+<td>v2.0.1</td>
+<td>11.7, 11.8</td>
+</tr>
+<tr>
+<td>v2.1.0</td>
+<td>11.8, 12.1</td>
+</tr>
+<tr>
+<td>v2.1.1</td>
+<td>11.8, 12.1</td>
+</tr>
+</tbody>
+</table>
+<p>candidates on H800</p>
+<ul>
+<li>&gt;= v2.0.0, with cuda 11.8 support</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://hub.docker.com/r/pytorch/pytorch/tags?page=1">docker images</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker pull pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel</span><br><span class="line">docker pull pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime</span><br><span class="line"></span><br><span class="line">docker pull pytorch/pytorch:2.0.1-cuda11.7-cudnn8-devel</span><br><span class="line">docker pull pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1396,152 +1722,6 @@
 <h1 id="identifying-adapter-cards"><a class="markdownIt-Anchor" href="#identifying-adapter-cards"></a> identifying adapter cards</h1>
 <p><a target="_blank" rel="noopener" href="https://network.nvidia.com/support/firmware/identification/">https://network.nvidia.com/support/firmware/identification/</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ibv_devinfo</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/e3ce3305.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/e3ce3305.html" class="post-title-link" itemprop="url">use docker container in modelarts training service</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-06-12 15:06:00" itemprop="dateCreated datePublished" datetime="2022-06-12T15:06:00Z">2022-06-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>目标：构建有如下软件的容器镜像，并使用华为云 ModelArts 训练服务运行</p>
-<ul>
-<li>ubuntu-18.04</li>
-<li>cuda-10.2</li>
-<li>python-3.7.13</li>
-<li>pytorch-1.8.1</li>
-</ul>
-<h1 id="1-准备-context-文件夹"><a class="markdownIt-Anchor" href="#1-准备-context-文件夹"></a> 1. 准备 context 文件夹</h1>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p context</span><br></pre></td></tr></table></figure>
-<h2 id="11-准备文件"><a class="markdownIt-Anchor" href="#11-准备文件"></a> 1.1. 准备文件</h2>
-<h3 id="111-pipconf"><a class="markdownIt-Anchor" href="#111-pipconf"></a> 1.1.1. pip.conf</h3>
-<blockquote>
-<p>使用华为开源镜像站 pypi 配置</p>
-<p><a target="_blank" rel="noopener" href="https://mirrors.huaweicloud.com/home">https://mirrors.huaweicloud.com/home</a></p>
-</blockquote>
-<p>文件内容如下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">index-url = https://repo.huaweicloud.com/repository/pypi/simple</span><br><span class="line">trusted-host = repo.huaweicloud.com</span><br><span class="line">timeout = 120</span><br></pre></td></tr></table></figure>
-<h3 id="112-torchwhl"><a class="markdownIt-Anchor" href="#112-torchwhl"></a> 1.1.2. torch*.whl</h3>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/previous-versions/#v181">https://pytorch.org/get-started/previous-versions/#v181</a></p>
-</blockquote>
-<p>在该地址上 <a target="_blank" rel="noopener" href="https://download.pytorch.org/whl/torch_stable.html">https://download.pytorch.org/whl/torch_stable.html</a> 搜索并下载如下 whl</p>
-<ul>
-<li>torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</li>
-<li>torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</li>
-<li>torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</li>
-</ul>
-<h3 id="113-miniconda3"><a class="markdownIt-Anchor" href="#113-miniconda3"></a> 1.1.3. Miniconda3</h3>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a></p>
-<p>Miniconda3-py37_4.12.0-Linux-x86_64.sh</p>
-</blockquote>
-<p>使用该地址 <a target="_blank" rel="noopener" href="https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh">https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh</a>, 下载 miniconda3 安装文件</p>
-<h2 id="12-context-文件夹内容"><a class="markdownIt-Anchor" href="#12-context-文件夹内容"></a> 1.2. context 文件夹内容</h2>
-<p>将上述文件放置在 context 文件夹内</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">├── Miniconda3-py37_4.12.0-Linux-x86_64.sh</span><br><span class="line">├── pip.conf</span><br><span class="line">├── torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">├── torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">└── torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-<h1 id="2-编写容器镜像-dockerfile-文件"><a class="markdownIt-Anchor" href="#2-编写容器镜像-dockerfile-文件"></a> 2. 编写容器镜像 Dockerfile 文件</h1>
-<p>在 context 文件夹内新建名为 <strong>Dockerfile</strong> 的空文件，并将下述文件内容写入其中</p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 容器镜像构建主机需要连通公网</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础容器镜像, https://github.com/NVIDIA/nvidia-docker/wiki/CUDA</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds</span></span><br><span class="line"><span class="comment"># require Docker Engine &gt;= 17.05</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># builder stage</span></span><br><span class="line"><span class="keyword">FROM</span> nvidia/cuda:<span class="number">10.2</span>-runtime-ubuntu18.<span class="number">04</span> AS builder</span><br><span class="line"></span><br><span class="line"><span class="comment"># 基础容器镜像的默认用户已经是 root</span></span><br><span class="line"><span class="comment"># USER root</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用华为开源镜像站提供的 pypi 配置</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> mkdir -p /root/.pip/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> pip.conf /root/.pip/pip.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拷贝待安装文件到基础容器镜像中的 /tmp 目录</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> Miniconda3-py37_4.12.0-Linux-x86_64.sh \</span></span><br><span class="line"><span class="bash">     torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">     ./tmp</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># https://conda.io/projects/conda/en/latest/user-guide/install/linux.html#installing-on-linux</span></span><br><span class="line"><span class="comment"># 安装 Miniconda3 到基础容器镜像的 /home/ma-user/miniconda3 目录中</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> bash /tmp/Miniconda3-py37_4.12.0-Linux-x86_64.sh -b -p /home/ma-user/miniconda3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 Miniconda3 默认 python 环境 (即 /home/ma-user/miniconda3/bin/pip) 安装 torch*.whl</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">cd</span> /tmp &amp;&amp; \</span></span><br><span class="line"><span class="bash">    /home/ma-user/miniconda3/bin/pip install --no-cache-dir \</span></span><br><span class="line"><span class="bash">    /tmp/torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">    /tmp/torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl \</span></span><br><span class="line"><span class="bash">    /tmp/torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建最终容器镜像</span></span><br><span class="line"><span class="keyword">FROM</span> nvidia/cuda:<span class="number">10.2</span>-runtime-ubuntu18.<span class="number">04</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 vim / curl 工具（依然使用华为开源镜像站）</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> cp -a /etc/apt/sources.list /etc/apt/sources.list.bak &amp;&amp; \</span></span><br><span class="line"><span class="bash">    sed -i <span class="string">&quot;s@http://.*archive.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="bash">    sed -i <span class="string">&quot;s@http://.*security.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get update &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get install -y vim curl &amp;&amp; \</span></span><br><span class="line"><span class="bash">    apt-get clean &amp;&amp; \</span></span><br><span class="line"><span class="bash">    mv /etc/apt/sources.list.bak /etc/apt/sources.list</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加 ma-user 用户 (uid = 1000, gid = 100)</span></span><br><span class="line"><span class="comment"># 注意到基础容器镜像已存在 gid = 100 的组，因此 ma-user 用户可直接使用</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从上述 builder stage 中拷贝 /home/ma-user/miniconda3 目录到当前容器镜像的同名目录</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --chown=ma-user --from=builder /home/ma-user/miniconda3 /home/ma-user/miniconda3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置容器镜像预置环境变量</span></span><br><span class="line"><span class="comment"># 请务必设置 PYTHONUNBUFFERED=1, 以免日志丢失</span></span><br><span class="line"><span class="keyword">ENV</span> PATH=$PATH:/home/ma-<span class="keyword">user</span>/miniconda3/bin \</span><br><span class="line">    PYTHONUNBUFFERED=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置容器镜像默认用户与工作目录</span></span><br><span class="line"><span class="keyword">USER</span> ma-<span class="keyword">user</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /home/ma-user</span></span><br></pre></td></tr></table></figure>
-<h1 id="3-构建容器镜像"><a class="markdownIt-Anchor" href="#3-构建容器镜像"></a> 3. 构建容器镜像</h1>
-<p>context 文件夹内容如下</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">├── Dockerfile</span><br><span class="line">├── Miniconda3-py37_4.12.0-Linux-x86_64.sh</span><br><span class="line">├── pip.conf</span><br><span class="line">├── torch-1.8.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">├── torchaudio-0.8.1-cp37-cp37m-linux_x86_64.whl</span><br><span class="line">└── torchvision-0.9.1+cu102-cp37-cp37m-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-<p>执行如下命令构建容器镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 执行构建容器镜像命令之前，请务必切换到 context 目录内</span></span><br><span class="line">cd context</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 执行构建容器镜像命令</span></span><br><span class="line">docker build . -t swr.cn-north-4.myhuaweicloud.com/deep-learning-demo/pytorch:1.8.1-cuda10.2</span><br></pre></td></tr></table></figure>
-<p>容器镜像构建成功后，可通过如下命令查询到对应的容器镜像地址</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep pytorch | grep 1.8.1-cuda10.2</span><br></pre></td></tr></table></figure>
-<h1 id="3-pytorch-verification-code"><a class="markdownIt-Anchor" href="#3-pytorch-verification-code"></a> 3. pytorch verification code</h1>
-<p><a target="_blank" rel="noopener" href="https://pytorch.org/get-started/locally/#linux-verification">https://pytorch.org/get-started/locally/#linux-verification</a></p>
-<p>验证示例代码：<a target="_blank" rel="noopener" href="http://pytorch-verification.py">pytorch-verification.py</a></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line">x = torch.randn(<span class="number">5</span>, <span class="number">3</span>)</span><br><span class="line">print(x)</span><br><span class="line"></span><br><span class="line">available_dev = torch.device(<span class="string">&quot;cuda&quot;</span>) <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> torch.device(<span class="string">&quot;cpu&quot;</span>)</span><br><span class="line">y = torch.randn(<span class="number">5</span>, <span class="number">3</span>).to(available_dev)</span><br><span class="line">print(y)</span><br></pre></td></tr></table></figure>
-<h1 id="4-boot-command-in-modelarts-training-service"><a class="markdownIt-Anchor" href="#4-boot-command-in-modelarts-training-service"></a> 4. boot command in modelarts training service</h1>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/home/ma-user/miniconda3/bin/python $&#123;MA_JOB_DIR&#125;/code/pytorch-verification.py</span><br></pre></td></tr></table></figure>
-<p>cpu 训练作业日志显示示例</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tensor([[ 0.8945, -0.6946,  0.3807],</span><br><span class="line">        [ 0.6665,  0.3133,  0.8285],</span><br><span class="line">        [-0.5353, -0.1730, -0.5419],</span><br><span class="line">        [ 0.4870,  0.5183,  0.2505],</span><br><span class="line">        [ 0.2679, -0.4996,  0.7919]])</span><br><span class="line">tensor([[ 0.9692,  0.4652,  0.5659],</span><br><span class="line">        [ 2.2032,  1.4157, -0.1755],</span><br><span class="line">        [-0.6296,  0.5466,  0.6994],</span><br><span class="line">        [ 0.2353, -0.0089, -1.9546],</span><br><span class="line">        [ 0.9319,  1.1781, -0.4587]])</span><br></pre></td></tr></table></figure>
-<p>gpu 训练作业日志显示示例</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">tensor([[-0.2874, -0.3475,  0.1848],</span><br><span class="line">        [-0.1660, -0.5038, -0.5470],</span><br><span class="line">        [ 0.1289, -0.2400,  2.0829],</span><br><span class="line">        [ 1.6870, -0.0492,  0.1189],</span><br><span class="line">        [ 0.4800, -0.3611, -0.9572]])</span><br><span class="line">tensor([[-0.6710,  0.4095, -0.7370],</span><br><span class="line">        [ 1.4353,  0.9093,  1.7551],</span><br><span class="line">        [ 1.3477, -0.0499,  0.2404],</span><br><span class="line">        [ 1.7489, -1.0203, -0.7875],</span><br><span class="line">        [-1.2104,  0.4593,  1.1365]], device=&#x27;cuda:0&#x27;)</span><br></pre></td></tr></table></figure>
 
       
     </div>

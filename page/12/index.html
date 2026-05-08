@@ -140,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -168,6 +168,129 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2e8f7f88.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/2e8f7f88.html" class="post-title-link" itemprop="url">Cluster ID 和 Member ID 的生成规则</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-03 00:00:00" itemprop="dateCreated datePublished" datetime="2017-10-03T00:00:00Z">2017-10-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>etcd v3.1.9</p>
+</blockquote>
+<h1 id="从-etcd-启动参数中生成-cluster-id-和-member-id"><a class="markdownIt-Anchor" href="#从-etcd-启动参数中生成-cluster-id-和-member-id"></a> 从 etcd 启动参数中生成 Cluster ID 和 Member ID</h1>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cl, err = membership.NewClusterFromURLsMap(cfg.InitialClusterToken, cfg.InitialPeerURLsMap)</span><br></pre></td></tr></table></figure>
+<p>上述方法从 –initial-cluster-token and –initial-cluster 这个两个启动参数中生成 Cluster ID 和各个 Member ID</p>
+<p>NewClusterFromURLsMap 这个方法中调用 NewMember 生成 Member ID</p>
+<p>首先来看 NewMember 方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func NewMember(name string, peerURLs types.URLs, clusterName string, now *time.Time) *Member</span><br></pre></td></tr></table></figure>
+<p>核心思路</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b []<span class="keyword">byte</span>: peerUrls + clusterName + time</span><br><span class="line">hash := sha1.Sum(b)</span><br><span class="line">memberID: binary.BigEndian.Uint64(hash[:<span class="number">8</span>])</span><br></pre></td></tr></table></figure>
+<p>Member ID 根据 peerUrls / clusterName / current_time 的 sha1 sum 值，取其前 8 个 bytes，为 16 位的 hex 数</p>
+<p>回到 NewClusterFromURLsMap 方法中的 NewMember（代码如下）可见最后一个参数为 nil，即不加入时间因素，因此 NewClusterFromURLsMap 生成的 Member ID 是固定的</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m := NewMember(name, urls, token, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="member-add-生成的-member-id"><a class="markdownIt-Anchor" href="#member-add-生成的-member-id"></a> Member Add 生成的 Member ID</h1>
+<p>直接从 server 端看起 —— etcdserver/api/v3rpc/member.go 中的 MemberAdd 方法</p>
+<p>可见如下代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">urls, err := types.NewURLs(r.PeerURLs)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, rpctypes.ErrGRPCMemberBadURLs</span><br><span class="line">&#125;</span><br><span class="line">now := time.Now()</span><br><span class="line">m := membership.NewMember(<span class="string">&quot;&quot;</span>, urls, <span class="string">&quot;&quot;</span>, &amp;now)</span><br><span class="line"><span class="keyword">if</span> err = cs.server.AddMember(ctx, *m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, togRPCError(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>m := membership.NewMember(“”, urls, “”, &amp;now) 加入了当前时间，因此 Member ID 是不确定的</p>
+<h1 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h1>
+<p>cluster ID 仅生成一次，此后不会变化</p>
+<p>通过 etcd 启动参数生成 (initial-cluster) 的 Member ID 固定</p>
+<p>通过 Member add 生成的 Member ID 不确定</p>
+<p>Member add 的时候，没有传递 member 的 name，因此 member add 成功时，member list 出来的 member item，新加入的 member 其 name 为空，且没有 client url，因该 member 尚未 publish 其 client url 到集群中</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1182,117 +1305,6 @@
 <p>呃，有个不幸的事情，刚去看照片的时候，发现在台湾的最后一天的照片原图找不到了，只有很少一部分处理过的照片，有点遗憾 ~ 不知道有木有机会再去一次，把这些照片补上[机智]啊。另外特别感谢文兄还留着那健身照！不然真就丢了。</p>
 <p>也没到要睡的时间，这次就不说好梦了。</p>
 <p>2017年04月21日22:23:25 杭州</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/7f85baff.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/7f85baff.html" class="post-title-link" itemprop="url">岁月无可回头(2)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-04-14 23:31:47" itemprop="dateCreated datePublished" datetime="2017-04-14T23:31:47Z">2017-04-14</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-29 08:24:58" itemprop="dateModified" datetime="2026-03-29T08:24:58Z">2026-03-29</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>746</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>有很多想写的话，待付诸笔端之时，又不知从何下手。断断续续的写了这些。</p>
-<p>《时间煮雨》</p>
-<p>这些天连着下了两天雨，接着半天阴天，到下午才有阳光的影子。开心的是晾了三天的鞋子可算有了要干的迹象。雨水充沛，四处绿色，是这座城市的一大观感。</p>
-<p>室友 A 前几天匆匆买了去北京的票，心里想着五一、端午过后，就只有十一了，中间隔着好几个月，还是回去看看 TA 吧。A 就职网易云音乐前端部门，平均下班时间九点到九点半。下班回来后，偶尔会在客厅的沙发上闲聊一二，而后到点回屋歇着。</p>
-<p>沙县小吃（特别多，感觉到哪儿都有），黄焖鸡米饭（也是一样，哪儿都有），周边小店已然吃腻。待室友 B 锅碗瓢盆、菜米油盐买齐了，我们涮火锅 or 煮面条 or 有闲心的时候做饭吃。室友 B 在阿里 B2B 部门从事后台开发工作，平均下班时间八点，热爱生活。</p>
-<p>室友 A 和 B 都是之前实验室的同学了，彼此熟悉，以后很长时间会互相帮助的。</p>
-<p>偶然间看到微信订阅号上显示的标题《是你们见证了破壳的生命之光》，点进去看了下，惊奇的发现这不就是刘晓晔和王印么，不就是上次去看的《两只狗的生活意见》的主演么。再往后翻，扫到了新话剧的名字《蛋》。回想起当时出剧场时，对着墙上的宣传画拍照，画上宣传的应该就是这剧了。杭州也有蜂巢剧场呢，不知道会发生怎么样的故事。</p>
-<p>啊，刚回屋的路上，突然一个语音进来。之前老打架的学妹开心的说，居然收到了阿里的 offer，喜极而泣。据她自己说的，面完二面觉得自己挂了，没想到还是收到了 offer，并且是核心部门。不过真不太敢想象她过来的样子，希望她还有更好的去处。</p>
-<p>另外体检的地方离西湖好近，所以体检结束后又去西湖走了走。哎，抱歉，美得有点腻了，绿水雾天，直接上图吧。</p>
-<p>(图去了吧，今天想起来自己看一眼，发现加载速度很慢 …)</p>
-<p>《青空》</p>
-<p>2017年04月14日23:31:47 杭州</p>
 
       
     </div>

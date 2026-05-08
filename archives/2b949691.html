@@ -20,29 +20,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="在 KubeRay 里，Ray Job 由 Ray Cluster 承载与管理，真正的难点往往在于 如何把 Ray Job 与 Ray Cluster 的生命周期对齐。  先看通用 Job：常用 init container 拉数据、下发配置等；init 失败即整次 Job 失败，这很直观。 Ray Job 不同：它并不是「那一组实际跑在集群里的 Pod」——资源实体是 Ray Cluster；所">
+    <meta name="description" content="想着在这个时间点上回顾下模型和模型训练 infra 发展的经历，就以 DS 的技术报告为例吧。 DS 系列模型：  DeepSeek LLM — DeepSeek LLM 7B、DeepSeek LLM 67B Dense（2024&#x2F;01&#x2F;05） arXiv:2401.02954 DeepSeek-Coder — 1.3B～33B（2024&#x2F;01&#x2F;25） arXiv:2401.14196 Deep">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ray Job Init Containers in KubeRay: Lifecycle Nuances">
-<meta property="og:url" content="https://zrss.github.io/archives/268f4fc2.html">
+<meta property="og:title" content="model-ds-series">
+<meta property="og:url" content="https://zrss.github.io/archives/2b949691.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="在 KubeRay 里，Ray Job 由 Ray Cluster 承载与管理，真正的难点往往在于 如何把 Ray Job 与 Ray Cluster 的生命周期对齐。  先看通用 Job：常用 init container 拉数据、下发配置等；init 失败即整次 Job 失败，这很直观。 Ray Job 不同：它并不是「那一组实际跑在集群里的 Pod」——资源实体是 Ray Cluster；所">
+<meta property="og:description" content="想着在这个时间点上回顾下模型和模型训练 infra 发展的经历，就以 DS 的技术报告为例吧。 DS 系列模型：  DeepSeek LLM — DeepSeek LLM 7B、DeepSeek LLM 67B Dense（2024&#x2F;01&#x2F;05） arXiv:2401.02954 DeepSeek-Coder — 1.3B～33B（2024&#x2F;01&#x2F;25） arXiv:2401.14196 Deep">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zrss.github.io/images/rayjob-init-container.svg">
-<meta property="article:published_time" content="2026-03-24T23:53:44.000Z">
-<meta property="article:modified_time" content="2026-03-31T14:56:54.376Z">
+<meta property="article:published_time" content="2026-05-08T20:04:51.000Z">
+<meta property="article:modified_time" content="2026-05-08T16:28:33.936Z">
 <meta property="article:author" content="Zrss">
-<meta property="article:tag" content="ray">
+<meta property="article:tag" content="tech">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zrss.github.io/images/rayjob-init-container.svg">
 
 
-<link rel="canonical" href="https://zrss.github.io/archives/268f4fc2.html">
+<link rel="canonical" href="https://zrss.github.io/archives/2b949691.html">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/268f4fc2.html","path":"archives/268f4fc2.html","title":"Ray Job Init Containers in KubeRay: Lifecycle Nuances"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/2b949691.html","path":"archives/2b949691.html","title":"model-ds-series"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Ray Job Init Containers in KubeRay: Lifecycle Nuances | MegaThinking</title>
+<title>model-ds-series | MegaThinking</title>
   
 
 
@@ -119,7 +117,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -132,6 +130,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-llm"><span class="nav-number">1.</span> <span class="nav-text"> DeepSeek LLM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-coder"><span class="nav-number">2.</span> <span class="nav-text"> DeepSeek-Coder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseekmoe"><span class="nav-number">3.</span> <span class="nav-text"> DeepSeekMoE</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseekmath"><span class="nav-number">4.</span> <span class="nav-text"> DeepSeekMath</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-v2"><span class="nav-number">5.</span> <span class="nav-text"> DeepSeek-V2</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-v25"><span class="nav-number">6.</span> <span class="nav-text"> DeepSeek-V2.5</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-v3"><span class="nav-number">7.</span> <span class="nav-text"> DeepSeek-V3</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-r1"><span class="nav-number">8.</span> <span class="nav-text"> DeepSeek-R1</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -182,7 +181,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/268f4fc2.html">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2b949691.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -195,12 +194,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Ray Job Init Containers in KubeRay: Lifecycle Nuances | MegaThinking">
+      <meta itemprop="name" content="model-ds-series | MegaThinking">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Ray Job Init Containers in KubeRay: Lifecycle Nuances
+          model-ds-series
         </h1>
 
         <div class="post-meta-container">
@@ -210,24 +209,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2026-03-24 23:53:44" itemprop="dateCreated datePublished" datetime="2026-03-24T23:53:44Z">2026-03-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-31 14:56:54" itemprop="dateModified" datetime="2026-03-31T14:56:54Z">2026-03-31</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
-        </span>
+      <time title="创建时间：2026-05-08 20:04:51 / 修改时间：16:28:33" itemprop="dateCreated datePublished" datetime="2026-05-08T20:04:51Z">2026-05-08</time>
     </span>
 
   
@@ -237,7 +221,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.2k</span>
+      <span>691</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -254,32 +238,27 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>在 KubeRay 里，Ray Job 由 Ray Cluster 承载与管理，真正的难点往往在于 <strong>如何把 Ray Job 与 Ray Cluster 的生命周期对齐</strong>。</p>
-<p><img src="/images/rayjob-init-container.svg" alt="rayjob-raycluster" /></p>
-<p>先看通用 Job：常用 init container 拉数据、下发配置等；<strong>init 失败即整次 Job 失败</strong>，这很直观。</p>
-<p>Ray Job 不同：它并不是「那一组实际跑在集群里的 Pod」——资源实体是 Ray Cluster；所谓 Ray Job 的 init container，也落在 Cluster 侧。结果是 <strong>Job 侧的 init 语义，会和 Cluster 的 init / bootstrap 语义绑在一起</strong>。</p>
-<ul>
-<li><strong>站在 Cluster 视角</strong>：init 失败时反复重试直到 bootstrap 成功，常常说得通——先得把集群建立起来。</li>
-<li><strong>站在 Job 视角</strong>：Job 是一次性任务，<strong>init 失败更合理的预期是 fail fast</strong>，而不是长期跟着 Cluster 重试。</li>
-</ul>
-<p>也是在借助大模型拆解 issue、梳理场景，并对照代码与线上行为逐项验证的过程中，才逐渐理解：Ray Job 对 init container 的生命周期管理，很难用一套简单直白、一步到位的规则实现。</p>
-<blockquote>
-<p>1h vibe issue, 8h vibe coding<br />
-70M tokens cost</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/ray-project/kuberay/issues/4637">https://github.com/ray-project/kuberay/issues/4637</a></p>
-</blockquote>
-<p>两种典型模式：</p>
-<ul>
-<li><strong>新建</strong> Ray Cluster：Ray Job 的 init container <strong>会生效</strong>；在这条路径下，它实际就是跑在 <strong>Ray Cluster</strong> 上的 init container，与 Cluster 的 bootstrap 同一条链路。</li>
-<li><strong>使用已有</strong> Ray Cluster：Ray Job 的 init container <strong>不生效</strong>；Job 只消费已有 Cluster，不会为本次 Job 再单独跑一轮 init。</li>
-</ul>
-<p>Cluster 自身的生命周期也要分开看：</p>
-<ul>
-<li><strong>Job 新建的</strong> Cluster：可用 Ray Job 的 delete rule 决定在 Job 结束后是否删除 Cluster / Workers 等；<strong>默认为保留 Cluster</strong>。</li>
-<li><strong>沿用已有</strong> Cluster：Ray Job 结束 <strong>不改变</strong> Cluster 的生命周期（Cluster 可能继续服务其他任务或由别处托管）。</li>
-</ul>
-<p>回到 <strong>Ray Job 自定义 init 失败</strong>——这发生在 <strong>Job 新建并绑定的专属 Cluster</strong> 上。Job 结束后如果 Cluster 长期保留，语义上确实容易别扭；而更合理的模式通常是 <strong>短时间保留现场</strong>（以收集日志和进行问题诊断），然后自动回收这个临时 Cluster。这本质上是一种「单次 Job + 一套临时 Cluster」的短生命期部署方式，与长期共用 Cluster 是两套完全不同的心智模型。</p>
-<p>不过需要注意，<strong>当前 Ray Job 实际上并不支持这样的能力</strong>：Job 自定义 init 失败后，Job 仍然处于 initializing 状态，系统还不会自动实现「短暂保留现场再回收 Cluster」的行为。可以继续 vibe issue, 基于 issue vibe coding。</p>
+    <div class="post-body" itemprop="articleBody"><p>想着在这个时间点上回顾下模型和模型训练 infra 发展的经历，就以 DS 的技术报告为例吧。</p>
+<p>DS 系列模型：</p>
+<ol>
+<li>DeepSeek LLM — DeepSeek LLM 7B、DeepSeek LLM 67B Dense（2024/01/05） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.02954">arXiv:2401.02954</a></li>
+<li>DeepSeek-Coder — 1.3B～33B（2024/01/25） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.14196">arXiv:2401.14196</a></li>
+<li>DeepSeekMoE — MoE 语言模型系列 2B / 16B / 145B 等（2024/01/11） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.06066">arXiv:2401.06066</a></li>
+<li>DeepSeekMath — DeepSeekMath-7B（2024/02/05） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2402.03300">arXiv:2402.03300</a></li>
+<li>DeepSeek-V2 — 第二代 MoE 通用大模型（2024/05/07） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2405.04434">arXiv:2405.04434</a></li>
+<li>DeepSeek-V2.5 — 通用与代码能力合流迭代（2024/09/06；无单独 arXiv 技术报告，架构见 V2） <a target="_blank" rel="noopener" href="https://api-docs.deepseek.com/news/news0905">官方说明</a></li>
+<li>DeepSeek-V3 — 第三代 MoE 通用大模型（2024/12/27） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2412.19437">arXiv:2412.19437</a></li>
+<li>DeepSeek-R1、DeepSeek-R1-Zero（2025/01/22） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12948">arXiv:2501.12948</a></li>
+</ol>
+<p>继而再看框架的实现。不是之前不能做，之前这是个浩大的工程。现在借助模型不仅是代码门槛下降了，理解 sota 工作的门槛也下降了，可以抽空广泛的了解起来了，成为新时代的 “全栈” 工程师</p>
+<h1 id="deepseek-llm"><a class="markdownIt-Anchor" href="#deepseek-llm"></a> DeepSeek LLM</h1>
+<h1 id="deepseek-coder"><a class="markdownIt-Anchor" href="#deepseek-coder"></a> DeepSeek-Coder</h1>
+<h1 id="deepseekmoe"><a class="markdownIt-Anchor" href="#deepseekmoe"></a> DeepSeekMoE</h1>
+<h1 id="deepseekmath"><a class="markdownIt-Anchor" href="#deepseekmath"></a> DeepSeekMath</h1>
+<h1 id="deepseek-v2"><a class="markdownIt-Anchor" href="#deepseek-v2"></a> DeepSeek-V2</h1>
+<h1 id="deepseek-v25"><a class="markdownIt-Anchor" href="#deepseek-v25"></a> DeepSeek-V2.5</h1>
+<h1 id="deepseek-v3"><a class="markdownIt-Anchor" href="#deepseek-v3"></a> DeepSeek-V3</h1>
+<h1 id="deepseek-r1"><a class="markdownIt-Anchor" href="#deepseek-r1"></a> DeepSeek-R1</h1>
 
     </div>
 
@@ -288,22 +267,16 @@
     
 
     <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/ray/" rel="tag"># ray</a>
-          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/archives/e4d00207.html" rel="prev" title="rl infra">
-                  <i class="fa fa-angle-left"></i> rl infra
+                <a href="/archives/5982b47d.html" rel="prev" title="PPO">
+                  <i class="fa fa-angle-left"></i> PPO
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/archives/5982b47d.html" rel="next" title="PPO">
-                  PPO <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>

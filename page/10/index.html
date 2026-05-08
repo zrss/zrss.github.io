@@ -140,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -168,6 +168,104 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/4ab1fcf6.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/4ab1fcf6.html" class="post-title-link" itemprop="url">ETCD 链接建立</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-03 16:48:36" itemprop="dateCreated datePublished" datetime="2017-12-03T16:48:36Z">2017-12-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>521</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>机缘巧合，在测试的引导下，读了下 etcd 连接建立方面的代码</p>
+<p>etcd 启动后监听 peer url</p>
+<p>peer url 通过 mux 绑定 handler，关于 raft 的 url 的请求绑定到 streamHandler 上，这玩意会 hold 住一个连接，除非遇到错误，&lt;-c.closeNotify()，连接 close</p>
+<p>啥时候重新 p.attachOutgoingConn(conn) 回来，当然是该成员又请求连接到 url 上来时，即 streamReader 重新连接回来时</p>
+<p>streamWriter 使用长链</p>
+<p>streamReader 持续读，与 streamWriter 匹配，streamWriter 不遇到错误，不 close 连接；streamReader 断了之后，100ms 重新 dial 一次，重连上后，对端 streamWriter 能 hold 住新的连接</p>
+<p>etcd 对其每一个 peer 都会启动 streamReader 和 streamWriter，reader 建立连接后，writer 使用不关闭，reader 有数据时读，writer 有写入时写，保持着连接</p>
+<p>所以 etcd peer 间是建立着长链的，可以使用 netstat -anp | grep {etcd_peer_port} 查看 peer 之间的连接建立情况</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1241,101 +1339,6 @@ to be cont.</p>
 <p><strong>删除数组中的一个元素</strong></p>
 <p>删除 index 元素</p>
 <p>n.inodes = append(n.inodes[:index], n.inodes[index+1:]…)</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/89164994.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/89164994.html" class="post-title-link" itemprop="url">曾經我也想放棄治療</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2017-10-15 15:32:12" itemprop="dateCreated datePublished" datetime="2017-10-15T15:32:12Z">2017-10-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>79</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Live 版完美，温暖和力量 ——</p>
-<p>曾經我也想放棄治療</p>
-<p>是因為還沒遇見到你</p>
-<p>像你這樣的人存在這世界上，我對世界稍微有了好感</p>
-<p>像你這樣的人存在這世界上，我對世界稍微有了期待</p>
 
       
     </div>
