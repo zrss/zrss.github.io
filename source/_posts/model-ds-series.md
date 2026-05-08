@@ -1,5 +1,6 @@
 ---
 title: model-ds-series
+abbrlink: 2b949691
 date: 2026-05-08 20:04:51
 tags:
 ---
@@ -15,6 +16,8 @@ DS 系列模型：
 6. DeepSeek-V2.5 — 通用与代码能力合流迭代（2024/09/06；无单独 arXiv 技术报告，架构见 V2） [官方说明](https://api-docs.deepseek.com/news/news0905)
 7. DeepSeek-V3 — 第三代 MoE 通用大模型（2024/12/27） [arXiv:2412.19437](https://arxiv.org/abs/2412.19437)
 8. DeepSeek-R1、DeepSeek-R1-Zero（2025/01/22） [arXiv:2501.12948](https://arxiv.org/abs/2501.12948)
+
+继而再看框架的实现。不是之前不能做，之前这是个浩大的工程，借助模型不仅是代码门槛下降了，理解 sota 工作的门槛也下降了，可以抽空广泛的了解起来了，成为新时代的 “全栈” 工程师
 
 # DeepSeek LLM
 
