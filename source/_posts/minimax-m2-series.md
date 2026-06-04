@@ -469,35 +469,31 @@ Agent 多轮交互里有大量共享 prefix。Forge 使用分布式 KV cache poo
 
 下面是基于报告描述的工程推断，不是官方源码，也不是论文披露的完整实现。
 
-{% mermaid flowchart TB %}
-  task["Task Queue<br/>prompts / env specs"]
+{% mermaid sequenceDiagram %}
+  participant T as Task Queue
+  participant A as Agent Runner
+  participant E as Tool / Env Servers
+  participant G as Gateway Server
+  participant R as Rollout Engine
+  participant D as Data Pool
+  participant Tr as Train Engine
 
-  subgraph agent["Agent Side"]
-    runner["Agent Runner<br/>agent loop<br/>context management<br/>trajectory recording"]
-    tools["Tool / Env Servers<br/>Docker / browser / code runner<br/>spreadsheet / file tools"]
-    runner <--> tools
+  T->>A: task / env spec
+  loop agent rollout
+    A->>G: completion request<br/>state + tools + metadata
+    G->>R: normalized request<br/>model version attached
+    R-->>G: completion<br/>tokens + logprobs
+    G-->>A: action / tool call
+    A->>E: execute tool call
+    E-->>A: observation / artifact
+    A->>D: state / action / observation
+    E->>D: verification / reward signal
+    R->>D: model version / logprobs
   end
-
-  subgraph middleware["Middleware"]
-    gateway["Gateway Server<br/>request normalization<br/>model-version tagging<br/>white-box / black-box agent bridge"]
-    pool["Data Pool<br/>trajectory storage<br/>reward / logprob metadata<br/>Windowed FIFO batching"]
-  end
-
-  subgraph infer["Training / Inference Side"]
-    rollout["Rollout Engine<br/>MoE serving<br/>MTP speculative decoding<br/>prefill-decode split<br/>global KV cache"]
-    train["Train Engine<br/>sample construction<br/>prefix tree merging<br/>CISPO update"]
-  end
-
-  task --> runner
-  runner -- completion request --> gateway
-  gateway --> rollout
-  rollout -- completion --> gateway
-  gateway -- action --> runner
-  runner -- state / action / observation --> pool
-  tools -- verification / reward signal --> pool
-  pool -- training batch --> train
-  train -- updated weights --> rollout
-  rollout -- model version / logprobs --> pool
+  D->>D: Windowed FIFO<br/>filtering / batching
+  D->>Tr: training batch
+  Tr->>Tr: prefix tree merging<br/>CISPO update
+  Tr-->>R: updated weights
 {% endmermaid %}
 
 图里的关键边界是 Gateway：Agent Side 可以保持 scaffold 差异，Training / Inference Side 则通过统一的 completion 接口接收请求、记录元数据，并把 rollout 数据回流到 Data Pool。
@@ -505,23 +501,22 @@ Agent 多轮交互里有大量共享 prefix。Forge 使用分布式 KV cache poo
 Prefix tree merging 可以单独画成下面这个形态：
 
 {% mermaid flowchart LR %}
-  subgraph before["Before: independent samples"]
-    b1["ctx + a"]
-    b2["ctx + b"]
-    b3["ctx + c"]
-  end
+  b1["before: ctx + a"]
+  b2["before: ctx + b"]
+  b3["before: ctx + c"]
 
-  subgraph after["After: prefix tree"]
-    ctx["shared ctx"]
-    a["branch a"]
-    b["branch b"]
-    c["branch c"]
-    ctx --> a
-    ctx --> b
-    ctx --> c
-  end
+  ctx["after: shared ctx"]
+  a["branch a"]
+  b["branch b"]
+  c["branch c"]
 
-  before --> after
+  b1 -. same prefix .-> ctx
+  b2 -. same prefix .-> ctx
+  b3 -. same prefix .-> ctx
+
+  ctx --> a
+  ctx --> b
+  ctx --> c
 {% endmermaid %}
 
 共享 prefix 只做一次 forward，分叉后的 response segment 分别计算；forward 结束后再根据元数据还原到原始 sample 计算 loss。
