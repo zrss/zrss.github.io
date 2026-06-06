@@ -118,7 +118,7 @@ theme_config:
     badges: false
   sidebar:
     position: right
-    display: hide
+    display: post
   text_align:
     desktop: justify
     mobile: start

@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">NCCL connection setup architecture</title>
+  <desc id="desc">Layered architecture diagram for NCCL communicator connection setup.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfcfe; }
+      .title { fill: #172033; font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .subtitle { fill: #5f6b7a; font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .section-title { fill: #263244; font: 700 16px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .label { fill: #182334; font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .body { fill: #4a5666; font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .small { fill: #667386; font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .code { fill: #243043; font: 600 12px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+      .stage { stroke: #cfd8e3; stroke-width: 1.2; rx: 12; }
+      .lane { fill: #ffffff; stroke: #d6deea; stroke-width: 1.2; rx: 14; }
+      .note { fill: #fffaf0; stroke: #ead8a6; stroke-width: 1.2; rx: 10; }
+      .data { fill: #f3f7ff; stroke: #a9bee8; stroke-width: 1.2; rx: 10; }
+      .transport { fill: #f7fbf8; stroke: #b7d8c5; stroke-width: 1.2; rx: 10; }
+      .arrow { stroke: #76849a; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #9aa7b8; stroke-width: 1.4; fill: none; stroke-dasharray: 5 5; marker-end: url(#arrow-soft); }
+      .divider { stroke: #e4e9f0; stroke-width: 1; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#76849a"/>
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa7b8"/>
+    </marker>
+    <filter id="shadow" x="-8%" y="-12%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1f2937" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect class="bg" width="1280" height="760"/>
+
+  <text class="title" x="48" y="54">NCCL 建链架构图</text>
+  <text class="subtitle" x="48" y="80">从 communicator 初始化到 device kernel 可使用的连接信息写入</text>
+
+  <rect class="lane" x="40" y="106" width="1200" height="188" filter="url(#shadow)"/>
+  <text class="section-title" x="64" y="134">逻辑通信关系生成</text>
+
+  <rect class="stage" x="64" y="156" width="190" height="104" fill="#eef6ff"/>
+  <text class="label" x="84" y="185">初始化入口</text>
+  <text class="code" x="84" y="211">initTransportsRank</text>
+  <text class="body" x="84" y="236">peerInfo allGather</text>
+
+  <rect class="stage" x="298" y="156" width="190" height="104" fill="#eef8f5"/>
+  <text class="label" x="318" y="185">Topology / Graph</text>
+  <text class="code" x="318" y="211">ncclTopoCompute</text>
+  <text class="body" x="318" y="236">ring / tree / nvls</text>
+
+  <rect class="stage" x="532" y="156" width="190" height="104" fill="#fff6e8"/>
+  <text class="label" x="552" y="185">Preset / Postset</text>
+  <text class="code" x="552" y="211">ncclTopoPreset</text>
+  <text class="code" x="552" y="235">ncclTopoPostset</text>
+
+  <rect class="stage" x="766" y="156" width="190" height="104" fill="#f7f2ff"/>
+  <text class="label" x="786" y="185">Channel 邻居</text>
+  <text class="code" x="786" y="211">ring.prev / next</text>
+  <text class="code" x="786" y="235">tree.up / down[]</text>
+
+  <rect class="data" x="1000" y="156" width="190" height="104"/>
+  <text class="label" x="1020" y="185">阶段输出</text>
+  <text class="body" x="1020" y="211">逻辑通信关系</text>
+  <text class="small" x="1020" y="236">尚未建立 transport 连接</text>
+
+  <path class="arrow" d="M254 208 H298"/>
+  <path class="arrow" d="M488 208 H532"/>
+  <path class="arrow" d="M722 208 H766"/>
+  <path class="arrow" d="M956 208 H1000"/>
+
+  <rect class="lane" x="40" y="326" width="1200" height="244" filter="url(#shadow)"/>
+  <text class="section-title" x="64" y="354">连接建立路径</text>
+
+  <rect class="stage" x="64" y="382" width="190" height="118" fill="#f2f7ff"/>
+  <text class="label" x="84" y="410">算法连接入口</text>
+  <text class="code" x="84" y="436">RingConnect</text>
+  <text class="code" x="84" y="459">TreeConnect</text>
+  <text class="small" x="84" y="482">读取 channel 邻居</text>
+
+  <rect class="stage" x="298" y="382" width="190" height="118" fill="#fff8eb"/>
+  <text class="label" x="318" y="410">待连接记录</text>
+  <text class="code" x="318" y="436">P2pConnect</text>
+  <text class="code" x="318" y="459">connectSend[peer]</text>
+  <text class="code" x="318" y="482">connectRecv[peer]</text>
+
+  <rect class="stage" x="532" y="382" width="190" height="118" fill="#edf8f2"/>
+  <text class="label" x="552" y="410">连接协调</text>
+  <text class="code" x="552" y="436">P2pSetup</text>
+  <text class="code" x="552" y="459">selectTransport</text>
+  <text class="small" x="552" y="482">按 bitmask 枚举 peer/channel</text>
+
+  <rect class="stage" x="766" y="382" width="190" height="118" fill="#f7f2ff"/>
+  <text class="label" x="786" y="410">Handle 交换</text>
+  <text class="code" x="786" y="436">transport.setup</text>
+  <text class="code" x="786" y="459">bootstrap exchange</text>
+  <text class="small" x="786" y="482">交换 ncclConnect</text>
+
+  <rect class="stage" x="1000" y="382" width="190" height="118" fill="#eef6ff"/>
+  <text class="label" x="1020" y="410">连接完成</text>
+  <text class="code" x="1020" y="436">transport.connect</text>
+  <text class="code" x="1020" y="459">cudaMemcpyAsync</text>
+  <text class="small" x="1020" y="482">写入 devPeers</text>
+
+  <path class="arrow" d="M254 441 H298"/>
+  <path class="arrow" d="M488 441 H532"/>
+  <path class="arrow" d="M722 441 H766"/>
+  <path class="arrow" d="M956 441 H1000"/>
+
+  <rect class="note" x="298" y="520" width="190" height="32"/>
+  <text class="code" x="318" y="541">输出：待连接 bitmask</text>
+  <path class="arrow-soft" d="M393 500 V520"/>
+
+  <rect class="note" x="766" y="520" width="190" height="32"/>
+  <text class="code" x="786" y="541">临时：ncclConnect</text>
+  <path class="arrow-soft" d="M861 500 V520"/>
+
+  <rect class="note" x="1000" y="520" width="190" height="32"/>
+  <text class="code" x="1020" y="541">最终：ncclConnInfo</text>
+  <path class="arrow-soft" d="M1095 500 V520"/>
+
+  <rect class="lane" x="40" y="604" width="1200" height="110" filter="url(#shadow)"/>
+  <text class="section-title" x="64" y="632">Transport 实现</text>
+
+  <rect class="transport" x="64" y="654" width="250" height="42"/>
+  <text class="label" x="84" y="681">P2P</text>
+  <text class="small" x="138" y="681">direct / CUDA IPC / cuMem / intermediate</text>
+
+  <rect class="transport" x="350" y="654" width="250" height="42"/>
+  <text class="label" x="370" y="681">SHM</text>
+  <text class="small" x="428" y="681">shared memory desc / import</text>
+
+  <rect class="transport" x="636" y="654" width="250" height="42"/>
+  <text class="label" x="656" y="681">NET</text>
+  <text class="small" x="710" y="681">NIC / GDR / PXN / proxy / async connect</text>
+
+  <rect class="transport" x="922" y="654" width="250" height="42"/>
+  <text class="label" x="942" y="681">CollNet</text>
+  <text class="small" x="1018" y="681">collective network transport</text>
+
+  <path class="arrow-soft" d="M189 654 C280 588 422 548 552 463"/>
+  <path class="arrow-soft" d="M475 654 C545 590 582 548 615 500"/>
+  <path class="arrow-soft" d="M761 654 C720 590 676 548 648 500"/>
+  <path class="arrow-soft" d="M1047 654 C970 590 870 548 876 500"/>
+
+  <line class="divider" x1="40" y1="304" x2="1240" y2="304"/>
+  <line class="divider" x1="40" y1="582" x2="1240" y2="582"/>
+</svg>
