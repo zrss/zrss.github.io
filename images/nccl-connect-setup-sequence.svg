@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">NCCL P2pSetup connection sequence</title>
+  <desc id="desc">Sequence diagram for NCCL P2pSetup: setup handles, bootstrap exchange, transport connect, and copy connection info to device peers.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfcfe; }
+      .title { fill: #172033; font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .subtitle { fill: #5f6b7a; font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .lane { fill: #ffffff; stroke: #d6deea; stroke-width: 1.2; rx: 14; }
+      .participant { fill: #eef6ff; stroke: #b8cceb; stroke-width: 1.2; rx: 10; }
+      .participant-alt { fill: #f7fbf8; stroke: #b7d8c5; stroke-width: 1.2; rx: 10; }
+      .participant-boot { fill: #fff6e8; stroke: #e4ca93; stroke-width: 1.2; rx: 10; }
+      .note { fill: #fffaf0; stroke: #ead8a6; stroke-width: 1.2; rx: 10; }
+      .result { fill: #f7f2ff; stroke: #cbbbe8; stroke-width: 1.2; rx: 10; }
+      .label { fill: #182334; font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .body { fill: #4a5666; font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .small { fill: #667386; font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+      .code { fill: #243043; font: 600 12px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+      .lifeline { stroke: #cfd8e3; stroke-width: 1.3; stroke-dasharray: 6 6; }
+      .arrow { stroke: #68778d; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #9aa7b8; stroke-width: 1.5; fill: none; stroke-dasharray: 5 5; marker-end: url(#arrow-soft); }
+      .self { stroke: #68778d; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .step { fill: #50617a; font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#68778d"/>
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa7b8"/>
+    </marker>
+    <filter id="shadow" x="-8%" y="-12%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1f2937" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect class="bg" width="1280" height="760"/>
+  <text class="title" x="48" y="54">P2pSetup 连接建立时序</text>
+  <text class="subtitle" x="48" y="80">以两个 rank 的一个 peer/channel 连接为例，展示 setup、bootstrap handle 交换和 connect 的边界</text>
+
+  <rect class="lane" x="40" y="106" width="1200" height="596" filter="url(#shadow)"/>
+
+  <rect class="participant" x="82" y="132" width="160" height="58"/>
+  <text class="label" x="126" y="158">Rank A</text>
+  <text class="code" x="112" y="179">comm / channel</text>
+
+  <rect class="participant-alt" x="318" y="132" width="160" height="58"/>
+  <text class="label" x="354" y="158">A transport</text>
+  <text class="code" x="354" y="179">setup/connect</text>
+
+  <rect class="participant-boot" x="554" y="132" width="172" height="58"/>
+  <text class="label" x="602" y="158">Bootstrap</text>
+  <text class="code" x="596" y="179">send / recv</text>
+
+  <rect class="participant-alt" x="802" y="132" width="160" height="58"/>
+  <text class="label" x="838" y="158">B transport</text>
+  <text class="code" x="838" y="179">setup/connect</text>
+
+  <rect class="participant" x="1038" y="132" width="160" height="58"/>
+  <text class="label" x="1082" y="158">Rank B</text>
+  <text class="code" x="1068" y="179">comm / channel</text>
+
+  <line class="lifeline" x1="162" y1="190" x2="162" y2="652"/>
+  <line class="lifeline" x1="398" y1="190" x2="398" y2="652"/>
+  <line class="lifeline" x1="640" y1="190" x2="640" y2="652"/>
+  <line class="lifeline" x1="882" y1="190" x2="882" y2="652"/>
+  <line class="lifeline" x1="1118" y1="190" x2="1118" y2="652"/>
+
+  <rect class="note" x="76" y="218" width="208" height="58"/>
+  <text class="step" x="96" y="240">1</text>
+  <text class="body" x="118" y="240">读取 connectSend / connectRecv</text>
+  <text class="code" x="118" y="262">待连接 bitmask</text>
+
+  <rect class="note" x="996" y="218" width="208" height="58"/>
+  <text class="step" x="1016" y="240">1</text>
+  <text class="body" x="1038" y="240">读取 connectSend / connectRecv</text>
+  <text class="code" x="1038" y="262">待连接 bitmask</text>
+
+  <path class="arrow" d="M162 322 H398"/>
+  <text class="step" x="172" y="310">2</text>
+  <text class="body" x="202" y="310">setup()</text>
+  <text class="small" x="202" y="331">创建本地资源</text>
+
+  <path class="arrow" d="M1118 322 H882"/>
+  <text class="step" x="1084" y="310">2</text>
+  <text class="body" x="988" y="310">setup()</text>
+  <text class="small" x="948" y="331">创建本地资源</text>
+
+  <path class="arrow-soft" d="M398 364 H162"/>
+  <text class="code" x="205" y="356">ncclConnect handle</text>
+
+  <path class="arrow-soft" d="M882 364 H1118"/>
+  <text class="code" x="934" y="356">ncclConnect handle</text>
+
+  <path class="arrow" d="M162 420 H640"/>
+  <text class="step" x="172" y="408">3</text>
+  <text class="body" x="214" y="408">bootstrapSend(handle)</text>
+
+  <path class="arrow" d="M1118 448 H640"/>
+  <text class="step" x="1084" y="436">3</text>
+  <text class="body" x="900" y="436">bootstrapSend(handle)</text>
+
+  <path class="arrow-soft" d="M640 496 H162"/>
+  <text class="step" x="172" y="484">4</text>
+  <text class="body" x="224" y="484">bootstrapRecv(peer handle)</text>
+
+  <path class="arrow-soft" d="M640 524 H1118"/>
+  <text class="step" x="1084" y="512">4</text>
+  <text class="body" x="810" y="512">bootstrapRecv(peer handle)</text>
+
+  <path class="arrow" d="M162 574 H398"/>
+  <text class="step" x="172" y="562">5</text>
+  <text class="body" x="216" y="562">connect(peer handle)</text>
+
+  <path class="arrow" d="M1118 574 H882"/>
+  <text class="step" x="1084" y="562">5</text>
+  <text class="body" x="920" y="562">connect(peer handle)</text>
+
+  <rect class="result" x="314" y="604" width="170" height="54"/>
+  <text class="step" x="334" y="626">6</text>
+  <text class="code" x="358" y="626">ncclConnInfo</text>
+  <text class="small" x="358" y="646">填 connector->conn</text>
+
+  <rect class="result" x="796" y="604" width="170" height="54"/>
+  <text class="step" x="816" y="626">6</text>
+  <text class="code" x="840" y="626">ncclConnInfo</text>
+  <text class="small" x="840" y="646">填 connector->conn</text>
+
+  <path class="arrow-soft" d="M398 658 C398 680 162 680 162 658"/>
+  <text class="code" x="202" y="688">copy conn to devPeers</text>
+
+  <path class="arrow-soft" d="M882 658 C882 680 1118 680 1118 658"/>
+  <text class="code" x="916" y="688">copy conn to devPeers</text>
+</svg>
