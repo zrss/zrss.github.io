@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1180" role="img" aria-labelledby="title desc">
+  <title id="title">MAI-Thinking-1 training infrastructure architecture</title>
+  <desc id="desc">A layered architecture diagram summarizing Microsoft AI training infrastructure based on the MAI-Thinking-1 technical report.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef4f7"/>
+    </linearGradient>
+    <linearGradient id="hardware" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8f3ff"/>
+      <stop offset="1" stop-color="#d7e8ff"/>
+    </linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9f7ef"/>
+      <stop offset="1" stop-color="#d9f0e2"/>
+    </linearGradient>
+    <linearGradient id="control" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6df"/>
+      <stop offset="1" stop-color="#ffe9ba"/>
+    </linearGradient>
+    <linearGradient id="runtime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1edff"/>
+      <stop offset="1" stop-color="#e4dcff"/>
+    </linearGradient>
+    <linearGradient id="workload" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff0ef"/>
+      <stop offset="1" stop-color="#ffe0dc"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-18%" width="124%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#536273"/>
+    </marker>
+    <style>
+      .bg { fill: url(#bg); }
+      .title { font: 700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; }
+      .subtitle { font: 400 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #526071; }
+      .layer-title { font: 700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; }
+      .layer-sub { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #475569; }
+      .tag { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #334155; }
+      .side-title { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; }
+      .side-text { font: 500 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #475569; }
+      .line-label { font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #475569; }
+      .layer { stroke: #d4dde8; stroke-width: 1.2; filter: url(#shadow); }
+      .tag-box { fill: rgba(255,255,255,0.72); stroke: rgba(148,163,184,0.58); stroke-width: 1.1; }
+      .arrow { stroke: #536273; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #7b8798; stroke-width: 1.7; stroke-dasharray: 7 7; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="1180"/>
+
+  <text class="title" x="64" y="60">MAI-Thinking-1 训练基础设施示意图</text>
+  <text class="subtitle" x="64" y="88">基于技术报告 Section 6 和 Appendix K 整理</text>
+
+  <rect class="layer" x="64" y="116" width="1152" height="74" rx="18" fill="#ffffff"/>
+  <text class="side-title" x="92" y="150">训练基础设施目标</text>
+  <rect class="tag-box" x="238" y="132" width="150" height="34" rx="10"/>
+  <text class="tag" x="258" y="154">goodput</text>
+  <rect class="tag-box" x="416" y="132" width="210" height="34" rx="10"/>
+  <text class="tag" x="436" y="154">topology-aware placement</text>
+  <rect class="tag-box" x="654" y="132" width="150" height="34" rx="10"/>
+  <text class="tag" x="674" y="154">rack locality</text>
+  <rect class="tag-box" x="832" y="132" width="250" height="34" rx="10"/>
+  <text class="tag" x="852" y="154">quota / reservation coherence</text>
+
+  <g transform="translate(64 224)">
+    <rect class="layer" x="0" y="0" width="900" height="150" rx="20" fill="url(#workload)"/>
+    <text class="layer-title" x="28" y="38">1. 模型训练业务层</text>
+    <text class="layer-sub" x="28" y="64">面向 MAI-Base-1 / MAI-Thinking-1 的训练阶段和任务环境</text>
+    <rect class="tag-box" x="28" y="92" width="200" height="32" rx="9"/>
+    <text class="tag" x="46" y="113">Pre-training</text>
+    <rect class="tag-box" x="248" y="92" width="190" height="32" rx="9"/>
+    <text class="tag" x="266" y="113">Mid-training</text>
+    <rect class="tag-box" x="458" y="92" width="190" height="32" rx="9"/>
+    <text class="tag" x="476" y="113">SFT / preference</text>
+    <rect class="tag-box" x="668" y="92" width="190" height="32" rx="9"/>
+    <text class="tag" x="686" y="113">RL climb / evaluation</text>
+
+    <line class="arrow" x1="450" y1="154" x2="450" y2="188"/>
+
+    <rect class="layer" x="0" y="190" width="900" height="150" rx="20" fill="url(#runtime)"/>
+    <text class="layer-title" x="28" y="228">2. Admitted job 运行时层</text>
+    <text class="layer-sub" x="28" y="254">训练作业通过准入 / 调度并获得资源后，在作业内进行 actor 编排和训练执行</text>
+    <rect class="tag-box" x="28" y="282" width="180" height="32" rx="9"/>
+    <text class="tag" x="46" y="303">MAI drivers</text>
+    <rect class="tag-box" x="228" y="282" width="162" height="32" rx="9"/>
+    <text class="tag" x="246" y="303">Ray runtime</text>
+    <rect class="tag-box" x="410" y="282" width="152" height="32" rx="9"/>
+    <text class="tag" x="428" y="303">YOLO</text>
+    <rect class="tag-box" x="582" y="282" width="142" height="32" rx="9"/>
+    <text class="tag" x="600" y="303">PyTorch</text>
+    <rect class="tag-box" x="744" y="282" width="114" height="32" rx="9"/>
+    <text class="tag" x="762" y="303">NCCL</text>
+
+    <line class="arrow" x1="450" y1="344" x2="450" y2="378"/>
+
+    <rect class="layer" x="0" y="380" width="900" height="156" rx="20" fill="url(#control)"/>
+    <text class="layer-title" x="28" y="418">3. Kubernetes 调度与控制层</text>
+    <text class="layer-sub" x="28" y="444">完成资源视图、队列、准入、拓扑放置、节点认证和修复控制</text>
+    <rect class="tag-box" x="28" y="474" width="150" height="32" rx="9"/>
+    <text class="tag" x="46" y="495">Kubernetes</text>
+    <rect class="tag-box" x="198" y="474" width="136" height="32" rx="9"/>
+    <text class="tag" x="216" y="495">Kueue</text>
+    <rect class="tag-box" x="354" y="474" width="230" height="32" rx="9"/>
+    <text class="tag" x="372" y="495">MAI cluster-local controllers</text>
+    <rect class="tag-box" x="604" y="474" width="254" height="32" rx="9"/>
+    <text class="tag" x="622" y="495">certification / remediation</text>
+
+    <line class="arrow" x1="450" y1="540" x2="450" y2="574"/>
+
+    <rect class="layer" x="0" y="576" width="900" height="150" rx="20" fill="url(#node)"/>
+    <text class="layer-title" x="28" y="614">4. 节点 / 容器基础层</text>
+    <text class="layer-sub" x="28" y="640">节点级操作系统镜像和运行环境，为 Kubernetes workload 暴露 GPU、网络和健康信号</text>
+    <rect class="tag-box" x="28" y="668" width="160" height="32" rx="9"/>
+    <text class="tag" x="46" y="689">custom images</text>
+    <rect class="tag-box" x="208" y="668" width="170" height="32" rx="9"/>
+    <text class="tag" x="226" y="689">GPU / RDMA drivers</text>
+    <rect class="tag-box" x="398" y="668" width="218" height="32" rx="9"/>
+    <text class="tag" x="416" y="689">kubelet / pods</text>
+    <rect class="tag-box" x="636" y="668" width="222" height="32" rx="9"/>
+    <text class="tag" x="654" y="689">host networking / NPD</text>
+
+    <line class="arrow" x1="450" y1="730" x2="450" y2="764"/>
+
+    <rect class="layer" x="0" y="766" width="900" height="150" rx="20" fill="url(#hardware)"/>
+    <text class="layer-title" x="28" y="804">5. 硬件资源层</text>
+    <text class="layer-sub" x="28" y="830">Microsoft first-party datacenters / Azure platform 中的 single-site GB200 cluster</text>
+    <rect class="tag-box" x="28" y="858" width="150" height="32" rx="9"/>
+    <text class="tag" x="46" y="879">GB200 racks</text>
+    <rect class="tag-box" x="198" y="858" width="150" height="32" rx="9"/>
+    <text class="tag" x="216" y="879">NVL72 / NVL64</text>
+    <rect class="tag-box" x="368" y="858" width="170" height="32" rx="9"/>
+    <text class="tag" x="386" y="879">NVLink / NVSwitch</text>
+    <rect class="tag-box" x="558" y="858" width="142" height="32" rx="9"/>
+    <text class="tag" x="576" y="879">InfiniBand</text>
+    <rect class="tag-box" x="720" y="858" width="138" height="32" rx="9"/>
+    <text class="tag" x="738" y="879">RDMA</text>
+  </g>
+
+  <g transform="translate(1004 224)">
+    <rect class="layer" x="0" y="0" width="212" height="916" rx="20" fill="#ffffff"/>
+    <text class="side-title" x="22" y="38">健康与观测</text>
+    <text class="side-text" x="22" y="74">Telemetry</text>
+    <text class="side-text" x="22" y="98">fabric health</text>
+    <text class="side-text" x="22" y="122">storage faults</text>
+    <text class="side-text" x="22" y="146">NPD conditions</text>
+    <text class="side-text" x="22" y="170">GHR</text>
+
+    <line x1="22" y1="210" x2="190" y2="210" stroke="#d9e1ec"/>
+
+    <text class="side-title" x="22" y="250">控制动作</text>
+    <text class="side-text" x="22" y="286">admission decision</text>
+    <text class="side-text" x="22" y="310">mark unschedulable</text>
+    <text class="side-text" x="22" y="334">drain</text>
+    <text class="side-text" x="22" y="358">auto remediation</text>
+    <text class="side-text" x="22" y="382">vendor maintenance</text>
+    <text class="side-text" x="22" y="406">recertification</text>
+
+  </g>
+
+  <path class="arrow-soft" d="M830,800 C930,800 948,704 1004,418"/>
+  <text class="line-label" x="816" y="784">health signals</text>
+
+  <path class="arrow-soft" d="M1004,508 C948,540 930,612 830,614"/>
+  <text class="line-label" x="820" y="596">control actions</text>
+</svg>

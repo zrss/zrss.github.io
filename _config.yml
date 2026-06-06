@@ -108,6 +108,11 @@ theme_config:
   scheme: Muse
   sidebar:
     position: right
+    display: hide
+  text_align:
+    desktop: justify
+    mobile: start
+  mobile_layout_economy: true
   favicon:
     small: /images/favicon-16x16.png
     medium: /images/favicon-32x32.png
