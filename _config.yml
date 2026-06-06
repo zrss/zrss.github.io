@@ -105,7 +105,17 @@ theme_config:
   cache:
     enable: true
   minify: true
-  scheme: Muse
+  custom_file_path:
+    style: source/_data/styles.styl
+  scheme: Mist
+  menu:
+    home: / || fa fa-home
+    archives: /archives/ || fa fa-archive
+    categories: /categories/ || fa fa-th
+    tags: /tags/ || fa fa-tags
+  menu_settings:
+    icons: true
+    badges: false
   sidebar:
     position: right
     display: hide
@@ -113,6 +123,16 @@ theme_config:
     desktop: justify
     mobile: start
   mobile_layout_economy: true
+  codeblock:
+    copy_button:
+      enable: true
+      style: flat
+    language: true
+  reading_progress:
+    enable: true
+    position: top
+    color: "#222"
+    height: 3px
   favicon:
     small: /images/favicon-16x16.png
     medium: /images/favicon-32x32.png
