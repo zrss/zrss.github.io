@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"hide","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="MAI-Thinking-1 的技术报告标题是 MAI-Thinking-1: Building a Hill-Climbing Machine。 官方还有一个介绍页：Introducing MAI-Thinking-1，以及 MAI-Thinking-1 Model Card。 一句话概括：这篇报告围绕 Microsoft AI 所说的 hill-climbing machine 展开，内容覆盖">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MAI-Thinking-1 技术报告阅读">
+<meta property="og:url" content="https://zrss.github.io/archives/6e5c9a21.html">
+<meta property="og:site_name" content="MegaThinking">
+<meta property="og:description" content="MAI-Thinking-1 的技术报告标题是 MAI-Thinking-1: Building a Hill-Climbing Machine。 官方还有一个介绍页：Introducing MAI-Thinking-1，以及 MAI-Thinking-1 Model Card。 一句话概括：这篇报告围绕 Microsoft AI 所说的 hill-climbing machine 展开，内容覆盖">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zrss.github.io/images/mai-thinking-1-system-architecture.svg">
+<meta property="og:image" content="https://zrss.github.io/images/mai-thinking-1-figure-26-node-lifecycle.png">
+<meta property="article:published_time" content="2026-06-05T23:10:00.000Z">
+<meta property="article:modified_time" content="2026-06-06T10:11:09.143Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="llm">
+<meta property="article:tag" content="moe">
+<meta property="article:tag" content="rl">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zrss.github.io/images/mai-thinking-1-system-architecture.svg">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/6e5c9a21.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/6e5c9a21.html","path":"archives/6e5c9a21.html","title":"MAI-Thinking-1 技术报告阅读"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MAI-Thinking-1 技术报告阅读 | MegaThinking</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">MegaThinking</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text"> 模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD"><span class="nav-number">2.</span> <span class="nav-text"> 训练基础设施</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#yolo-%E8%AE%AD%E7%BB%83%E6%A1%86%E6%9E%B6"><span class="nav-number">2.1.</span> <span class="nav-text"> YOLO 训练框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E5%92%8C%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text"> 硬件和集群架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%88%87%E5%88%86%E5%92%8C%E9%80%BB%E8%BE%91%E9%9B%86%E7%BE%A4"><span class="nav-number">2.2.1.</span> <span class="nav-text"> 集群切分和逻辑集群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E5%92%8C%E6%8E%A7%E5%88%B6%E9%9D%A2"><span class="nav-number">2.2.2.</span> <span class="nav-text"> 调度和控制面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ray-runtime-%E5%92%8C%E8%AE%AD%E7%BB%83%E4%BD%9C%E4%B8%9A"><span class="nav-number">2.2.3.</span> <span class="nav-text"> Ray runtime 和训练作业</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#certification-%E5%92%8C%E8%8A%82%E7%82%B9%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">2.2.4.</span> <span class="nav-text"> Certification 和节点生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#telemetry-%E5%92%8C-observability"><span class="nav-number">2.2.5.</span> <span class="nav-text"> Telemetry 和 observability</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E4%BF%A1%E6%81%AF"><span class="nav-number">2.2.6.</span> <span class="nav-text"> 参考信息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pre-training"><span class="nav-number">3.</span> <span class="nav-text"> Pre-training</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#scaling-ladder"><span class="nav-number">3.1.</span> <span class="nav-text"> Scaling ladder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pre-training-%E6%95%B0%E6%8D%AE"><span class="nav-number">3.2.</span> <span class="nav-text"> Pre-training 数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#post-training-rl"><span class="nav-number">4.</span> <span class="nav-text"> Post-training &#x2F; RL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rl-climb"><span class="nav-number">4.1.</span> <span class="nav-text"> RL climb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stem-%E6%95%B0%E6%8D%AE"><span class="nav-number">4.2.</span> <span class="nav-text"> STEM 数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agentic-coding-%E5%92%8C-tool-use"><span class="nav-number">4.3.</span> <span class="nav-text"> Agentic coding 和 tool use</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#helpfulness-%E5%92%8C-safety"><span class="nav-number">4.4.</span> <span class="nav-text"> Helpfulness 和 safety</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#consolidation"><span class="nav-number">4.5.</span> <span class="nav-text"> Consolidation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%84%E6%B5%8B"><span class="nav-number">5.</span> <span class="nav-text"> 评测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E5%90%AF%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text"> 总结与启发</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">140</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6e5c9a21.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="MAI-Thinking-1 技术报告阅读 | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MAI-Thinking-1 技术报告阅读
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-06-05 23:10:00" itemprop="dateCreated datePublished" datetime="2026-06-05T23:10:00Z">2026-06-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-06-06 10:11:09" itemprop="dateModified" datetime="2026-06-06T10:11:09Z">2026-06-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>23k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>21 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>MAI-Thinking-1 的技术报告标题是 <a target="_blank" rel="noopener" href="https://microsoft.ai/wp-content/uploads/2026/06/main_20260602_2.pdf">MAI-Thinking-1: Building a Hill-Climbing Machine</a>。</p>
+<p>官方还有一个介绍页：<a target="_blank" rel="noopener" href="https://microsoft.ai/news/introducing-mai-thinking-1/">Introducing MAI-Thinking-1</a>，以及 <a target="_blank" rel="noopener" href="https://microsoft.ai/pdf/MAI-Thinking-1-Model-Card.PDF">MAI-Thinking-1 Model Card</a>。</p>
+<p>一句话概括：这篇报告围绕 Microsoft AI 所说的 <strong>hill-climbing machine</strong> 展开，内容覆盖数据、MoE 架构、训练系统、RL recipe、agent 环境、评测和安全红队，重点是模型能力迭代体系，而不只是单个模型的 benchmark 结果。</p>
+<p>MAI-Thinking-1 本身是一个 35B active / 1T total parameter 的 sparse MoE reasoning model。报告强调它是 from scratch 训练的，没有用第三方模型蒸馏；pre-training 使用 30T tokens，数据来自公开和授权的人类生成内容，并且在 pre-training 阶段不使用语言模型生成的 synthetic data。</p>
+<p>需要区分的是：报告里说的 “不蒸馏” 主要指不从第三方模型继承能力；RL 阶段内部仍然使用 self-distillation 来恢复或延续 RL climb。</p>
+<p>本文主要整理几个点：</p>
+<ul>
+<li>模型结构：MAI-Base-1 的 MoE、attention、LatentMoE 和 dropless MoE；</li>
+<li>训练基础设施：YOLO 训练框架、硬件集群、调度和运维；</li>
+<li>Pre-training：scaling ladder、数据 composition 和训练阶段；</li>
+<li>Post-training / RL：RL climb、STEM / agentic / helpfulness-safety 数据与训练；</li>
+<li>Evaluation：benchmark、人类偏好评测和安全评估。</li>
+</ul>
+<h2 id="模型结构"><a class="markdownIt-Anchor" href="#模型结构"></a> 模型结构</h2>
+<p>MAI-Thinking-1 的 base model 叫 MAI-Base-1，是 decoder-only Transformer + sparse MoE。</p>
+<p>几个核心配置：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>报告口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型规模</td>
+<td>35B active / 1T total</td>
+</tr>
+<tr>
+<td>架构</td>
+<td>decoder-only Transformer</td>
+</tr>
+<tr>
+<td>层数</td>
+<td>78 layers</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td>dense FFN 和 MoE 交替</td>
+</tr>
+<tr>
+<td>MoE</td>
+<td>LatentMoE</td>
+</tr>
+<tr>
+<td>experts</td>
+<td>512 experts</td>
+</tr>
+<tr>
+<td>每 token 激活专家</td>
+<td>top-8</td>
+</tr>
+<tr>
+<td>attention</td>
+<td>5 local attention + 1 global attention 周期</td>
+</tr>
+<tr>
+<td>local window</td>
+<td>512</td>
+</tr>
+<tr>
+<td>GQA</td>
+<td>8 KV heads</td>
+</tr>
+<tr>
+<td>tokenizer</td>
+<td>o200k_base，vocab size 200019</td>
+</tr>
+<tr>
+<td>context</td>
+<td>mid-training 后扩到 256K</td>
+</tr>
+</tbody>
+</table>
+<p>这个结构主要服务于训练效率、推理效率和大规模训练稳定性。</p>
+<p>Attention 部分没有用每层 full attention，而是 5 层 local attention 搭配 1 层 global attention。local attention 用 RoPE，window size 是 512；global attention 不用 position encoding。这样可以降低训练 attention 计算量，也能减少推理时 KV cache 的规模。</p>
+<p>FFN 部分采用 dense FFN 和 MoE 交替。它不是 every-layer MoE，而是把高稀疏 MoE 和零稀疏 dense layer 配在一起。报告里的说法是，这种 interleaved layout 在 scaling 上接近更均匀的 medium-sparsity MoE，但 wall-clock 训练效率更好。</p>
+<p>MoE 使用 LatentMoE：先共享 down-projection，再做 all-to-all dispatch；routing 仍然基于原始 representation，每个 compressed representation 被路由到 512 个专家中的 8 个。报告将其作为降低专家通信和计算成本的一项设计。</p>
+<p>另一个工程细节是 dropless MoE。很多 MoE 实现会设置 expert capacity，超出 capacity 的 token 被 drop。报告里说他们最终收敛到 fully dropless MoE，并支持 variable message size all-to-all 和 bounded memory usage。这个设计与训练稳定性有关：如果 token dropping 存在，routing / load balance 的结果会受到 capacity 设置影响。</p>
+<h2 id="训练基础设施"><a class="markdownIt-Anchor" href="#训练基础设施"></a> 训练基础设施</h2>
+<p>训练基础设施部分主要包括 YOLO 训练框架、底层硬件集群、Kubernetes/Kueue/Ray 调度运行时，以及围绕 goodput 的稳定性和可观测性体系。</p>
+<h3 id="yolo-训练框架"><a class="markdownIt-Anchor" href="#yolo-训练框架"></a> YOLO 训练框架</h3>
+<p>报告里的训练系统叫 YOLO，展开是 You Only Launch Once。</p>
+<p>YOLO 是 Microsoft AI 自研的大规模训练框架，基于 PyTorch，覆盖 pre-training、mid-training、SFT 和 RL training。它实现了 model definition、sharding、optimizer、dataloader、checkpointing 等核心训练循环。</p>
+<p>报告没有说明 YOLO 与 DeepSpeed 的实现关系；虽然二者都覆盖 ZeRO、MoE、sharding、checkpointing 等大规模训练问题域，但不能据此判断 YOLO 是否复用了 DeepSpeed。</p>
+<p>报告列出的训练系统能力包括：</p>
+<ul>
+<li>自定义 FP8 GEMM、Grouped GEMM、quantization kernels；</li>
+<li>MoE 支持 dropless / capacity-capped、多种 load-balancing 策略、router replay；</li>
+<li>expert dispatch / compute / collect 做 pipeline overlap；</li>
+<li>activation checkpointing + activation offloading；</li>
+<li>bitwise reproducibility；</li>
+<li>checkpoint 保存 model weights、optimizer state、FP8 scaling history、dataloader progress、RNG；</li>
+<li>把 goodput 当成生产 KPI，而不仅仅是 MFU。</li>
+</ul>
+<p>报告里提到 MAI-Base-1 pre-training 在 8K GPUs 上达到 90.0% goodput。goodput 不同于单纯的 MFU，它会受到 crashloop、node failure、link flap、OOM、checkpoint stall、recompute、slow startup、调度延迟、恢复后 MFU 下降等因素影响。</p>
+<p>从 infra 角度看，这部分说明报告关注的不只是单步训练吞吐，也包括故障恢复、可复现性、checkpoint 和长周期训练的有效利用率。</p>
+<p>报告给出的 goodput 定义是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">goodput = ideal training duration / actual wall-clock duration</span><br></pre></td></tr></table></figure>
+<p>其中 ideal training duration 可以理解为：如果训练过程一直以目标状态稳定 stepping，没有失败、重算、启动等待、checkpoint stall、MFU drop 等 overhead，完成同样训练进度所需的理想时间。actual wall-clock duration 则是实际从训练开始到完成所花的墙钟时间。</p>
+<p>也可以按 overhead 分解成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">actual wall-clock duration = ideal training duration + total overhead</span><br><span class="line"></span><br><span class="line">goodput = ideal training duration / (ideal training duration + total overhead)</span><br></pre></td></tr></table></figure>
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">overhead ratio = 1 - goodput</span><br></pre></td></tr></table></figure>
+<p>MAI-Base-1 的 90.0% goodput 表示：实际消耗的 wall-clock time 中，大约 90% 对应理想训练进度，约 10% 是各种 overhead。报告进一步把 overhead 拆成 recomputation、non-stepping time、MFU drop overhead 等类别。</p>
+<p>这个指标和 MFU 的关系是：MFU 衡量 stepping 时 GPU 理论算力被模型计算利用了多少；goodput 衡量端到端训练墙钟时间里有多少真正转化成有效训练进度。因此，一个 run 可以有较高 MFU，但如果频繁失败、重启、重算或 checkpoint 卡住，goodput 仍然会很低。</p>
+<p>报告还披露了几组训练系统指标：</p>
+<ul>
+<li>MAI-Base-1 pre-training 在 8K GPUs 上达到 90.0% goodput；</li>
+<li>total overhead 降到 51 hours；</li>
+<li>recomputation 为 6.5 hours，占 overhead 的 15%；</li>
+<li>non-stepping time 为 14 hours，占 overhead 的 27%；</li>
+<li>MFU drop overhead 为 18 hours，占 overhead 的 35%，是最终 run 中最大的剩余 overhead 类别；</li>
+<li>在架构演进中，早期 GB200 NVL64 设置的 MFU 从 18% 提升到 22%；</li>
+<li>GPU Direct RDMA 约带来 1.1x end-to-end training time 改善；</li>
+<li>自定义 block-sparse attention backend 约带来 1.06x step time 改善；</li>
+<li>ZeRO-2 相关优化约带来 1.03x end-to-end 改善；</li>
+<li>自定义 Triton expert encode kernel 将 HBM utilization 从约 10% 提升到约 80%，并带来约 1.03x end-to-end 改善。</li>
+</ul>
+<p>推理部署侧，报告称 MAI-Thinking-1 在 MAIA-200 上实现后，相比 GB200-based deployment，在相同 rack power budget 下 token generation throughput 高 40% 以上。这个指标是 performance per watt 口径，不是单卡峰值吞吐。</p>
+<h3 id="硬件和集群架构"><a class="markdownIt-Anchor" href="#硬件和集群架构"></a> 硬件和集群架构</h3>
+<p>MAI-Thinking-1 的主训练硬件是 <a target="_blank" rel="noopener" href="https://azure.microsoft.com/">Microsoft Azure</a> 平台内 Microsoft-operated 的单站点 <a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/">GB200</a> 集群。这个部分的信息主要来自报告正文的 Section 6 Cluster Environment 和 Appendix K Cluster Environment Details；外部链接只用于补充硬件、网络和调度组件背景。</p>
+<p>报告没有说明使用了 Azure Machine Learning。它披露的是：MAI-Base-1 在 Azure platform 内的 Microsoft-operated cluster 上，从 8K GB200 GPUs 开始做 from-scratch pre-training；调度和运行时栈包括 Kubernetes、Kueue、MAI control plane、Ray、NCCL 和 YOLO 训练框架。下文按 Azure-based first-party infrastructure 理解。</p>
+<p>下图是基于报告文字整理的系统架构示意。</p>
+<img src="/images/mai-thinking-1-system-architecture.svg" alt="MAI-Thinking-1 training infrastructure architecture diagram" width="100%">
+<p>图中 GHR 是 guest health report，指节点内部运行环境上报的健康信息，用于辅助判断节点是否需要进入 vendor maintenance。NPD 是 Kubernetes Node Problem Detector，负责把节点侧异常上报为 Kubernetes node conditions 或 events。admitted job 指已经通过集群准入 / 调度流程，并获得相应计算资源的训练作业。</p>
+<p>报告里的硬件口径如下：</p>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>硬件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主 pre-training run</td>
+<td>8K NVIDIA GB200 GPUs</td>
+</tr>
+<tr>
+<td>Pre-training / Mid-training 1</td>
+<td>8,192 GB200 GPUs</td>
+</tr>
+<tr>
+<td>Mid-training 2</td>
+<td>4,096 GB200 GPUs</td>
+</tr>
+<tr>
+<td>早期原型和实验</td>
+<td>H100</td>
+</tr>
+<tr>
+<td>开发、验证、profiling、下一代 bring-up</td>
+<td>H100 / GB200 / GB300</td>
+</tr>
+<tr>
+<td>推理部署优化</td>
+<td><a target="_blank" rel="noopener" href="https://azure.microsoft.com/en-us/blog/azure-maia-for-the-era-of-ai-from-silicon-to-software-to-systems/">Microsoft MAIA-200</a></td>
+</tr>
+</tbody>
+</table>
+<p>GB200 和 GB300 集群部署在 Microsoft first-party datacenters。这里的 first-party datacenters 可理解为 Microsoft 自有或直接运营的 Azure 数据中心资源。</p>
+<p>报告还提到，这些集群通过 Azure 团队共同维护的 custom images 暴露给 MAI。从 Appendix K 的 cluster provisioning、node lifecycle、certification 和 telemetry 语境看，这里的 custom images 更像是节点级操作系统镜像，可能包含 OS、GPU driver、RDMA/NCCL 相关组件、诊断与 telemetry agent 等基础软件栈；报告没有明确说明它是 OS image 还是 container image。</p>
+<p>主训练被放在一个 single logical cluster、one site 上，主要是为了降低实验方差：同一代 accelerator、稳定 rack health、稳定 scheduler 行为、可预测 storage path。</p>
+<p>硬件拓扑上，GB200 / <a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/data-center/gb300-nvl72/">GB300</a> 系统以 rack-scale NVL72 为单位部署：</p>
+<ul>
+<li>每个 rack 是一个 72-GPU NVLink domain；</li>
+<li><a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/data-center/nvlink/">NVLink</a> / NVSwitch 负责 rack 内 scale-up 高带宽通信；</li>
+<li>rack 间 scale-out 通信用 <a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/networking/products/infiniband/">InfiniBand</a> RDMA；</li>
+<li>为了训练稳定性，报告中实际使用 64 GPUs per rack，即 NVL64，保留 spare capacity 来容忍 node failure 和 unhealthy devices；</li>
+<li>H100 系统仍在 lab 环境里使用，形态是 8-GPU nodes，node-local NVLink/NVSwitch，跨节点 InfiniBand。</li>
+</ul>
+<p>可以简化理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GB200 rack / NVL72</span><br><span class="line">  72 GPUs in one NVLink domain</span><br><span class="line">  report training placement uses 64 GPUs per rack (NVL64)</span><br><span class="line"></span><br><span class="line">multiple racks</span><br><span class="line">  connected by InfiniBand RDMA</span><br><span class="line"></span><br><span class="line">large training job</span><br><span class="line">  keep expert all-to-all inside NVL64</span><br><span class="line">  use cross-rack InfiniBand mainly for data parallel communication</span><br></pre></td></tr></table></figure>
+<p>这个拓扑也影响了模型并行策略。为了提高 GEMM efficiency，MAI-Base-1 选择：</p>
+<ul>
+<li>expert parallelism，EP = 64；</li>
+<li>tensor parallelism，TP = 1；</li>
+<li>expert all-to-all communication 保持在 NVL64 domain 内；</li>
+<li>cross-rack InfiniBand 用于 data parallel communication，比如 parameter all-gather 和 gradient reduce-scatter；</li>
+<li>pre-training 和 mid-training 1 使用 EP=64 + ZeRO-2；</li>
+<li>mid-training 2 启用 ZeRO-3 / FSDP；</li>
+<li>mid-training 阶段使用 context parallelism。</li>
+</ul>
+<h4 id="集群切分和逻辑集群"><a class="markdownIt-Anchor" href="#集群切分和逻辑集群"></a> 集群切分和逻辑集群</h4>
+<p>Appendix K 里有一句关键描述：每个 site 会被切分成多个 Kubernetes clusters，通常是一栋 datacenter building 对应一个 Kubernetes cluster。</p>
+<p>可以理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">physical site / datacenter campus</span><br><span class="line">  datacenter building A -&gt; Kubernetes cluster A</span><br><span class="line">  datacenter building B -&gt; Kubernetes cluster B</span><br><span class="line">  datacenter building C -&gt; Kubernetes cluster C</span><br></pre></td></tr></table></figure>
+<p>这种切分不是说一个训练任务只能在一栋楼里运行，而是把物理基础设施按 building 边界组织成多个 Kubernetes 管理单元。报告同时提到 large jobs 在需要时可以跨越单个 Kubernetes cluster 的边界：nodes are universally routable across the compute environment，workload pods use host networking，以减少 overlay network overhead。</p>
+<p>这里的几个层次可以分开看：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>site</td>
+<td>一个物理数据中心站点或数据中心园区</td>
+</tr>
+<tr>
+<td>datacenter building</td>
+<td>site 内的一栋数据中心楼，通常有自己的电力、冷却、网络和 rack 布局</td>
+</tr>
+<tr>
+<td>Kubernetes cluster</td>
+<td>软件层面的资源管理单元，通常按 building 切分</td>
+</tr>
+<tr>
+<td>logical cluster</td>
+<td>面向训练和调度暴露的逻辑资源池，包含 GPU nodes 和 CPU support nodes</td>
+</tr>
+<tr>
+<td>fleet-wide view</td>
+<td>跨 cluster / scheduler backend 的统一可见性和运维视图</td>
+</tr>
+</tbody>
+</table>
+<p>报告称主训练放在一个 single logical cluster、one site 上，目标是降低实验方差：同一代 accelerator、稳定 rack health、稳定 scheduler 行为、可预测 storage path。这里的 logical cluster 不应直接等同于单个 Kubernetes cluster；Appendix K 同时说明一个 site 通常会按 datacenter building 切分为多个 Kubernetes clusters。因此，8K GB200 是否全部位于同一个 Kubernetes cluster 内，报告没有明确披露。</p>
+<h4 id="调度和控制面"><a class="markdownIt-Anchor" href="#调度和控制面"></a> 调度和控制面</h4>
+<p>控制面和调度架构可以拆成：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/">Kubernetes</a> 维护 cluster state；</li>
+<li><a target="_blank" rel="noopener" href="https://kueue.sigs.k8s.io/">Kueue</a> 负责 quota、admission、priority、preemption 和 topology-aware placement；</li>
+<li>MAI cluster-local control plane 管理 reservation、rack topology、quota coherence 和 scheduling-readiness gates；</li>
+<li><a target="_blank" rel="noopener" href="https://www.ray.io/">Ray</a> 在 admitted jobs 内执行 distributed runtime；</li>
+<li>MAI drivers 把调度得到的 topology 转成 actor placement、communication groups 和 <a target="_blank" rel="noopener" href="https://developer.nvidia.com/nccl">NCCL</a> clique configuration。</li>
+</ul>
+<p>这里的 MAI control plane 不是报告中披露的公开 Kubernetes 插件名。按 Appendix K.3 的描述，它更像一组 MAI 内部的 cluster-local controllers：不替代 scheduler，而是维护 scheduler 所需的 reservation、rack topology、quota coherence、scheduling-readiness gates 等状态。是否实现为 Kubernetes CRD/controller、scheduler plugin 或其他内部组件，报告没有进一步披露。</p>
+<p>Kueue 负责 admission 和 topology-aware placement。MAI cluster-local control plane 则维护 Kueue / scheduler 做决策所需的状态，例如 rack reservation、topology labels、scheduling-readiness gates。报告特别提到 rack fragmentation 风险：许多小任务如果随机占满不同 rack，会让后续大任务很难拿到连续、拓扑紧凑的容量。为此，cluster-local control plane 会维护 soft rack reservations。队列可以有 preferred racks；空闲时可以借用容量，需要时再通过 reclaimWithinCohort reclaim reserved racks。</p>
+<h4 id="ray-runtime-和训练作业"><a class="markdownIt-Anchor" href="#ray-runtime-和训练作业"></a> Ray runtime 和训练作业</h4>
+<p>Ray 是 admitted job 内部的 distributed runtime。这里的 admitted job 指已经通过集群准入 / 调度流程，并获得相应计算资源的训练作业。Kueue 完成 admission 和 placement 后，MAI drivers 会把得到的 topology 转成 Ray actor placement、communication groups 和 NCCL clique configuration。</p>
+<p>不同类型任务的 actor 需求不同：</p>
+<ul>
+<li>pre-training jobs 主要要求 strict learner availability；</li>
+<li>RL jobs 会包含 learners、inference servers、rollout workers、routers 等多种 actor；</li>
+<li>MAI drivers 负责监控 actor liveness、协调训练循环，并维护异步组件之间的 checkpoint consistency。</li>
+</ul>
+<p>这部分和 RL training 尤其相关。RL 不是单一同步训练循环，而是 learner、推理服务、rollout、reward / grader 等多类组件共同工作。报告把 Ray 放在 admitted jobs 内部；按该描述，Ray 的作用范围主要在作业内，用于 actor 编排和运行时管理，集群级排队、准入和资源分配仍由 Kubernetes、Kueue 以及 MAI control plane 等组件承担。</p>
+<h4 id="certification-和节点生命周期"><a class="markdownIt-Anchor" href="#certification-和节点生命周期"></a> Certification 和节点生命周期</h4>
+<p>报告强调 physical topology 和 hardware health 是 first-class scheduling state。节点不是 provisioned 就可用，而是要经过 certification。certification 的目的，是防止坏节点、退化链路、边缘状态存储和 silent-corruption 风险进入生产训练池。</p>
+<p>certification 分层进行：</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>检查内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>single-node diagnostics</td>
+<td>GPU、CPU cores、HCA、NVLink links、main memory</td>
+</tr>
+<tr>
+<td>rack-level collectives</td>
+<td>通过 NCCL collectives 检查 rack 内多节点通信和 NVLink / NVSwitch 行为</td>
+</tr>
+<tr>
+<td>cross-rack InfiniBand validation</td>
+<td>检查跨 rack、rails、leaf groups、spine-layer path diversity 和 RDMA performance</td>
+</tr>
+</tbody>
+</table>
+<p>节点生命周期见报告 Figure 26：</p>
+<p><img src="/images/mai-thinking-1-figure-26-node-lifecycle.png" alt="Figure 26. Node lifecycle from MAI-Thinking-1 technical report" /></p>
+<p>状态迁移可以直接理解为：</p>
+<ul>
+<li>新节点或修复后的节点先进入 <code>Init</code>，再由 certification controller 进入 <code>Certifying</code>；</li>
+<li>certification 通过后进入 <code>Available</code>，失败则进入 <code>Impaired</code>；</li>
+<li><code>Available</code> 节点在出现 NPD condition 或 manual drain 后会进入 <code>Impaired</code>；</li>
+<li>如果是误报，可以从 <code>Impaired</code> 回到 <code>Available</code>；</li>
+<li>如果需要自动修复，则从 <code>Impaired</code> 进入 <code>Auto Remediating</code>，例如 auto reboot、reset 或 soft drain，之后回到 <code>Init</code> 重新认证；</li>
+<li>如果自动修复不足以解决问题，则通过 GHR 进入 <code>Vendor Maintenance</code>；</li>
+<li>vendor 维修成功后进入 <code>Repaired</code>，再回到 <code>Init</code>；维修失败则进入 <code>Decommissioned</code>。</li>
+</ul>
+<p>这里 <code>Impaired</code> 表示节点已被判定为不健康或不适合继续进入生产训练池；<code>Auto Remediating</code> 表示系统先尝试自动修复，例如 reboot、soft drain 或 reset。NPD 是 Kubernetes Node Problem Detector，负责把节点侧异常上报为 Kubernetes node conditions 或 events。GHR 可理解为 guest health report，即节点运行环境内部上报的健康信息，通常来自 guest OS 或节点级 agent，用于补充平台侧硬件健康信号。Runtime monitoring 会根据 NPD conditions、XID errors、ECC thresholds、NVLink degradation、InfiniBand link flaps、storage faults 等信号触发状态迁移。修复后的节点不会直接回到 Available，而是回到 Init 并重新经过 certification。</p>
+<p>异常处理时序可以整理成：</p>
+<pre>
+<code class="mermaid">
+sequenceDiagram
+participant Telemetry as Telemetry &#x2F; Runtime Monitoring
+participant Controller as Certification &#x2F; Remediation Controller
+participant Scheduler as Scheduler &#x2F; Kueue
+participant Node as Node
+participant Vendor as Vendor &#x2F; Datacenter Maintenance
+
+Telemetry-&gt;&gt;Controller: XID &#x2F; ECC &#x2F; NVLink &#x2F; IB &#x2F; storage fault
+Controller-&gt;&gt;Scheduler: mark node unschedulable &#x2F; drain
+Controller-&gt;&gt;Node: attempt auto remediation
+
+alt transient issue fixed
+  Node--&gt;&gt;Controller: reboot &#x2F; reset &#x2F; soft drain succeeds
+  Controller-&gt;&gt;Node: reset to Init
+  Controller-&gt;&gt;Node: run certification
+  Controller-&gt;&gt;Scheduler: mark node Available
+else persistent hardware issue
+  Controller-&gt;&gt;Vendor: GHR &#x2F; guest health report
+  Vendor-&gt;&gt;Node: repair or replace
+  Node--&gt;&gt;Controller: repaired
+  Controller-&gt;&gt;Node: reset to Init
+  Controller-&gt;&gt;Node: re-run certification
+  Controller-&gt;&gt;Scheduler: mark node Available if cert-pass
+else maintenance fail
+  Vendor-&gt;&gt;Controller: maintenance fail
+  Controller-&gt;&gt;Scheduler: decommission node
+end
+</code>
+</pre>
+<h4 id="telemetry-和-observability"><a class="markdownIt-Anchor" href="#telemetry-和-observability"></a> Telemetry 和 observability</h4>
+<p>报告把 observability 放进控制回路，而不是只做 dashboard。硬件 telemetry、fabric health、storage behavior、scheduling state 和 job progress 会决定容量是否 admitted、drained、remediated 或 returned to service。</p>
+<p>硬件健康信号包括：</p>
+<ul>
+<li>GPU XID；</li>
+<li>ECC；</li>
+<li>thermals、power、clock throttling；</li>
+<li>NVLink state、NVLink bit-error rate、chip-to-chip links；</li>
+<li>InfiniBand device state；</li>
+<li>local NVMe health；</li>
+<li>PCIe errors；</li>
+<li>driver state。</li>
+</ul>
+<p>这些信号会转成 Kubernetes node conditions，再进入 scheduling、triage、drain 和 remediation controllers。</p>
+<p>作业可观测性则横跨 Kueue、Kubernetes、Ray、training logs 和 experiment metadata。报告提到 operator 可以按 namespace、pod、job、restart index 查看 queue、priority、admission state、node placement、worker readiness、restart count、training configuration、step progress 和 scoped logs。这样可以区分 scheduling delay、runtime failure、node failure、storage degradation 和 application-level stalls。</p>
+<p>Telemetry 存储和查询也分层：</p>
+<table>
+<thead>
+<tr>
+<th>系统</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Datadog</td>
+<td>near-real-time metrics 和 log search</td>
+</tr>
+<tr>
+<td>Azure Managed Prometheus</td>
+<td>in-cluster / cross-cluster time-series collection</td>
+</tr>
+<tr>
+<td>Azure Data Explorer</td>
+<td>long-retention logs、metrics、storage telemetry、cluster state</td>
+</tr>
+<tr>
+<td>Azure Monitor</td>
+<td>resource 和 Prometheus alerts</td>
+</tr>
+</tbody>
+</table>
+<p>因此，硬件架构不只是 “8K GB200 GPUs”，而是一套围绕 usable training capacity 设计的系统：rack 内 NVLink 负责高带宽局部通信，rack 间 InfiniBand 负责扩展到多 rack；调度器尽量保持 locality；certification 和 telemetry 防止坏节点、坏链路和 silent corruption 进入训练池。</p>
+<h4 id="参考信息"><a class="markdownIt-Anchor" href="#参考信息"></a> 参考信息</h4>
+<p>本节事实来源主要是 MAI-Thinking-1 技术报告的 Section 6 Cluster Environment 和 Appendix K Cluster Environment Details。下面这些外部链接只作为背景参考，用来解释报告中出现的硬件、网络和调度组件，不作为 MAI 训练细节的独立来源。</p>
+<table>
+<thead>
+<tr>
+<th>链接</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://azure.microsoft.com/">Microsoft Azure</a></td>
+<td>Azure 平台背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/">NVIDIA GB200 NVL72</a></td>
+<td>GB200 / NVL72 硬件形态</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/data-center/gb300-nvl72/">NVIDIA GB300 NVL72</a></td>
+<td>GB300 / NVL72 硬件形态</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/data-center/nvlink/">NVIDIA NVLink</a></td>
+<td>NVLink / NVSwitch 高带宽互联背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.nvidia.com/en-us/networking/products/infiniband/">NVIDIA InfiniBand</a></td>
+<td>InfiniBand / RDMA 网络背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://kubernetes.io/">Kubernetes</a></td>
+<td>Kubernetes cluster state 和控制面背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://kueue.sigs.k8s.io/">Kueue</a></td>
+<td>Kubernetes batch queueing、admission 和 quota 管理背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.ray.io/">Ray</a></td>
+<td>distributed runtime 背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://developer.nvidia.com/nccl">NCCL</a></td>
+<td>GPU collective communication library 背景</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://azure.microsoft.com/en-us/blog/azure-maia-for-the-era-of-ai-from-silicon-to-software-to-systems/">Azure Maia</a></td>
+<td>Microsoft Maia 系列背景；报告未披露 MAIA-200 具体芯片规格</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pre-training"><a class="markdownIt-Anchor" href="#pre-training"></a> Pre-training</h2>
+<p>Pre-training 部分主要整理 scaling ladder、pre-training 数据 composition，以及 pre-training / mid-training 的训练阶段。</p>
+<h3 id="scaling-ladder"><a class="markdownIt-Anchor" href="#scaling-ladder"></a> Scaling ladder</h3>
+<p>报告反复强调 scaling ladder：架构和数据决策不只看单个小规模实验，而要看收益能否沿着 scale 稳定成立。</p>
+<p>他们用 scaling ladder 做架构和数据消融：对不同 model size，用固定的 tokens per active parameter 训练，比较 scaling curve。多数 architecture ablation 在接近 Chinchilla optimal 的 100-200 TPP 做，而主训练会 over-train 到 500-1000 TPP，让模型更适合高频推理场景。</p>
+<p>这个方法的前提是：小模型上的改进不一定能迁移到大模型；某个数据 mixture 在小规模上更好，也不代表在大规模上排序不变。因此，报告把可扩展验证放在 pre-training 决策的中心。</p>
+<p>这也是 “hill-climbing machine” 的组成部分：架构、数据和训练系统都通过 ladder + efficiency gain 做评估，以支持持续迭代。</p>
+<h3 id="pre-training-数据"><a class="markdownIt-Anchor" href="#pre-training-数据"></a> Pre-training 数据</h3>
+<p>MAI-Base-1 使用 30T tokens 预训练。数据来源包括：</p>
+<ul>
+<li>web HTML；</li>
+<li>web PDFs；</li>
+<li>public GitHub code；</li>
+<li>books and journals；</li>
+<li>academic papers；</li>
+<li>news；</li>
+<li>multilingual text；</li>
+<li>domain-specific materials。</li>
+</ul>
+<p>报告披露了几个数据治理口径：</p>
+<ul>
+<li>不使用 open source training datasets；</li>
+<li>不使用语言模型生成的 synthetic data 做 pre-training；</li>
+<li>尽力移除采集源里的 AI-generated content；</li>
+<li>排除常见机器学习数据站点和仓库，比如 <a target="_blank" rel="noopener" href="http://huggingface.co">huggingface.co</a> 一类来源；</li>
+<li>不使用 Microsoft 产品和服务里的 private customer data，除非用户明确 opt in 或适用协议允许；</li>
+<li>对整个 corpus 做 PII-risk 和 safety filtering。</li>
+</ul>
+<p>报告披露的知识截止日期也比较细：</p>
+<table>
+<thead>
+<tr>
+<th>Source family</th>
+<th>Knowledge cut off date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web HTML pages</td>
+<td>September 2025</td>
+</tr>
+<tr>
+<td>Web PDFs</td>
+<td>December 2025</td>
+</tr>
+<tr>
+<td>Public GitHub Code</td>
+<td>June 2025</td>
+</tr>
+<tr>
+<td>Books and journals</td>
+<td>March 2026</td>
+</tr>
+</tbody>
+</table>
+<p>从报告披露看，MAI-Base-1 的 pre-training 数据策略强调 clean、licensed 和 human-generated。</p>
+<p>预训练数据 composition 的数字如下：</p>
+<table>
+<thead>
+<tr>
+<th>Source family</th>
+<th style="text-align:right">Unique tokens</th>
+<th style="text-align:right">Training tokens</th>
+<th style="text-align:right">Mix</th>
+<th style="text-align:right">Avg. epochs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code</td>
+<td style="text-align:right">7.4T</td>
+<td style="text-align:right">16.4T</td>
+<td style="text-align:right">54.6%</td>
+<td style="text-align:right">2.22x</td>
+</tr>
+<tr>
+<td>STEM</td>
+<td style="text-align:right">2.2T</td>
+<td style="text-align:right">4.7T</td>
+<td style="text-align:right">15.8%</td>
+<td style="text-align:right">2.17x</td>
+</tr>
+<tr>
+<td>Math</td>
+<td style="text-align:right">0.3T</td>
+<td style="text-align:right">1.6T</td>
+<td style="text-align:right">5.4%</td>
+<td style="text-align:right">5.28x</td>
+</tr>
+<tr>
+<td>Books and journals</td>
+<td style="text-align:right">0.6T</td>
+<td style="text-align:right">0.9T</td>
+<td style="text-align:right">3.1%</td>
+<td style="text-align:right">1.65x</td>
+</tr>
+<tr>
+<td>PDFs</td>
+<td style="text-align:right">2.7T</td>
+<td style="text-align:right">1.4T</td>
+<td style="text-align:right">4.7%</td>
+<td style="text-align:right">0.53x</td>
+</tr>
+<tr>
+<td>Web text</td>
+<td style="text-align:right">8.1T</td>
+<td style="text-align:right">4.5T</td>
+<td style="text-align:right">14.9%</td>
+<td style="text-align:right">0.55x</td>
+</tr>
+<tr>
+<td>Multilingual (other)</td>
+<td style="text-align:right">8.1T</td>
+<td style="text-align:right">0.5T</td>
+<td style="text-align:right">1.6%</td>
+<td style="text-align:right">0.06x</td>
+</tr>
+<tr>
+<td>Total</td>
+<td style="text-align:right">29.2T</td>
+<td style="text-align:right">30.0T</td>
+<td style="text-align:right">100.0%</td>
+<td style="text-align:right">1.03x</td>
+</tr>
+</tbody>
+</table>
+<p>这里有几个指标比较关键：</p>
+<ul>
+<li>code 占 54.6%，是最大的数据来源；</li>
+<li>STEM + Math 合计 21.2%，并且 Math 的平均采样 epoch 最高，达到 5.28x；</li>
+<li>Web text 和 PDFs 的可用 unique tokens 没有被完整耗尽，平均 epoch 分别是 0.55x 和 0.53x；</li>
+<li>multilingual other 只有 1.6% training mix，但报告说明 domain-specific multilingual data 会被计入其他类别。</li>
+</ul>
+<p>mid-training 的数据仍来自 pre-training corpus，不引入新的 synthetic source。报告披露的目标 mixture 是：code 55%，STEM/math 35%，background sources 10%。</p>
+<p>训练阶段的规格如下：</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th style="text-align:right">Tokens</th>
+<th style="text-align:right">Context length</th>
+<th style="text-align:right">GB200 GPUs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pre-training</td>
+<td style="text-align:right">30T</td>
+<td style="text-align:right">16,384</td>
+<td style="text-align:right">8,192</td>
+</tr>
+<tr>
+<td>Mid-training 1</td>
+<td style="text-align:right">3.4T</td>
+<td style="text-align:right">65,536</td>
+<td style="text-align:right">8,192</td>
+</tr>
+<tr>
+<td>Mid-training 2</td>
+<td style="text-align:right">150B</td>
+<td style="text-align:right">262,144</td>
+<td style="text-align:right">4,096</td>
+</tr>
+</tbody>
+</table>
+<p>也就是说，MAI-Base-1 先在 16K context 上完成 30T tokens 的主预训练，再通过 3.55T tokens 的 mid-training 把 context 扩展到 256K。</p>
+<h2 id="post-training-rl"><a class="markdownIt-Anchor" href="#post-training-rl"></a> Post-training / RL</h2>
+<p>Post-training / RL 部分包括通用 RL recipe、STEM climb、agentic coding / tool use、helpfulness / safety，以及最后的 consolidation。</p>
+<h3 id="rl-climb"><a class="markdownIt-Anchor" href="#rl-climb"></a> RL climb</h3>
+<p>pre-training 和 mid-training 提供模型预测能力和知识；解题策略、推理 token 分配、工具使用、偏好和安全约束主要在 RL climb 阶段处理。</p>
+<p>MAI-Thinking-1 的 RL 从没有 reasoning trace 暴露的 checkpoint 开始，目标是让模型从零发展 reasoning 能力。报告里把稳定 RL 爬坡归因到三个机制：</p>
+<ul>
+<li>对 GRPO 做两个简单但关键的调整；</li>
+<li>self-distillation，用于 crash 或 base policy 更新后恢复 climb；</li>
+<li>infra 改进，减少 training 和 inference 之间的 numerical mismatch。</li>
+</ul>
+<p>他们训练了三个 specialist：</p>
+<ul>
+<li>STEM / competitive code；</li>
+<li>agentic coding / tool use；</li>
+<li>helpfulness / safety。</li>
+</ul>
+<p>之后再把这些 specialist consolidation 到单个 MAI-Thinking-1 模型。</p>
+<p>GRPO 有两个主要改动。</p>
+<p>第一个是 adaptive entropy control。它不是显式加 entropy bonus，而是根据目标 entropy 在线调整 clipping bound。如果 entropy 太低，就放宽上界，让 policy 能更积极地增加 alternative tokens 的概率；如果 entropy 足够高，就收紧 trust region。</p>
+<p>第二个是 outer ratio clip。原始 PPO / GRPO 的某些分支在 “往正确方向修正” 时不 clip，但报告发现这些 unclipped branches 会导致 catastrophic gradient-norm spikes，于是加了 hard outer clip。</p>
+<p>reward 结构也保持统一：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">R = R_task + w_lang * R_lang - w_len * R_len</span><br></pre></td></tr></table></figure>
+<p>也就是 task reward 加语言一致性奖励，再减长度惩罚。语言一致性奖励用于缓解长上下文 RL 中的语言漂移；长度惩罚用于控制 reasoning 长度。</p>
+<p>RL 训练的部分超参数也有披露：</p>
+<ul>
+<li>top-p sampling 使用 <code>p = 0.97</code>；</li>
+<li>早期最大 rollout length capped at 8K tokens；</li>
+<li>随训练推进，rollout length 按 2 的幂次扩展，最终到 128K tokens；</li>
+<li>在 128K extension stage 移除 length penalty，即 <code>w_len = 0</code>；</li>
+<li>problem sampling 设置 <code>G = 128</code> total rollouts，<code>G_early = 16</code>；</li>
+<li>early pass-rate filtering 使用 <code>[0.05, 0.8]</code>，常规 pass-rate filtering 使用 <code>[0.1, 0.8]</code>；</li>
+<li>每次 inference model update 之间做 5 个 gradient steps；</li>
+<li>超过 8 次 inference updates stale 的 rollout 会被丢弃，也就是最多落后 40 gradient steps；</li>
+<li>RL 阶段 global MoE load balancing coefficient 为 <code>1e-5</code>；</li>
+<li>self-distillation SFT 使用 128K sequence length、global batch size 2048、AdamW weight decay 0.001、maximum learning rate <code>1.7e-5</code>、minimum learning rate <code>5.2e-6</code>、warmup ratio 2%；</li>
+<li>self-distillation dropout rate 为 0.15，MoE load balancing coefficient 为 <code>1e-2</code>。</li>
+</ul>
+<h3 id="stem-数据"><a class="markdownIt-Anchor" href="#stem-数据"></a> STEM 数据</h3>
+<p>STEM climb 使用 STEM Mix。报告说他们处理了数百万文档，产出超过 5M samples，其中最难部分超过 550k 个 <code>(q, a)</code> pairs。</p>
+<p>这个 pipeline 将 textbooks、academic PDFs、forum discussions、competition archives、vendor problems 等异构来源转成可验证的问答对。</p>
+<p>流程包括：</p>
+<ul>
+<li>OCR 和 cleanup；</li>
+<li>去 boilerplate，规范化文本；</li>
+<li>构建层级结构；</li>
+<li>LLM 标注 question / answer spans；</li>
+<li>对分离的题目和答案做 QA pairing；</li>
+<li>标注题型、topic taxonomy、PII、answer leakage；</li>
+<li>把选择题、证明题等重写成 open-ended；</li>
+<li>多 solver pass@k 解题；</li>
+<li>consensus grading；</li>
+<li>difficulty rating；</li>
+<li>丢掉 faulty ground truth。</li>
+</ul>
+<p>这个部分的重点是构造可验证、难度合适、topic 多样且 ground truth 可靠的训练信号。报告把 verifier / grader / data pipeline 作为 STEM RL 数据构造的核心环节。</p>
+<p>STEM Mix 的样本分布也有披露。</p>
+<p>按原始题型：</p>
+<table>
+<thead>
+<tr>
+<th>Problem format</th>
+<th style="text-align:right">Share</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open ended</td>
+<td style="text-align:right">56.1%</td>
+</tr>
+<tr>
+<td>Proof</td>
+<td style="text-align:right">33.3%</td>
+</tr>
+<tr>
+<td>MCQ</td>
+<td style="text-align:right">10.6%</td>
+</tr>
+</tbody>
+</table>
+<p>按学科 taxonomy：</p>
+<table>
+<thead>
+<tr>
+<th>Subject</th>
+<th style="text-align:right">Share</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mathematics</td>
+<td style="text-align:right">58.5%</td>
+</tr>
+<tr>
+<td>Physics</td>
+<td style="text-align:right">13.2%</td>
+</tr>
+<tr>
+<td>Chemistry</td>
+<td style="text-align:right">10.9%</td>
+</tr>
+<tr>
+<td>Other</td>
+<td style="text-align:right">4.3%</td>
+</tr>
+<tr>
+<td>Electrical Engineering</td>
+<td style="text-align:right">3.4%</td>
+</tr>
+<tr>
+<td>Computer Science</td>
+<td style="text-align:right">2.6%</td>
+</tr>
+<tr>
+<td>Mechanical Engineering</td>
+<td style="text-align:right">2.6%</td>
+</tr>
+<tr>
+<td>Biology</td>
+<td style="text-align:right">1.9%</td>
+</tr>
+<tr>
+<td>Mechanics of Materials</td>
+<td style="text-align:right">1.0%</td>
+</tr>
+<tr>
+<td>Civil Engineering</td>
+<td style="text-align:right">0.9%</td>
+</tr>
+<tr>
+<td>Economics</td>
+<td style="text-align:right">0.7%</td>
+</tr>
+</tbody>
+</table>
+<p>Multiple-choice 和 proof problems 会在 ingestion 过程中转换成 open-ended form；转换不可行的样本会被丢弃，但报告保留了少量 multiple-choice problems，让模型仍然熟悉该格式。</p>
+<h3 id="agentic-coding-和-tool-use"><a class="markdownIt-Anchor" href="#agentic-coding-和-tool-use"></a> Agentic coding 和 tool use</h3>
+<p>Agentic climb 训练模型在外部环境里做多步任务：读代码、改文件、跑测试、观察失败、修复方案、再尝试。</p>
+<p>报告里的 Sandbox Execution Environment（SEE）会为每个 agentic task 启一个 fresh container，任务完成后销毁。容器默认 network-isolated，以保证可复现，避免 rate limit、外部服务波动等副作用。如果确实需要网络，比如安装包，则通过 caching proxy 和 domain allowlist 管理。</p>
+<p>SWE RL problem 会被打包成自包含容器镜像：</p>
+<ul>
+<li>repo checkout 到指定 commit；</li>
+<li>依赖预装；</li>
+<li>problem statement；</li>
+<li>unit tests / grader；</li>
+<li>Bash tool；</li>
+<li>String replace editor。</li>
+</ul>
+<p>模型通过 tool call 和容器交互，结束后 grader 在同一个容器里跑测试并给 reward。</p>
+<p>这个设计把 SWE-bench 式任务扩展为可规模化生产的 RL environment。它不是只用于评测的 benchmark，而是用于训练的环境工厂。</p>
+<p>tool-use 环境则模拟企业和消费场景中的 API / MCP 交互。每个问题包含 query、tool schemas、initial state 和 grader。有些环境里单个任务可用工具超过 50 个，用来训练模型高效选择合适工具。</p>
+<p>他们还会合成 closed-world tool-use environment：生成数据库、tool definition、verifiable task，然后执行和去重。这里 synthetic data 用在 RL / tool-use 环境构造上，而不是 pre-training。</p>
+<h3 id="helpfulness-和-safety"><a class="markdownIt-Anchor" href="#helpfulness-和-safety"></a> Helpfulness 和 safety</h3>
+<p>报告把 helpfulness 和 safety 放在同一个 RL 框架里，而不是把 safety 当成模型发布前的独立补丁。</p>
+<p>一个重点是 reward aggregation。很多目标的 reward scale 不同，简单相加会导致大尺度信号压过小尺度信号；而安全这类目标又不能被 response quality 抵消。报告里用了两种策略：</p>
+<ul>
+<li>lexicographic reward shaping：高优先级 reward 打平时，低优先级 reward 才起作用；</li>
+<li>gated reward application：高优先级目标达到最低要求后，低优先级 reward 才应用。</li>
+</ul>
+<p>比如安全属于 gated case：unsafe response 直接拿最低 reward，不再因为 response quality 较高而得到补偿。</p>
+<p>另一个细节是风格训练。报告里的目标风格包括 warmth without sycophancy、scannable structure、tone calibrated to context、避免冗长开场等。这部分属于 post-training 中面向可用性的训练目标。</p>
+<h3 id="consolidation"><a class="markdownIt-Anchor" href="#consolidation"></a> Consolidation</h3>
+<p>三个 specialist 最后要合到一个模型。报告给了 consolidation SFT 的数据 mixture：</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th style="text-align:right">Sample weight</th>
+<th style="text-align:right">Token weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STEM and Coding</td>
+<td style="text-align:right">56%</td>
+<td style="text-align:right">89%</td>
+</tr>
+<tr>
+<td>Agentic Capability</td>
+<td style="text-align:right">11%</td>
+<td style="text-align:right">9%</td>
+</tr>
+<tr>
+<td>General Helpfulness and Safety</td>
+<td style="text-align:right">33%</td>
+<td style="text-align:right">2%</td>
+</tr>
+</tbody>
+</table>
+<p>这个表显示：general helpfulness / safety 的 sample weight 很高，但 token weight 很低；STEM and Coding 的 token weight 极高。这说明 STEM / code 样本单条更长，尤其 reasoning 和 agentic 轨迹会消耗大量 token。</p>
+<p>从 token weight 看，推理模型训练不能只看样本数，还需要看 token budget 和 rollout 长度。</p>
+<h2 id="评测"><a class="markdownIt-Anchor" href="#评测"></a> 评测</h2>
+<p>报告里的 STEM 和 agentic coding public benchmark 指标如下。MAI-Thinking-1 的结果是 4 runs average，统一使用 <code>temperature = 1</code>、<code>top-p = 0.97</code>；agentic coding 使用 256K total context length，其他表内 eval 使用 maximum output tokens 256K。</p>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th style="text-align:right">MAI-Thinking-1</th>
+<th style="text-align:right">Sonnet 4.6</th>
+<th style="text-align:right">Opus 4.6</th>
+<th style="text-align:right">GPT 5.4</th>
+<th style="text-align:right">Kimi K2.6</th>
+<th style="text-align:right">DeepSeek V3.2</th>
+<th style="text-align:right">DeepSeek V4</th>
+<th style="text-align:right">GLM-5.1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIME 2025</td>
+<td style="text-align:right">97.0</td>
+<td style="text-align:right">95.6</td>
+<td style="text-align:right">99.8</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">93.1</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+</tr>
+<tr>
+<td>AIME 2026</td>
+<td style="text-align:right">94.5</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">96.4</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">95.3</td>
+</tr>
+<tr>
+<td>HMMT Feb 2026</td>
+<td style="text-align:right">84.9</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">92.7</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">95.2</td>
+<td style="text-align:right">82.6</td>
+</tr>
+<tr>
+<td>GPQA Diamond</td>
+<td style="text-align:right">84.2</td>
+<td style="text-align:right">89.9</td>
+<td style="text-align:right">91.3</td>
+<td style="text-align:right">92.8</td>
+<td style="text-align:right">90.5</td>
+<td style="text-align:right">82.4</td>
+<td style="text-align:right">90.1</td>
+<td style="text-align:right">86.2</td>
+</tr>
+<tr>
+<td>LCB v6</td>
+<td style="text-align:right">87.7</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">89.6</td>
+<td style="text-align:right">83.3</td>
+<td style="text-align:right">93.5</td>
+<td style="text-align:right">-</td>
+</tr>
+<tr>
+<td>Terminal-Bench 2.0</td>
+<td style="text-align:right">46.0</td>
+<td style="text-align:right">59.1</td>
+<td style="text-align:right">65.4</td>
+<td style="text-align:right">75.1</td>
+<td style="text-align:right">66.7</td>
+<td style="text-align:right">46.4</td>
+<td style="text-align:right">67.9</td>
+<td style="text-align:right">69.0</td>
+</tr>
+<tr>
+<td>SWE-bench Verified</td>
+<td style="text-align:right">73.5</td>
+<td style="text-align:right">79.6</td>
+<td style="text-align:right">80.8</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">80.2</td>
+<td style="text-align:right">73.1</td>
+<td style="text-align:right">80.6</td>
+<td style="text-align:right">-</td>
+</tr>
+<tr>
+<td>SWE-Bench Pro</td>
+<td style="text-align:right">52.8</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">53.4</td>
+<td style="text-align:right">57.7</td>
+<td style="text-align:right">58.6</td>
+<td style="text-align:right">-</td>
+<td style="text-align:right">55.4</td>
+<td style="text-align:right">58.4</td>
+</tr>
+</tbody>
+</table>
+<p>报告中的结果显示，MAI-Thinking-1 在 broad set of benchmark categories 上表现较强，但不是所有任务都领先。比如 Terminal-Bench 2.0 低于 GPT 5.4、Opus 4.6、Kimi K2.6、DeepSeek V4 等；SWE-Bench Pro 接近 Opus 4.6，但低于 GPT 5.4 / Kimi K2.6 / DeepSeek V4 / GLM-5.1。</p>
+<p>因此，从报告自身呈现看，MAI-Thinking-1 的定位不是所有 benchmark 的绝对 top-1，而是一个强调自研训练体系、可部署性和持续迭代能力的 reasoning model。</p>
+<p>其他 public benchmark 指标如下，Sonnet 4.6 是报告作者在自有 evaluation suite 中生成的结果：</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Benchmark</th>
+<th style="text-align:right">MAI-Thinking-1</th>
+<th style="text-align:right">Sonnet 4.6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Knowledge</td>
+<td>MMLU Pro</td>
+<td style="text-align:right">85</td>
+<td style="text-align:right">87</td>
+</tr>
+<tr>
+<td>Knowledge</td>
+<td>SimpleQA Verified</td>
+<td style="text-align:right">31</td>
+<td style="text-align:right">29</td>
+</tr>
+<tr>
+<td>Instruction Following</td>
+<td>IF Bench</td>
+<td style="text-align:right">69</td>
+<td style="text-align:right">50</td>
+</tr>
+<tr>
+<td>Instruction Following</td>
+<td>Adv. IF</td>
+<td style="text-align:right">85</td>
+<td style="text-align:right">86</td>
+</tr>
+<tr>
+<td>Instruction Following</td>
+<td>Multi-Challenge</td>
+<td style="text-align:right">53</td>
+<td style="text-align:right">57</td>
+</tr>
+<tr>
+<td>Long Context</td>
+<td>GraphWalks &lt;=128k</td>
+<td style="text-align:right">90</td>
+<td style="text-align:right">96</td>
+</tr>
+<tr>
+<td>Tool Calling</td>
+<td>BFCL v3</td>
+<td style="text-align:right">72</td>
+<td style="text-align:right">76</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>AIR-Bench</td>
+<td style="text-align:right">88</td>
+<td style="text-align:right">88</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>CyberSec Instruct</td>
+<td style="text-align:right">63</td>
+<td style="text-align:right">62</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>CyberSec Auto</td>
+<td style="text-align:right">63</td>
+<td style="text-align:right">56</td>
+</tr>
+<tr>
+<td>Honesty</td>
+<td>Long Fact</td>
+<td style="text-align:right">98</td>
+<td style="text-align:right">98</td>
+</tr>
+<tr>
+<td>Honesty</td>
+<td>Truthful QA</td>
+<td style="text-align:right">88</td>
+<td style="text-align:right">88</td>
+</tr>
+<tr>
+<td>Health</td>
+<td>HealthBench Prof.</td>
+<td style="text-align:right">35</td>
+<td style="text-align:right">38</td>
+</tr>
+<tr>
+<td>Health</td>
+<td>MedXpert QA</td>
+<td style="text-align:right">43</td>
+<td style="text-align:right">49</td>
+</tr>
+</tbody>
+</table>
+<p>这张表的对比对象比 Table 11 少，原因是很多实验室没有在 model card 或 announcement 里报告这些 benchmark。报告因此只给了 Sonnet 4.6 作为 baseline。</p>
+<p>官方介绍页和报告还给出人类 side-by-side evaluation。最终 evaluation set 包含 1276 个英文任务，其中 30% 是 multi-turn。任务来源包括 expert-authored prompts 和经过 PII 过滤的 Microsoft consumer Copilot logs。评估由 Surge AI 管理的 native English raters 完成。</p>
+<p>任务分布如下：</p>
+<table>
+<thead>
+<tr>
+<th>Task category</th>
+<th style="text-align:right">Share of prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open QA</td>
+<td style="text-align:right">13-14%</td>
+</tr>
+<tr>
+<td>Brainstorming and advising</td>
+<td style="text-align:right">13-14%</td>
+</tr>
+<tr>
+<td>Content authoring</td>
+<td style="text-align:right">13-14%</td>
+</tr>
+<tr>
+<td>Structured problem-solving</td>
+<td style="text-align:right">6-7%</td>
+</tr>
+<tr>
+<td>Information extraction</td>
+<td style="text-align:right">6-7%</td>
+</tr>
+<tr>
+<td>Academic help</td>
+<td style="text-align:right">6-7%</td>
+</tr>
+<tr>
+<td>Insight generation</td>
+<td style="text-align:right">6-7%</td>
+</tr>
+<tr>
+<td>Content summarization</td>
+<td style="text-align:right">6-7%</td>
+</tr>
+<tr>
+<td>Task planning</td>
+<td style="text-align:right">5%</td>
+</tr>
+<tr>
+<td>Context-based QA</td>
+<td style="text-align:right">5%</td>
+</tr>
+<tr>
+<td>Other text analysis</td>
+<td style="text-align:right">5%</td>
+</tr>
+<tr>
+<td>Personal support</td>
+<td style="text-align:right">3-4%</td>
+</tr>
+<tr>
+<td>Entertainment</td>
+<td style="text-align:right">3-4%</td>
+</tr>
+<tr>
+<td>Chit-chat</td>
+<td style="text-align:right">3-4%</td>
+</tr>
+<tr>
+<td>Role-play</td>
+<td style="text-align:right">3-4%</td>
+</tr>
+</tbody>
+</table>
+<p>Human eval 结果：</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align:right">vs Sonnet 4.6</th>
+<th style="text-align:right">vs Opus 4.6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overall side-by-side preference</td>
+<td style="text-align:right">0.07 ± 0.06</td>
+<td style="text-align:right">-0.07 ± 0.06</td>
+</tr>
+<tr>
+<td>Instruction following delta</td>
+<td style="text-align:right">-0.01 ± 0.02</td>
+<td style="text-align:right">-0.04 ± 0.02</td>
+</tr>
+<tr>
+<td>Factuality delta</td>
+<td style="text-align:right">-0.02 ± 0.02</td>
+<td style="text-align:right">-0.03 ± 0.02</td>
+</tr>
+<tr>
+<td>Conciseness and relevance delta</td>
+<td style="text-align:right">0.11 ± 0.02</td>
+<td style="text-align:right">0.07 ± 0.02</td>
+</tr>
+<tr>
+<td>Completeness delta</td>
+<td style="text-align:right">-0.01 ± 0.02</td>
+<td style="text-align:right">-0.02 ± 0.02</td>
+</tr>
+<tr>
+<td>Style and tone delta</td>
+<td style="text-align:right">0.08 ± 0.02</td>
+<td style="text-align:right">0.05 ± 0.02</td>
+</tr>
+</tbody>
+</table>
+<p>整体胜负比例：</p>
+<table>
+<thead>
+<tr>
+<th>Comparison</th>
+<th style="text-align:right">Win</th>
+<th style="text-align:right">Tie</th>
+<th style="text-align:right">Loss</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAI-Thinking-1 vs Sonnet 4.6</td>
+<td style="text-align:right">49%</td>
+<td style="text-align:right">6%</td>
+<td style="text-align:right">45%</td>
+</tr>
+<tr>
+<td>MAI-Thinking-1 vs Opus 4.6</td>
+<td style="text-align:right">43%</td>
+<td style="text-align:right">5%</td>
+<td style="text-align:right">52%</td>
+</tr>
+</tbody>
+</table>
+<p>也就是说，人类偏好评测中，MAI-Thinking-1 相对 Sonnet 4.6 略占优；相对 Opus 4.6 略落后。分项上，它相对 Sonnet 4.6 的主要优势来自 conciseness/relevance 和 style/tone；instruction following、factuality、completeness 大致在噪声范围内。</p>
+<p>安全侧，报告披露了两个内部指标方向：</p>
+<ul>
+<li>safety / over-refusal：低风险 prompt 计算 over-refusal rate，helpfulness 报告为 <code>1 - over-refusal rate</code>；高敏感 item 用 1-5 Likert safety judge，<code>score &gt; 3</code> 视为 safety pass；</li>
+<li>jailbreak：从 vendor、internal red-teaming、HarmBench、StrongREJECT 等来源收集 2.5K unique seed scenarios，再增强成约 9.5K jailbreak prompts；指标是 attack success rate，越低越好。</li>
+</ul>
+<p>报告没有在正文文本中给出 safety figure 的逐项数值表，但描述称 MAI-Thinking-1 在 8 个类别中的 5 个相对 Sonnet 4.6 更好或相当，较大提升出现在 CBRN、Self Harm、Elections &amp; Politics；jailbreak ASR 与 Sonnet 4.6 和 Opus 4.6 comparable。</p>
+<h2 id="总结与启发"><a class="markdownIt-Anchor" href="#总结与启发"></a> 总结与启发</h2>
+<p>这篇报告的核心关键词是 <strong>machine</strong>。</p>
+<p>报告并不只围绕某个单点技术展开，例如 attention、experts、tokens 或 benchmark 分数；它更强调模型开发体系，即如何把数据、模型、训练、RL、环境和评测组织成持续迭代流程。</p>
+<p>这个体系可以拆成几层：</p>
+<ul>
+<li>数据层：干净、授权、人类生成、可治理；</li>
+<li>模型层：MoE + local/global attention + LatentMoE，为训练和推理效率服务；</li>
+<li>实验层：scaling ladder + efficiency gain，避免小规模幻觉；</li>
+<li>训练层：YOLO、determinism、dropless MoE、goodput；</li>
+<li>RL 层：稳定 GRPO、reward shaping、self-distillation；</li>
+<li>环境层：SEE、SWE container、tool-use closed-world environment；</li>
+<li>产品层：helpfulness、安全、style、instruction following；</li>
+<li>评测层：public benchmark、人类偏好、安全红队。</li>
+</ul>
+<p>从训练基础设施视角看，有几个启发比较明确。</p>
+<p>第一，训练基础设施需要有明确的目标指标。报告把 goodput 放在生产 KPI 位置，而不只看 MFU 或单步吞吐。对长周期训练来说，节点故障、调度等待、重启、checkpoint 恢复、storage 抖动和通信退化都会进入 wall-clock 成本；因此，基础设施目标应更接近 <code>实际有效训练时间 / 总 wall-clock 时间</code>，而不是单点硬件利用率。</p>
+<p>第二，调度系统需要理解硬件拓扑。GB200 这类 rack-scale 系统不是一组同质 GPU 池；NVLink domain、rack boundary、InfiniBand path、reserved spare capacity 都会影响训练稳定性和通信成本。Kubernetes / Kueue / MAI control plane 的价值不只是把 Pod 调起来，而是把 quota、reservation、rack locality 和 topology-aware placement 组织成可持续运行的大作业调度能力。</p>
+<p>第三，健康检查和 remediation 要进入调度控制回路。报告中的 certification、NPD conditions、GHR、telemetry、drain、auto remediation 和 recertification 共同决定节点能否进入生产训练池。对训练基础设施来说，坏节点、退化链路和边缘状态存储如果只靠人工排查，会直接降低 goodput；更合理的做法是把健康信号转成可调度状态，并让修复后的节点重新经过 certification。</p>
+<p>第四，训练框架和集群控制面需要边界清晰。Kubernetes / Kueue / MAI control plane 负责资源准入、拓扑放置和节点状态；Ray 主要在 admitted job 内部承担 actor 编排和 runtime 管理；YOLO 负责训练循环、sharding、optimizer、checkpoint 和 MoE 相关优化。这个分层可以减少职责混杂，也便于分别优化调度效率、作业恢复和训练性能。</p>
+<p>第五，RL 环境越来越接近生产系统。它不是离线数据集，也不是简单 judge，而是一批可执行、可复现、可评分、可并发调度的任务环境。持续构造这样的环境，是获得高质量训练信号的重要条件。因此，训练基础设施不仅要支持 GPU 大作业，也要支持容器化任务环境、工具调用、reward / grader、rollout 和 learner 之间的复杂编排。</p>
+<p>第六，可复现和可恢复能力会影响模型迭代速度。报告强调 determinism、checkpoint/restart、dataloader progress、RNG、FP8 scaling history 等状态保存。对于大模型训练，这些能力不只是工程洁癖，而是缩短故障恢复时间、降低实验方差、复盘训练异常和稳定推进 RL climb 的基础条件。</p>
+<p>因此，这篇报告可以看成 Microsoft AI 对其自有模型训练体系的一次系统披露：从数据、训练系统、RL 环境到产品评测，形成一个面向 reasoning model 的迭代闭环。</p>
+<p>报告仍有不少未披露的部分：比如完整数据来源、各阶段 token / compute budget、更细的 RL rollout 规模、reward model 细节、agentic environment 的实际数量、human eval 的完整 prompt 分布等。这些信息会影响外部读者对 hill-climbing machine 长期效率的判断。</p>
+<p>总体看，MAI-Thinking-1 的技术意义不仅在于单次 benchmark 表现，也在于 Microsoft 是否能够把 <strong>from-scratch pretraining + 自研 RL infra + 企业场景环境 + Foundry 分发</strong> 串成稳定迭代系统。后续 MAI 系列的迭代速度和能力边界，需要继续结合模型发布、评测结果和实际产品表现观察。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/llm/" rel="tag"># llm</a>
+              <a href="/tags/moe/" rel="tag"># moe</a>
+              <a href="/tags/rl/" rel="tag"># rl</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/55b4e23b.html" rel="prev" title="MiniMax M2 Series 技术报告阅读">
+                  <i class="fa fa-angle-left"></i> MiniMax M2 Series 技术报告阅读
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">421k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">6:22</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

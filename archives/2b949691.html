@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"hide","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="想着在这个时间点上回顾下模型和模型训练 infra 发展的经历，就以 DS 的技术报告为例吧。 DS 系列模型：  DeepSeek LLM — DeepSeek LLM 7B、DeepSeek LLM 67B Dense（2024&#x2F;01&#x2F;05） arXiv:2401.02954 DeepSeek-Coder — 1.3B &#x2F; 6.7B &#x2F; 33B（2024&#x2F;01&#x2F;25） arXiv:2401.1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="model-ds-series">
+<meta property="og:url" content="https://zrss.github.io/archives/2b949691.html">
+<meta property="og:site_name" content="MegaThinking">
+<meta property="og:description" content="想着在这个时间点上回顾下模型和模型训练 infra 发展的经历，就以 DS 的技术报告为例吧。 DS 系列模型：  DeepSeek LLM — DeepSeek LLM 7B、DeepSeek LLM 67B Dense（2024&#x2F;01&#x2F;05） arXiv:2401.02954 DeepSeek-Coder — 1.3B &#x2F; 6.7B &#x2F; 33B（2024&#x2F;01&#x2F;25） arXiv:2401.1">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-08T20:04:51.000Z">
+<meta property="article:modified_time" content="2026-05-25T16:23:42.044Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="tech">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/2b949691.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/2b949691.html","path":"archives/2b949691.html","title":"model-ds-series"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>model-ds-series | MegaThinking</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">MegaThinking</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-llm"><span class="nav-number">1.</span> <span class="nav-text"> DeepSeek LLM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-coder"><span class="nav-number">2.</span> <span class="nav-text"> DeepSeek-Coder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseekmoe"><span class="nav-number">3.</span> <span class="nav-text"> DeepSeekMoE</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseekmath"><span class="nav-number">4.</span> <span class="nav-text"> DeepSeekMath</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-v2"><span class="nav-number">5.</span> <span class="nav-text"> DeepSeek-V2</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-v25"><span class="nav-number">6.</span> <span class="nav-text"> DeepSeek-V2.5</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-v3"><span class="nav-number">7.</span> <span class="nav-text"> DeepSeek-V3</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#deepseek-r1"><span class="nav-number">8.</span> <span class="nav-text"> DeepSeek-R1</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">140</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2b949691.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="model-ds-series | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          model-ds-series
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-05-08 20:04:51" itemprop="dateCreated datePublished" datetime="2026-05-08T20:04:51Z">2026-05-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-05-25 16:23:42" itemprop="dateModified" datetime="2026-05-25T16:23:42Z">2026-05-25</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>想着在这个时间点上回顾下模型和模型训练 infra 发展的经历，就以 DS 的技术报告为例吧。</p>
+<p>DS 系列模型：</p>
+<ol>
+<li>DeepSeek LLM — DeepSeek LLM 7B、DeepSeek LLM 67B Dense（2024/01/05） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.02954">arXiv:2401.02954</a></li>
+<li>DeepSeek-Coder — 1.3B / 6.7B / 33B（2024/01/25） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.14196">arXiv:2401.14196</a></li>
+<li>DeepSeekMoE — MoE 语言模型系列 2B / 16B / 145B 等（2024/01/11） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.06066">arXiv:2401.06066</a></li>
+<li>DeepSeekMath — DeepSeekMath-7B（2024/02/05） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2402.03300">arXiv:2402.03300</a></li>
+<li>DeepSeek-V2 — 第二代 MoE 通用大模型（2024/05/07） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2405.04434">arXiv:2405.04434</a></li>
+<li>DeepSeek-V2.5 — 通用与代码能力合流迭代（2024/09/06；无单独 arXiv 技术报告，架构见 V2） <a target="_blank" rel="noopener" href="https://api-docs.deepseek.com/news/news0905">官方说明</a></li>
+<li>DeepSeek-V3 — 第三代 MoE 通用大模型（2024/12/27） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2412.19437">arXiv:2412.19437</a></li>
+<li>DeepSeek-R1、DeepSeek-R1-Zero（2025/01/22） <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12948">arXiv:2501.12948</a></li>
+</ol>
+<p>继而再看框架的实现。不是之前不能做，之前这是个浩大的工程。现在借助模型不仅是代码门槛下降了，理解 sota 工作的门槛也下降了，可以抽空广泛的了解起来了，成为新时代的 “全栈” 工程师。</p>
+<h1 id="deepseek-llm"><a class="markdownIt-Anchor" href="#deepseek-llm"></a> DeepSeek LLM</h1>
+<p>LLaMA</p>
+<p>2T tokens pre train</p>
+<p>1M sft, RLHF, SFT → RM → PPO 这条经典 RLHF pipeline</p>
+<p>DPO, 不显式训一个单独的 RM、也不做 RL 循环，直接用 <em>偏好对</em> 数据（同一条 prompt 下，人类更喜欢回答 A 而不是 B）去更新语言模型。</p>
+<p>SFT -&gt; DPO</p>
+<p>模型架构</p>
+<p>a Pre-Norm structure with RMSNorm (Zhang and Sennrich, 2019) function</p>
+<p>using SwiGLU (Shazeer, 2020) as the activation function</p>
+<p>Rotary Embedding (Su et al., 2024) for positional encoding</p>
+<p>Grouped Query Attention (GQA)</p>
+<p>AdamW optimizer (Loshchilov and Hutter, 2017), with the following hyperparameters: 𝛽1 = 0.9, 𝛽2 = 0.95, and weight_decay = 0.1</p>
+<p>HAI-LLM = Megatron 式多并行 + Flash Attention + ZeRO-1 省优化器显存 + 通信计算重叠 + 融合 kernel；数值上用 bf16 算、fp32 攒梯度保稳；最后在 softmax/CE 上用 in-place 省 logits 显存。</p>
+<h1 id="deepseek-coder"><a class="markdownIt-Anchor" href="#deepseek-coder"></a> DeepSeek-Coder</h1>
+<p>代码生成和代码补全，专门进行 FIM 代码补全训练</p>
+<p>employ HuggingFace Tokenizer library 使用 Byte Pair Encoding 技术在训练语料子集上进行训练得到</p>
+<p>基于 DeepSeek LLM 模型架构和训练技术，decode-only transformer, RoPE, GQA, FlashAttention v2</p>
+<p>AdamW 优化器</p>
+<p>并行策略实现仍然用的自研的 HAI-LLM 框架</p>
+<table>
+<thead>
+<tr>
+<th>超参数 (Hyperparameter)</th>
+<th>DeepSeek-Coder 1.3B</th>
+<th>DeepSeek-Coder 6.7B</th>
+<th>DeepSeek-Coder 33B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>隐藏层激活函数 (Hidden Activation)</strong></td>
+<td>SwiGLU</td>
+<td>SwiGLU</td>
+<td>SwiGLU</td>
+</tr>
+<tr>
+<td><strong>隐藏层维度 (Hidden size)</strong></td>
+<td>2048</td>
+<td>4096</td>
+<td>7168</td>
+</tr>
+<tr>
+<td><strong>中间层维度 (Intermediate size)</strong></td>
+<td>5504</td>
+<td>11008</td>
+<td>19200</td>
+</tr>
+<tr>
+<td><strong>隐藏层数 (Hidden layers number)</strong></td>
+<td>24</td>
+<td>32</td>
+<td>62</td>
+</tr>
+<tr>
+<td><strong>注意力头数 (Attention heads number)</strong></td>
+<td>16</td>
+<td>32</td>
+<td>56</td>
+</tr>
+<tr>
+<td><strong>注意力机制 (Attention)</strong></td>
+<td>Multi-head</td>
+<td>Multi-head</td>
+<td>Grouped-query (8)</td>
+</tr>
+<tr>
+<td><strong>批次大小 (Batch Size)</strong></td>
+<td>1024</td>
+<td>2304</td>
+<td>3840</td>
+</tr>
+<tr>
+<td><strong>最大学习率 (Max Learning Rate)</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.3</mn><mo>×</mo><mn>1</mn><msup><mn>0</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">5.3 \times 10^{-4}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">5</span><span class="mord">.</span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span></span></span></span> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.3</mn><mtext>e-</mtext><mn>4</mn></mrow><annotation encoding="application/x-tex">5.3\text{e-}4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">5</span><span class="mord">.</span><span class="mord">3</span><span class="mord text"><span class="mord">e-</span></span><span class="mord">4</span></span></span></span>)</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4.2</mn><mo>×</mo><mn>1</mn><msup><mn>0</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">4.2 \times 10^{-4}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">4</span><span class="mord">.</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span></span></span></span> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4.2</mn><mtext>e-</mtext><mn>4</mn></mrow><annotation encoding="application/x-tex">4.2\text{e-}4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span><span class="mord">.</span><span class="mord">2</span><span class="mord text"><span class="mord">e-</span></span><span class="mord">4</span></span></span></span>)</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3.5</mn><mo>×</mo><mn>1</mn><msup><mn>0</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3.5 \times 10^{-4}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">3</span><span class="mord">.</span><span class="mord">5</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span></span></span></span> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3.5</mn><mtext>e-</mtext><mn>4</mn></mrow><annotation encoding="application/x-tex">3.5\text{e-}4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">3</span><span class="mord">.</span><span class="mord">5</span><span class="mord text"><span class="mord">e-</span></span><span class="mord">4</span></span></span></span>)</td>
+</tr>
+</tbody>
+</table>
+<p>DeepSeek-Coder 主系列（1.3B / 6.7B / 33B）：from scratch pt 2T -&gt; Base（<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.14196">技术报告</a>：pre-training 含 FIM、context 扩至 16K；<a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepSeek-Coder">DeepSeek-Coder 仓库 README</a> Model Training 两阶段 1.8T@4K + 200B@16K）；SFT 2B -&gt; Instruct</p>
+<p>DeepSeek-Coder-v1.5（仅 7B）：CPT from DeepSeek-LLM 7B，2T@4K（next-token，无 FIM/16K）</p>
+<h1 id="deepseekmoe"><a class="markdownIt-Anchor" href="#deepseekmoe"></a> DeepSeekMoE</h1>
+<p>更小（多）的专家 + 共享专家</p>
+<p>2B 实验</p>
+<h1 id="deepseekmath"><a class="markdownIt-Anchor" href="#deepseekmath"></a> DeepSeekMath</h1>
+<h1 id="deepseek-v2"><a class="markdownIt-Anchor" href="#deepseek-v2"></a> DeepSeek-V2</h1>
+<h1 id="deepseek-v25"><a class="markdownIt-Anchor" href="#deepseek-v25"></a> DeepSeek-V2.5</h1>
+<h1 id="deepseek-v3"><a class="markdownIt-Anchor" href="#deepseek-v3"></a> DeepSeek-V3</h1>
+<h1 id="deepseek-r1"><a class="markdownIt-Anchor" href="#deepseek-r1"></a> DeepSeek-R1</h1>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/5982b47d.html" rel="prev" title="PPO">
+                  <i class="fa fa-angle-left"></i> PPO
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/82259066.html" rel="next" title="Ray Direct Transport (RDT)">
+                  Ray Direct Transport (RDT) <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">421k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">6:22</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

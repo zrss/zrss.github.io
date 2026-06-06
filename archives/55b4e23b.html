@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"hide","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="MiniMax M2 系列技术报告的标题是 The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence。 NVIDIA 也有一篇部署侧性能文章：MiniMax M2.7 Advances Scalable Agentic Workflows on NVIDIA Platforms for Comple">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MiniMax M2 Series 技术报告阅读">
+<meta property="og:url" content="https://zrss.github.io/archives/55b4e23b.html">
+<meta property="og:site_name" content="MegaThinking">
+<meta property="og:description" content="MiniMax M2 系列技术报告的标题是 The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence。 NVIDIA 也有一篇部署侧性能文章：MiniMax M2.7 Advances Scalable Agentic Workflows on NVIDIA Platforms for Comple">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-04T23:20:00.000Z">
+<meta property="article:modified_time" content="2026-06-04T16:04:51.591Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="llm">
+<meta property="article:tag" content="moe">
+<meta property="article:tag" content="rl">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/55b4e23b.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/55b4e23b.html","path":"archives/55b4e23b.html","title":"MiniMax M2 Series 技术报告阅读"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MiniMax M2 Series 技术报告阅读 | MegaThinking</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">MegaThinking</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text"> 模型参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#moe-%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text"> MoE 结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attention-full-attention"><span class="nav-number">3.</span> <span class="nav-text"> Attention: full attention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mtp"><span class="nav-number">4.</span> <span class="nav-text"> MTP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pre-training-%E6%95%B0%E6%8D%AE"><span class="nav-number">5.</span> <span class="nav-text"> Pre-training 数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#post-training-%E6%95%B0%E6%8D%AE"><span class="nav-number">6.</span> <span class="nav-text"> Post-training 数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#agentic-coding"><span class="nav-number">6.1.</span> <span class="nav-text"> Agentic Coding</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#agentic-cowork"><span class="nav-number">6.2.</span> <span class="nav-text"> Agentic Cowork</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reasoning-%E5%92%8C-general-data"><span class="nav-number">6.3.</span> <span class="nav-text"> Reasoning 和 general data</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sft-interleaved-thinking"><span class="nav-number">7.</span> <span class="nav-text"> SFT: interleaved thinking</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#forge"><span class="nav-number">8.</span> <span class="nav-text"> Forge</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">8.1.</span> <span class="nav-text"> 是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rl-%E7%AE%97%E6%B3%95%E5%92%8C-reward"><span class="nav-number">8.2.</span> <span class="nav-text"> RL 算法和 reward</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#windowed-fifo"><span class="nav-number">8.3.</span> <span class="nav-text"> Windowed FIFO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#prefix-tree-merging"><span class="nav-number">8.4.</span> <span class="nav-text"> Prefix tree merging</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rollout-%E4%BE%A7%E6%8E%A8%E7%90%86%E4%BC%98%E5%8C%96"><span class="nav-number">8.5.</span> <span class="nav-text"> Rollout 侧推理优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mtp-speculative-decoding"><span class="nav-number">8.5.1.</span> <span class="nav-text"> MTP speculative decoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#prefill-decode-disaggregation"><span class="nav-number">8.5.2.</span> <span class="nav-text"> Prefill-decode disaggregation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#global-l3-kv-cache-pool"><span class="nav-number">8.5.3.</span> <span class="nav-text"> Global L3 KV cache pool</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD"><span class="nav-number">8.6.</span> <span class="nav-text"> 训练系统性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%9E%B6%E6%9E%84%E6%8E%A8%E6%96%AD"><span class="nav-number">8.7.</span> <span class="nav-text"> 实现架构推断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">9.</span> <span class="nav-text"> 性能数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#agent-task-%E8%BF%90%E8%A1%8C%E8%AE%BE%E7%BD%AE"><span class="nav-number">9.1.</span> <span class="nav-text"> Agent task 运行设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#self-evolution-%E5%86%85%E9%83%A8%E6%95%88%E7%8E%87"><span class="nav-number">9.2.</span> <span class="nav-text"> Self-evolution 内部效率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E4%BE%A7%E6%8E%A8%E7%90%86%E6%80%A7%E8%83%BD"><span class="nav-number">9.3.</span> <span class="nav-text"> 部署侧推理性能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E6%A0%87"><span class="nav-number">10.</span> <span class="nav-text"> 指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#m27-%E7%9A%84-self-evolution"><span class="nav-number">11.</span> <span class="nav-text"> M2.7 的 self-evolution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">12.</span> <span class="nav-text"> 总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">140</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/55b4e23b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="MiniMax M2 Series 技术报告阅读 | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MiniMax M2 Series 技术报告阅读
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-06-04 23:20:00 / 修改时间：16:04:51" itemprop="dateCreated datePublished" datetime="2026-06-04T23:20:00Z">2026-06-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>16k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>MiniMax M2 系列技术报告的标题是 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2605.26494">The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence</a>。</p>
+<p>NVIDIA 也有一篇部署侧性能文章：<a target="_blank" rel="noopener" href="https://developer.nvidia.com/blog/minimax-m2-7-advances-scalable-agentic-workflows-on-nvidia-platforms-for-complex-ai-applications/">MiniMax M2.7 Advances Scalable Agentic Workflows on NVIDIA Platforms for Complex AI Applications</a>。</p>
+<p>一句话概括：M2 系列不是单纯把模型参数做大，而是在尝试把 <strong>低激活 MoE backbone、agent 数据 pipeline、agent-native RL 系统 Forge、长上下文推理优化</strong> 组合成一套面向真实 agent workflow 的训练和部署方案。</p>
+<p>本文主要整理四类信息：</p>
+<ul>
+<li>模型参数和结构；</li>
+<li>pre-training / post-training 用了哪些技术；</li>
+<li>Forge 这套 RL 工程系统是什么；</li>
+<li>M2.7 的指标到底提升在哪里。</li>
+</ul>
+<h2 id="模型参数"><a class="markdownIt-Anchor" href="#模型参数"></a> 模型参数</h2>
+<p>先看 M2 backbone 的基本配置。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th style="text-align:right">报告口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>架构</td>
+<td style="text-align:right">decoder-only Transformer + MoE</td>
+</tr>
+<tr>
+<td>总参数</td>
+<td style="text-align:right">229.9B</td>
+</tr>
+<tr>
+<td>每 token 激活参数</td>
+<td style="text-align:right">9.8B</td>
+</tr>
+<tr>
+<td>层数</td>
+<td style="text-align:right">62</td>
+</tr>
+<tr>
+<td>hidden size</td>
+<td style="text-align:right">3072</td>
+</tr>
+<tr>
+<td>vocab size</td>
+<td style="text-align:right">200064</td>
+</tr>
+<tr>
+<td>MoE experts</td>
+<td style="text-align:right">256 fine-grained experts</td>
+</tr>
+<tr>
+<td>每 token 激活专家数</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td>attention</td>
+<td style="text-align:right">full attention</td>
+</tr>
+<tr>
+<td>query heads</td>
+<td style="text-align:right">48</td>
+</tr>
+<tr>
+<td>KV heads</td>
+<td style="text-align:right">8, GQA</td>
+</tr>
+<tr>
+<td>position embedding</td>
+<td style="text-align:right">RoPE</td>
+</tr>
+<tr>
+<td>native context</td>
+<td style="text-align:right">192K tokens</td>
+</tr>
+<tr>
+<td>pre-training tokens</td>
+<td style="text-align:right">29.2T</td>
+</tr>
+</tbody>
+</table>
+<p>这个配置体现出一个明确取舍：总参数很大，但每 token 激活参数控制在 10B 左右。agent task 的 token 消耗通常较高，多轮工具调用、长上下文、观察结果、文件内容都会增加 context 长度。因此，每 token 激活成本会直接影响推理和 RL rollout 成本。</p>
+<p>因此，M2 的参数信息需要同时看 total params 和 activated params：<strong>229.9B total params / 9.8B activated params</strong>。</p>
+<h2 id="moe-结构"><a class="markdownIt-Anchor" href="#moe-结构"></a> MoE 结构</h2>
+<p>M2 的 FFN 层使用 MoE。报告里强调了三个设计：</p>
+<ul>
+<li>fine-grained experts；</li>
+<li>sigmoid gating；</li>
+<li>expert bias。</li>
+</ul>
+<p>fine-grained experts 的意思是使用更多、更小的 experts。M2 使用 256 个 experts，每 token 激活 8 个。这样增加了 expert 组合的多样性，也可以降低不同设备之间 expert utilization 的方差。</p>
+<p>sigmoid gating 和常见 softmax top-k gating 的区别在于：softmax 有 zero-sum constraint，一个 expert 得分高，其他 expert 得分就会相对被压下去；sigmoid 则是每个 expert 独立打分。报告认为这样可以让多个 expert 同时以较高置信度被激活，routing dynamics 更平滑。</p>
+<p>expert bias 则是在 gating score 上加入 per-expert learnable bias，用来改善 load balancing，并减少对 auxiliary load-balancing loss 的依赖。</p>
+<p>报告给了一个小规模消融实验：17.8B total params，2B activated params，500B training tokens。</p>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th style="text-align:right">MATH</th>
+<th style="text-align:right">MMLU</th>
+<th style="text-align:right">ARC-C</th>
+<th style="text-align:right">KorBench</th>
+<th style="text-align:right">HumanEval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>baseline</td>
+<td style="text-align:right">19.6</td>
+<td style="text-align:right">39.8</td>
+<td style="text-align:right">27.4</td>
+<td style="text-align:right">14.1</td>
+<td style="text-align:right">29.7</td>
+</tr>
+<tr>
+<td>+ MTP</td>
+<td style="text-align:right">21.3</td>
+<td style="text-align:right">39.7</td>
+<td style="text-align:right">27.5</td>
+<td style="text-align:right">15.0</td>
+<td style="text-align:right">30.1</td>
+</tr>
+<tr>
+<td>+ fine-grained experts</td>
+<td style="text-align:right">24.1</td>
+<td style="text-align:right">40.2</td>
+<td style="text-align:right">27.8</td>
+<td style="text-align:right">14.8</td>
+<td style="text-align:right">32.5</td>
+</tr>
+</tbody>
+</table>
+<p>这里 HumanEval 和 MATH 的提升比较明显。</p>
+<h2 id="attention-full-attention"><a class="markdownIt-Anchor" href="#attention-full-attention"></a> Attention: full attention</h2>
+<p>M2 使用 full attention，而不是 hybrid SWA、linear attention 或 sparse attention。</p>
+<p>这里的 full attention 需要和 causal attention 分开理解。M2 是 decoder-only language model，所以 attention 仍然是 causal 的：当前位置只能看过去和当前位置，不能看未来。full attention 指的是在 causal mask 下，每个 token 可以看完整历史 token，而不是只看一个局部 sliding window。</p>
+<p>也就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">causal full attention:</span><br><span class="line">token t can attend to token 1 ... t</span><br><span class="line"></span><br><span class="line">causal sliding-window attention:</span><br><span class="line">token t can attend to token max(1, t - W) ... t</span><br></pre></td></tr></table></figure>
+<p>报告提到，MiniMax 对 hybrid SWA 做了多组继续预训练实验，包括 SWA/full attention 比例、RoPE 设置、layer 内和 layer 间混合、sink token 等。但在 retrieval、多跳推理、in-context learning 和长上下文 agent task 上，SWA variant 有明显损失。</p>
+<p>预训练阶段的一组对比：</p>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th style="text-align:right">full attention</th>
+<th style="text-align:right">hybrid SWA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HELMET ICL</td>
+<td style="text-align:right">75.8</td>
+<td style="text-align:right">72.7</td>
+</tr>
+<tr>
+<td>MMLU</td>
+<td style="text-align:right">85.5</td>
+<td style="text-align:right">85.6</td>
+</tr>
+<tr>
+<td>MATH</td>
+<td style="text-align:right">60.3</td>
+<td style="text-align:right">60.3</td>
+</tr>
+<tr>
+<td>RULER 128K CWE</td>
+<td style="text-align:right">90.0</td>
+<td style="text-align:right">72.0</td>
+</tr>
+<tr>
+<td>RULER 128K MQ</td>
+<td style="text-align:right">99.0</td>
+<td style="text-align:right">93.0</td>
+</tr>
+<tr>
+<td>RULER 32K CWE</td>
+<td style="text-align:right">99.0</td>
+<td style="text-align:right">99.0</td>
+</tr>
+<tr>
+<td>RULER 32K MQ</td>
+<td style="text-align:right">99.0</td>
+<td style="text-align:right">99.0</td>
+</tr>
+<tr>
+<td>MTOB K-e Bleurt</td>
+<td style="text-align:right">60.0</td>
+<td style="text-align:right">45.0</td>
+</tr>
+<tr>
+<td>MTOB e-k ChrF</td>
+<td style="text-align:right">44.8</td>
+<td style="text-align:right">27.2</td>
+</tr>
+</tbody>
+</table>
+<p>从这组数据看，32K 内部分任务中 SWA 与 full attention 差距不大；到 128K retrieval 和 long-context ICL 时，局部窗口的覆盖限制开始体现出来。</p>
+<p>对于 agent 任务，长上下文通常包含任务描述、工具输出、失败尝试、文件内容、之前的 reasoning state 等信息。如果 attention 机制不能可靠访问完整历史，后续 planning 和 self-correction 会受到影响。</p>
+<h2 id="mtp"><a class="markdownIt-Anchor" href="#mtp"></a> MTP</h2>
+<p>M2 使用 Multi-Token Prediction。预训练阶段先使用单个 MTP module，K = 1，MTP loss weight 从 0.3 anneal 到 0.1。</p>
+<p>在 continued pre-training 的 decay phase，M2 把 MTP module 扩展到 K = 3，用于 multi-step speculative decoding。扩展时不是随机初始化，而是从 main model 复制权重初始化。报告里的解释是：</p>
+<ul>
+<li>copy initialization 收敛更快；</li>
+<li>随机初始化会带来较高 loss，并短暂干扰 main model；</li>
+<li>先冻结 main model 训练 MTP modules，loss 稳定后再 joint training。</li>
+</ul>
+<p>所以 MTP 在 M2 里有两层作用：</p>
+<ul>
+<li>训练阶段提供更丰富的预测信号；</li>
+<li>推理阶段作为 speculative decoding 的 draft path。</li>
+</ul>
+<p>这个点和 Forge 也有关。RL rollout 期间 policy 在持续更新，如果 MTP draft model 不跟着适配，acceptance rate 会下降。报告提到 Forge 里 MTP modules 会通过 top-K KL divergence loss 和 RL policy 一起 co-train，从而维持 speculative decoding 的效果。</p>
+<h2 id="pre-training-数据"><a class="markdownIt-Anchor" href="#pre-training-数据"></a> Pre-training 数据</h2>
+<p>预训练总量是 29.2T tokens。</p>
+<p>报告把它分成：</p>
+<ul>
+<li>constant phase: 19.9T tokens；</li>
+<li>decay phase: 9.3T tokens。</li>
+</ul>
+<p>数据来源包括 web documents、academic literature、books、programming code、structured QA。code、math、STEM 会相对自然分布上采样。</p>
+<p>长上下文扩展是多阶段完成的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">8K -&gt; 32K -&gt; 192K</span><br></pre></td></tr></table></figure>
+<p>长上下文数据主要来自：</p>
+<ul>
+<li>high-quality code concatenation；</li>
+<li>naturally long-form PDF documents；</li>
+<li>thematically related document packing。</li>
+</ul>
+<p>从报告结构看，M2 的 pre-training 不只服务于通用 base model 能力，也为后续 agent post-training 提供 192K context backbone。</p>
+<h2 id="post-training-数据"><a class="markdownIt-Anchor" href="#post-training-数据"></a> Post-training 数据</h2>
+<p>报告真正花篇幅的地方其实是 post-training data collection。</p>
+<p>M2 系列的 post-training data 不是普通 chat 数据，而是大量带 workspace、tool、environment、verifiable reward 或 artifact-aligned feedback 的 agent trajectories。</p>
+<p>主要分几类：</p>
+<ul>
+<li>Agentic Coding；</li>
+<li>Agentic Cowork；</li>
+<li>Reasoning-intensive tasks；</li>
+<li>General conversation and writing；</li>
+<li>Role-play and persona coherence。</li>
+</ul>
+<p>但是这里有一个需要注意的点：<strong>报告没有披露 post-training 的具体数据规模</strong>。</p>
+<p>也就是说，论文写了很多 pipeline 和数据类型，但没有给出类似下面这样的硬数字：</p>
+<ul>
+<li>SFT tokens 数；</li>
+<li>RL tokens 数；</li>
+<li>agent trajectories 数；</li>
+<li>SWE/AppDev/Terminal/Cowork 各域样本量；</li>
+<li>rejection sampling 前后 pass rate；</li>
+<li>每个 stage 的 domain mixing ratio。</li>
+</ul>
+<p>报告使用的是 large-scale、corpus、trajectories、at scale 这类描述。能看到的硬规模数字主要集中在 pre-training：29.2T tokens，其中 constant phase 19.9T tokens，decay phase 9.3T tokens。</p>
+<p>因此，post-training 部分可确认的信息是：<strong>M2 披露了 post-training 数据构造方法和验证信号，但没有披露各类 post-training data 的样本规模和 token budget</strong>。</p>
+<h3 id="agentic-coding"><a class="markdownIt-Anchor" href="#agentic-coding"></a> Agentic Coding</h3>
+<p>Agentic Coding 又分 SWE、AppDev、Terminal-Gym。</p>
+<p>SWE pipeline 从 GitHub PR 和 issue 出发，过滤 merged PR、有测试的 PR，再由 agent 构建 Docker environment。之后按 PR 类型做 task routing，比如 bug fix、feature addition、performance optimization、test/refactor 等。</p>
+<p>这里最重要的是 reward construction。不同任务类型用不同的验证信号：</p>
+<ul>
+<li>bug fix: F2P / P2P tests；</li>
+<li>feature addition: newly added test points；</li>
+<li>performance optimization: stable and significant performance difference；</li>
+<li>code review: secondary LLM consistency check。</li>
+</ul>
+<p>AppDev 则是从零构建应用。它用 expert-in-the-loop 生成 meta queries 和 system prompts，再通过 Agent-as-a-Verifier 做 rejection sampling。AaaV 分三层验证：</p>
+<ul>
+<li>execution layer: 文件、依赖、构建、服务启动、JS error；</li>
+<li>interaction layer: Playwright 检查核心交互；</li>
+<li>visual aesthetics layer: 布局、层次、配色、现代 UI 质量。</li>
+</ul>
+<p>Terminal-Gym 则从 Stack Overflow 出发，筛选 terminal-compatible、scriptable、verifiable、Docker-relevant 的任务，然后生成 Dockerfile 和 test script，再做 query evolution 和 difficulty calibration。</p>
+<p>这几个 pipeline 的共同点是：数据不只包含最终答案，还包含可执行环境，使结果能够被测试、运行或交互验证。</p>
+<h3 id="agentic-cowork"><a class="markdownIt-Anchor" href="#agentic-cowork"></a> Agentic Cowork</h3>
+<p>Cowork 覆盖的东西更接近知识工作者任务：</p>
+<ul>
+<li>deep search and open-web research；</li>
+<li>knowledge-worker office tasks；</li>
+<li>financial analysis and spreadsheet operations；</li>
+<li>slide generation and editing。</li>
+</ul>
+<p>这部分的 reward 更复杂。有些任务可以 deterministic check，比如 spreadsheet cell value match、formula recalculation；有些任务需要 rubric-based judge，比如 report、slides、open-ended financial reasoning。</p>
+<p>这个方向是 M2.7 相比 M2.5 提升很明显的地方。后面的指标表里，GDPval-AA、MEWC v2、Finance Modeling Pro 都涨得很大。</p>
+<h3 id="reasoning-和-general-data"><a class="markdownIt-Anchor" href="#reasoning-和-general-data"></a> Reasoning 和 general data</h3>
+<p>Reasoning data 主要强调 scaling：</p>
+<ul>
+<li>query-side scaling: 扩展题目覆盖；</li>
+<li>response-side scaling: 一个 query 采多个正确解法；</li>
+<li>training-side scaling: 在固定计算预算下调 query expansion / response expansion 比例；</li>
+<li>QA: query、verifier、answer、response 多阶段质量控制。</li>
+</ul>
+<p>General conversation and writing 则用于保持通用对话、写作、多轮理解，以及 tool-augmented / tool-free 两种能力。</p>
+<h2 id="sft-interleaved-thinking"><a class="markdownIt-Anchor" href="#sft-interleaved-thinking"></a> SFT: interleaved thinking</h2>
+<p>M2 的 SFT 目标之一是训练 interleaved thinking。</p>
+<p>普通 long CoT 往往是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">thinking -&gt; final answer</span><br></pre></td></tr></table></figure>
+<p>Agent 场景更像：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">thinking -&gt; tool call -&gt; observation -&gt; thinking -&gt; tool call -&gt; observation -&gt; final answer</span><br></pre></td></tr></table></figure>
+<p>报告把它称为 Plan-Act-Reflect loop。关键点是 reasoning state persistence：前一轮的 thinking block 会保留在 history 里，进入下一轮上下文。</p>
+<p>这和 stateless per-turn reasoning 不一样。如果每轮工具调用后都把之前的 reasoning 丢掉，模型就要反复重新推导状态，长程任务里容易 drift。</p>
+<p>这个地方也能解释为什么 M2 更坚持 full attention：如果 thinking、action、observation 都保留在 192K context 里，模型必须能可靠地访问完整历史。</p>
+<h2 id="forge"><a class="markdownIt-Anchor" href="#forge"></a> Forge</h2>
+<h3 id="是什么"><a class="markdownIt-Anchor" href="#是什么"></a> 是什么</h3>
+<p>Forge 是 M2 系列的 agent-native RL training system。</p>
+<p>它不是模型结构，也不是单个 RL 算法，而是一套让长程 agent trajectories 能进入 RL 训练闭环的工程系统。</p>
+<p>普通 RLHF 或 response-level RL 常见输入是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prompt -&gt; response -&gt; reward</span><br></pre></td></tr></table></figure>
+<p>Agent RL 的输入则像：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">task</span><br><span class="line">-&gt; reasoning</span><br><span class="line">-&gt; tool call</span><br><span class="line">-&gt; observation</span><br><span class="line">-&gt; reasoning</span><br><span class="line">-&gt; tool call</span><br><span class="line">-&gt; observation</span><br><span class="line">-&gt; artifact / test result / final answer</span><br><span class="line">-&gt; reward</span><br></pre></td></tr></table></figure>
+<p>轨迹可能有几十 K 到 192K tokens，中间还有工具调用、Docker、browser、spreadsheet、file system、context management、sub-agent delegation。这要求训练系统处理长序列、异步环境和复杂状态转移。</p>
+<p>Forge 的系统拆分为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Agent Side</span><br><span class="line">  run agent loop</span><br><span class="line">  manage context</span><br><span class="line">  call tools / envs</span><br><span class="line">  produce trajectories</span><br><span class="line"></span><br><span class="line">Middleware</span><br><span class="line">  Gateway Server</span><br><span class="line">  Data Pool</span><br><span class="line"></span><br><span class="line">Training / Inference Side</span><br><span class="line">  Rollout Engine</span><br><span class="line">  Train Engine</span><br></pre></td></tr></table></figure>
+<p>Agent Side 只负责跑任务和记录轨迹。Rollout Engine 负责高吞吐生成。Train Engine 负责策略更新。Gateway 和 Data Pool 把二者解耦。</p>
+<p>一个重要抽象是：Forge 把 LLM generation interface 作为 policy 边界，边界之外的 tool execution、context management、memory access、agent harness 都视为 environment dynamics。</p>
+<p>这样它就可以支持两类 agent：</p>
+<ul>
+<li>white-box agent: 训练系统知道它怎么做 context management；</li>
+<li>black-box agent: 训练系统只看到每次发给模型的 state 和模型输出。</li>
+</ul>
+<p>black-box support 很重要。因为真实 agent scaffold 往往各有各的 context rewrite、memory、sub-agent、tool protocol。如果要求所有 agent 都白盒接入，系统扩展性会很差。</p>
+<h3 id="rl-算法和-reward"><a class="markdownIt-Anchor" href="#rl-算法和-reward"></a> RL 算法和 reward</h3>
+<p>M2 系列 RL 使用 CISPO，Clipped Importance Sampling Policy Optimization。报告里给了 objective 和 importance sampling ratio 的 clipped form。</p>
+<p>我先不展开公式，抓几个工程上更重要的点：</p>
+<p>第一，训练样本是 <code>(state, action)</code> pair。一个 action 是一次 LLM completion，可以包含 reasoning、tool invocation、context operation、sub-agent communication 等。</p>
+<p>第二，credit assignment 仍然按完整 episode 做。也就是说，每个 step 的 advantage 要结合整条 trajectory 的结果。</p>
+<p>第三，reward 不是只有最终 outcome，而是 composite reward：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">r_t = alpha * process_reward_t</span><br><span class="line">    + beta * speed_reward_t</span><br><span class="line">    + performance_reward_t</span><br></pre></td></tr></table></figure>
+<p>process reward 用于中间行为，比如工具调用格式、语言混杂、reasoning 结构。</p>
+<p>speed reward 用于 wall-clock completion time。这个点很 agent：两个 trajectory 都完成任务，但一个串行慢慢跑，一个并行调用工具，后者对产品更有价值。</p>
+<p>performance reward 则是最终任务质量，比如测试通过、artifact 正确、rubric score。</p>
+<p>第四，使用 mixed-domain RL。每个 stage 同时混合 reasoning、coding、agent、general 四类数据。这样可以降低单一 agent task RL 造成的 catastrophic forgetting。</p>
+<h3 id="windowed-fifo"><a class="markdownIt-Anchor" href="#windowed-fifo"></a> Windowed FIFO</h3>
+<p>Agent rollout 有一个很现实的问题：任务完成时间差异巨大。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">simple API task: seconds</span><br><span class="line">coding task: minutes</span><br><span class="line">ML engineering task: hours</span><br></pre></td></tr></table></figure>
+<p>如果严格 FIFO，训练会被长任务卡住。<br />
+如果谁先完成就训练谁，前期 batch 会被短任务和简单任务主导，后期才出现长任务和难任务，训练分布会漂。</p>
+<p>Forge 用 Windowed FIFO 做折中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">queue = [T0, T1, T2, T3, T4, T5, ...]</span><br><span class="line">window = [T0, T1, T2, T3]</span><br></pre></td></tr></table></figure>
+<p>只允许训练系统消费 window 内已经完成的 trajectories。window 内可以乱序取，window 外即使已经完成也不能提前进入训练。</p>
+<p>论文里举的窗口大小例子是 <code>W = 0.3N</code>。这个策略牺牲一点点绝对吞吐，换来更稳定的数据分布。</p>
+<h3 id="prefix-tree-merging"><a class="markdownIt-Anchor" href="#prefix-tree-merging"></a> Prefix tree merging</h3>
+<p>Prefix tree merging 是 Forge 里最有工程味的优化之一。报告称它最高能带来 40x training speedup，并降低显存占用。</p>
+<p>Agent RL 训练中，很多 samples 共享长前缀。例如同一个 rollout group 里可能有：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sample 1 = long context + response A</span><br><span class="line">sample 2 = long context + response B</span><br><span class="line">sample 3 = long context + response C</span><br></pre></td></tr></table></figure>
+<p>或者同一条 agent trajectory 被拆成多个 step：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">s1 -&gt; a1</span><br><span class="line">s2 = s1 + a1 + obs1 -&gt; a2</span><br><span class="line">s3 = s2 + a2 + obs2 -&gt; a3</span><br></pre></td></tr></table></figure>
+<p>如果每个 sample 独立 forward，<code>long context</code> 或历史轨迹会被反复计算。</p>
+<p>Prefix tree merging 把这些序列组织成一棵 prefix tree：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">long shared context</span><br><span class="line">├── response A</span><br><span class="line">├── response B</span><br><span class="line">└── response C</span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">context</span><br><span class="line">└── action1 + obs1</span><br><span class="line">    └── action2 + obs2</span><br><span class="line">        └── action3 + obs3</span><br></pre></td></tr></table></figure>
+<p>共享 prefix 只 forward 一次。到分叉点后，再分别计算 branch。forward 结束后，根据元数据把 tree 拆回原始 sample，loss 仍然按 sample 独立计算。</p>
+<p>它成立的原因是 causal attention：prefix token 的 hidden states 不依赖后续 branch tokens。后面的 token 可以看前面，前面的 token 不会看后面。</p>
+<p>概念伪代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">samples = [</span><br><span class="line">    ctx + resp_a,</span><br><span class="line">    ctx + resp_b,</span><br><span class="line">    ctx + resp_c,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">tree = build_prefix_tree(samples)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">forward_node</span>(<span class="params">node, parent_state</span>):</span></span><br><span class="line">    state = model_forward_segment(</span><br><span class="line">        tokens=node.tokens,</span><br><span class="line">        parent_state=parent_state,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> child <span class="keyword">in</span> node.children:</span><br><span class="line">        forward_node(child, state)</span><br><span class="line"></span><br><span class="line">forward_node(tree.root, <span class="literal">None</span>)</span><br><span class="line"></span><br><span class="line">loss = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> sample <span class="keyword">in</span> samples:</span><br><span class="line">    logits = reconstruct_logits(sample, tree)</span><br><span class="line">    loss += compute_loss(logits, sample.labels)</span><br><span class="line"></span><br><span class="line">loss.backward()</span><br></pre></td></tr></table></figure>
+<p>真实实现会复杂很多，要处理 attention mask、position ids、loss mask、MoE routing、activation checkpointing、分布式并行和 backward graph。但核心就是把训练 batch 从独立 sequence list 改成共享前缀树。</p>
+<p>这个优化和普通 sequence packing 不同。sequence packing 主要减少 padding；prefix tree merging 则是避免重复计算公共历史。对于 192K context 的 agent RL，这类重复计算会带来较高开销。</p>
+<h3 id="rollout-侧推理优化"><a class="markdownIt-Anchor" href="#rollout-侧推理优化"></a> Rollout 侧推理优化</h3>
+<p>Forge 还做了几类 inference acceleration。</p>
+<h4 id="mtp-speculative-decoding"><a class="markdownIt-Anchor" href="#mtp-speculative-decoding"></a> MTP speculative decoding</h4>
+<p>M2 的 MTP modules 可以生成 draft tokens，再由 main model 验证。RL 期间 policy 会更新，所以 MTP modules 也要跟着 co-train，否则 draft acceptance rate 会下降。</p>
+<h4 id="prefill-decode-disaggregation"><a class="markdownIt-Anchor" href="#prefill-decode-disaggregation"></a> Prefill-decode disaggregation</h4>
+<p>把 prefill 和 decode 分开调度。MoE 模型里 prefill 和 decode 的计算形态不同，混在一起容易互相干扰。拆开后可以分别采用更适合的 parallelism 策略。</p>
+<h4 id="global-l3-kv-cache-pool"><a class="markdownIt-Anchor" href="#global-l3-kv-cache-pool"></a> Global L3 KV cache pool</h4>
+<p>Agent 多轮交互里有大量共享 prefix。Forge 使用分布式 KV cache pool，提高 prefix cache hit rate。router 会在 queue delay 和 cache migration cost 之间做权衡。</p>
+<p>从报告描述看，Forge 里的 rollout engine 不只是离线采样服务，而是包含长上下文、KV cache、MoE serving、speculative decoding、prefill/decode separation、多版本权重同步等能力的推理系统。</p>
+<h3 id="训练系统性能"><a class="markdownIt-Anchor" href="#训练系统性能"></a> 训练系统性能</h3>
+<p>报告明确给出的硬数字是：prefix tree merging 最高可以达到 <strong>40x training speedup</strong>，同时降低 memory consumption，使更长 sequence 和更大 batch size 成为可能。</p>
+<p>其他 Forge 优化更多是定性描述，比如：</p>
+<ul>
+<li>Windowed FIFO 用于在 rollout throughput 和 distributional consistency 之间折中；</li>
+<li>MTP speculative decoding 用于提升 rollout generation throughput；</li>
+<li>prefill-decode disaggregation 用于提升 global throughput 并降低 tail latency；</li>
+<li>global L3 KV cache pool 用于提升 prefix cache hit rate。</li>
+</ul>
+<p>但是论文没有给出这些优化各自的 ablation 表，比如没有列出 Windowed FIFO 前后吞吐、GPU utilization、tail latency、KV hit rate、MTP acceptance rate 等数字。</p>
+<h3 id="实现架构推断"><a class="markdownIt-Anchor" href="#实现架构推断"></a> 实现架构推断</h3>
+<p>下面是基于报告描述的工程推断，不是官方源码，也不是论文披露的完整实现。</p>
+<pre>
+<code class="mermaid">
+sequenceDiagram
+participant T as Task Queue
+participant A as Agent Runner
+participant E as Tool &#x2F; Env Servers
+participant G as Gateway Server
+participant R as Rollout Engine
+participant D as Data Pool
+participant Tr as Train Engine
+
+T-&gt;&gt;A: task &#x2F; env spec
+loop agent rollout
+  A-&gt;&gt;G: completion request&lt;br&#x2F;&gt;state + tools + metadata
+  G-&gt;&gt;R: normalized request&lt;br&#x2F;&gt;model version attached
+  R--&gt;&gt;G: completion&lt;br&#x2F;&gt;tokens + logprobs
+  G--&gt;&gt;A: action &#x2F; tool call
+  A-&gt;&gt;E: execute tool call
+  E--&gt;&gt;A: observation &#x2F; artifact
+  A-&gt;&gt;D: state &#x2F; action &#x2F; observation
+  E-&gt;&gt;D: verification &#x2F; reward signal
+  R-&gt;&gt;D: model version &#x2F; logprobs
+end
+D-&gt;&gt;D: Windowed FIFO&lt;br&#x2F;&gt;filtering &#x2F; batching
+D-&gt;&gt;Tr: training batch
+Tr-&gt;&gt;Tr: prefix tree merging&lt;br&#x2F;&gt;CISPO update
+Tr--&gt;&gt;R: updated weights
+</code>
+</pre>
+<p>图里的关键边界是 Gateway：Agent Side 可以保持 scaffold 差异，Training / Inference Side 则通过统一的 completion 接口接收请求、记录元数据，并把 rollout 数据回流到 Data Pool。</p>
+<p>Prefix tree merging 可以单独画成下面这个形态：</p>
+<pre>
+<code class="mermaid">
+flowchart LR
+b1[&quot;before: ctx + a&quot;]
+b2[&quot;before: ctx + b&quot;]
+b3[&quot;before: ctx + c&quot;]
+
+ctx[&quot;after: shared ctx&quot;]
+a[&quot;branch a&quot;]
+b[&quot;branch b&quot;]
+c[&quot;branch c&quot;]
+
+b1 -. same prefix .-&gt; ctx
+b2 -. same prefix .-&gt; ctx
+b3 -. same prefix .-&gt; ctx
+
+ctx --&gt; a
+ctx --&gt; b
+ctx --&gt; c
+</code>
+</pre>
+<p>共享 prefix 只做一次 forward，分叉后的 response segment 分别计算；forward 结束后再根据元数据还原到原始 sample 计算 loss。</p>
+<p>根据 Forge 的训练需求，Data Pool 可能需要记录这些字段：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">trajectory_id</span><br><span class="line">task_id</span><br><span class="line">domain</span><br><span class="line">model_version</span><br><span class="line">states</span><br><span class="line">actions</span><br><span class="line">observations</span><br><span class="line">token_ids</span><br><span class="line">old_logprobs</span><br><span class="line">process_rewards</span><br><span class="line">final_reward</span><br><span class="line">wall_clock_time</span><br><span class="line">tool_calls</span><br><span class="line">artifact_paths</span><br><span class="line">verification_result</span><br></pre></td></tr></table></figure>
+<p>Train Engine 的处理流程可以抽象为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">trajectories = data_pool.fetch_windowed_fifo_batch()</span><br><span class="line"></span><br><span class="line">samples = []</span><br><span class="line"><span class="keyword">for</span> traj <span class="keyword">in</span> trajectories:</span><br><span class="line">    <span class="keyword">for</span> step <span class="keyword">in</span> traj.steps:</span><br><span class="line">        samples.append(&#123;</span><br><span class="line">            <span class="string">&quot;input_ids&quot;</span>: step.state_tokens,</span><br><span class="line">            <span class="string">&quot;target_ids&quot;</span>: step.action_tokens,</span><br><span class="line">            <span class="string">&quot;old_logprobs&quot;</span>: step.old_logprobs,</span><br><span class="line">            <span class="string">&quot;advantage&quot;</span>: compute_advantage(traj, step),</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">batch = prefix_tree_merge(samples)</span><br><span class="line">loss = cispo_loss(batch)</span><br><span class="line"></span><br><span class="line">loss.backward()</span><br><span class="line">optimizer.step()</span><br><span class="line"></span><br><span class="line">rollout_engine.sync_weights(model)</span><br></pre></td></tr></table></figure>
+<p>这里的关键是 old logprobs 和 model version。RL rollout 和 training 之间一定存在 policy lag，所以需要知道 trajectory 是哪个旧 policy 采样出来的，再通过 importance sampling ratio 做修正。</p>
+<h2 id="性能数据"><a class="markdownIt-Anchor" href="#性能数据"></a> 性能数据</h2>
+<p>M2 系列报告里其余性能数据分布比较散，和 Forge 训练系统性能分开看更清晰。</p>
+<h3 id="agent-task-运行设置"><a class="markdownIt-Anchor" href="#agent-task-运行设置"></a> Agent task 运行设置</h3>
+<p>这些不是系统吞吐，但可以反映任务成本：</p>
+<ul>
+<li>agent trajectories 最长可到 192K tokens，并可能包含 thousands of intermediate actions；</li>
+<li>rollout completion time 从 seconds 到 hours；</li>
+<li>Terminal-Bench 2.0 使用 8 vCPU / 16GB sandbox，2 小时 wall-clock timeout，4 trials；</li>
+<li>MLE Bench Lite 对 22 个 competitions 运行，每个 competition 在 single-A30 sandbox 中跑 24 小时，最终取 3 个 independent 24-hour trials 的平均 medal rate；</li>
+<li>VIBE-Pro、HyperTask、MM Claw、MEWC v2、Finance Modeling Pro 等多项 agent / artifact benchmark 使用 3 trials。</li>
+</ul>
+<h3 id="self-evolution-内部效率"><a class="markdownIt-Anchor" href="#self-evolution-内部效率"></a> Self-evolution 内部效率</h3>
+<ul>
+<li>M2.7 在 RL team workflow 中吸收 30% 到 50% 的 daily iteration workload；</li>
+<li>对内部 programming scaffold 做 100-round autonomous iteration；</li>
+<li>引入 loop detection 和更好的参数组合后，内部评估有 30% performance gain。</li>
+</ul>
+<p>这部分属于内部系统和内部评测，不是外部可复现 benchmark。</p>
+<h3 id="部署侧推理性能"><a class="markdownIt-Anchor" href="#部署侧推理性能"></a> 部署侧推理性能</h3>
+<p>来自 NVIDIA 技术博客，而不是 M2 论文主体。NVIDIA 提到在 Blackwell Ultra GPU 上，针对 MiniMax M2 系列在 vLLM / SGLang 集成 QK RMSNorm kernel 和 FP8 MoE kernel 后，在 1K/1K ISL/OSL dataset 上：</p>
+<ul>
+<li>vLLM throughput 最高提升 2.5x；</li>
+<li>SGLang throughput 最高提升 2.7x。</li>
+</ul>
+<p>这个数据属于部署工程部分，不应和 Forge 训练系统性能混在一起。Forge 是 post-training / RL infrastructure；NVIDIA 这里讲的是 open-source inference framework 的 serving optimization。</p>
+<h2 id="指标"><a class="markdownIt-Anchor" href="#指标"></a> 指标</h2>
+<p>论文 Table 4 给了 M2.7、M2.5 和几个闭源 frontier baseline 的对比。这里只摘 M2.7 和 M2.5。</p>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th style="text-align:right">M2.7</th>
+<th style="text-align:right">M2.5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SWE-bench Pro</td>
+<td style="text-align:right">56.2</td>
+<td style="text-align:right">55.4</td>
+</tr>
+<tr>
+<td>SWE-bench Multilingual</td>
+<td style="text-align:right">76.5</td>
+<td style="text-align:right">74.1</td>
+</tr>
+<tr>
+<td>Multi-SWE-bench</td>
+<td style="text-align:right">52.7</td>
+<td style="text-align:right">51.3</td>
+</tr>
+<tr>
+<td>NL2Repo</td>
+<td style="text-align:right">39.8</td>
+<td style="text-align:right">26.6</td>
+</tr>
+<tr>
+<td>Terminal-Bench 2.0</td>
+<td style="text-align:right">57.0</td>
+<td style="text-align:right">51.7</td>
+</tr>
+<tr>
+<td>MLE Bench Lite</td>
+<td style="text-align:right">66.6</td>
+<td style="text-align:right">51.5</td>
+</tr>
+<tr>
+<td>VIBE-Pro</td>
+<td style="text-align:right">55.6</td>
+<td style="text-align:right">54.2</td>
+</tr>
+<tr>
+<td>HyperTask</td>
+<td style="text-align:right">67.6</td>
+<td style="text-align:right">59.4</td>
+</tr>
+<tr>
+<td>BrowseComp</td>
+<td style="text-align:right">77.8</td>
+<td style="text-align:right">76.3</td>
+</tr>
+<tr>
+<td>Wide Search</td>
+<td style="text-align:right">75.2</td>
+<td style="text-align:right">70.3</td>
+</tr>
+<tr>
+<td>RISE</td>
+<td style="text-align:right">64.3</td>
+<td style="text-align:right">50.2</td>
+</tr>
+<tr>
+<td>GDPval-AA</td>
+<td style="text-align:right">50.0</td>
+<td style="text-align:right">35.0</td>
+</tr>
+<tr>
+<td>Toolathlon</td>
+<td style="text-align:right">46.3</td>
+<td style="text-align:right">38.3</td>
+</tr>
+<tr>
+<td>MM Claw</td>
+<td style="text-align:right">62.7</td>
+<td style="text-align:right">57.6</td>
+</tr>
+<tr>
+<td>MEWC v2</td>
+<td style="text-align:right">63.3</td>
+<td style="text-align:right">49.8</td>
+</tr>
+<tr>
+<td>Finance Modeling Pro</td>
+<td style="text-align:right">57.0</td>
+<td style="text-align:right">33.8</td>
+</tr>
+<tr>
+<td>AIME 2026</td>
+<td style="text-align:right">94.2</td>
+<td style="text-align:right">87.2</td>
+</tr>
+<tr>
+<td>GPQA-Diamond</td>
+<td style="text-align:right">89.8</td>
+<td style="text-align:right">85.2</td>
+</tr>
+<tr>
+<td>SciCode</td>
+<td style="text-align:right">47.0</td>
+<td style="text-align:right">43.0</td>
+</tr>
+<tr>
+<td>IFBench</td>
+<td style="text-align:right">76.0</td>
+<td style="text-align:right">72.0</td>
+</tr>
+<tr>
+<td>AA-LCR</td>
+<td style="text-align:right">72.0</td>
+<td style="text-align:right">65.0</td>
+</tr>
+<tr>
+<td>HLE</td>
+<td style="text-align:right">28.0</td>
+<td style="text-align:right">19.0</td>
+</tr>
+<tr>
+<td>MMLU-Pro</td>
+<td style="text-align:right">81.8</td>
+<td style="text-align:right">85.2</td>
+</tr>
+</tbody>
+</table>
+<p>从表中可以看到：</p>
+<ul>
+<li>M2.7 相比 M2.5 的大幅提升集中在 agent / cowork / office / MLE；</li>
+<li>Finance Modeling Pro 从 33.8 到 57.0；</li>
+<li>GDPval-AA 从 35.0 到 50.0；</li>
+<li>MEWC v2 从 49.8 到 63.3；</li>
+<li>MLE Bench Lite 从 51.5 到 66.6；</li>
+<li>MMLU-Pro 从 85.2 降到 81.8。</li>
+</ul>
+<p>这说明 M2.7 不是所有传统静态知识 benchmark 都提升。报告更强调的是：agent data pipeline 和 Forge RL 对真实 workflow benchmark 的提升。</p>
+<h2 id="m27-的-self-evolution"><a class="markdownIt-Anchor" href="#m27-的-self-evolution"></a> M2.7 的 self-evolution</h2>
+<p>报告里还提到 M2.7 的 self-evolution。</p>
+<p>MiniMax 的说法是，M2.7 可以在内部 Model Iteration System 里帮助 RL 团队：</p>
+<ul>
+<li>profile ongoing runs；</li>
+<li>read logs；</li>
+<li>diagnose metric anomalies；</li>
+<li>debug code；</li>
+<li>adjust configs；</li>
+<li>generate reports；</li>
+<li>modify agent scaffold。</li>
+</ul>
+<p>报告称它可以吸收 RL 团队日常 30% 到 50% 的 iteration workload。另一个例子是，M2.7 对内部 programming scaffold 做了 100-round autonomous iteration，引入 loop detection 和更好的参数组合，在内部评估上带来 30% performance gain。</p>
+<p>这部分高度依赖内部工作流和内部评测，应视为官方披露的内部案例，而不是外部可复现实验结论。</p>
+<h2 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h2>
+<p>M2 系列报告的重点不只是单个 benchmark，而是一套完整路线：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">low-activation MoE backbone</span><br><span class="line">-&gt; long-context full attention</span><br><span class="line">-&gt; MTP for training signal and speculative decoding</span><br><span class="line">-&gt; verifiable agent trajectory data</span><br><span class="line">-&gt; interleaved thinking SFT</span><br><span class="line">-&gt; Forge agent-native RL</span><br><span class="line">-&gt; rollout / training / serving co-optimization</span><br></pre></td></tr></table></figure>
+<p>如果只看参数，M2 是一个 229.9B total / 9.8B activated 的 MoE 模型。<br />
+如果看训练，它是一个围绕可验证 agent trajectories 做 post-training 的模型。<br />
+如果看工程，Forge 才是这篇报告里很关键的东西：它把 agent loop、推理服务、轨迹存储、reward、RL trainer 和权重同步接成一个系统。</p>
+<p>这也是 M2 系列和很多只讲模型结构的技术报告不同的地方。它把模型能力放在完整 agent workflow 里讲，重点不是“模型会不会回答”，而是“模型能不能在环境里把事情做完，并且这个训练闭环能不能规模化”。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/llm/" rel="tag"># llm</a>
+              <a href="/tags/moe/" rel="tag"># moe</a>
+              <a href="/tags/rl/" rel="tag"># rl</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/82259066.html" rel="prev" title="Ray Direct Transport (RDT)">
+                  <i class="fa fa-angle-left"></i> Ray Direct Transport (RDT)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/archives/6e5c9a21.html" rel="next" title="MAI-Thinking-1 技术报告阅读">
+                  MAI-Thinking-1 技术报告阅读 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">421k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">6:22</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
