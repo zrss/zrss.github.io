@@ -1360,7 +1360,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #9d5d1c;
+  background: #b00eff;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2866,6 +2866,9 @@ body {
 }
 .site-title {
   letter-spacing: 0;
+}
+.site-meta .site-subtitle {
+  display: block;
 }
 .post-body {
   line-height: 1.85;
