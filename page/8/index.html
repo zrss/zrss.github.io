@@ -147,7 +147,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">141</span>
+          <span class="site-state-item-count">142</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -175,6 +175,145 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/ac75c7e9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/ac75c7e9.html" class="post-title-link" itemprop="url">docker network</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-12-02 11:31:11" itemprop="dateCreated datePublished" datetime="2018-12-02T11:31:11Z">2018-12-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="docker-network"><a class="markdownIt-Anchor" href="#docker-network"></a> Docker Network</h1>
+<p>IBM 的几篇 Blog overall 的讲了一下</p>
+<p><strong>容器如何访问外部网络</strong></p>
+<p>通过 docker0 网桥的外发包经过 NAT 之后 src ip 变为主机 ip</p>
+<p><strong>外部网络如何访问容器</strong></p>
+<p>容器内的端口，可在容器启动时，通过 -p 参数映射到 host 上，这时 host 上的端口会随机分配。当然也可以通过 -p [container-port]:[host-port] 方式，指定映射到 host 的特定端口</p>
+<p>至于实现上也较为直接，若容器有 expose 端口，则 docker 会相应启动一个 docker-proxy 监听 host 上的 host 端口 (如上述例子中的 host-port)，外部流量到达 host-port 时，由 docker-proxy 转发至最终容器</p>
+<p>当然上述只是 docker network 的原生实现，docker 原生实现的不同 host 的 container 略去</p>
+<h1 id="flannel"><a class="markdownIt-Anchor" href="#flannel"></a> Flannel</h1>
+<p>如果在 k8s 生态中，docker container 跨 host 通信，早期版本多使用 Flannel 完成</p>
+<p><a target="_blank" rel="noopener" href="https://www.hi-linux.com/posts/30481.html">Flannel 原理</a></p>
+<p>Flannel 实现的是 overlay network，即基于已有的 underlay network，在其之上扩展报文字段，完成报文转发</p>
+<p>原理也比较好理解</p>
+<ul>
+<li>在 ETCD 中设置 Flannel 网段及子网范围</li>
+<li>多个 Host 上运行 Flannel daemon</li>
+<li>Flannel daemon 根据 ETCD 中记录的已分配子网，确定自己的子网，并注册至 ETCD 中</li>
+<li>Docker 根据 Flannel 划分的子网启动，docker0 地址从 Flannel 子网中分配得到，一般来说 Flannel0 地址为子网的第一个地址 (10.0.2.0)，docker0 地址为子网的第二个地址 (10.0.2.1)</li>
+</ul>
+<p>VM1 Container 1 至 VM2 Container 2 的报文转发过程</p>
+<p><a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">可参看该作者的一篇详细分析</a></p>
+<p>看上述链接吧，讲的非常好，图文并茂，下面我只是自我温习 😆 努力积累</p>
+<p><strong>VM1 Container 1</strong></p>
+<ul>
+<li>Container 1 报文中 src ip 为容器 ip，假设为 10.1.15.2/24，dst ip 为对端容器 ip，假设为 10.1.20.3/24</li>
+<li>报文从容器中的 veth0 发往 host 上的 veth pair (veth_XXX)</li>
+<li>kernel 根据 route 表将报文转发至 Flannel0 TUN</li>
+<li>Flannel0 接收到之后 overlay 的作用体现了，首先根据目的 ip 查询其所在 host 的 ip，封装一层 IP 报文，随后封装一层 UDP 报文，投递到对端 Flannel daemon 监听端口 8285。这个时候报文就能通过 underlay network 转发至对端 host 了</li>
+</ul>
+<p><strong>VM2 Container 2</strong></p>
+<ul>
+<li>报文到达当前 host 后，UDP 报文交由 Flannel daemon 处理</li>
+<li>Flannel daemon 交由 Flannel0 TUN 处理</li>
+<li>kernel 直接根据 route 表处理，转发至 docker0</li>
+<li>docker0 是网桥设备，所有 docker container 均连接在其之上，因此最后根据 container dst ip 转发至 dst container</li>
+</ul>
+<p>当然这是 Flannel 早期的版本，使用了 UDP 的报文封装，这样会有一些 packet 来回拷贝的开销</p>
+<p>Flannel 还支持 VxLan 的模式，看下它的原理，网络这块还是比较有意思</p>
+<p>这篇也很 nice <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-2-13fdc6c4e24c">An illustrated guide to Kubernetes Networking [Part 2]</a></p>
+<p>nice shot <a target="_blank" rel="noopener" href="https://medium.com/@ApsOps/an-illustrated-guide-to-kubernetes-networking-part-1-d1ede3322727">An illustrated guide to Kubernetes Networking [Part 1]</a></p>
+<p>这篇非常详细 … 蛤蛤</p>
+<p>ARP 协议</p>
+<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/computer-network-arp-works/">ARP</a></p>
+<p>Flannel <a target="_blank" rel="noopener" href="https://www.slideshare.net/enakai/how-vxlan-works-on-linux">VxLan</a></p>
+<h1 id="term"><a class="markdownIt-Anchor" href="#term"></a> Term</h1>
+<p>ref <a target="_blank" rel="noopener" href="https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c">Han’s blog</a></p>
+<ul>
+<li>TUN is a software interface implemented in linux kernel, it can pass raw ip packet between user program and the kernel</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1642,156 +1781,6 @@ Storage drivers allow you to create data in the writable layer of your container
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/bdc66cb7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/bdc66cb7.html" class="post-title-link" itemprop="url">Performance of golang (etcd)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-08-12 15:20:27" itemprop="dateCreated datePublished" datetime="2018-08-12T15:20:27Z">2018-08-12</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>3 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>golang profiling (即剖析)，golang 原生提供了 pprof 性能分析工具</p>
-<p>前段时间分析了一个 apiserver 处理请求性能较低的问题，正是使用了 pprof 确定了问题点，从而解决了该问题</p>
-<p>这次使用 etcd <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd">https://github.com/coreos/etcd</a> 来举个例子，关于 pprof 的使用及可视化，Ref 中提到了 golang 性能分析大名鼎鼎的几篇 blog，建议先行参考，看了之后会对 golang 性能分析有个 overall 的思路</p>
-<p>此篇并无太多 creative 之处</p>
-<h1 id="show-time"><a class="markdownIt-Anchor" href="#show-time"></a> Show time</h1>
-<p>之前提到 golang 中自带了 pprof 采集代码，而且启用它们也非常简单</p>
-<p>如果是一个 web server 的话，仅需要 import _ “net/http/pprof”，则会注册 pprof 相关的 handler</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ <span class="string">&quot;net/http/pprof&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        log.Println(http.ListenAndServe(<span class="string">&quot;localhost:6060&quot;</span>, <span class="literal">nil</span>))</span><br><span class="line">    &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>web server 启动后，即可调用 pprof 接口获取数据</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http:&#x2F;&#x2F;localhost:6060&#x2F;debug&#x2F;pprof&#x2F;profile -O profile-data</span><br></pre></td></tr></table></figure>
-<p>当然 curl 也行</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http:&#x2F;&#x2F;localhost:6060&#x2F;debug&#x2F;pprof&#x2F;profile -o profile-data</span><br></pre></td></tr></table></figure>
-<p>对于 etcd 来说，pprof 也已经集成，可通过启动参数指定开启</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;etcd --enable-pprof</span><br></pre></td></tr></table></figure>
-<p>当然对于非 web server 类的 app，也可以使用 runtime/pprof 包中的方法输出 pprof 数据</p>
-<h1 id="go-tool-pprof"><a class="markdownIt-Anchor" href="#go-tool-pprof"></a> go tool pprof</h1>
-<blockquote>
-<p>以 etcd v3.1.9 为例子, go1.10</p>
-</blockquote>
-<p>采样 10s cpu profile 数据</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http:&#x2F;&#x2F;localhost:2379&#x2F;debug&#x2F;pprof&#x2F;profile?seconds&#x3D;10 -o etcd-profile-10</span><br></pre></td></tr></table></figure>
-<p>使用 go tool pprof 分析</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ go tool pprof <span class="variable">$GOPATH</span>/src/github.com/coreos/etcd/bin/etcd etcd-profile-10</span><br><span class="line">File: etcd</span><br><span class="line">Type: cpu</span><br><span class="line">Time: Aug 12, 2018 at 11:45am (CST)</span><br><span class="line">Duration: 10s, Total samples = 40ms (  0.4%)</span><br><span class="line">Entering interactive mode (<span class="built_in">type</span> <span class="string">&quot;help&quot;</span> <span class="keyword">for</span> commands, <span class="string">&quot;o&quot;</span> <span class="keyword">for</span> options)</span><br></pre></td></tr></table></figure>
-<p>注意传入对应的二进制文件，否则可能无法找到相应的方法</p>
-<p>go tool pprof 常用命令 top / list，其中 list 方法是正则匹配的，能显示匹配上的方法的 profile 信息</p>
-<h1 id="secure-of-pprof"><a class="markdownIt-Anchor" href="#secure-of-pprof"></a> Secure of pprof</h1>
-<p>注意到之前均使用的是 http 的 Protocol 访问 pprof 接口，如果 server 是 https 该怎么办？</p>
-<p>搜索得知 golang 很快便会支持 go tool pprof with client certificates 了</p>
-<p>cmd/pprof: add HTTPS support with client certificates: <a target="_blank" rel="noopener" href="https://github.com/golang/go/issues/20939">https://github.com/golang/go/issues/20939</a></p>
-<p>Support HTTPS certs, keys and CAs: <a target="_blank" rel="noopener" href="https://github.com/google/pprof/pull/261">https://github.com/google/pprof/pull/261</a></p>
-<p>当然如果 server 不要求 client certificates 的话，可以如此使用 go tool pprof 获取数据（注意 https+insecure）</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go tool pprof -seconds 5 https+insecure://192.168.99.100:32473/debug/pprof/profile</span><br></pre></td></tr></table></figure>
-<p>如果要求 client certificates 的话，亦或是日常使用时，其实也没必要直接用 go tool pprof 获取数据，使用 wget / curl 同样可以下载，下载之后再使用 go tool pprof 或者是 go-torch 分析好了</p>
-<p>而 curl 显然是支持传入 ca.crt / tls.crt / tls.key 的</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --cacert ca.crt --cert ./tls.crt --key tls.key https://192.168.99.100:32473/debug/pprof/profile -O profile-data</span><br></pre></td></tr></table></figure>
-<h1 id="visual-pprof"><a class="markdownIt-Anchor" href="#visual-pprof"></a> Visual pprof</h1>
-<p>go tool pprof 命令行模式，并不是特别直观，如果可以图形化的展示各个方法的消耗情况，那么将能更快的确定问题所在</p>
-<ul>
-<li>graphviz</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install graphviz</span><br></pre></td></tr></table></figure>
-<p>安装 ok graphviz 之后</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ go tool pprof <span class="variable">$GOPATH</span>/src/github.com/coreos/etcd/bin/etcd etcd-profile-10</span><br><span class="line">File: etcd</span><br><span class="line">Type: cpu</span><br><span class="line">Time: Aug 12, 2018 at 11:45am (CST)</span><br><span class="line">Duration: 10s, Total samples = 40ms (  0.4%)</span><br><span class="line">Entering interactive mode (<span class="built_in">type</span> <span class="string">&quot;help&quot;</span> <span class="keyword">for</span> commands, <span class="string">&quot;o&quot;</span> <span class="keyword">for</span> options)</span><br><span class="line">(pprof) web</span><br></pre></td></tr></table></figure>
-<p>即可在浏览器中显示 .svg 文件，浏览器中 Ctrl+s 保存到本地，即可传阅</p>
-<p><img src="/images/web-pprof.svg" alt="web-pprof" /></p>
-<ul>
-<li>go-torch</li>
-</ul>
-<p>大名鼎鼎的火焰图 (flame-graph)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com&#x2F;uber&#x2F;go-torch</span><br></pre></td></tr></table></figure>
-<p>clone brandangregg 的火焰图生成脚本</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git@github.com:brendangregg&#x2F;FlameGraph.git</span><br></pre></td></tr></table></figure>
-<p>生成火焰图</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash-3.2$ <span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$GOPATH</span>/src/github.com/brendangregg/FlameGraph</span><br><span class="line">bash-3.2$</span><br><span class="line">bash-3.2$ <span class="variable">$GOPATH</span>/bin/go-torch --file <span class="string">&quot;torch.svg&quot;</span> etcd-profile-10</span><br><span class="line">INFO[13:12:17] Run pprof <span class="built_in">command</span>: go tool pprof -raw -seconds 30 etcd-profile-10</span><br><span class="line">INFO[13:12:17] Writing svg to torch.svg</span><br></pre></td></tr></table></figure>
-<p>浏览器打开 torch.svg 即可</p>
-<p><img src="/images/torch.svg" alt="torch" /></p>
-<p>个人觉得 flame-graph 更为直观，横向为各个方法消耗占比，纵向为调用栈上的各个方法消耗占比，一目了然，对应分析消耗较大的方法即可</p>
-<h1 id="ref"><a class="markdownIt-Anchor" href="#ref"></a> Ref</h1>
-<p>golang pprof <a target="_blank" rel="noopener" href="https://blog.golang.org/profiling-go-programs">https://blog.golang.org/profiling-go-programs</a></p>
-<p>pprof tools <a target="_blank" rel="noopener" href="http://colobu.com/2017/03/02/a-short-survey-of-golang-pprof/">http://colobu.com/2017/03/02/a-short-survey-of-golang-pprof/</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/9/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1815,13 +1804,13 @@ Storage drivers allow you to create data in the writable layer of your container
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">434k</span>
+    <span title="站点总字数">441k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:34</span>
+    <span title="站点阅读时长">6:41</span>
   </span>
 </div>
 

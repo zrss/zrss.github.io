@@ -147,7 +147,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">141</span>
+          <span class="site-state-item-count">142</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -175,6 +175,111 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/168d7bf9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/168d7bf9.html" class="post-title-link" itemprop="url">transparent huge page</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-06-30 12:53:00" itemprop="dateCreated datePublished" datetime="2024-06-30T12:53:00Z">2024-06-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>567</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>THP</p>
+<p><a target="_blank" rel="noopener" href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/</a></p>
+<p>增加 page 大小, 从而减少 TLB 大小; 由于 walk TLB 开销较大, 所以是个优化</p>
+<p>THP 会让 os 申请连续的内存空间大小, 但如果申请不到, 则 os 会开始 compact, reclaim or page out other pages;</p>
+<blockquote>
+<p>That process is expensive and could cause latency spikes (up to seconds)</p>
+</blockquote>
+<p><code>cat /proc/buddyinfo</code></p>
+<blockquote>
+<p>Each column represents the number of pages of a certain order which are<br />
+available.  In this case, there are 0 chunks of 2^0<em>PAGE_SIZE available in<br />
+ZONE_DMA, 4 chunks of 2^1</em>PAGE_SIZE in ZONE_DMA, 101 chunks of 2^4*PAGE_SIZE<br />
+available in ZONE_NORMAL, etc…</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://andorian.blogspot.com/2014/03/making-sense-of-procbuddyinfo.html">https://andorian.blogspot.com/2014/03/making-sense-of-procbuddyinfo.html</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1221,7 +1326,7 @@ decoder, 将整数编码转为字符串</p>
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-06-06 17:14:30" itemprop="dateModified" datetime="2026-06-06T17:14:30Z">2026-06-06</time>
+      <time title="修改时间：2026-06-07 04:27:32" itemprop="dateModified" datetime="2026-06-07T04:27:32Z">2026-06-07</time>
     </span>
 
   
@@ -1254,9 +1359,9 @@ decoder, 将整数编码转为字符串</p>
 <li>pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime</li>
 <li>pytorch 1.13, cuda 11.6.2, nccl 2.14.3</li>
 </ul>
-<p>这篇主要记录 NCCL 2.14.3 中 <code>net_ib</code> 和 RDMA 相关细节。关于 communicator 建链、transport 选择、<code>ncclConnInfo</code> 写入，以及建链后一次通信如何执行，可以参考：<a href="/archives/9e7a43b2.html">NCCL 建链与通信过程</a>。</p>
+<p>这篇主要记录 NCCL 2.14.3 中 <code>net_ib</code> 和 RDMA 相关细节。关于较新 NCCL <code>master</code> 分支中 communicator 建链、transport 选择、<code>ncclConnInfo</code> 写入，以及建链后一次通信如何执行，可以参考：<a href="/archives/9e7a43b2.html">NCCL 从建链到通信</a>。</p>
 <p>和新文的对应关系可以粗略理解为：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NCCL 建链与通信过程：</span><br><span class="line">  解释 NCCL 抽象层如何选择 NET transport、生成 ncclConnInfo、投递 proxy op。</span><br><span class="line"></span><br><span class="line">reading nccl：</span><br><span class="line">  展开 NET transport 下面的 ncclNetIb 实现，</span><br><span class="line">  重点看 QP、MR、FIFO、ibv_post_send、ibv_post_recv、ibv_poll_cq。</span><br></pre></td></tr></table></figure>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NCCL 从建链到通信：</span><br><span class="line">  解释较新 NCCL master 主流程中如何选择 NET transport、生成 ncclConnInfo、投递 proxy op。</span><br><span class="line"></span><br><span class="line">reading nccl：</span><br><span class="line">  展开 NET transport 下面的 ncclNetIb 实现，</span><br><span class="line">  重点看 QP、MR、FIFO、ibv_post_send、ibv_post_recv、ibv_poll_cq。</span><br></pre></td></tr></table></figure>
 <p>也就是说，新文回答“NET transport 在 NCCL 主流程中处于什么位置”，本文回答“NET/IB 具体如何通过 RDMA 完成发送和接收”。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&quot;import torch;print(torch.cuda.nccl.version())&quot;</span></span><br></pre></td></tr></table></figure>
 <h1 id="rdma-和网络相关知识"><a class="markdownIt-Anchor" href="#rdma-和网络相关知识"></a> rdma 和网络相关知识</h1>
@@ -1540,105 +1645,6 @@ decoder, 将整数编码转为字符串</p>
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/50758925.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/50758925.html" class="post-title-link" itemprop="url">wsl2 docker</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-03 11:32:15" itemprop="dateCreated datePublished" datetime="2023-05-03T11:32:15Z">2023-05-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>994</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ol>
-<li>参考 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/binaries/#install-static-binaries">https://docs.docker.com/engine/install/binaries/#install-static-binaries</a> 使用二进制方式安装 docker engine 18.09.9</li>
-<li>参考 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/windows/wsl/wsl-config#systemd-support">https://learn.microsoft.com/en-us/windows/wsl/wsl-config#systemd-support</a> 开启 wsl2 支持 systemd</li>
-<li>参考 <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/linux-postinstall/#configure-docker-to-start-on-boot-with-systemd">https://docs.docker.com/engine/install/linux-postinstall/#configure-docker-to-start-on-boot-with-systemd</a> 配置 docker engine systemd, systemd 配置文件 <a target="_blank" rel="noopener" href="https://github.com/moby/moby/tree/master/contrib/init/systemd">https://github.com/moby/moby/tree/master/contrib/init/systemd</a></li>
-<li>参考 <a target="_blank" rel="noopener" href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy">https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a> 配置 docker daemon proxy</li>
-</ol>
-<p>完成上述配置后发现 <code>docker info</code> 非常慢，并且尝试 <code>docker run</code> 容器镜像会有如下报错</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker: Error response from daemon: all SubConns are in TransientFailure, latest connection error: connection error: desc &#x3D; &quot;transport: Error while dialing dial unix:&#x2F;&#x2F;&#x2F;run&#x2F;containerd&#x2F;containerd.sock: timeout&quot;: unavailable.</span><br></pre></td></tr></table></figure>
-<p>参考 <a target="_blank" rel="noopener" href="https://github.com/sous-chefs/docker/issues/1062">https://github.com/sous-chefs/docker/issues/1062</a> 发现疑似 master 分支的 systemd 配置引入了不兼容修改，导致使用 master 分支的 systemd 配置，无法完全启动 docker engine 18.09.9。修改 systemd 配置为 <a target="_blank" rel="noopener" href="https://github.com/moby/moby/tree/v18.09.9/contrib/init/systemd">https://github.com/moby/moby/tree/v18.09.9/contrib/init/systemd</a> 后，<code>docker info</code> 以及 <code>docker run</code> 功能恢复正常</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1662,13 +1668,13 @@ decoder, 将整数编码转为字符串</p>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">434k</span>
+    <span title="站点总字数">441k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:34</span>
+    <span title="站点阅读时长">6:41</span>
   </span>
 </div>
 
