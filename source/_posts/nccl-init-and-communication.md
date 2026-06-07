@@ -17,9 +17,9 @@ date: 2026-06-07 00:11:01
 
 关于业务侧如何组织 communicator、rank / GPU placement 如何影响 NCCL clique、MNNVL clique 和通信顺序，可以参考：[业务侧配置与 NCCL clique](/archives/8a7d13c9.html)。
 
-# 总览
+## 总览
 
-## 阶段主线
+### 阶段主线
 
 主线可以压缩为：
 
@@ -38,7 +38,7 @@ topology / graph
 
 <img src="/images/nccl-connect-architecture.svg" alt="NCCL 建链架构图" width="100%">
 
-## 主要源码入口
+### 主要源码入口
 
 对应的主要文件：
 
@@ -62,7 +62,7 @@ topology / graph
 * `src/transport/shm.cc`
 * `src/transport/net.cc`
 
-## 与 reading nccl 的内容对照
+### 与 reading nccl 的内容对照
 
 [reading nccl](/archives/f62c2008.html) 可以看作本文中 NET/IB 传输部分的展开。本文描述 NCCL 的通用抽象和调用主线，`reading nccl` 更接近 `ncclNetIb` 的实现细节。
 
@@ -93,13 +93,13 @@ ncclNet -> ncclNetIb
   -> ibv_post_send / ibv_post_recv / ibv_poll_cq
 ```
 
-# 阅读路径
+## 阅读路径
 
 如果直接从 `initTransportsRank` 沿调用链展开，会同时涉及 topology、bootstrap、proxy、CUDA IPC、SHM、NET、GDR、PXN 等多个子系统。
 
 阅读时可以先按问题边界分层，再进入完整调用链。
 
-## 第一层：先看谁连谁
+### 第一层：先看谁连谁
 
 这一层只看 graph 层，不关心 P2P、SHM、NET。
 
@@ -139,7 +139,7 @@ channel->tree.down[]
 
 也就是说，这一层还没有真的建立连接，只是把通信图画出来。
 
-## 第二层：再看逻辑邻居如何变成待连接任务
+### 第二层：再看逻辑邻居如何变成待连接任务
 
 这一层看 `generic.cc` 和 `transport.cc` 的第一段。
 
@@ -175,7 +175,7 @@ comm->connectSend[peer]
 
 因此它可以视为待连接记录的生成步骤。
 
-## 第三层：看连接建立函数
+### 第三层：看连接建立函数
 
 这一层进入连接建立逻辑。
 
@@ -228,7 +228,7 @@ ncclConnInfo:
 
 这两个结构对应不同阶段：`ncclConnect` 属于 bootstrap 交换阶段，`ncclConnInfo` 属于 device 侧执行阶段。
 
-## 第四层：最后再分 transport 看细节
+### 第四层：最后再分 transport 看细节
 
 transport 细节可以作为最后一层阅读，第一阶段只关注 `setup` 和 `connect`。
 
@@ -272,7 +272,7 @@ NET:
 
 `proxyProgress` 主要用于运行时数据传输的进度推进，可以不纳入初始化建链的第一阶段阅读。
 
-## 最小闭环
+### 最小闭环
 
 最小阅读闭环可以只覆盖 ring：
 
@@ -305,11 +305,11 @@ transport.connect：根据对端 ncclConnect 建立连接
 ncclConnInfo：保存 device kernel 使用的连接信息
 ```
 
-# 建链流程
+## 建链流程
 
 建链流程可以按阶段阅读：先生成 channel 的逻辑邻居，再把逻辑邻居登记成待连接任务，随后选择 transport、交换 handle、填充 `ncclConnInfo`。
 
-## 生成逻辑邻居
+### 生成逻辑邻居
 
 初始化时，NCCL 先探测机器拓扑，计算 GPU、NIC、CPU 之间路径，然后搜索不同 collective algorithm 对应的 graph。
 
@@ -363,7 +363,7 @@ channel->tree.down[]
 
 注意，这一步只回答“谁和谁连”，还没有真的建立 CUDA IPC、SHM 或 NET 连接。
 
-## 记录待连接 bitmask
+### 记录待连接 bitmask
 
 以 ring 为例：
 
@@ -388,7 +388,7 @@ comm->connectSend[peer] |= 1ULL << channelId
 ncclTransportP2pSetup(comm, graph, connIndex)
 ```
 
-## 建立连接并写入 ncclConnInfo
+### 建立连接并写入 ncclConnInfo
 
 `ncclTransportP2pSetup` 可以拆成一个循环：
 
@@ -418,7 +418,7 @@ ncclTransportP2pSetup(comm, graph, connIndex)
 * `flags`
 * 部分 NET/GDR 场景下的 net device handle 和 memory handle
 
-## 选择 transport
+### 选择 transport
 
 transport 抽象在 `src/include/transport.h`：
 
@@ -463,7 +463,7 @@ struct ncclTransport* ncclTransports[NTRANSPORTS + 1] = {
 最后 NET
 ```
 
-### P2P transport
+#### P2P transport
 
 `src/transport/p2p.cc` 处理 GPU 之间可以直接或间接访问的场景。
 
@@ -487,7 +487,7 @@ connect 阶段：
 
 P2P 连接不一定是 A 与 B 直接连接。`p2pGetInfo` 可能选择 intermediate rank，形成 indirect P2P path。
 
-### SHM transport
+#### SHM transport
 
 `src/transport/shm.cc` 处理同 host 且共享 `/dev/shm` 的场景。
 
@@ -509,7 +509,7 @@ conn.tail
 conn.stepSize
 ```
 
-### NET transport
+#### NET transport
 
 `src/transport/net.cc` 是跨节点通信的主要 transport，也可能在同节点但拓扑要求走 NET 时使用。
 
@@ -542,7 +542,7 @@ conn.netDeviceHandle
 conn.mhandles[]
 ```
 
-## runtime connect
+### runtime connect
 
 另一个分支是 runtime connect：
 
@@ -559,7 +559,7 @@ comm->runtimeConn = comm->cuMemSupport && ncclParamRuntimeConnect();
 
 这也是为什么有时候读 `initTransportsRank` 会发现某些连接没有在 init 阶段直接发生。
 
-# 通信流程
+## 通信流程
 
 建链完成后，NCCL 不会在每次通信时重新选择 transport。建链阶段已经把每个 channel、peer、connIndex 对应的连接信息写入 `connector->conn`，并同步到 device side 的 `devPeers`。通信阶段复用这些连接信息，主要完成三件事：
 
@@ -573,7 +573,7 @@ proxy 线程在需要时推进 NET 或其它需要 CPU 参与的 transport
 
 <img src="/images/nccl-after-connect-communication.svg" alt="NCCL 建链后的通信过程" width="100%">
 
-## Host 侧生成 work
+### Host 侧生成 work
 
 一次 collective 或 P2P API 调用先被放入 communicator 的 planner。group launch 阶段会调用：
 
@@ -605,7 +605,7 @@ ncclLaunchKernel
 
 在这个阶段，host 侧主要负责“把本次通信描述清楚”。数据搬运发生在 device kernel 和 proxy progress 中。
 
-## Device kernel 消费连接信息
+### Device kernel 消费连接信息
 
 device kernel 拿到 work 后，会根据 collective 类型、algorithm、protocol 进入对应实现。
 
@@ -646,7 +646,7 @@ postPeer
 
 对于用户显式的 `ncclSend` / `ncclRecv`，device 侧路径在 `src/device/sendrecv.h`。send 侧循环调用 `directSend`，recv 侧循环调用 `directRecv`，同样通过 `Primitives` 使用建链阶段准备好的连接。
 
-## step 和 FIFO
+### step 和 FIFO
 
 `ncclConnInfo` 中的 `buffs`、`head`、`tail`、`connFifo`、`stepSize` 是通信阶段的关键状态。
 
@@ -671,7 +671,7 @@ copy / reduce
 进入下一个 slice
 ```
 
-## Proxy 推进 NET 等传输
+### Proxy 推进 NET 等传输
 
 如果当前连接是 GPU 可以直接访问的 P2P 路径，device primitive 可以直接读写对端可见的 buffer。
 
@@ -722,7 +722,7 @@ src/transport/net.cc
 更新 GPU 可见的状态，让 device kernel 继续读取
 ```
 
-## 建链和通信的边界
+### 建链和通信的边界
 
 二者的边界可以概括为：
 
@@ -735,7 +735,7 @@ src/transport/net.cc
   由 device kernel 和 proxy progress 按 step/FIFO 协议完成数据传输。
 ```
 
-# 小结
+## 小结
 
 NCCL 的建链和通信可以按两个阶段理解。
 
