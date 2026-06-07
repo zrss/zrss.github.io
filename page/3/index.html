@@ -147,7 +147,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-count">143</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,7 +158,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-count">75</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -175,6 +175,144 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/f3995990.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/f3995990.html" class="post-title-link" itemprop="url">pytorch 1.13 and nccl</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-03 12:27:15" itemprop="dateCreated datePublished" datetime="2023-05-03T12:27:15Z">2023-05-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>windows 11</li>
+<li>wsl2
+<ul>
+<li>ubuntu 18.04</li>
+<li>nvidia driver 531.68</li>
+<li>cuda 11.6.2</li>
+</ul>
+</li>
+</ul>
+<h1 id="pytorch-1131-docker-image"><a class="markdownIt-Anchor" href="#pytorch-1131-docker-image"></a> pytorch 1.13.1 docker image</h1>
+<p>docker image</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime</span><br></pre></td></tr></table></figure>
+<p>view nccl version of pytorch</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run -ti --rm pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime bash</span><br><span class="line"></span><br><span class="line">python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;</span><br></pre></td></tr></table></figure>
+<h1 id="pytorch-1131"><a class="markdownIt-Anchor" href="#pytorch-1131"></a> pytorch 1.13.1</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1">https://github.com/pytorch/pytorch/tree/v1.13.1</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1#from-source">https://github.com/pytorch/pytorch/tree/v1.13.1#from-source</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging">https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging</a></p>
+<p><a href="https://zrss.github.io/archives/5a3d0ab7.html">https://zrss.github.io/archives/5a3d0ab7.html</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python&#x3D;3.8</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line">conda install -c pytorch magma-cuda116</span><br><span class="line">conda install mkl mkl-include</span><br><span class="line"></span><br><span class="line">export CMAKE_PREFIX_PATH&#x3D;$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))&#x2F;..&#x2F;&quot;&#125;</span><br><span class="line"></span><br><span class="line">CUDACXX&#x3D;&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;bin&#x2F;nvcc MAX_JOBS&#x3D;8 python setup.py develop</span><br></pre></td></tr></table></figure>
+<p>如果 setup 过程中出现如下日志</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Building wheel torch-1.13.0a0+git49444c3</span><br><span class="line">-- Building version 1.13.0a0+git49444c3</span><br><span class="line">Could not find any of CMakeLists.txt, Makefile, setup.py, LICENSE, LICENSE.md, LICENSE.txt in &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;ios-cmake</span><br><span class="line">Did you run &#39;git submodule update --init --recursive --jobs 0&#39;?</span><br></pre></td></tr></table></figure>
+<p>可以重新 update submodule，再做尝试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git submodule deinit -f .</span><br><span class="line">git clean -xdf</span><br><span class="line">python setup.py clean</span><br><span class="line">git submodule update --init --recursive --jobs 0</span><br></pre></td></tr></table></figure>
+<p>如果 setup 过程中出现如下日志，可以减小 jobs 数（例如上述的 case 为 8），再做尝试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FAILED: third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;c++ -DFBGEMM_STATIC -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;cpuinfo&#x2F;include -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;third_party&#x2F;asmjit&#x2F;src -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;include -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;benchmark&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;googletest&#x2F;googlemock&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;googletest&#x2F;googletest&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;protobuf&#x2F;src -isystem &#x2F;root&#x2F;tools&#x2F;miniconda3&#x2F;envs&#x2F;pytorch-dev&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;gemmlowp -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;neon2sse -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;XNNPACK&#x2F;include -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -Wall -Wextra -Werror -Wno-deprecated-declarations -O3 -DNDEBUG -fPIC -fvisibility&#x3D;hidden -m64 -mavx2 -mf16c -mfma -std&#x3D;c++14 -Wno-uninitialized -MD -MT third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o -MF third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o.d -o third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o -c &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc</span><br><span class="line">c++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
+<h1 id="nccl-v2143-1"><a class="markdownIt-Anchor" href="#nccl-v2143-1"></a> nccl v2.14.3-1</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/tree/v2.14.3-1">https://github.com/NVIDIA/nccl/tree/v2.14.3-1</a></p>
+<p>make (generate header)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd nccl</span><br><span class="line">make -j 8 src.build</span><br></pre></td></tr></table></figure>
+<p>如果 make 过程中出现如下日志，可以减小 make 所使用的核数（例如上述的 case 为 8 核），再做尝试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
+<p>将 <code>build/include/nccl.h</code> 文件拷贝至 <code>src</code> 目录下</p>
+<h2 id="vscode-nccl-in-wsl"><a class="markdownIt-Anchor" href="#vscode-nccl-in-wsl"></a> vscode nccl in wsl</h2>
+<ol>
+<li>config wsl for vscode</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/cpp/config-wsl">https://code.visualstudio.com/docs/cpp/config-wsl</a></p>
+<ol start="2">
+<li>install cuda toolkit in wsl</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2">https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/cuda-11-6-2-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;Distribution=WSL-Ubuntu&amp;target_version=2.0&amp;target_type=deb_local">https://developer.nvidia.com/cuda-11-6-2-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;Distribution=WSL-Ubuntu&amp;target_version=2.0&amp;target_type=deb_local</a></p>
+<ol start="3">
+<li>add includePath for vscode</li>
+</ol>
+<p><code>/usr/local/cuda/targets/x86_64-linux/include/</code></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1388,127 +1526,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/dc51ca39.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/dc51ca39.html" class="post-title-link" itemprop="url">ps-worker-paper</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-05-03 10:00:00" itemprop="dateCreated datePublished" datetime="2022-05-03T10:00:00Z">2022-05-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1YA4y197G8?spm_id_from=333.337.search-card.all.click">https://www.bilibili.com/video/BV1YA4y197G8?spm_id_from=333.337.search-card.all.click</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-li_mu.pdf">https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-li_mu.pdf</a></p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/dmlc/ps-lite">https://github.com/dmlc/ps-lite</a></p>
-<p>总结李沐大神 ps-worker 的论文实现要点如下</p>
-<h1 id="server-高可用"><a class="markdownIt-Anchor" href="#server-高可用"></a> server 高可用</h1>
-<ol>
-<li>多副本复制: 例如每次对 server 的修改或写入，均会复制到两个其他副本后再回复 ok。当然这会增加延迟，以及要求客户端错误重试</li>
-<li>一致性哈希: key-value datastore, improve load balancing and recovery</li>
-</ol>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://memcached.org/">https://memcached.org/</a> 也采用了类似的高可用策略</p>
-</blockquote>
-<h1 id="server-一致性"><a class="markdownIt-Anchor" href="#server-一致性"></a> server 一致性</h1>
-<ol>
-<li>vector clock，记录时间点 (t) 发出的权重 (w) 的数据，使用 vector clock 便于实现各种一致性模型，given the potentially complex task dependency graph and<br />
-the need for fast recovery</li>
-</ol>
-<h1 id="worker-高可用"><a class="markdownIt-Anchor" href="#worker-高可用"></a> worker 高可用</h1>
-<p>论文中提到</p>
-<ul>
-<li>一般而言 worker 仅负责部分数据的计算，而部分数据往往不至于对模型的最终效果有很大影响</li>
-<li>假若每个 worker 数据量较大，恢复 worker 的代价较高，还不如恢复 server</li>
-</ul>
-<p>所以 worker 的高可用，还是交由算法设计者控制。可能算法设计者更愿意实现即使 worker 挂了，模型训练依然能够运行下去的算法</p>
-<h1 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> summary</h1>
-<p>parameter server 综合利用了现有技术（交叉），是领域型的 memcached/redis (这两都是 kv datastore)。当然 ps 是面向机器学习算法设计的，通过优化机器学习算法，使其适应 ps api，，解决了机器学习领域大规模训练的实际（工业界）问题</p>
-<blockquote>
-<p>The novelty of the proposed system lies in the synergy achieved by picking the right systems techniques, adapting them to the machine learning algorithms, and modifying the machine learning algorithms to be more systemsfriendly. In particular, we can relax a number of otherwise hard systems constraints since the associated machine learning algorithms are quite tolerant to perturbations. The consequence is the first general purpose ML system capable of scaling to industrial scale sizes</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1532,13 +1549,13 @@ the need for fast recovery</li>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">441k</span>
+    <span title="站点总字数">454k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:41</span>
+    <span title="站点阅读时长">6:53</span>
   </span>
 </div>
 

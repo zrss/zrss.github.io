@@ -147,7 +147,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-count">143</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -158,7 +158,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-count">75</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -175,6 +175,128 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/6f5ad8f8.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/archives/6f5ad8f8.html" class="post-title-link" itemprop="url">clusterd</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-06-01 19:30:00" itemprop="dateCreated datePublished" datetime="2025-06-01T19:30:00Z">2025-06-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>907</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://www.hiascend.com/document/detail/zh/mindcluster/70rc1/clustersched/dlug/mxdlug_007.html">https://www.hiascend.com/document/detail/zh/mindcluster/70rc1/clustersched/dlug/mxdlug_007.html</a></p>
+<p>有如下几类 configmap</p>
+<ul>
+<li>cmDevice: ns, kube-system; cmName, mindx-dl-deviceinfo-{NodeName}; which is reported by device-plugin</li>
+<li>cmNode: ns, mindx-dl; cmName, mindx-dl-nodeinfo-{NodeName}; which is reported by nodeD</li>
+<li>cmPingMesh: ns, cluster-system; cmName, pingmesh-config;</li>
+<li>cmSuperPodDevice: ns, cluster-system; cmName, super-pod-{SuperPodId}; clusterD 维护
+<ul>
+<li>特别的 {RAS_NET_ROOT_PATH}/cluster/super-pod-{SuperPodId}/super-pod-{SuperPodId}.json; clusterD 维护</li>
+</ul>
+</li>
+<li>cmPubicFault: mc-consumer-publicfault=true label;</li>
+</ul>
+<p>其中 cmDevice configmap mindx-dl-deviceinfo-{NodeName}, 由 device-plugin 上报, 包括如下信息</p>
+<ul>
+<li>DeviceInfoCfg</li>
+<li>SwitchInfoCfg</li>
+</ul>
+<p>cmPubicFault configmap, 包括如下信息</p>
+<ul>
+<li>PublicFault</li>
+</ul>
+<p>pingmesh-config 的格式为 global pingmesh 任务的配置或者是指定 superpodid 的任务配置</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;activate&quot;</span>: <span class="string">&quot;on&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;task_interval&quot;</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>node annotation 中包括如下信息</p>
+<ul>
+<li>product-serial-number</li>
+<li>superPodID</li>
+<li>baseDeviceInfos</li>
+<li>serverType</li>
+<li>serverIndex</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1507,144 +1629,6 @@ decoder, 将整数编码转为字符串</p>
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/f3995990.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zrss">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="MegaThinking">
-      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | MegaThinking">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/archives/f3995990.html" class="post-title-link" itemprop="url">pytorch 1.13 and nccl</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-05-03 12:27:15" itemprop="dateCreated datePublished" datetime="2023-05-03T12:27:15Z">2023-05-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-03-19 16:21:19" itemprop="dateModified" datetime="2026-03-19T16:21:19Z">2026-03-19</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>windows 11</li>
-<li>wsl2
-<ul>
-<li>ubuntu 18.04</li>
-<li>nvidia driver 531.68</li>
-<li>cuda 11.6.2</li>
-</ul>
-</li>
-</ul>
-<h1 id="pytorch-1131-docker-image"><a class="markdownIt-Anchor" href="#pytorch-1131-docker-image"></a> pytorch 1.13.1 docker image</h1>
-<p>docker image</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime</span><br></pre></td></tr></table></figure>
-<p>view nccl version of pytorch</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run -ti --rm pytorch&#x2F;pytorch:1.13.1-cuda11.6-cudnn8-runtime bash</span><br><span class="line"></span><br><span class="line">python -c &quot;import torch;print(torch.cuda.nccl.version())&quot;</span><br></pre></td></tr></table></figure>
-<h1 id="pytorch-1131"><a class="markdownIt-Anchor" href="#pytorch-1131"></a> pytorch 1.13.1</h1>
-<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1">https://github.com/pytorch/pytorch/tree/v1.13.1</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/tree/v1.13.1#from-source">https://github.com/pytorch/pytorch/tree/v1.13.1#from-source</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging">https://github.com/pytorch/pytorch/blob/v1.13.1/CONTRIBUTING.md#tips-and-debugging</a></p>
-<p><a href="https://zrss.github.io/archives/5a3d0ab7.html">https://zrss.github.io/archives/5a3d0ab7.html</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">conda create -n pytorch-dev python&#x3D;3.8</span><br><span class="line"></span><br><span class="line">conda activate pytorch-dev</span><br><span class="line"></span><br><span class="line">conda install astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses</span><br><span class="line">conda install -c pytorch magma-cuda116</span><br><span class="line">conda install mkl mkl-include</span><br><span class="line"></span><br><span class="line">export CMAKE_PREFIX_PATH&#x3D;$&#123;CONDA_PREFIX:-&quot;$(dirname $(which conda))&#x2F;..&#x2F;&quot;&#125;</span><br><span class="line"></span><br><span class="line">CUDACXX&#x3D;&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;bin&#x2F;nvcc MAX_JOBS&#x3D;8 python setup.py develop</span><br></pre></td></tr></table></figure>
-<p>如果 setup 过程中出现如下日志</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Building wheel torch-1.13.0a0+git49444c3</span><br><span class="line">-- Building version 1.13.0a0+git49444c3</span><br><span class="line">Could not find any of CMakeLists.txt, Makefile, setup.py, LICENSE, LICENSE.md, LICENSE.txt in &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;ios-cmake</span><br><span class="line">Did you run &#39;git submodule update --init --recursive --jobs 0&#39;?</span><br></pre></td></tr></table></figure>
-<p>可以重新 update submodule，再做尝试</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git submodule deinit -f .</span><br><span class="line">git clean -xdf</span><br><span class="line">python setup.py clean</span><br><span class="line">git submodule update --init --recursive --jobs 0</span><br></pre></td></tr></table></figure>
-<p>如果 setup 过程中出现如下日志，可以减小 jobs 数（例如上述的 case 为 8），再做尝试</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FAILED: third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;c++ -DFBGEMM_STATIC -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;cpuinfo&#x2F;include -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;third_party&#x2F;asmjit&#x2F;src -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;include -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm -I&#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;benchmark&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;googletest&#x2F;googlemock&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;cmake&#x2F;..&#x2F;third_party&#x2F;googletest&#x2F;googletest&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;protobuf&#x2F;src -isystem &#x2F;root&#x2F;tools&#x2F;miniconda3&#x2F;envs&#x2F;pytorch-dev&#x2F;include -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;gemmlowp -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;neon2sse -isystem &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;XNNPACK&#x2F;include -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -Wall -Wextra -Werror -Wno-deprecated-declarations -O3 -DNDEBUG -fPIC -fvisibility&#x3D;hidden -m64 -mavx2 -mf16c -mfma -std&#x3D;c++14 -Wno-uninitialized -MD -MT third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o -MF third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o.d -o third_party&#x2F;fbgemm&#x2F;CMakeFiles&#x2F;fbgemm_avx2.dir&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc.o -c &#x2F;root&#x2F;projects&#x2F;pytorch&#x2F;third_party&#x2F;fbgemm&#x2F;src&#x2F;FbgemmI8DepthwiseAvx2.cc</span><br><span class="line">c++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
-<h1 id="nccl-v2143-1"><a class="markdownIt-Anchor" href="#nccl-v2143-1"></a> nccl v2.14.3-1</h1>
-<p><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl/tree/v2.14.3-1">https://github.com/NVIDIA/nccl/tree/v2.14.3-1</a></p>
-<p>make (generate header)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd nccl</span><br><span class="line">make -j 8 src.build</span><br></pre></td></tr></table></figure>
-<p>如果 make 过程中出现如下日志，可以减小 make 所使用的核数（例如上述的 case 为 8 核），再做尝试</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++: internal compiler error: Killed (program cc1plus)</span><br></pre></td></tr></table></figure>
-<p>将 <code>build/include/nccl.h</code> 文件拷贝至 <code>src</code> 目录下</p>
-<h2 id="vscode-nccl-in-wsl"><a class="markdownIt-Anchor" href="#vscode-nccl-in-wsl"></a> vscode nccl in wsl</h2>
-<ol>
-<li>config wsl for vscode</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/cpp/config-wsl">https://code.visualstudio.com/docs/cpp/config-wsl</a></p>
-<ol start="2">
-<li>install cuda toolkit in wsl</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2">https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2</a></p>
-<p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/cuda-11-6-2-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;Distribution=WSL-Ubuntu&amp;target_version=2.0&amp;target_type=deb_local">https://developer.nvidia.com/cuda-11-6-2-download-archive?target_os=Linux&amp;target_arch=x86_64&amp;Distribution=WSL-Ubuntu&amp;target_version=2.0&amp;target_type=deb_local</a></p>
-<ol start="3">
-<li>add includePath for vscode</li>
-</ol>
-<p><code>/usr/local/cuda/targets/x86_64-linux/include/</code></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1668,13 +1652,13 @@ decoder, 将整数编码转为字符串</p>
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">441k</span>
+    <span title="站点总字数">454k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:41</span>
+    <span title="站点阅读时长">6:53</span>
   </span>
 </div>
 

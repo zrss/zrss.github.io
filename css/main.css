@@ -1360,7 +1360,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #b00eff;
+  background: #b56f34;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2941,10 +2941,6 @@ figure.highlight,
     font-size: 16px;
     line-height: 1.85;
     text-align: start;
-  }
-  .sidebar,
-  .sidebar-toggle {
-    display: none;
   }
   .post-body h1 {
     font-size: 1.55em;

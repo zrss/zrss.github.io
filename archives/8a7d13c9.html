@@ -20,16 +20,17 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="本文以当前 NCCL master 分支源码为例，版本标识来自 makefiles&#x2F;version.mk，当前为 NCCL 2.30.7。 本文中的“业务侧 NCCL clique”不是 NCCL 暴露的独立 API，而是指业务或训练框架对一组 rank &#x2F; GPU 的通信组织方式。例如数据并行组、张量并行组、流水并行组、专家并行组，在运行时会对应到一个或多个 NCCL communicator。">
+    <meta name="description" content="本文以当前 NCCL master 分支源码为例，版本标识来自 makefiles&#x2F;version.mk，当前为 NCCL 2.30.7。 这里讨论的“业务侧 NCCL clique”不是 NCCL 暴露的独立 API，而是指业务或训练框架对一组 rank &#x2F; GPU 的通信组织方式。例如数据并行组、张量并行组、流水并行组、专家并行组，在运行时会对应到一个或多个 NCCL communicator">
 <meta property="og:type" content="article">
 <meta property="og:title" content="业务侧配置与 NCCL clique">
 <meta property="og:url" content="https://zrss.github.io/archives/8a7d13c9.html">
 <meta property="og:site_name" content="MegaThinking">
-<meta property="og:description" content="本文以当前 NCCL master 分支源码为例，版本标识来自 makefiles&#x2F;version.mk，当前为 NCCL 2.30.7。 本文中的“业务侧 NCCL clique”不是 NCCL 暴露的独立 API，而是指业务或训练框架对一组 rank &#x2F; GPU 的通信组织方式。例如数据并行组、张量并行组、流水并行组、专家并行组，在运行时会对应到一个或多个 NCCL communicator。">
+<meta property="og:description" content="本文以当前 NCCL master 分支源码为例，版本标识来自 makefiles&#x2F;version.mk，当前为 NCCL 2.30.7。 这里讨论的“业务侧 NCCL clique”不是 NCCL 暴露的独立 API，而是指业务或训练框架对一组 rank &#x2F; GPU 的通信组织方式。例如数据并行组、张量并行组、流水并行组、专家并行组，在运行时会对应到一个或多个 NCCL communicator">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zrss.github.io/images/nccl-clique-business-layers.svg">
+<meta property="og:image" content="https://zrss.github.io/images/nccl-clique-business-implications.svg">
 <meta property="article:published_time" content="2026-06-07T12:29:33.000Z">
-<meta property="article:modified_time" content="2026-06-07T04:40:49.328Z">
+<meta property="article:modified_time" content="2026-06-07T16:22:58.219Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="tech">
 <meta name="twitter:card" content="summary">
@@ -139,7 +140,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%A0%E7%A7%8D-clique-%E7%9A%84%E5%90%AB%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text"> 几种 clique 的含义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%80%9A%E4%BF%A1%E7%BB%84%E5%88%B0-communicator-%E7%9A%84%E6%98%A0%E5%B0%84"><span class="nav-number">2.</span> <span class="nav-text"> 业务通信组到 communicator 的映射</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E4%BE%A7%E8%BE%93%E5%85%A5%E9%A1%B9"><span class="nav-number">3.</span> <span class="nav-text"> 业务侧输入项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#rank-%E9%9B%86%E5%90%88"><span class="nav-number">3.1.</span> <span class="nav-text"> rank 集合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rank-%E9%A1%BA%E5%BA%8F"><span class="nav-number">3.2.</span> <span class="nav-text"> rank 顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rank-%E5%88%B0-gpu-%E7%9A%84-placement"><span class="nav-number">3.3.</span> <span class="nav-text"> rank 到 GPU 的 placement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#communicator-%E5%88%87%E5%88%86"><span class="nav-number">3.4.</span> <span class="nav-text"> communicator 切分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#collective-%E8%B0%83%E7%94%A8%E5%92%8C-group-launch"><span class="nav-number">3.5.</span> <span class="nav-text"> collective 调用和 group launch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="nav-number">3.6.</span> <span class="nav-text"> 环境变量和配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#mnnvl-clique-%E7%9A%84%E6%9D%A5%E6%BA%90"><span class="nav-number">4.</span> <span class="nav-text"> MNNVL clique 的来源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E9%A1%BA%E5%BA%8F%E7%9A%84%E5%B1%82%E6%AC%A1"><span class="nav-number">5.</span> <span class="nav-text"> 通信顺序的层次</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82communicator-%E5%86%85-rank-%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.1.</span> <span class="nav-text"> 第一层：communicator 内 rank 顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82topology-graph-%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.2.</span> <span class="nav-text"> 第二层：topology graph 顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82group-launch-%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.3.</span> <span class="nav-text"> 第三层：group launch 顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%B1%82kernel-%E5%86%85-chunk-step-%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.4.</span> <span class="nav-text"> 第四层：kernel 内 chunk &#x2F; step 顺序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%B8%9A%E5%8A%A1%E8%A7%86%E8%A7%92%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">6.</span> <span class="nav-text"> 一个业务视角的例子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E5%92%8C%E9%AA%8C%E8%AF%81"><span class="nav-number">7.</span> <span class="nav-text"> 观察和验证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text"> 小结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E8%BE%B9%E7%95%8C"><span class="nav-number">1.</span> <span class="nav-text"> 概念边界</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%B1%BB-clique"><span class="nav-number">1.1.</span> <span class="nav-text"> 三类 clique</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%80%9A%E4%BF%A1%E7%BB%84%E5%88%B0-communicator-%E7%9A%84%E6%98%A0%E5%B0%84"><span class="nav-number">1.2.</span> <span class="nav-text"> 业务通信组到 communicator 的映射</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E4%BE%A7%E8%BE%93%E5%85%A5%E9%A1%B9"><span class="nav-number">2.</span> <span class="nav-text"> 业务侧输入项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E7%AD%96%E7%95%A5%E5%A6%82%E4%BD%95%E5%B1%95%E5%BC%80%E6%88%90-rank-group"><span class="nav-number">2.1.</span> <span class="nav-text"> 并行策略如何展开成 rank group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rank-%E9%9B%86%E5%90%88"><span class="nav-number">2.2.</span> <span class="nav-text"> rank 集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rank-%E9%A1%BA%E5%BA%8F"><span class="nav-number">2.3.</span> <span class="nav-text"> rank 顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rank-%E5%88%B0-gpu-%E7%9A%84-placement"><span class="nav-number">2.4.</span> <span class="nav-text"> rank 到 GPU 的 placement</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#communicator-%E5%88%87%E5%88%86"><span class="nav-number">2.5.</span> <span class="nav-text"> communicator 切分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#collective-%E8%B0%83%E7%94%A8%E5%92%8C-group-launch"><span class="nav-number">2.6.</span> <span class="nav-text"> collective 调用和 group launch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="nav-number">2.7.</span> <span class="nav-text"> 环境变量和配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mnnvl-clique"><span class="nav-number">3.</span> <span class="nav-text"> MNNVL clique</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fabric-%E4%BF%A1%E6%81%AF%E6%9D%A5%E6%BA%90"><span class="nav-number">3.1.</span> <span class="nav-text"> fabric 信息来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nccl-%E5%88%A4%E6%96%AD%E9%80%BB%E8%BE%91"><span class="nav-number">3.2.</span> <span class="nav-text"> NCCL 判断逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E4%B8%9A%E5%8A%A1-clique-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">3.3.</span> <span class="nav-text"> 与业务 clique 的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text"> 通信顺序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#communicator-%E5%86%85-rank-%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.1.</span> <span class="nav-text"> communicator 内 rank 顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#topology-graph-%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.2.</span> <span class="nav-text"> topology graph 顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#group-launch-%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.3.</span> <span class="nav-text"> group launch 顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kernel-%E5%86%85-chunk-step-%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.4.</span> <span class="nav-text"> kernel 内 chunk &#x2F; step 顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text"> 示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E5%92%8C%E9%AA%8C%E8%AF%81"><span class="nav-number">6.</span> <span class="nav-text"> 观察和验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E5%92%8C%E5%90%AF%E7%A4%BA"><span class="nav-number">7.</span> <span class="nav-text"> 总结和启示</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -152,7 +153,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-count">143</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -163,7 +164,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-count">75</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -220,7 +221,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2026-06-07 12:29:33 / 修改时间：04:40:49" itemprop="dateCreated datePublished" datetime="2026-06-07T12:29:33Z">2026-06-07</time>
+      <time title="创建时间：2026-06-07 12:29:33 / 修改时间：16:22:58" itemprop="dateCreated datePublished" datetime="2026-06-07T12:29:33Z">2026-06-07</time>
     </span>
 
   
@@ -230,14 +231,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>7.1k</span>
+      <span>9.1k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
+      <span>8 分钟</span>
     </span>
 </div>
 
@@ -248,13 +249,15 @@
     
     
     <div class="post-body" itemprop="articleBody"><p>本文以当前 NCCL <code>master</code> 分支源码为例，版本标识来自 <code>makefiles/version.mk</code>，当前为 NCCL 2.30.7。</p>
-<p>本文中的“业务侧 NCCL clique”不是 NCCL 暴露的独立 API，而是指业务或训练框架对一组 rank / GPU 的通信组织方式。例如数据并行组、张量并行组、流水并行组、专家并行组，在运行时会对应到一个或多个 NCCL communicator。</p>
+<p>这里讨论的“业务侧 NCCL clique”不是 NCCL 暴露的独立 API，而是指业务或训练框架对一组 rank / GPU 的通信组织方式。例如数据并行组、张量并行组、流水并行组、专家并行组，在运行时会对应到一个或多个 NCCL communicator。</p>
 <p>相关阅读：</p>
 <ul>
 <li><a href="/archives/9e7a43b2.html">NCCL 从建链到通信</a>：解释 communicator 初始化、建链和一次通信执行主线。</li>
 <li><a href="/archives/f62c2008.html">reading nccl</a>：以 NCCL 2.14.3 为例展开 <code>net_ib</code>、RDMA、QP、MR、FIFO 等实现细节。</li>
+<li><a href="/nccl-clique-visual.html">NCCL clique 可视化页面</a>：用交互图解释训练框架、launcher / rendezvous、调度 placement 和 NCCL communicator 的关系。</li>
 </ul>
-<h1 id="几种-clique-的含义"><a class="markdownIt-Anchor" href="#几种-clique-的含义"></a> 几种 clique 的含义</h1>
+<h2 id="概念边界"><a class="markdownIt-Anchor" href="#概念边界"></a> 概念边界</h2>
+<h3 id="三类-clique"><a class="markdownIt-Anchor" href="#三类-clique"></a> 三类 clique</h3>
 <p>NCCL 相关讨论里，<code>clique</code> 可以对应三类对象。</p>
 <table>
 <thead>
@@ -286,11 +289,10 @@
 </tr>
 </tbody>
 </table>
-<p>本文把业务文档中的“NCCL clique”对应到第一类：一组业务 rank 被组织成同一个 communicator。</p>
-<p>MNNVL clique 和业务 clique 都表示 rank 的集合关系，但来源不同。业务 clique 来自框架和调度输入，MNNVL clique 来自硬件 fabric 信息；业务可以影响 MNNVL clique 的使用条件，但不直接定义硬件 fabric 的物理拓扑。</p>
+<p>本文把业务文档中的“NCCL clique”对应到第一类：一组业务 rank 被组织成同一个 communicator。MNNVL clique 后文作为硬件 fabric domain 对照展开。</p>
 <p>下图给出从业务输入到 NCCL 实际通信顺序的层次关系：</p>
 <img src="/images/nccl-clique-business-layers.svg" alt="业务侧影响 NCCL clique 的层次图" width="100%">
-<h1 id="业务通信组到-communicator-的映射"><a class="markdownIt-Anchor" href="#业务通信组到-communicator-的映射"></a> 业务通信组到 communicator 的映射</h1>
+<h3 id="业务通信组到-communicator-的映射"><a class="markdownIt-Anchor" href="#业务通信组到-communicator-的映射"></a> 业务通信组到 communicator 的映射</h3>
 <p>NCCL API 注释里，<code>ncclCommInitRank</code> 要求 rank 在一个 communicator clique 内唯一。这里的 communicator clique 表示一组共同参与同一个 communicator 的 ranks。</p>
 <p>典型初始化输入是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ncclUniqueId</span><br><span class="line">nranks</span><br><span class="line">rank</span><br><span class="line">CUDA device</span><br></pre></td></tr></table></figure>
@@ -305,9 +307,31 @@
 <p>多进程训练框架通常先完成 rendezvous，然后为不同通信组构造不同的 communicator。例如：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">global group:</span><br><span class="line">  ranks = [0, 1, 2, 3, 4, 5, 6, 7]</span><br><span class="line"></span><br><span class="line">tensor parallel group:</span><br><span class="line">  ranks = [0, 1, 2, 3]</span><br><span class="line">  ranks = [4, 5, 6, 7]</span><br><span class="line"></span><br><span class="line">data parallel group:</span><br><span class="line">  ranks = [0, 4]</span><br><span class="line">  ranks = [1, 5]</span><br><span class="line">  ranks = [2, 6]</span><br><span class="line">  ranks = [3, 7]</span><br></pre></td></tr></table></figure>
 <p>这些业务组如果使用 NCCL backend，会对应到不同的 NCCL communicator。每个 communicator 都有自己的 rank 空间。全局 rank 4 在某个 data parallel communicator 里可能是 rank 1；在 global communicator 里仍然是 rank 4。</p>
-<h1 id="业务侧输入项"><a class="markdownIt-Anchor" href="#业务侧输入项"></a> 业务侧输入项</h1>
+<h2 id="业务侧输入项"><a class="markdownIt-Anchor" href="#业务侧输入项"></a> 业务侧输入项</h2>
 <p>业务侧对 NCCL 的影响，主要发生在初始化之前和 collective enqueue 之前。</p>
-<h2 id="rank-集合"><a class="markdownIt-Anchor" href="#rank-集合"></a> rank 集合</h2>
+<h3 id="并行策略如何展开成-rank-group"><a class="markdownIt-Anchor" href="#并行策略如何展开成-rank-group"></a> 并行策略如何展开成 rank group</h3>
+<p>训练框架通常先描述并行维度，而不是直接手写所有 NCCL communicator。一个常见的描述方式类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">world_size = 16</span><br><span class="line">tensor_model_parallel_size = 4</span><br><span class="line">pipeline_model_parallel_size = 2</span><br><span class="line">data_parallel_size = world_size / tensor_model_parallel_size / pipeline_model_parallel_size</span><br><span class="line">                   = 2</span><br></pre></td></tr></table></figure>
+<p>这类配置表达的是 group pattern：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TP: 每 4 个 rank 组成一个 tensor parallel group</span><br><span class="line">PP: 每条 pipeline 包含 2 个 stage</span><br><span class="line">DP: 相同 TP/PP 位置上的 rank 组成 data parallel group</span><br></pre></td></tr></table></figure>
+<p>这里需要拆开四个职责：</p>
+<ul>
+<li>训练框架解释并行策略，定义 <code>(dp_rank, pp_rank, tp_rank)</code> 这样的逻辑坐标，并通过 rank layout 把逻辑坐标映射到 global rank。</li>
+<li>launcher / rendezvous 生成或分配 global / local rank。例如 <code>torchrun</code>、MPI、Kubernetes training operator 或框架自带 launcher，会为每个训练进程提供 <code>RANK</code>、<code>WORLD_SIZE</code>、<code>LOCAL_RANK</code> 等信息。</li>
+<li>训练调度系统负责资源 placement，选择节点、GPU、NIC 或 fabric domain，并影响 rank 到物理 GPU 的落点。</li>
+<li>NCCL 接收 communicator 成员、rank 编号、device / busId / fabric 信息等输入，并在这些输入上生成实际通信图。</li>
+</ul>
+<p>因此，如果“并行策略”只指 <code>tp_size</code>、<code>pp_size</code>、<code>dp_size</code>，它还不能唯一决定 global rank id。如果框架同时确定了 rank layout，并且 launcher / rendezvous 已经给进程分配 global rank，具体 rank id group 就是确定的。</p>
+<p>假设框架采用如下 rank layout：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rank = ((dp_rank * pp_size + pp_rank) * tp_size) + tp_rank</span><br></pre></td></tr></table></figure>
+<p>则 16 个 rank 可以展开成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">TP groups:</span><br><span class="line">  dp0, pp0: [0, 1, 2, 3]</span><br><span class="line">  dp0, pp1: [4, 5, 6, 7]</span><br><span class="line">  dp1, pp0: [8, 9, 10, 11]</span><br><span class="line">  dp1, pp1: [12, 13, 14, 15]</span><br><span class="line"></span><br><span class="line">PP groups:</span><br><span class="line">  dp0, tp0: [0, 4]</span><br><span class="line">  dp0, tp1: [1, 5]</span><br><span class="line">  dp0, tp2: [2, 6]</span><br><span class="line">  dp0, tp3: [3, 7]</span><br><span class="line">  dp1, tp0: [8, 12]</span><br><span class="line">  dp1, tp1: [9, 13]</span><br><span class="line">  dp1, tp2: [10, 14]</span><br><span class="line">  dp1, tp3: [11, 15]</span><br><span class="line"></span><br><span class="line">DP groups:</span><br><span class="line">  pp0, tp0: [0, 8]</span><br><span class="line">  pp0, tp1: [1, 9]</span><br><span class="line">  pp0, tp2: [2, 10]</span><br><span class="line">  pp0, tp3: [3, 11]</span><br><span class="line">  pp1, tp0: [4, 12]</span><br><span class="line">  pp1, tp1: [5, 13]</span><br><span class="line">  pp1, tp2: [6, 14]</span><br><span class="line">  pp1, tp3: [7, 15]</span><br></pre></td></tr></table></figure>
+<p>如果框架换一种 rank layout，虽然 <code>tp_size=4</code>、<code>pp_size=2</code>、<code>dp_size=2</code> 没变，rank id group 也可能改变。例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rank = ((pp_rank * dp_size + dp_rank) * tp_size) + tp_rank</span><br></pre></td></tr></table></figure>
+<p>这时 rank 4 从前一个例子里的 <code>(dp0, pp1, tp0)</code> 变成 <code>(dp1, pp0, tp0)</code>。因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">前一个 layout:</span><br><span class="line">  DP group, pp0, tp0: [0, 8]</span><br><span class="line">  PP group, dp0, tp0: [0, 4]</span><br><span class="line"></span><br><span class="line">新的 layout:</span><br><span class="line">  DP group, pp0, tp0: [0, 4]</span><br><span class="line">  PP group, dp0, tp0: [0, 8]</span><br></pre></td></tr></table></figure>
+<p>这个对比说明：parallel size 决定逻辑 group pattern，rank layout 决定具体 rank id group，placement 决定这些 rank 的物理含义。即使框架已经生成 <code>[0, 1, 2, 3]</code> 这样的固定 group，把它放在一台 8 卡 NVSwitch 机器上，和分散在 4 台机器上，对 NCCL 来说仍然是不同的拓扑输入。</p>
+<h3 id="rank-集合"><a class="markdownIt-Anchor" href="#rank-集合"></a> rank 集合</h3>
 <p>业务可以决定哪些进程 / GPU 进入同一个 communicator。</p>
 <p>这会直接影响：</p>
 <ul>
@@ -317,11 +341,10 @@
 <li>后续 ring、tree、NVLS、CollNet 等图的候选空间。</li>
 </ul>
 <p>如果业务把跨机 rank 放进同一个 communicator，NCCL 需要考虑 NET transport。如果业务把同机 GPU 放进一个 communicator，NCCL 可以在 P2P、SHM、NVLS 等路径中选择。</p>
-<h2 id="rank-顺序"><a class="markdownIt-Anchor" href="#rank-顺序"></a> rank 顺序</h2>
+<h3 id="rank-顺序"><a class="markdownIt-Anchor" href="#rank-顺序"></a> rank 顺序</h3>
 <p>业务可以决定 communicator 内 rank 的编号顺序。</p>
-<p>这个顺序不是最终通信边的唯一决定因素，但它是 NCCL 图搜索的输入之一。NCCL 会结合 GPU busId、NVLink、PCIe、NIC、NUMA、MNNVL 等拓扑信息计算 ring / tree。最终每个 channel 上的 <code>ring.prev</code> 和 <code>ring.next</code>，是在拓扑计算和 <code>ncclTopoPostset</code> 之后确定的。</p>
-<p>因此，业务 rank 顺序可以影响通信图，但不等价于“业务指定 ring 顺序”。NCCL 仍然会根据拓扑和配置做选择。</p>
-<h2 id="rank-到-gpu-的-placement"><a class="markdownIt-Anchor" href="#rank-到-gpu-的-placement"></a> rank 到 GPU 的 placement</h2>
+<p>这个顺序是 NCCL 图搜索的输入之一，但不等价于“业务指定 ring 顺序”。NCCL 还会结合 GPU busId、NVLink、PCIe、NIC、NUMA、MNNVL 等拓扑信息计算 ring / tree。</p>
+<h3 id="rank-到-gpu-的-placement"><a class="markdownIt-Anchor" href="#rank-到-gpu-的-placement"></a> rank 到 GPU 的 placement</h3>
 <p>业务调度和框架启动方式决定 rank 绑定到哪张 GPU。</p>
 <p>该映射会影响 NCCL 的 transport 选择和图搜索，因为 NCCL 会使用物理位置信息：</p>
 <ul>
@@ -332,7 +355,7 @@
 <li>是否属于同一个 MNNVL fabric domain。</li>
 </ul>
 <p>例如，同样是 8 个 rank，如果 rank 0-7 都在同一台 8 卡机器上，和 rank 0-7 分散在 8 台机器上，NCCL 得到的图和 transport 选择会不同。</p>
-<h2 id="communicator-切分"><a class="markdownIt-Anchor" href="#communicator-切分"></a> communicator 切分</h2>
+<h3 id="communicator-切分"><a class="markdownIt-Anchor" href="#communicator-切分"></a> communicator 切分</h3>
 <p>业务可以通过框架里的 process group / communication group，或者直接使用 <code>ncclCommSplit</code>，把已有通信世界切成多个 communicator。</p>
 <p><code>ncclCommSplit</code> 的语义是：</p>
 <ul>
@@ -341,7 +364,7 @@
 <li><code>NCCL_SPLIT_NOCOLOR</code> 表示该 rank 不进入任何新组。</li>
 </ul>
 <p>这种语义可以对应业务里的 data parallel、tensor parallel、expert parallel 分组。它影响的是 communicator 边界，而不是单次 collective 内部的 packet 传输顺序。</p>
-<h2 id="collective-调用和-group-launch"><a class="markdownIt-Anchor" href="#collective-调用和-group-launch"></a> collective 调用和 group launch</h2>
+<h3 id="collective-调用和-group-launch"><a class="markdownIt-Anchor" href="#collective-调用和-group-launch"></a> collective 调用和 group launch</h3>
 <p>业务可以影响 collective 的 enqueue 顺序：</p>
 <ul>
 <li>哪个 stream 上调用；</li>
@@ -350,8 +373,8 @@
 <li>每次 collective 的数据规模、datatype、op 类型。</li>
 </ul>
 <p>NCCL 内部 <code>ncclGroupCommJoin</code> 会把同一进程内 sibling communicators 放在相邻位置。这里的 sibling 由 <code>intraComm0</code> 判断。<code>doLaunches</code> 再按这些本地 clique 分批 prepare、launch、finish。</p>
-<p>因此，业务调用顺序会影响 launch 组织方式；NCCL 也会在本地对 communicator 做聚合和排序，以满足多 GPU 同进程场景下的 launch 约束。</p>
-<h2 id="环境变量和配置"><a class="markdownIt-Anchor" href="#环境变量和配置"></a> 环境变量和配置</h2>
+<p>因此，业务调用顺序会影响 launch 组织方式；NCCL 也会在本地做聚合和排序，以满足多 GPU 同进程场景下的 launch 约束。</p>
+<h3 id="环境变量和配置"><a class="markdownIt-Anchor" href="#环境变量和配置"></a> 环境变量和配置</h3>
 <p>业务或平台也可以通过环境变量影响 NCCL 选择。</p>
 <p>常见方向包括：</p>
 <ul>
@@ -363,11 +386,13 @@
 <li><code>NCCL_MNNVL_CROSS_CLIQUE</code>：允许同一 NVLink domain 内跨 clique 的 P2P。</li>
 </ul>
 <p>这些配置可用于验证、隔离或特定平台调优。它们约束 NCCL 的选择空间，不等同于显式指定完整的通信执行计划。</p>
-<h1 id="mnnvl-clique-的来源"><a class="markdownIt-Anchor" href="#mnnvl-clique-的来源"></a> MNNVL clique 的来源</h1>
+<h2 id="mnnvl-clique"><a class="markdownIt-Anchor" href="#mnnvl-clique"></a> MNNVL clique</h2>
 <p>MNNVL clique 表示 Multi-Node NVLink fabric 中的硬件通信域。它和业务 clique 都描述 rank 集合，但来源是 NVML / Fabric Manager 提供的 fabric 信息。</p>
+<h3 id="fabric-信息来源"><a class="markdownIt-Anchor" href="#fabric-信息来源"></a> fabric 信息来源</h3>
 <p>初始化时，NCCL 会在 <code>fillInfo</code> 里通过 NVML 读取 GPU fabric 信息。相关信息包括：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fabricInfo.clusterUuid</span><br><span class="line">fabricInfo.cliqueId</span><br><span class="line">fabricInfo.state</span><br></pre></td></tr></table></figure>
 <p>当前源码也提供了 <code>NCCL_MNNVL_UUID</code> 和 <code>NCCL_MNNVL_CLIQUE_ID</code> 这样的环境变量覆盖入口。文档里说明 <code>NCCL_MNNVL_CLIQUE_ID</code> 从 2.25 起可用，通常由 Fabric Manager 分配，也可以用于 MNNVL job 的 soft partition。</p>
+<h3 id="nccl-判断逻辑"><a class="markdownIt-Anchor" href="#nccl-判断逻辑"></a> NCCL 判断逻辑</h3>
 <p>随后 <code>ncclMnnvlCheck</code> 会做几件事：</p>
 <ul>
 <li>要求 cuMem 和 FABRIC handle 支持可用；</li>
@@ -381,25 +406,26 @@
 <p>拓扑检查里，<code>ncclTopoCheckMNNVL</code> 也是按这个规则判断：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">same clusterUuid &amp;&amp;</span><br><span class="line">  (same cliqueId || p2pCrossClique enabled)</span><br></pre></td></tr></table></figure>
 <p>如果启用了 cross-clique，并且两个 rank 在同一个 UUID 但不同 cliqueId 中，NCCL 会把它作为 cross-clique P2P 场景处理。</p>
+<h3 id="与业务-clique-的关系"><a class="markdownIt-Anchor" href="#与业务-clique-的关系"></a> 与业务 clique 的关系</h3>
 <p>二者关系可以描述为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">业务 clique:</span><br><span class="line">  由业务决定哪些 rank 组成一个 communicator。</span><br><span class="line"></span><br><span class="line">MNNVL clique:</span><br><span class="line">  由 Fabric / NVML 信息描述哪些 rank 处在同一个 Multi-Node NVLink clique。</span><br><span class="line"></span><br><span class="line">二者交集:</span><br><span class="line">  如果业务把一组 rank 放进 communicator，而这些 rank 在硬件上也属于同一个 MNNVL clique，</span><br><span class="line">  NCCL 可以把 MNNVL 纳入 topology / transport 选择。</span><br></pre></td></tr></table></figure>
-<h1 id="通信顺序的层次"><a class="markdownIt-Anchor" href="#通信顺序的层次"></a> 通信顺序的层次</h1>
+<h2 id="通信顺序"><a class="markdownIt-Anchor" href="#通信顺序"></a> 通信顺序</h2>
 <p>“NCCL 的通信顺序”包含多个层次。业务输入的影响范围取决于具体层次。</p>
-<h2 id="第一层communicator-内-rank-顺序"><a class="markdownIt-Anchor" href="#第一层communicator-内-rank-顺序"></a> 第一层：communicator 内 rank 顺序</h2>
+<h3 id="communicator-内-rank-顺序"><a class="markdownIt-Anchor" href="#communicator-内-rank-顺序"></a> communicator 内 rank 顺序</h3>
 <p>业务通过 rank list、<code>key</code>、<code>devlist</code>、进程启动顺序等方式，决定 communicator 内 rank 编号。NCCL 后续所有拓扑和 collective 逻辑都以 communicator 内 rank 编号为基础。</p>
-<p>但 rank 顺序只是输入，不是最终 ring / tree 的完整结果。</p>
-<h2 id="第二层topology-graph-顺序"><a class="markdownIt-Anchor" href="#第二层topology-graph-顺序"></a> 第二层：topology graph 顺序</h2>
+<p>后续 topology graph 会在这个输入上继续计算。</p>
+<h3 id="topology-graph-顺序"><a class="markdownIt-Anchor" href="#topology-graph-顺序"></a> topology graph 顺序</h3>
 <p>NCCL 初始化时会根据 rank 到 GPU / NIC 的物理关系计算图。</p>
 <p>在 ring 场景下，最终每个 channel 上，本 rank 看到的是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">channel[c].ring.prev</span><br><span class="line">channel[c].ring.next</span><br></pre></td></tr></table></figure>
 <p>在 tree 场景下，则会有 parent / children 等关系。这个阶段综合了业务 placement、硬件拓扑、NCCL 配置和搜索策略。</p>
 <p>业务可以通过 placement 和 rank mapping 影响 topology graph，但 rank list 的顺序不等同于最终 ring 顺序。</p>
-<h2 id="第三层group-launch-顺序"><a class="markdownIt-Anchor" href="#第三层group-launch-顺序"></a> 第三层：group launch 顺序</h2>
+<h3 id="group-launch-顺序"><a class="markdownIt-Anchor" href="#group-launch-顺序"></a> group launch 顺序</h3>
 <p>如果业务用 <code>ncclGroupStart</code> / <code>ncclGroupEnd</code> 聚合多个 communicator 或多个 GPU 上的 collective，NCCL 会做本地 launch 排序。</p>
 <p>当前源码中，<code>ncclGroupCommJoin</code> 会优先把具有相同 <code>intraComm0</code> 的 communicator 放在一起。注释里明确说这样做是为了保留用户程序顺序，同时保证 sibling communicators 连续出现。</p>
 <p><code>doLaunches</code> 的外层循环也按相同 <code>intraComm0</code> 形成的 clique 迭代。每个 clique 内先 prepare，再按 rounds launch，最后 finish。</p>
 <p>这里的 clique 是 launch clique，不是 MNNVL clique。</p>
-<h2 id="第四层kernel-内-chunk-step-顺序"><a class="markdownIt-Anchor" href="#第四层kernel-内-chunk-step-顺序"></a> 第四层：kernel 内 chunk / step 顺序</h2>
+<h3 id="kernel-内-chunk-step-顺序"><a class="markdownIt-Anchor" href="#kernel-内-chunk-step-顺序"></a> kernel 内 chunk / step 顺序</h3>
 <p>数据移动发生在 NCCL kernel 和 proxy 线程里。</p>
 <p>这一层由多个因素共同决定：</p>
 <ul>
@@ -412,7 +438,7 @@
 <li>NET 场景下 proxy 如何推进 send / recv。</li>
 </ul>
 <p>业务可以通过 message size、算法 / 协议环境变量、placement 影响选择结果，但具体 packet 或 chunk 的顺序由 NCCL kernel 和 transport progress 逻辑决定。</p>
-<h1 id="一个业务视角的例子"><a class="markdownIt-Anchor" href="#一个业务视角的例子"></a> 一个业务视角的例子</h1>
+<h2 id="示例"><a class="markdownIt-Anchor" href="#示例"></a> 示例</h2>
 <p>假设有 16 个 GPU，分布在两台 8 卡机器上：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node0: rank 0 1 2 3 4 5 6 7</span><br><span class="line">node1: rank 8 9 10 11 12 13 14 15</span><br></pre></td></tr></table></figure>
 <p>业务可以组织两类通信组：</p>
@@ -426,7 +452,7 @@
 <li>如果业务改变 rank 到 GPU 的 placement，两个 communicator 的拓扑图和 transport 选择都可能改变。</li>
 </ul>
 <p>这个例子中，业务没有直接指定“ring 是 0-&gt;1-&gt;2-&gt;3”。业务指定的是：哪些 rank 一起通信，以及这些 rank 放在哪些 GPU 上。</p>
-<h1 id="观察和验证"><a class="markdownIt-Anchor" href="#观察和验证"></a> 观察和验证</h1>
+<h2 id="观察和验证"><a class="markdownIt-Anchor" href="#观察和验证"></a> 观察和验证</h2>
 <p>如果要验证业务 clique 到 NCCL 实际图的映射，可以从日志和 dump 文件入手。</p>
 <p>常用方式：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NCCL_DEBUG=INFO</span><br><span class="line">NCCL_DEBUG_SUBSYS=INIT,GRAPH,TUNING,NET,COLL</span><br><span class="line">NCCL_TOPO_DUMP_FILE=/tmp/nccl-topo.xml</span><br><span class="line">NCCL_GRAPH_DUMP_FILE=/tmp/nccl-graph.xml</span><br></pre></td></tr></table></figure>
@@ -440,10 +466,14 @@
 <li>NET / P2P / SHM / NVLS 相关日志；</li>
 <li>MNNVL 的 <code>cliqueId</code>、<code>cliqueSize</code>、<code>cliqueRank</code>、<code>nvlDomainSize</code>。</li>
 </ul>
-<h1 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h1>
-<p>业务侧所谓 NCCL clique，在本文中对应“业务通信组到 NCCL communicator 的映射”。它主要通过 rank 集合、rank 顺序、GPU placement、communicator split、collective 调用顺序和环境变量影响 NCCL。</p>
-<p>MNNVL clique 和业务 clique 都表示分组关系，但来源不同：MNNVL clique 是硬件 fabric domain，业务 clique 是 communicator membership。业务可以通过调度 placement 和相关环境变量影响 MNNVL 是否被 NCCL 使用，但 MNNVL clique 不是普通业务分组 API。</p>
-<p>因此，业务侧给 NCCL 提供成员、顺序和物理放置约束；NCCL 根据这些输入结合硬件拓扑和内部策略，决定最终的通信图、transport、launch 节奏和 kernel 内数据推进顺序。</p>
+<h2 id="总结和启示"><a class="markdownIt-Anchor" href="#总结和启示"></a> 总结和启示</h2>
+<p>下图用四个职责边界概括前文：训练框架、launcher / rendezvous、训练调度系统和 NCCL。重点不是严格时间线，而是输入归属。</p>
+<img src="/images/nccl-clique-business-implications.svg" alt="训练框架、launcher、调度系统与 NCCL 的职责边界" width="100%">
+<p>归纳起来，业务 clique 是 communicator membership，MNNVL clique 是硬件 fabric domain。前者来自框架通信组，后者来自 Fabric / NVML 信息；业务可以影响 MNNVL 的使用条件，但不能把它当作普通业务分组 API。</p>
+<p>对训练业务侧，关键是把 communication group、rank layout、rank 到 GPU 的映射、stream 使用和 collective 调用顺序固定下来。业务可以定义哪些 rank 一起通信，也可以约束 algorithm、protocol 或 MNNVL 行为，但不能直接指定每个 channel、chunk、packet 的执行顺序。</p>
+<p>对训练调度系统，关键是把 topology-aware placement 做成可解释的契约。调度器可以消费并行策略、通信亲和性，或者已经展开的 rank group 约束，然后输出满足约束的 node / GPU / NIC placement。只分配 GPU 数量，而不记录节点边界、NIC 亲和性、NVLink / MNNVL domain，就很难稳定复现业务期望的 NCCL 行为。</p>
+<p>对于支持 MNNVL 的平台，Fabric Manager 分配的 UUID、cliqueId、fabric state 也应该进入节点画像、准入判断和 placement 结果解释中，而不是只在容器启动后交给 NCCL 自行发现。</p>
+<p>因此，训练框架、launcher / rendezvous 和调度系统之间需要明确通信拓扑契约。契约越清晰，越容易定位性能差异来自并行策略、rank layout、rank assignment、调度 placement、硬件 fabric 状态，还是 NCCL algorithm / transport 选择。</p>
 
     </div>
 
@@ -462,6 +492,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/archives/b9ff3fc4.html" rel="next" title="Nemotron 3 Ultra 技术报告：RL Infra 阅读">
+                  Nemotron 3 Ultra 技术报告：RL Infra 阅读 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -492,13 +525,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">441k</span>
+    <span title="站点总字数">454k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:41</span>
+    <span title="站点阅读时长">6:53</span>
   </span>
 </div>
 

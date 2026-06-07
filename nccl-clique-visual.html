@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NCCL clique 可视化</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --line: #cdd6e1;
+      --text: #1f2933;
+      --muted: #5d6b7a;
+      --framework: #eaf2ff;
+      --framework-line: #7da9e4;
+      --scheduler: #f1ecff;
+      --scheduler-line: #a78bd7;
+      --rank: #e9f7ef;
+      --rank-line: #84bf9c;
+      --nccl: #fff3dd;
+      --nccl-line: #d1a45f;
+      --observe: #f2f4f7;
+      --observe-line: #aeb8c5;
+      --active: #255f9f;
+      --active-soft: #e7f0fb;
+      --shadow: 0 18px 50px rgba(31, 41, 51, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .back {
+      color: var(--active);
+      text-decoration: none;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    main {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 22px 24px 34px;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 16px;
+      align-self: start;
+      position: sticky;
+      top: 18px;
+    }
+
+    .control-title {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    button.step {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      min-height: 48px;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+
+    button.step:hover {
+      border-color: var(--active);
+      background: var(--active-soft);
+    }
+
+    button.step.active {
+      border-color: var(--active);
+      background: var(--active-soft);
+      transform: translateX(2px);
+    }
+
+    .step-name {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .step-desc {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input { display: none; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #d7dee8;
+      cursor: pointer;
+    }
+
+    .slider::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(31, 41, 51, .24);
+      transition: transform .18s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--active);
+    }
+
+    .switch input:checked + .slider::after {
+      transform: translateX(20px);
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 12px;
+      border-radius: 4px;
+      border: 1px solid;
+      flex: 0 0 auto;
+    }
+
+    .workspace {
+      min-width: 0;
+      display: grid;
+      gap: 16px;
+    }
+
+    .visual {
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .visual-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .visual-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .visual-copy {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      max-width: 760px;
+    }
+
+    .stage-tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      background: #fff;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .node {
+      transition: opacity .18s ease, filter .18s ease, stroke-width .18s ease;
+    }
+
+    .node.dim,
+    .wire.dim,
+    .gpu.dim,
+    .rank-chip.dim {
+      opacity: .34;
+    }
+
+    .node.active {
+      filter: drop-shadow(0 8px 14px rgba(37, 95, 159, .22));
+    }
+
+    .wire {
+      fill: none;
+      stroke: #728194;
+      stroke-width: 2;
+      marker-end: url(#arrow);
+      transition: opacity .18s ease, stroke .18s ease, stroke-width .18s ease;
+    }
+
+    .wire.active {
+      stroke: var(--active);
+      stroke-width: 3;
+    }
+
+    .wire-feedback {
+      stroke-width: 1.5;
+    }
+
+    .wire-feedback.active {
+      stroke-width: 2;
+    }
+
+    .svg-label {
+      font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: var(--text);
+    }
+
+    .svg-text {
+      font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: #415163;
+    }
+
+    .svg-small {
+      font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: #667789;
+    }
+
+    .rank-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .rank-board,
+    .explain {
+      padding: 16px;
+    }
+
+    .section-head {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .gpu-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .node-title {
+      margin: 12px 0 8px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .gpu {
+      min-height: 74px;
+      border: 1px solid var(--rank-line);
+      background: var(--rank);
+      border-radius: 8px;
+      padding: 8px;
+      display: grid;
+      align-content: space-between;
+      transition: opacity .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .gpu strong {
+      font-size: 13px;
+    }
+
+    .gpu span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .group-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .group-row {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .group-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .rank-chip {
+      min-width: 30px;
+      text-align: center;
+      border-radius: 999px;
+      border: 1px solid var(--framework-line);
+      background: var(--framework);
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: opacity .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .rank-chip.dp {
+      border-color: var(--scheduler-line);
+      background: var(--scheduler);
+    }
+
+    .explain p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .key-list {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .key-list li {
+      border-left: 3px solid var(--active);
+      padding-left: 10px;
+      color: #344251;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        position: static;
+      }
+
+      .rank-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-inner,
+      main {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .header-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 21px;
+      }
+
+      .visual-top {
+        flex-direction: column;
+      }
+
+      .gpu-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="header-inner">
+        <h1>NCCL clique 可视化</h1>
+        <a class="back" href="/archives/8a7d13c9.html">返回文章</a>
+      </div>
+    </header>
+
+    <main>
+      <aside class="panel controls">
+        <p class="control-title">选择观察层</p>
+        <div class="steps" role="tablist" aria-label="NCCL clique visual steps">
+          <button class="step active" data-step="framework" type="button">
+            <span class="step-name">1. 训练框架</span>
+            <span class="step-desc">定义并行策略、rank layout 和 process group。</span>
+          </button>
+          <button class="step" data-step="launcher" type="button">
+            <span class="step-name">2. Rank id</span>
+            <span class="step-desc">launcher / rendezvous 生成 global / local rank。</span>
+          </button>
+          <button class="step" data-step="scheduler" type="button">
+            <span class="step-name">3. 调度系统</span>
+            <span class="step-desc">选择节点、GPU、NIC 和 fabric domain。</span>
+          </button>
+          <button class="step" data-step="nccl" type="button">
+            <span class="step-name">4. NCCL communicator</span>
+            <span class="step-desc">框架按 rank id group 初始化 NCCL communicator。</span>
+          </button>
+        </div>
+
+        <div class="toggle-row">
+          <span>显示观测反馈</span>
+          <label class="switch">
+            <input id="feedbackToggle" type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><span class="swatch" style="background: var(--framework); border-color: var(--framework-line);"></span>训练框架输入</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--scheduler); border-color: var(--scheduler-line);"></span>调度拓扑约束</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--rank); border-color: var(--rank-line);"></span>rank id / placement</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--nccl); border-color: var(--nccl-line);"></span>NCCL 实际图</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--observe); border-color: var(--observe-line);"></span>日志 / dump 观测</div>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <section class="panel visual">
+          <div class="visual-top">
+            <div>
+              <h2 class="visual-title" id="stageTitle">训练框架负责解释并行策略</h2>
+              <p class="visual-copy" id="stageCopy">框架定义 TP / DP / PP / EP 的逻辑 group pattern，并用 rank layout 把逻辑坐标映射到 global rank。</p>
+            </div>
+            <span class="stage-tag" id="stageTag">group pattern</span>
+          </div>
+
+          <svg viewBox="0 0 980 470" aria-labelledby="diagramTitle" role="img">
+            <title id="diagramTitle">NCCL clique conceptual graph</title>
+            <defs>
+              <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="strokeWidth">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#728194"></path>
+              </marker>
+            </defs>
+
+            <path class="wire wire-framework" d="M192 182 C250 222 300 242 374 260"></path>
+            <path class="wire wire-launcher" d="M490 182 L490 260"></path>
+            <path class="wire wire-scheduler" d="M824 182 C758 222 690 244 606 260"></path>
+            <path class="wire wire-nccl" d="M520 344 L520 388"></path>
+            <path class="wire wire-feedback" d="M805 420 C842 420 876 420 876 400"></path>
+
+            <g class="node node-framework" data-node="framework">
+              <rect x="40" y="54" width="240" height="128" rx="10" fill="var(--framework)" stroke="var(--framework-line)" stroke-width="1.6"></rect>
+              <text class="svg-label" x="64" y="88">训练框架</text>
+              <text class="svg-text" x="64" y="118">并行策略与 rank layout</text>
+              <text class="svg-text" x="64" y="144">process group / new_group</text>
+              <text class="svg-small" x="64" y="166">负责把逻辑坐标展开成 rank group</text>
+            </g>
+
+            <g class="node node-launcher" data-node="launcher">
+              <rect x="370" y="54" width="240" height="128" rx="10" fill="var(--rank)" stroke="var(--rank-line)" stroke-width="1.6"></rect>
+              <text class="svg-label" x="394" y="88">Launcher / Rendezvous</text>
+              <text class="svg-text" x="394" y="118">RANK / WORLD_SIZE</text>
+              <text class="svg-text" x="394" y="144">LOCAL_RANK / local world</text>
+              <text class="svg-small" x="394" y="166">负责给训练进程分配 rank id</text>
+            </g>
+
+            <g class="node node-scheduler" data-node="scheduler">
+              <rect x="700" y="54" width="240" height="128" rx="10" fill="var(--scheduler)" stroke="var(--scheduler-line)" stroke-width="1.6"></rect>
+              <text class="svg-label" x="724" y="88">训练调度系统</text>
+              <text class="svg-text" x="724" y="118">node / GPU / NIC 拓扑</text>
+              <text class="svg-text" x="724" y="144">NUMA / fabric domain</text>
+              <text class="svg-small" x="724" y="166">负责资源选择和物理 placement</text>
+            </g>
+
+            <g class="node node-mapping" data-node="mapping">
+              <rect x="300" y="260" width="440" height="84" rx="10" fill="#eef6ff" stroke="#7aa7dc" stroke-width="1.6"></rect>
+              <text class="svg-label" x="324" y="292">rank id group + rank -> GPU placement</text>
+              <text class="svg-text" x="324" y="318">框架给出成员关系；调度和 launcher 给出物理落点</text>
+            </g>
+
+            <g class="node node-nccl" data-node="nccl">
+              <rect x="300" y="388" width="520" height="62" rx="10" fill="var(--nccl)" stroke="var(--nccl-line)" stroke-width="1.6"></rect>
+              <text class="svg-label" x="324" y="422">NCCL: communicator + topology graph + transport</text>
+            </g>
+
+            <g class="node node-feedback" data-node="feedback">
+              <rect x="812" y="312" width="128" height="88" rx="10" fill="var(--observe)" stroke="var(--observe-line)" stroke-width="1.6"></rect>
+              <text class="svg-label" x="834" y="344">观测</text>
+              <text class="svg-text" x="834" y="370">NCCL log</text>
+              <text class="svg-text" x="834" y="390">graph dump</text>
+            </g>
+
+            <text class="svg-small" x="52" y="224">注意：rank id 来自 launcher/rendezvous；rank group 来自框架 layout；物理路径来自 placement 和 NCCL 建图。</text>
+          </svg>
+        </section>
+
+        <section class="rank-section">
+          <section class="panel rank-board">
+            <p class="section-head">示例：2 节点 x 4 GPU</p>
+            <p class="node-title">node0</p>
+            <div class="gpu-grid" id="node0"></div>
+            <p class="node-title">node1</p>
+            <div class="gpu-grid" id="node1"></div>
+          </section>
+
+          <section class="panel rank-board">
+            <p class="section-head">具体 rank id group</p>
+            <div class="group-list">
+              <div class="group-row">
+                <span class="group-label">TP groups</span>
+                <div class="chips" id="tpGroups"></div>
+              </div>
+              <div class="group-row">
+                <span class="group-label">DP groups</span>
+                <div class="chips" id="dpGroups"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="panel explain">
+          <p class="section-head">当前层回答的问题</p>
+          <p id="explainText">框架先给出并行策略和 group pattern，例如 TP size 为 4，DP size 为 2，以及 TP 倾向同机或同一高带宽 fabric domain。</p>
+          <ul class="key-list" id="keyList"></ul>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const stages = {
+      framework: {
+        title: "训练框架负责解释并行策略",
+        copy: "框架定义 TP / DP / PP / EP 的逻辑 group pattern，并用 rank layout 把逻辑坐标映射到 global rank。",
+        tag: "parallel strategy + rank layout",
+        activeNodes: ["framework", "mapping"],
+        activeWires: ["framework"],
+        explain: "训练框架负责把业务并行策略翻译成 communication group：例如 TP size 为 4、DP size 为 2，以及采用什么 rank layout。",
+        keys: [
+          "训练框架定义逻辑坐标，例如 dp_rank、pp_rank、tp_rank。",
+          "训练框架决定 rank layout，例如逻辑坐标如何映射到 global rank。",
+          "训练框架根据 rank id group 调用 process group / new_group / NCCL backend。"
+        ],
+        showRanks: false,
+        showGroups: false,
+        highlightRanks: []
+      },
+      launcher: {
+        title: "rank id 由 launcher / rendezvous 分配",
+        copy: "global rank、local rank、world size 通常来自 torchrun、MPI、Kubernetes operator 或框架自带 launcher，而不是 NCCL。",
+        tag: "RANK / LOCAL_RANK",
+        activeNodes: ["launcher", "mapping"],
+        activeWires: ["launcher"],
+        explain: "launcher / rendezvous 负责让每个训练进程知道自己的编号。框架拿到这些编号后，才能把 rank layout 展开成具体 rank id group。",
+        keys: [
+          "global rank 是整个作业内的进程编号。",
+          "local rank 是节点内编号，通常用于绑定本机 GPU。",
+          "NCCL 接收 rank 编号作为输入，不负责生成业务侧的 global rank。"
+        ],
+        showRanks: false,
+        showGroups: true,
+        highlightRanks: []
+      },
+      scheduler: {
+        title: "调度系统负责物理 placement",
+        copy: "调度系统选择节点、GPU、NIC、NUMA 和 fabric domain，决定这些 rank id 最终落在哪些物理设备附近。",
+        tag: "rank -> physical GPU",
+        activeNodes: ["scheduler", "mapping"],
+        activeWires: ["scheduler"],
+        explain: "调度系统通常不定义 TP / PP / DP 的语义，但它通过资源选择和设备可见性影响 NCCL 看到的拓扑。",
+        keys: [
+          "同一个 rank id group，可以被放在一台机器上，也可以跨多台机器。",
+          "rank -> GPU placement 改变 busId、NIC 距离、NVLink/MNNVL domain 等 NCCL 输入。",
+          "调度系统影响性能路径，但不等价于直接指定 NCCL ring 顺序。"
+        ],
+        showRanks: true,
+        showGroups: true,
+        highlightRanks: [0,1,2,3,4,5,6,7]
+      },
+      nccl: {
+        title: "NCCL 负责生成实际通信图",
+        copy: "NCCL 接收 communicator 成员、communicator-local rank 和设备拓扑，再选择 ring / tree / NVLS / transport / channel。",
+        tag: "communicator + topology",
+        activeNodes: ["mapping", "nccl", "feedback"],
+        activeWires: ["nccl", "feedback"],
+        explain: "具体 communication group 会变成 NCCL communicator。NCCL 不知道业务意图本身，只根据 rank、device 和拓扑生成实际通信图。",
+        keys: [
+          "group = rank id 集合 + 顺序；placement = rank 到设备的物理映射。",
+          "NCCL 建图使用 busId、hostHash、NVLink、NIC、MNNVL fabric info。",
+          "实际结果需要用 NCCL_DEBUG、topo dump、graph dump 观察。"
+        ],
+        showRanks: true,
+        showGroups: true,
+        highlightRanks: [0,1,2,3,4,5,6,7]
+      }
+    };
+
+    const rankPlacement = [
+      { rank: 0, node: "node0", gpu: 0 },
+      { rank: 1, node: "node0", gpu: 1 },
+      { rank: 2, node: "node0", gpu: 2 },
+      { rank: 3, node: "node0", gpu: 3 },
+      { rank: 4, node: "node1", gpu: 0 },
+      { rank: 5, node: "node1", gpu: 1 },
+      { rank: 6, node: "node1", gpu: 2 },
+      { rank: 7, node: "node1", gpu: 3 }
+    ];
+
+    const tpGroups = [[0,1,2,3], [4,5,6,7]];
+    const dpGroups = [[0,4], [1,5], [2,6], [3,7]];
+
+    const steps = Array.from(document.querySelectorAll(".step"));
+    const feedbackToggle = document.getElementById("feedbackToggle");
+
+    function renderGpuBoards() {
+      ["node0", "node1"].forEach(node => {
+        const host = document.getElementById(node);
+        host.innerHTML = "";
+        rankPlacement.filter(item => item.node === node).forEach(item => {
+          const gpu = document.createElement("div");
+          gpu.className = "gpu";
+          gpu.dataset.rank = String(item.rank);
+          gpu.innerHTML = `<strong>GPU ${item.gpu}</strong><span>global rank ${item.rank}</span>`;
+          host.appendChild(gpu);
+        });
+      });
+    }
+
+    function renderGroups() {
+      const tp = document.getElementById("tpGroups");
+      const dp = document.getElementById("dpGroups");
+      tp.innerHTML = "";
+      dp.innerHTML = "";
+      tpGroups.forEach((group, idx) => {
+        const row = document.createElement("span");
+        row.className = "rank-chip";
+        row.textContent = `TP${idx}: [${group.join(",")}]`;
+        tp.appendChild(row);
+      });
+      dpGroups.forEach((group, idx) => {
+        const row = document.createElement("span");
+        row.className = "rank-chip dp";
+        row.textContent = `DP${idx}: [${group.join(",")}]`;
+        dp.appendChild(row);
+      });
+    }
+
+    function setStage(stageName) {
+      const stage = stages[stageName];
+      document.getElementById("stageTitle").textContent = stage.title;
+      document.getElementById("stageCopy").textContent = stage.copy;
+      document.getElementById("stageTag").textContent = stage.tag;
+      document.getElementById("explainText").textContent = stage.explain;
+
+      const list = document.getElementById("keyList");
+      list.innerHTML = "";
+      stage.keys.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+      });
+
+      steps.forEach(button => {
+        button.classList.toggle("active", button.dataset.step === stageName);
+      });
+
+      document.querySelectorAll(".node").forEach(node => {
+        const tags = (node.dataset.node || "").split(" ");
+        const isFeedback = tags.includes("feedback");
+        const active = tags.some(tag => stage.activeNodes.includes(tag));
+        node.classList.toggle("active", active);
+        node.classList.toggle("dim", !active || (isFeedback && !feedbackToggle.checked));
+      });
+
+      document.querySelectorAll(".wire").forEach(wire => {
+        const tag = Array.from(wire.classList).find(name => name.startsWith("wire-") && name !== "wire");
+        const key = tag ? tag.replace("wire-", "") : "";
+        const isFeedback = key === "feedback";
+        const active = stage.activeWires.includes(key);
+        wire.classList.toggle("active", active);
+        wire.classList.toggle("dim", !active || (isFeedback && !feedbackToggle.checked));
+      });
+
+      document.querySelectorAll(".gpu").forEach(gpu => {
+        const rank = Number(gpu.dataset.rank);
+        const show = stage.showRanks && stage.highlightRanks.includes(rank);
+        gpu.classList.toggle("dim", !show);
+      });
+
+      document.querySelectorAll(".rank-chip").forEach(chip => {
+        chip.classList.toggle("dim", !stage.showGroups);
+      });
+    }
+
+    renderGpuBoards();
+    renderGroups();
+    steps.forEach(button => button.addEventListener("click", () => setStage(button.dataset.step)));
+    feedbackToggle.addEventListener("change", () => {
+      const current = document.querySelector(".step.active")?.dataset.step || "framework";
+      setStage(current);
+    });
+    setStage("framework");
+  </script>
+</body>
+</html>

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="Nemotron 3 Ultra 的技术报告标题是 Nemotron 3 Ultra: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning。  报告概览 报告围绕四大板块展开：  预训练（Pretraining） 架构细节（层数、MoE 配置、Mamba 头参数等）、NVFP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nemotron 3 Ultra 技术报告：RL Infra 阅读">
+<meta property="og:url" content="https://zrss.github.io/archives/b9ff3fc4.html">
+<meta property="og:site_name" content="MegaThinking">
+<meta property="og:description" content="Nemotron 3 Ultra 的技术报告标题是 Nemotron 3 Ultra: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning。  报告概览 报告围绕四大板块展开：  预训练（Pretraining） 架构细节（层数、MoE 配置、Mamba 头参数等）、NVFP">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-07T23:58:20.000Z">
+<meta property="article:modified_time" content="2026-06-07T16:44:57.886Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="Infra">
+<meta property="article:tag" content="RL">
+<meta property="article:tag" content="Nemotron">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/b9ff3fc4.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/b9ff3fc4.html","path":"archives/b9ff3fc4.html","title":"Nemotron 3 Ultra 技术报告：RL Infra 阅读"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Nemotron 3 Ultra 技术报告：RL Infra 阅读 | MegaThinking</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">MegaThinking</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%A5%E5%91%8A%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text"> 报告概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rl-infra-%E6%80%BB%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text"> RL Infra 总览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text"> 关键优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mtp-%E5%8A%A0%E9%80%9F-rollout-%E7%94%9F%E6%88%90"><span class="nav-number">3.1.</span> <span class="nav-text"> MTP 加速 Rollout 生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#slurm-%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text"> Slurm 启动优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ray-gcs-%E6%89%A9%E5%B1%95%E6%80%A7"><span class="nav-number">3.3.</span> <span class="nav-text"> Ray GCS 扩展性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nvlink-%E6%8B%93%E6%89%91%E6%84%9F%E7%9F%A5%E8%B0%83%E5%BA%A6"><span class="nav-number">3.4.</span> <span class="nav-text"> NVLink 拓扑感知调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#numa-%E7%BB%91%E5%AE%9A"><span class="nav-number">3.5.</span> <span class="nav-text"> NUMA 绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#checkpoint-%E5%BC%82%E6%AD%A5%E4%BF%9D%E5%AD%98"><span class="nav-number">3.6.</span> <span class="nav-text"> Checkpoint 异步保存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#jit-%E7%BC%96%E8%AF%91%E7%BC%93%E5%AD%98"><span class="nav-number">3.7.</span> <span class="nav-text"> JIT 编译缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E8%8A%82%E7%82%B9-vllm-%E7%A8%B3%E5%AE%9A%E6%80%A7"><span class="nav-number">3.8.</span> <span class="nav-text"> 多节点 vLLM 稳定性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F-io-%E9%A3%8E%E6%9A%B4"><span class="nav-number">3.9.</span> <span class="nav-text"> 容器镜像 I&#x2F;O 风暴</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E6%96%B9%E5%90%91%E6%9B%B4%E7%BB%86%E7%B2%92%E5%BA%A6%E7%9A%84%E5%AE%B9%E9%94%99"><span class="nav-number">4.</span> <span class="nav-text"> 后续方向：更细粒度的容错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E9%94%80%E4%B8%8E%E6%94%B6%E7%9B%8A"><span class="nav-number">5.</span> <span class="nav-text"> 开销与收益</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rl-infra-%E5%90%AF%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text"> RL Infra 启发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E6%9E%84%E6%83%B3%E5%9C%A8-kubernetes-%E4%B9%8B%E4%B8%8A%E6%9E%84%E5%BB%BA%E4%BA%91%E5%8E%9F%E7%94%9F%E5%88%86%E5%B8%83%E5%BC%8F-rl-%E7%B3%BB%E7%BB%9F"><span class="nav-number">7.</span> <span class="nav-text"> 一个构想：在 Kubernetes 之上构建云原生分布式 RL 系统</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">143</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">75</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/b9ff3fc4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Nemotron 3 Ultra 技术报告：RL Infra 阅读 | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Nemotron 3 Ultra 技术报告：RL Infra 阅读
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-06-07 23:58:20 / 修改时间：16:44:57" itemprop="dateCreated datePublished" datetime="2026-06-07T23:58:20Z">2026-06-07</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>12k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Nemotron 3 Ultra 的技术报告标题是 <a target="_blank" rel="noopener" href="https://research.nvidia.com/labs/nemotron/files/NVIDIA-Nemotron-3-Ultra-Technical-Report.pdf">Nemotron 3 Ultra: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning</a>。</p>
+<h2 id="报告概览"><a class="markdownIt-Anchor" href="#报告概览"></a> 报告概览</h2>
+<p>报告围绕四大板块展开：</p>
+<ol>
+<li>预训练（Pretraining）<br />
+架构细节（层数、MoE 配置、Mamba 头参数等）、NVFP4 低精度训练配方、数据混合策略（两阶段课程：Phase 1 偏多样性、Phase 2 偏质量）、长上下文扩展（用 32-way context parallelism 在 GB200 上扩展到 1M），以及两次训练发散事件的诊断（原因、回滚方案）。</li>
+<li>后训练（Post-training）<br />
+SFT → RLVR → MOPD（多教师蒸馏）的三阶段流水线。训练了超过 10 个专项教师模型，涵盖软件工程、终端使用、搜索、Office 办公任务、安全、数学推理、竞赛编程等领域。还包括 MTP Boosting（推测解码头的专项优化）和推理预算控制。</li>
+<li>量化（Quantization）<br />
+NVFP4 量化方案及其对精度的影响分析。</li>
+<li>推理（Inference）<br />
+吞吐量对比、MTP 加速推理的效果数据。</li>
+</ol>
+<h2 id="rl-infra-总览"><a class="markdownIt-Anchor" href="#rl-infra-总览"></a> RL Infra 总览</h2>
+<p>报告的 Infra 内容集中在 <strong>RL/MOPD 训练阶段的工程挑战</strong>，背景是 GB200 NVL72 集群 + Slurm + Ray + vLLM + NeMo-RL 的异构分布式训练栈。以下按问题分类整理：</p>
+<p>这部分最有价值的地方，是它没有只给一个大而化之的“我们用了很多 GPU”描述，而是把 post-training 期间真实会拖慢训练、放大失败、拖垮共享服务的问题列出来，并给出前后对比。对 RL infra 来说，核心目标不只是单个 GPU 的 token/s，而是让 policy update、rollout generation、环境执行、judge / reward、checkpoint 和重启恢复共同组成一个稳定闭环。</p>
+<p>报告里 RL/MOPD 采用的是 <strong>one-step off-policy asynchronous RL</strong>：rollout generation 和 policy update 会 overlap，整体 step time 取决于更慢的一侧。NVIDIA 观察到瓶颈通常在 rollout generation，而 rollout 又被少量长尾 generation 拖慢。所以后面的 MTP、vLLM、多节点启动、JIT cache、I/O cache，本质上都是为了减少 RL step 的尾延迟和重启成本。</p>
+<p>从失败归因看，报告把 RL 软件失败分成三类：</p>
+<table>
+<thead>
+<tr>
+<th>失败类别</th>
+<th>占比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generation engine failures / timeouts</td>
+<td>56%</td>
+</tr>
+<tr>
+<td>Sandbox / tool calling</td>
+<td>36%</td>
+</tr>
+<tr>
+<td>Other software issues</td>
+<td>8%</td>
+</tr>
+</tbody>
+</table>
+<p>这说明大规模 agentic RL 的主要风险已经不只是 trainer 本身，而是 <strong>生成引擎 + 环境 / 工具执行系统</strong>。二者合计约 92% 的失败，意味着 infra 要把 vLLM、Ray actor、sandbox、tool calling、health check、timeout 和 cleanup 都纳入训练系统，而不是把它们当作外部黑盒。</p>
+<h2 id="关键优化"><a class="markdownIt-Anchor" href="#关键优化"></a> 关键优化</h2>
+<h3 id="mtp-加速-rollout-生成"><a class="markdownIt-Anchor" href="#mtp-加速-rollout-生成"></a> MTP 加速 Rollout 生成</h3>
+<p>RL/MOPD 训练中，rollout 生成是瓶颈，而生成时间又被极少数&quot;straggler&quot;长请求主导。方案是用 MTP 投机解码（MTP head 先出 k 个候选 token，base model 单次前向验证），k=5 时带来 <strong>1.46× 加速</strong>，收益集中在长尾慢请求上。</p>
+<p>这里的关键点是，MTP 在 infra 里的作用不是单纯提高在线推理吞吐，而是缩短训练循环里的 rollout wall-clock。长尾请求往往会在 batch 后段以较低并发继续 decode，投机解码在这类场景里收益更明显。也就是说，它优化的是 RL step 的 tail latency，而不是平均单请求延迟。</p>
+<h3 id="slurm-启动优化"><a class="markdownIt-Anchor" href="#slurm-启动优化"></a> Slurm 启动优化</h3>
+<p>原有启动脚本对每个节点发多次独立 <code>srun</code> 来分配角色，<code>slurmctld</code> 串行处理 RPC，节点数多时复杂度 O(n)，导致启动耗时 30+ 分钟。改为单次多节点 <code>srun</code>，Slurm 控制器交互降为 O(1)，<strong>启动时间从 30+ 分钟降到 10 分钟</strong>。</p>
+<p>这个问题很典型：小规模下“每个节点单独发命令”很直观，但到几百、上千节点后，控制面会先于数据面变成瓶颈。这里的优化不是更快的 GPU kernel，而是减少对 Slurm controller 的 RPC 压力，让 job launch 从节点数线性增长回到常数级控制面交互。</p>
+<h3 id="ray-gcs-扩展性"><a class="markdownIt-Anchor" href="#ray-gcs-扩展性"></a> Ray GCS 扩展性</h3>
+<p>3000+ GPU 规模下，RL job 同时创建大量 Ray actor（policy、generation、env、judge 四类 worker），Ray 单线程 GCS 被 actor 注册请求淹没，启动耗时 25–49 分钟，且出现雷群式启动失败。解法：</p>
+<ul>
+<li>把短生命周期 actor 改为 task，减少 40% actor 注册量</li>
+<li>每节点合并初始化 actor</li>
+<li>升级到 Ray 2.55（Anyscale 在此版本中修了 GCS 扩展性回归）</li>
+</ul>
+<p>这里反映出 Ray 在 RL infra 里的角色更像一个异构 job runtime，而不是只负责几个 Python worker。policy、generation、environment、judge 的生命周期和资源需求不同，如果全部抽象成大量 actor，会把 GCS 注册路径打爆。短生命周期逻辑改为 task，本质是降低控制面对象数量；每节点合并初始化 actor，则是减少 thundering herd。</p>
+<p>这也说明 RL infra 的调度单位要谨慎设计：不是所有并发实体都适合作为独立 actor，尤其是在数千 GPU、数千到数万进程同时启动的场景下，控制面元数据本身就是稀缺资源。</p>
+<h3 id="nvlink-拓扑感知调度"><a class="markdownIt-Anchor" href="#nvlink-拓扑感知调度"></a> NVLink 拓扑感知调度</h3>
+<p>GB200 NVL72 的 NVLink 域覆盖单个 rack（18 节点 × 4 GPU = 72 GPU）。若 Megatron 的 Expert Parallelism (EP) 组跨 rack，MoE all-to-all 通信就会走 InfiniBand 而非 NVLink。原因是 Ray node ID 是随机 UUID，无拓扑信息，Megatron 按收到的 rank 排序分组，无法感知物理位置。</p>
+<p>解法三步走：</p>
+<ol>
+<li>容器启动时，用 <code>nvidia-smi -q</code> 读取 NVLink fabric ClusterUUID，注册为 Ray 自定义资源，给调度器提供 rack 归属信息</li>
+<li>NeMo RL 的 RayVirtualCluster 按 <code>(domain_min_topo_rank, topo_rank, gpu_id)</code> 组合键排序 bundle，确保 EP 组内所有 GPU 在同一 NVLink 域；用 <code>SLURM_TOPOLOGY_ADDR</code> 修正 Slurm block 乱序</li>
+<li>Megatron 启用 <code>external_gpu_device_mapping=True</code>，信任 Ray 的 GPU 绑定</li>
+</ol>
+<p>效果：<strong>端到端吞吐提升 20%</strong>。</p>
+<p>这部分是整篇 infra 里最值得关注的优化。GB200 NVL72 的 rack 内 72 GPU 通过 NVLink 域连接，MoE 的 EP all-to-all 如果落在同一个 NVLink 域内，通信路径和跨 rack InfiniBand 完全不是一个量级。问题在于 Ray 和 Megatron 默认看到的是逻辑 rank，而不是物理 rack / NVLink domain。</p>
+<p>因此这里其实做了一个跨层契约：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>原问题</th>
+<th>修正方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>硬件层</td>
+<td>NVLink domain 信息只存在于节点本地</td>
+<td>用 <code>nvidia-smi -q</code> 读 ClusterUUID</td>
+</tr>
+<tr>
+<td>调度层</td>
+<td>Ray node ID 是随机 UUID</td>
+<td>注册 Ray custom resource 表达 rack 归属</td>
+</tr>
+<tr>
+<td>编排层</td>
+<td>Slurm block 顺序可能乱</td>
+<td>用 <code>SLURM_TOPOLOGY_ADDR</code> / hostname 做 deterministic sort</td>
+</tr>
+<tr>
+<td>训练层</td>
+<td>Megatron 按 rank 建 EP 组</td>
+<td>让 RayVirtualCluster 排好 bundle，Megatron 信任外部 GPU mapping</td>
+</tr>
+</tbody>
+</table>
+<p>这个思路比“给训练框架加一个 topology 参数”更完整：它把硬件拓扑、Slurm 拓扑、Ray placement group、Megatron rank assignment 串成了一条链。链上任意一层丢失物理信息，EP 组就可能静默跨 rack，吞吐下降但不一定立刻报错。</p>
+<h3 id="numa-绑定"><a class="markdownIt-Anchor" href="#numa-绑定"></a> NUMA 绑定</h3>
+<p>GB200 NVL72 每个计算托盘有一块 Grace CPU，含两个 socket 和多个 NUMA 节点：GPU 0/1 对应 NUMA node 0，GPU 2/3 对应 NUMA node 1。NVLink-C2C 是 socket-local 的，若 Ray worker 进程跑到远端 socket，CPU↔GPU 的内存带宽会因跨 socket coherence link 而下降。</p>
+<p>解法：显式把 policy worker 和 vLLM worker 绑定到与其分配 GPU 物理相邻的 CPU socket。优化器 state offload、tokenization、数据预处理、pinned-memory 申请全部命中本地 DRAM 和 C2C 路径。效果：<strong>端到端吞吐提升 10%</strong>。</p>
+<p>这说明在 Grace-Blackwell 这类 CPU/GPU 紧耦合平台上，CPU placement 已经会影响端到端训练吞吐。对 RL 来说，CPU 不是闲置资源：tokenization、环境执行、judge、数据预处理、checkpoint D2H staging、vLLM worker 管理都会用 CPU。如果进程被 Linux 调度到远端 socket，就会把原本应该走本地 C2C 的路径变成跨 socket 访问。</p>
+<h3 id="checkpoint-异步保存"><a class="markdownIt-Anchor" href="#checkpoint-异步保存"></a> Checkpoint 异步保存</h3>
+<p>同步 checkpoint 阻塞训练约 60 秒/次。优化链路：</p>
+<ul>
+<li>启用 NVRx（NVIDIA Resiliency Extension）异步 checkpoint：参数先 copy 到 CPU，后台持久化，阻塞降到 6–8 秒</li>
+<li>NCCL D2H 传输与 CPU 拷贝 overlap，缩短同步窗口</li>
+<li>持久化 checkpoint worker 进程，避免每次 fork/spawn 开销</li>
+<li>checkpoint finalization（跨 worker 同步 + 最终 commit）移入后台线程，完全不阻塞训练</li>
+<li>缓存 distributed save plan，不再每次重新计算</li>
+</ul>
+<p>最终效果：<strong>exposed save time 降到 &lt;1 秒</strong>。</p>
+<p>这个 checkpoint 优化有两层含义。第一层是减少训练停顿：把参数拷到 CPU 后后台落盘，让 GPU 训练尽快继续。第二层是把 checkpoint 的分布式协议开销从 hot path 移出去：finalization、save plan 计算、worker 进程创建都不能每次阻塞训练主循环。</p>
+<p>Megatron Core Distributed Optimizer 也很关键，因为 optimizer state 已经按 data-parallel rank 分片，每个 rank 只保存本地 shard。对超大模型 post-training 来说，checkpoint 不只是容灾机制，也是影响 goodput 的常规周期性开销。</p>
+<h3 id="jit-编译缓存"><a class="markdownIt-Anchor" href="#jit-编译缓存"></a> JIT 编译缓存</h3>
+<p>1000+ GPU 冷启动时，初始化耗时 ~49 分钟，其中 JIT 编译占 38.8 分钟，明细如下：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>冷启动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FlashInfer cubin 编译</td>
+<td>28.0 min</td>
+</tr>
+<tr>
+<td>Inductor / torch.compile</td>
+<td>5.5 min</td>
+</tr>
+<tr>
+<td>Triton kernel autotuning</td>
+<td>2.0 min</td>
+</tr>
+<tr>
+<td>vLLM CUDA graph capture</td>
+<td>2.5 min</td>
+</tr>
+<tr>
+<td>模型加载</td>
+<td>0.4 min</td>
+</tr>
+</tbody>
+</table>
+<p>解法三步：</p>
+<ol>
+<li><strong>共享存储持久化缓存</strong>：job 结束时把所有 JIT artifacts 压缩打包写回共享目录</li>
+<li><strong>节点本地 seeding</strong>：Ray 初始化前，每个节点把压缩包解压到本地 <code>/tmp</code>，后续 JIT 写也打到 <code>/tmp</code>，避免并发元数据风暴</li>
+<li><strong>FlashInfer cubin 预编译进容器镜像</strong>：build 时用 <code>flashinfer download-cubin</code> 烘焙，消除运行时编译</li>
+</ol>
+<p>效果：<strong>初始化时间从 38.8 分钟降到 0.4 分钟，降低 99%</strong>。</p>
+<p>JIT cache 这一节可以理解为“把运行时不确定性前移或局部化”。FlashInfer cubin、Inductor graph、Triton autotuning、vLLM CUDA graph capture 都会生成本地 artifact；如果每个 worker 冷启动都重新编译，集群规模越大，重复工作越多，启动时间也越不可预测。</p>
+<p>这里的三个手段分别解决不同问题：</p>
+<table>
+<thead>
+<tr>
+<th>手段</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>共享存储保存 warm cache</td>
+<td>job 之间复用编译结果</td>
+</tr>
+<tr>
+<td>启动前解压到节点本地 <code>/tmp</code></td>
+<td>避免所有 worker 同时打共享文件系统 metadata</td>
+</tr>
+<tr>
+<td>FlashInfer cubin 烘进镜像</td>
+<td>消除最大头的运行时编译</td>
+</tr>
+</tbody>
+</table>
+<p>值得注意的是，缓存不是简单放共享盘就结束了。千卡规模下，共享盘上的大量小文件读写会变成 metadata storm，所以训练时写本地、启动时顺序解压 tarball、结束时单点归档，才是完整方案。</p>
+<h3 id="多节点-vllm-稳定性"><a class="markdownIt-Anchor" href="#多节点-vllm-稳定性"></a> 多节点 vLLM 稳定性</h3>
+<p>多节点 vLLM 在 GB200 上遇到三类问题及对应修复：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>修复</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>各组件安装了不同版本 GPU kernel 库，ABI 不兼容，冷静默崩溃</td>
+<td>统一全栈 GPU kernel 库版本</td>
+</tr>
+<tr>
+<td>主 Ray actor 的环境变量未传播到 <code>multiprocessing.spawn</code> 子进程，子进程加载不同库版本</td>
+<td>显式在 spawn 时 forward 所有库路径和环境变量</td>
+</tr>
+<tr>
+<td>部分 JIT 编译 kernel 与 NCCL 多节点 NVLink 内存注册不兼容，导致分布式初始化 hang</td>
+<td>在 FlashInfer 上游修复可用前，禁用受影响 kernel 路径的多节点 NVLink 内存注册</td>
+</tr>
+</tbody>
+</table>
+<p>此外还加了 vLLM health check、RPC timeout、graceful shutdown 和孤儿进程清理，提升整体稳定性。</p>
+<p>这部分的工程信号很强：vLLM 在 RL 训练里不是一个独立 serving 服务，而是 Ray 分布式执行图里的 generation backend。主 Ray actor 还会通过 <code>multiprocessing.spawn</code> 拉起 EngineCore 子进程，子进程再连 GCS。这样一来，版本、环境变量、NCCL 初始化、CUDA graph、FlashInfer kernel 都必须在父进程、子进程、多节点之间保持一致。</p>
+<p>所以它的稳定性问题往往不是“vLLM 算错了”，而是：</p>
+<ul>
+<li>多组件安装的 GPU kernel 库版本不一致，导致 ABI 静默不兼容；</li>
+<li>父进程的 <code>LD_LIBRARY_PATH</code>、CUDA/NCCL/FlashInfer 相关环境变量没有传到 spawn 子进程；</li>
+<li>某些 JIT kernel 和 NCCL 多节点 NVLink memory registration 组合会 hang；</li>
+<li>分布式 worker 没有 timeout / health check，单点卡死会拖住整个 RL job。</li>
+</ul>
+<p>这些问题都很像生产 serving，但影响的是训练 goodput。RL 训练里的 generation backend 如果没有 fail-fast 和 cleanup，失败会从一个子进程扩散到整轮 rollout，最后变成整 job 重启。</p>
+<h3 id="容器镜像-io-风暴"><a class="markdownIt-Anchor" href="#容器镜像-io-风暴"></a> 容器镜像 I/O 风暴</h3>
+<p>44GB squashfs 容器镜像在千卡规模下被所有节点并发读取，共享存储被打爆，部分节点报 I/O error 或卡 12+ 分钟（正常应 2–3 分钟），一个慢节点就能拖延整个 job 的 Ray 初始化。job 结束时所有节点并发回写 JIT 缓存，制造第二次 I/O 风暴。</p>
+<p>解法：</p>
+<ul>
+<li><strong>Enroot 本地 squashfs 缓存</strong>：节点首次提取后，后续 job 直接复用本地缓存，不再读共享存储</li>
+<li><strong>写入非对称化</strong>：训练时 JIT 全写本地，job 结束时仅由一个 sidecar 进程归档压缩包回共享存储（因所有节点编译的 kernel 完全相同，只需保存一份）</li>
+</ul>
+<p>这里可以和 JIT cache 放在一起看：大规模训练的启动阶段会同时制造两类 I/O 压力，一类是所有节点读同一个 44GB squashfs 镜像，另一类是所有节点写回大量 JIT 小文件。前者是吞吐型读风暴，后者是 metadata / 小文件写风暴。</p>
+<p>NVIDIA 的处理方式都遵循同一个原则：<strong>共享存储只做低频、顺序、少并发的持久化；高频读写放节点本地</strong>。容器镜像靠 Enroot 本地 cache 变成 warm start，JIT artifact 靠 sidecar 只保存一份，因为所有节点编译出的 kernel 相同，没有必要让每个节点都回写。</p>
+<h2 id="后续方向更细粒度的容错"><a class="markdownIt-Anchor" href="#后续方向更细粒度的容错"></a> 后续方向：更细粒度的容错</h2>
+<p>报告的 Future Work 指向两个主要方向：</p>
+<ol>
+<li><strong>fail-fast fault isolation</strong>：generation worker 或 sandbox 实例出问题时，尽快隔离失败，避免 retry 引发级联故障。</li>
+<li><strong>component-level recovery</strong>：单个 generation worker、sandbox、tool-calling 组件可以独立重启，不必重启整个 RL job。</li>
+<li><strong>细粒度状态 checkpoint</strong>：保存 in-flight rollout、KV cache、conversation state，让恢复从最近一致快照继续，而不是从头 replay。</li>
+</ol>
+<p>这说明下一阶段 RL infra 的重点会从“让大 job 跑起来”转向“让局部失败不要扩大成全局失败”。尤其是 agentic RL 里，环境、工具、浏览器、终端、judge、模型生成都可能失败，训练系统需要像分布式在线系统一样做 fault domain 切分。</p>
+<h2 id="开销与收益"><a class="markdownIt-Anchor" href="#开销与收益"></a> 开销与收益</h2>
+<table>
+<thead>
+<tr>
+<th>优化项</th>
+<th>收益</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NVLink 拓扑感知调度</td>
+<td>+20% 端到端吞吐</td>
+</tr>
+<tr>
+<td>NUMA 绑定</td>
+<td>+10% 端到端吞吐</td>
+</tr>
+<tr>
+<td>MTP 投机解码加速 rollout</td>
+<td>1.46× rollout 速度</td>
+</tr>
+<tr>
+<td>异步 checkpoint</td>
+<td>60s → &lt;1s 阻塞</td>
+</tr>
+<tr>
+<td>JIT 缓存</td>
+<td>38.8 min → 0.4 min 冷启动</td>
+</tr>
+<tr>
+<td>Slurm 启动优化</td>
+<td>30 min → 10 min</td>
+</tr>
+<tr>
+<td>多节点 vLLM 启动</td>
+<td>25 min → 9.5 min</td>
+</tr>
+<tr>
+<td>容器镜像 warm cache</td>
+<td>2–3 min / 失败级联 → warm node 约 0s</td>
+</tr>
+</tbody>
+</table>
+<p>这份 infra 章节的工程密度相当高，尤其是 NVLink 拓扑感知调度和 JIT 缓存部分，对做大规模 RL 训练基础设施的团队很有参考价值。</p>
+<h2 id="rl-infra-启发"><a class="markdownIt-Anchor" href="#rl-infra-启发"></a> RL Infra 启发</h2>
+<p>我的理解是，Nemotron 3 Ultra 的 infra 经验可以抽象成几条原则：</p>
+<ol>
+<li><strong>RL goodput 优先于单点吞吐</strong>：rollout 长尾、checkpoint、启动、恢复、工具执行失败都会进入 wall-clock。</li>
+<li><strong>控制面要按规模重新设计</strong>：Slurm RPC、Ray GCS actor 注册、Ray actor spawn、vLLM 子进程连接都会在千卡规模暴露瓶颈。</li>
+<li><strong>拓扑信息必须跨层传递</strong>：硬件 NVLink domain、Slurm topology、Ray placement、Megatron rank assignment 必须对齐。</li>
+<li><strong>共享存储不能承受所有节点同时读写</strong>：镜像、JIT cache、checkpoint 都要区分本地热路径和共享持久化路径。</li>
+<li><strong>agentic RL 的 fault domain 更复杂</strong>：generation engine、sandbox、tool calling、judge、environment 都是训练系统的一部分，需要 health check、timeout、cleanup 和局部恢复。</li>
+</ol>
+<p>这也是它和很多只讲模型结构的技术报告不同的地方：§3.6 把 RL 训练看成一个包含推理引擎、调度系统、容器系统、存储系统和任务环境的生产级分布式系统。对做训练平台的人来说，这部分比 benchmark 表格更值得反复看。</p>
+<h2 id="一个构想在-kubernetes-之上构建云原生分布式-rl-系统"><a class="markdownIt-Anchor" href="#一个构想在-kubernetes-之上构建云原生分布式-rl-系统"></a> 一个构想：在 Kubernetes 之上构建云原生分布式 RL 系统</h2>
+<p>如果把 Nemotron 3 Ultra 这套经验迁移到云原生体系里，一个自然的方向是 <strong>在 Kubernetes 之上构建云原生分布式 RL 系统</strong>。这里的 Kubernetes 不是 RL 系统本身，而是资源抽象、调度、隔离、生命周期管理和控制面的底座；真正的 RL 系统由 Ray / NeMo-RL / vLLM、learner、rollout generator、sandbox、tool calling、judge、checkpoint、cache 和 topology-aware runtime 共同组成。</p>
+<p>所以这套系统不是把 Ray job 简单塞进 Pod，也不是只做一个训练 launcher，而是把 RL 训练里的 policy、rollout、inference engine、sandbox、tool calling、judge、checkpoint、cache 和 topology placement 都变成 Kubernetes 可理解、可调度、可恢复的资源。</p>
+<p>这里有一个很关键的现实基础：NeMo-RL 本身已经开源，而且采用 Apache-2.0 License。官方 README 明确说它是 open-source post-training library，支持从小规模实验到 multi-GPU / multi-node deployment，并用 Ray 做资源管理和调度；GitHub repo 也标注了 Apache-2.0 License。也就是说，它不是只公开了 paper 或 recipe，而是把 RL post-training runtime 和相当一部分 infra 代码也放了出来。</p>
+<p>公开仓库里能看到几类和 §3.6 对应的基础设施代码，而且不少已经不是“示例级说明”，而是直接在 NeMo-RL runtime 路径里：</p>
+<table>
+<thead>
+<tr>
+<th>方向</th>
+<th>开源实现线索</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ray 资源调度封装</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/blob/main/nemo_rl/distributed/virtual_cluster.py"><code>nemo_rl/distributed/virtual_cluster.py</code></a> 里的 <code>RayVirtualCluster</code> 负责 placement group、逻辑节点、GPU bundle、端口分配和 bundle 排序；<a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/blob/main/nemo_rl/distributed/worker_groups.py"><code>nemo_rl/distributed/worker_groups.py</code></a> 里的 <code>RayWorkerGroup</code> 负责 worker 创建、rank/env 设置、bundle_indices、跨 worker 调用和结果聚合</td>
+</tr>
+<tr>
+<td>Slurm 启动</td>
+<td>根目录 <a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/blob/main/ray.sub"><code>ray.sub</code></a> 是 Slurm 上启动 Ray head / worker 的脚本，处理 container、mount、port layout、日志同步、attach、worker 检查、失败退出等逻辑</td>
+</tr>
+<tr>
+<td>Kubernetes infra</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/tree/main/infra"><code>infra/</code></a> 包含 KAI scheduler、KubeRay、JobSet、Helmfile、本地 GPU-enabled kind、monolithic / disaggregated RayCluster / JobSet 示例；<a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/tree/main/infra/nrl_k8s"><code>infra/nrl_k8s</code></a> 进一步提供 config-driven Kubernetes launcher</td>
+</tr>
+<tr>
+<td>异步 checkpoint</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/blob/main/nemo_rl/utils/checkpoint.py"><code>nemo_rl/utils/checkpoint.py</code></a> 的 <code>CheckpointingConfig</code> 已包含 <code>is_async</code>；Automodel checkpoint manager 会把 <code>is_async</code> 传给 checkpointer；DTensor v2 policy worker 初始化 checkpoint manager 时默认设置 <code>is_async=True</code></td>
+</tr>
+<tr>
+<td>NVLink 拓扑感知</td>
+<td>Kubernetes GB300 示例 manifest 里用 KAI topology annotation 约束 GPU clique，并在 worker entrypoint 里通过 <code>nvidia-smi -q</code> 读取 <code>ClusterUUID</code>，注册 <code>nvlink_domain_&lt;UUID&gt;</code> 和 <code>topo_rank</code> 为 Ray custom resources；Megatron setup 中也设置 <code>external_gpu_device_mapping=True</code>，并给 HybridEP 配置 NVLink domain 相关环境变量</td>
+</tr>
+<tr>
+<td>NUMA / CPU locality</td>
+<td>GB300 Kubernetes 示例里通过 <code>nvidia-smi topo -m</code> 生成 <code>NRL_GPU_CPU_AFFINITY_FILE</code>，把 GPU 到 CPU affinity 的映射传给运行时，给后续 NUMA-aware worker 绑定提供输入</td>
+</tr>
+<tr>
+<td>vLLM 多节点稳定性 patch</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA-NeMo/RL/tree/main/nemo_rl/models/generation/vllm"><code>nemo_rl/models/generation/vllm</code></a> 里有 vLLM worker、backend、async worker、generation wrapper；代码会 patch vLLM Ray executor，向 worker subprocess 传 <code>py_executable</code> 和 <code>NCCL_CUMEM_ENABLE</code> / <code>NCCL_NVLS_ENABLE</code> 等环境变量；跨节点并行时显式设置 <code>NCCL_NVLS_ENABLE=0</code>；async generation 路径有 timeout、socket lock、HTTP keepalive、shutdown cleanup 等稳定性处理</td>
+</tr>
+</tbody>
+</table>
+<p>所以这件事比“未来可以做一个 Kubernetes RL 系统”更现实：<strong>NeMo-RL 已经开源了 RL runtime、Ray 编排、Slurm/Kubernetes 启动、checkpoint 管理、NVLink topology plumbing、NUMA affinity 输入和 vLLM generation 稳定性 patch</strong>。剩下真正值得平台化的是，把这些能力从 repo 里的脚本、runtime 模块和 manifests，进一步沉淀成云原生控制器、调度插件、节点 daemon、cache controller 和标准化 CRD。</p>
+<p>这套系统可以分成几层：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RLJob CRD</td>
+<td>描述一次 RL/MOPD 训练，包括 policy、rollout、reward、judge、environment、checkpoint 策略</td>
+</tr>
+<tr>
+<td>WorkerGroup</td>
+<td>管理 learner、generation、sandbox、judge 等异构 worker 的副本数、资源和生命周期</td>
+</tr>
+<tr>
+<td>Topology Scheduler</td>
+<td>感知 GPU、NVLink domain、NUMA、IB fabric、rack，保证 EP/TP/PP/RL rollout 的放置约束</td>
+</tr>
+<tr>
+<td>Inference Runtime</td>
+<td>管理 vLLM / TensorRT-LLM 等 generation backend，提供 health check、timeout、graceful restart</td>
+</tr>
+<tr>
+<td>Environment Runtime</td>
+<td>管理 sandbox、tool calling、browser、terminal、grader，把环境执行也纳入调度和隔离</td>
+</tr>
+<tr>
+<td>Checkpoint / Cache Runtime</td>
+<td>负责异步 checkpoint、JIT cache、镜像 cache、warm start 和局部恢复</td>
+</tr>
+<tr>
+<td>Goodput Controller</td>
+<td>观测 rollout tail latency、GPU idle、failure rate、restart cost，并动态调整并发和资源</td>
+</tr>
+</tbody>
+</table>
+<p>核心设计目标应该是 <strong>RL goodput first</strong>。Kubernetes 不能只知道“Pod Running”，还要知道这一组 Pod 是否真的在产生有效 rollout、是否有 generation tail、是否有 sandbox timeout、是否有某个 vLLM worker 卡死、是否因为 checkpoint 或 JIT cache 拖慢训练。换句话说，RLJob 的状态机要比普通 Job 更接近一个长生命周期分布式系统。</p>
+<p>调度层可以重点做三件事：</p>
+<ol>
+<li><strong>拓扑感知放置</strong>：把 GPU UUID、NVLink ClusterUUID、NUMA node、IB leaf / spine、rack 信息注册成 Node label / extended resource / scheduler plugin 输入，让 TP/EP 组优先落在同一 NVLink domain，跨域通信显式可见。</li>
+<li><strong>异构 worker 编排</strong>：learner、rollout generator、sandbox、judge 的资源形态不同，不能只按 GPU 数量调度；CPU、memory、local NVMe、network、ephemeral storage 都会影响 RL step time。</li>
+<li><strong>局部失败恢复</strong>：generation worker、sandbox、tool-calling worker 可以独立重启和替换，RLJob controller 负责隔离失败、保留 in-flight 状态、避免整 job 重启。</li>
+</ol>
+<p>存储和启动路径也应该平台化。镜像、JIT cache、checkpoint 都走“本地热路径 + 共享持久化路径”：节点本地 NVMe 承担高频读写，共享存储只做少并发归档；checkpoint 异步化，save plan 缓存化；JIT artifact 可以通过 DaemonSet 预热到节点，或者在镜像构建阶段烘焙进 runtime layer。</p>
+<p>这样的系统最终会像一个运行在 Kubernetes 之上的 RL 训练操作系统：Kubernetes 提供资源、隔离和控制面，Ray / NeMo-RL / vLLM 提供执行 runtime，平台层负责 topology、cache、checkpoint、health、failure domain 和 goodput。Nemotron 3 Ultra §3.6 的意义就在这里：它把未来 RL infra 要解决的问题摊开了，而云原生版本要做的，是把这些经验沉淀成可复用的控制器、调度插件和运行时协议。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/Infra/" rel="tag"># Infra</a>
+              <a href="/tags/RL/" rel="tag"># RL</a>
+              <a href="/tags/Nemotron/" rel="tag"># Nemotron</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/8a7d13c9.html" rel="prev" title="业务侧配置与 NCCL clique">
+                  <i class="fa fa-angle-left"></i> 业务侧配置与 NCCL clique
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">454k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">6:53</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

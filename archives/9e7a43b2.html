@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://zrss.github.io/images/nccl-connect-setup-sequence.svg">
 <meta property="og:image" content="https://zrss.github.io/images/nccl-after-connect-communication.svg">
 <meta property="article:published_time" content="2026-06-07T00:11:01.000Z">
-<meta property="article:modified_time" content="2026-06-07T04:45:22.655Z">
+<meta property="article:modified_time" content="2026-06-07T07:06:47.746Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="tech">
 <meta name="twitter:card" content="summary">
@@ -141,7 +141,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text"> 总览</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%BB%E7%BA%BF"><span class="nav-number">1.1.</span> <span class="nav-text"> 阶段主线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E6%BA%90%E7%A0%81%E5%85%A5%E5%8F%A3"><span class="nav-number">1.2.</span> <span class="nav-text"> 主要源码入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-reading-nccl-%E7%9A%84%E5%86%85%E5%AE%B9%E5%AF%B9%E7%85%A7"><span class="nav-number">1.3.</span> <span class="nav-text"> 与 reading nccl 的内容对照</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%98%85%E8%AF%BB%E8%B7%AF%E5%BE%84"><span class="nav-number">2.</span> <span class="nav-text"> 阅读路径</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%E5%85%88%E7%9C%8B%E8%B0%81%E8%BF%9E%E8%B0%81"><span class="nav-number">2.1.</span> <span class="nav-text"> 第一层：先看谁连谁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E5%86%8D%E7%9C%8B%E9%80%BB%E8%BE%91%E9%82%BB%E5%B1%85%E5%A6%82%E4%BD%95%E5%8F%98%E6%88%90%E5%BE%85%E8%BF%9E%E6%8E%A5%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text"> 第二层：再看逻辑邻居如何变成待连接任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%E7%9C%8B%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text"> 第三层：看连接建立函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%B1%82%E6%9C%80%E5%90%8E%E5%86%8D%E5%88%86-transport-%E7%9C%8B%E7%BB%86%E8%8A%82"><span class="nav-number">2.4.</span> <span class="nav-text"> 第四层：最后再分 transport 看细节</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E9%97%AD%E7%8E%AF"><span class="nav-number">2.5.</span> <span class="nav-text"> 最小闭环</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BB%BA%E9%93%BE%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text"> 建链流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%80%BB%E8%BE%91%E9%82%BB%E5%B1%85"><span class="nav-number">3.1.</span> <span class="nav-text"> 生成逻辑邻居</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%BE%85%E8%BF%9E%E6%8E%A5-bitmask"><span class="nav-number">3.2.</span> <span class="nav-text"> 记录待连接 bitmask</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E5%B9%B6%E5%86%99%E5%85%A5-ncclconninfo"><span class="nav-number">3.3.</span> <span class="nav-text"> 建立连接并写入 ncclConnInfo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-transport"><span class="nav-number">3.4.</span> <span class="nav-text"> 选择 transport</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#p2p-transport"><span class="nav-number">3.4.1.</span> <span class="nav-text"> P2P transport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shm-transport"><span class="nav-number">3.4.2.</span> <span class="nav-text"> SHM transport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#net-transport"><span class="nav-number">3.4.3.</span> <span class="nav-text"> NET transport</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#runtime-connect"><span class="nav-number">3.5.</span> <span class="nav-text"> runtime connect</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text"> 通信流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#host-%E4%BE%A7%E7%94%9F%E6%88%90-work"><span class="nav-number">4.1.</span> <span class="nav-text"> Host 侧生成 work</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#device-kernel-%E6%B6%88%E8%B4%B9%E8%BF%9E%E6%8E%A5%E4%BF%A1%E6%81%AF"><span class="nav-number">4.2.</span> <span class="nav-text"> Device kernel 消费连接信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-%E5%92%8C-fifo"><span class="nav-number">4.3.</span> <span class="nav-text"> step 和 FIFO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#proxy-%E6%8E%A8%E8%BF%9B-net-%E7%AD%89%E4%BC%A0%E8%BE%93"><span class="nav-number">4.4.</span> <span class="nav-text"> Proxy 推进 NET 等传输</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E9%93%BE%E5%92%8C%E9%80%9A%E4%BF%A1%E7%9A%84%E8%BE%B9%E7%95%8C"><span class="nav-number">4.5.</span> <span class="nav-text"> 建链和通信的边界</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text"> 小结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text"> 总览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%BB%E7%BA%BF"><span class="nav-number">1.1.</span> <span class="nav-text"> 阶段主线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E6%BA%90%E7%A0%81%E5%85%A5%E5%8F%A3"><span class="nav-number">1.2.</span> <span class="nav-text"> 主要源码入口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E-reading-nccl-%E7%9A%84%E5%86%85%E5%AE%B9%E5%AF%B9%E7%85%A7"><span class="nav-number">1.3.</span> <span class="nav-text"> 与 reading nccl 的内容对照</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%85%E8%AF%BB%E8%B7%AF%E5%BE%84"><span class="nav-number">2.</span> <span class="nav-text"> 阅读路径</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%E5%85%88%E7%9C%8B%E8%B0%81%E8%BF%9E%E8%B0%81"><span class="nav-number">2.1.</span> <span class="nav-text"> 第一层：先看谁连谁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E5%86%8D%E7%9C%8B%E9%80%BB%E8%BE%91%E9%82%BB%E5%B1%85%E5%A6%82%E4%BD%95%E5%8F%98%E6%88%90%E5%BE%85%E8%BF%9E%E6%8E%A5%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text"> 第二层：再看逻辑邻居如何变成待连接任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%E7%9C%8B%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text"> 第三层：看连接建立函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%B1%82%E6%9C%80%E5%90%8E%E5%86%8D%E5%88%86-transport-%E7%9C%8B%E7%BB%86%E8%8A%82"><span class="nav-number">2.4.</span> <span class="nav-text"> 第四层：最后再分 transport 看细节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E9%97%AD%E7%8E%AF"><span class="nav-number">2.5.</span> <span class="nav-text"> 最小闭环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E9%93%BE%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text"> 建链流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%80%BB%E8%BE%91%E9%82%BB%E5%B1%85"><span class="nav-number">3.1.</span> <span class="nav-text"> 生成逻辑邻居</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%BE%85%E8%BF%9E%E6%8E%A5-bitmask"><span class="nav-number">3.2.</span> <span class="nav-text"> 记录待连接 bitmask</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E5%B9%B6%E5%86%99%E5%85%A5-ncclconninfo"><span class="nav-number">3.3.</span> <span class="nav-text"> 建立连接并写入 ncclConnInfo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-transport"><span class="nav-number">3.4.</span> <span class="nav-text"> 选择 transport</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#p2p-transport"><span class="nav-number">3.4.1.</span> <span class="nav-text"> P2P transport</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#shm-transport"><span class="nav-number">3.4.2.</span> <span class="nav-text"> SHM transport</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#net-transport"><span class="nav-number">3.4.3.</span> <span class="nav-text"> NET transport</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#runtime-connect"><span class="nav-number">3.5.</span> <span class="nav-text"> runtime connect</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text"> 通信流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#host-%E4%BE%A7%E7%94%9F%E6%88%90-work"><span class="nav-number">4.1.</span> <span class="nav-text"> Host 侧生成 work</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#device-kernel-%E6%B6%88%E8%B4%B9%E8%BF%9E%E6%8E%A5%E4%BF%A1%E6%81%AF"><span class="nav-number">4.2.</span> <span class="nav-text"> Device kernel 消费连接信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-%E5%92%8C-fifo"><span class="nav-number">4.3.</span> <span class="nav-text"> step 和 FIFO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#proxy-%E6%8E%A8%E8%BF%9B-net-%E7%AD%89%E4%BC%A0%E8%BE%93"><span class="nav-number">4.4.</span> <span class="nav-text"> Proxy 推进 NET 等传输</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E9%93%BE%E5%92%8C%E9%80%9A%E4%BF%A1%E7%9A%84%E8%BE%B9%E7%95%8C"><span class="nav-number">4.5.</span> <span class="nav-text"> 建链和通信的边界</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text"> 小结</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -154,7 +154,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-count">143</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -165,7 +165,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">71</span>
+        <span class="site-state-item-count">75</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -222,7 +222,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2026-06-07 00:11:01 / 修改时间：04:45:22" itemprop="dateCreated datePublished" datetime="2026-06-07T00:11:01Z">2026-06-07</time>
+      <time title="创建时间：2026-06-07 00:11:01 / 修改时间：07:06:47" itemprop="dateCreated datePublished" datetime="2026-06-07T00:11:01Z">2026-06-07</time>
     </span>
 
   
@@ -258,13 +258,13 @@
 <p>建链完成后，通信阶段主要复用 <code>ncclConnInfo</code>，由 host 生成 work，由 device kernel 和必要的 proxy 线程推进数据传输。</p>
 <p>相关阅读：<a href="/archives/f62c2008.html">reading nccl</a> 主要记录 NCCL 2.14.3 中 <code>net_ib</code>、RDMA、QP、MR、FIFO 等网络传输细节。本文侧重从 communicator 建链到一次通信执行的主线，两篇可以结合阅读。</p>
 <p>关于业务侧如何组织 communicator、rank / GPU placement 如何影响 NCCL clique、MNNVL clique 和通信顺序，可以参考：<a href="/archives/8a7d13c9.html">业务侧配置与 NCCL clique</a>。</p>
-<h1 id="总览"><a class="markdownIt-Anchor" href="#总览"></a> 总览</h1>
-<h2 id="阶段主线"><a class="markdownIt-Anchor" href="#阶段主线"></a> 阶段主线</h2>
+<h2 id="总览"><a class="markdownIt-Anchor" href="#总览"></a> 总览</h2>
+<h3 id="阶段主线"><a class="markdownIt-Anchor" href="#阶段主线"></a> 阶段主线</h3>
 <p>主线可以压缩为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">topology / graph</span><br><span class="line">  -&gt; channel 逻辑邻居</span><br><span class="line">  -&gt; connectSend / connectRecv bitmask</span><br><span class="line">  -&gt; transport.setup 生成 ncclConnect</span><br><span class="line">  -&gt; bootstrap 交换 handle</span><br><span class="line">  -&gt; transport.connect 填 ncclConnInfo</span><br><span class="line">  -&gt; cudaMemcpyAsync 到 devPeers</span><br><span class="line">  -&gt; device kernel 可直接通信</span><br></pre></td></tr></table></figure>
 <p>下图按阶段和模块边界展示建链过程：</p>
 <img src="/images/nccl-connect-architecture.svg" alt="NCCL 建链架构图" width="100%">
-<h2 id="主要源码入口"><a class="markdownIt-Anchor" href="#主要源码入口"></a> 主要源码入口</h2>
+<h3 id="主要源码入口"><a class="markdownIt-Anchor" href="#主要源码入口"></a> 主要源码入口</h3>
 <p>对应的主要文件：</p>
 <ul>
 <li><code>src/init.cc</code>
@@ -299,7 +299,7 @@
 <li><code>src/transport/shm.cc</code></li>
 <li><code>src/transport/net.cc</code></li>
 </ul>
-<h2 id="与-reading-nccl-的内容对照"><a class="markdownIt-Anchor" href="#与-reading-nccl-的内容对照"></a> 与 reading nccl 的内容对照</h2>
+<h3 id="与-reading-nccl-的内容对照"><a class="markdownIt-Anchor" href="#与-reading-nccl-的内容对照"></a> 与 reading nccl 的内容对照</h3>
 <p><a href="/archives/f62c2008.html">reading nccl</a> 可以看作本文中 NET/IB 传输部分的展开。本文描述 NCCL 的通用抽象和调用主线，<code>reading nccl</code> 更接近 <code>ncclNetIb</code> 的实现细节。</p>
 <table>
 <thead>
@@ -351,10 +351,10 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">建链：topology -&gt; transport -&gt; ncclConnInfo</span><br><span class="line">通信：work -&gt; device primitive -&gt; proxy -&gt; ncclNet</span><br></pre></td></tr></table></figure>
 <p>再回到 <code>reading nccl</code> 看 IB verbs 细节：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ncclNet -&gt; ncclNetIb</span><br><span class="line">  -&gt; connect / accept</span><br><span class="line">  -&gt; isend / irecv</span><br><span class="line">  -&gt; test</span><br><span class="line">  -&gt; ibv_post_send / ibv_post_recv / ibv_poll_cq</span><br></pre></td></tr></table></figure>
-<h1 id="阅读路径"><a class="markdownIt-Anchor" href="#阅读路径"></a> 阅读路径</h1>
+<h2 id="阅读路径"><a class="markdownIt-Anchor" href="#阅读路径"></a> 阅读路径</h2>
 <p>如果直接从 <code>initTransportsRank</code> 沿调用链展开，会同时涉及 topology、bootstrap、proxy、CUDA IPC、SHM、NET、GDR、PXN 等多个子系统。</p>
 <p>阅读时可以先按问题边界分层，再进入完整调用链。</p>
-<h2 id="第一层先看谁连谁"><a class="markdownIt-Anchor" href="#第一层先看谁连谁"></a> 第一层：先看谁连谁</h2>
+<h3 id="第一层先看谁连谁"><a class="markdownIt-Anchor" href="#第一层先看谁连谁"></a> 第一层：先看谁连谁</h3>
 <p>这一层只看 graph 层，不关心 P2P、SHM、NET。</p>
 <p>要回答的问题是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每个 channel 上，本 rank 的上游和下游分别是谁？</span><br></pre></td></tr></table></figure>
@@ -363,7 +363,7 @@
 <p>这一层的结论：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">topo / graph 阶段只是在填逻辑邻居：</span><br><span class="line"></span><br><span class="line">channel-&gt;ring.prev</span><br><span class="line">channel-&gt;ring.next</span><br><span class="line">channel-&gt;tree.up</span><br><span class="line">channel-&gt;tree.down[]</span><br></pre></td></tr></table></figure>
 <p>也就是说，这一层还没有真的建立连接，只是把通信图画出来。</p>
-<h2 id="第二层再看逻辑邻居如何变成待连接任务"><a class="markdownIt-Anchor" href="#第二层再看逻辑邻居如何变成待连接任务"></a> 第二层：再看逻辑邻居如何变成待连接任务</h2>
+<h3 id="第二层再看逻辑邻居如何变成待连接任务"><a class="markdownIt-Anchor" href="#第二层再看逻辑邻居如何变成待连接任务"></a> 第二层：再看逻辑邻居如何变成待连接任务</h3>
 <p>这一层看 <code>generic.cc</code> 和 <code>transport.cc</code> 的第一段。</p>
 <p>要回答的问题是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ring.prev / ring.next 这些逻辑邻居，怎么告诉 transport 层去连接？</span><br></pre></td></tr></table></figure>
@@ -374,7 +374,7 @@
 <p>它只是把待连接的 channel 写进 bitmask：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">comm-&gt;connectRecv[peer]</span><br><span class="line">comm-&gt;connectSend[peer]</span><br></pre></td></tr></table></figure>
 <p>因此它可以视为待连接记录的生成步骤。</p>
-<h2 id="第三层看连接建立函数"><a class="markdownIt-Anchor" href="#第三层看连接建立函数"></a> 第三层：看连接建立函数</h2>
+<h3 id="第三层看连接建立函数"><a class="markdownIt-Anchor" href="#第三层看连接建立函数"></a> 第三层：看连接建立函数</h3>
 <p>这一层进入连接建立逻辑。</p>
 <p>要回答的问题是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">待连接 bitmask 如何变成 device kernel 能用的 ncclConnInfo？</span><br></pre></td></tr></table></figure>
@@ -387,23 +387,23 @@
 <p>这里最重要的是区分两个结构：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ncclConnect:</span><br><span class="line">  host 之间交换的临时 handle。</span><br><span class="line">  它携带对端建立连接所需的信息。</span><br><span class="line"></span><br><span class="line">ncclConnInfo:</span><br><span class="line">  device kernel 最终使用的连接信息。</span><br><span class="line">  里面有 buffs、head、tail、connFifo、stepSize 等字段。</span><br></pre></td></tr></table></figure>
 <p>这两个结构对应不同阶段：<code>ncclConnect</code> 属于 bootstrap 交换阶段，<code>ncclConnInfo</code> 属于 device 侧执行阶段。</p>
-<h2 id="第四层最后再分-transport-看细节"><a class="markdownIt-Anchor" href="#第四层最后再分-transport-看细节"></a> 第四层：最后再分 transport 看细节</h2>
+<h3 id="第四层最后再分-transport-看细节"><a class="markdownIt-Anchor" href="#第四层最后再分-transport-看细节"></a> 第四层：最后再分 transport 看细节</h3>
 <p>transport 细节可以作为最后一层阅读，第一阶段只关注 <code>setup</code> 和 <code>connect</code>。</p>
 <p>阅读顺序：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">src/transport/p2p.cc</span><br><span class="line">  p2pSendSetup</span><br><span class="line">  p2pRecvSetup</span><br><span class="line">  p2pSendConnect</span><br><span class="line">  p2pRecvConnect</span><br><span class="line"></span><br><span class="line">src/transport/shm.cc</span><br><span class="line">  shmSendSetup</span><br><span class="line">  shmRecvSetup</span><br><span class="line">  shmSendConnect</span><br><span class="line">  shmRecvConnect</span><br><span class="line"></span><br><span class="line">src/transport/net.cc</span><br><span class="line">  sendSetup</span><br><span class="line">  recvSetup</span><br><span class="line">  sendConnect</span><br><span class="line">  recvConnect</span><br></pre></td></tr></table></figure>
 <p>可以先读 P2P，再读 SHM 和 NET：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">P2P:</span><br><span class="line">  GPU 之间可直接或间接访问。</span><br><span class="line">  可能走 direct pointer、CUDA IPC、cuMem，也可能选 intermediate rank。</span><br><span class="line"></span><br><span class="line">SHM:</span><br><span class="line">  同 host、共享 /dev/shm 时使用。</span><br><span class="line">  主要是共享内存描述符的创建和 import。</span><br><span class="line"></span><br><span class="line">NET:</span><br><span class="line">  跨节点通信的主要路径。</span><br><span class="line">  会涉及 NIC 选择、GDR、PXN、proxy、异步 connect。</span><br></pre></td></tr></table></figure>
 <p><code>proxyProgress</code> 主要用于运行时数据传输的进度推进，可以不纳入初始化建链的第一阶段阅读。</p>
-<h2 id="最小闭环"><a class="markdownIt-Anchor" href="#最小闭环"></a> 最小闭环</h2>
+<h3 id="最小闭环"><a class="markdownIt-Anchor" href="#最小闭环"></a> 最小闭环</h3>
 <p>最小阅读闭环可以只覆盖 ring：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">connectRings</span><br><span class="line">  -&gt; ncclTransportRingConnect</span><br><span class="line">  -&gt; ncclTransportP2pConnect</span><br><span class="line">  -&gt; ncclTransportP2pSetup</span><br><span class="line">  -&gt; p2pSendSetup / p2pRecvSetup</span><br><span class="line">  -&gt; p2pSendConnect / p2pRecvConnect</span><br></pre></td></tr></table></figure>
 <p>在这个闭环中暂不展开 tree、CollNet、NVLS、runtime connect。ring 路径建立后，其它路径主要差异为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">邻居集合不同</span><br><span class="line">connIndex 不同</span><br><span class="line">transport 细节不同</span><br></pre></td></tr></table></figure>
 <p>对应关系如下：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">graph 层：生成 channel 的逻辑通信关系</span><br><span class="line">P2pConnect：将逻辑通信关系记录到待连接 bitmask</span><br><span class="line">P2pSetup：处理待连接 bitmask</span><br><span class="line">transport.setup：创建本地资源并生成 ncclConnect</span><br><span class="line">bootstrap：交换 ncclConnect</span><br><span class="line">transport.connect：根据对端 ncclConnect 建立连接</span><br><span class="line">ncclConnInfo：保存 device kernel 使用的连接信息</span><br></pre></td></tr></table></figure>
-<h1 id="建链流程"><a class="markdownIt-Anchor" href="#建链流程"></a> 建链流程</h1>
+<h2 id="建链流程"><a class="markdownIt-Anchor" href="#建链流程"></a> 建链流程</h2>
 <p>建链流程可以按阶段阅读：先生成 channel 的逻辑邻居，再把逻辑邻居登记成待连接任务，随后选择 transport、交换 handle、填充 <code>ncclConnInfo</code>。</p>
-<h2 id="生成逻辑邻居"><a class="markdownIt-Anchor" href="#生成逻辑邻居"></a> 生成逻辑邻居</h2>
+<h3 id="生成逻辑邻居"><a class="markdownIt-Anchor" href="#生成逻辑邻居"></a> 生成逻辑邻居</h3>
 <p>初始化时，NCCL 先探测机器拓扑，计算 GPU、NIC、CPU 之间路径，然后搜索不同 collective algorithm 对应的 graph。</p>
 <p>典型流程在 <code>initTransportsRank</code> 中：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ncclTopoGetSystem</span><br><span class="line">ncclTopoComputePaths</span><br><span class="line">ncclTopoTrimSystem</span><br><span class="line">ncclTopoSearchInit</span><br><span class="line">ncclTopoCompute(ringGraph)</span><br><span class="line">ncclTopoCompute(treeGraph)</span><br><span class="line">ncclTopoCompute(collNetGraph / nvlsGraph)</span><br></pre></td></tr></table></figure>
@@ -425,7 +425,7 @@
 <p>这里会把 channel 中的逻辑邻居写好：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">channel-&gt;ring.prev</span><br><span class="line">channel-&gt;ring.next</span><br><span class="line">channel-&gt;tree.up</span><br><span class="line">channel-&gt;tree.down[]</span><br></pre></td></tr></table></figure>
 <p>注意，这一步只回答“谁和谁连”，还没有真的建立 CUDA IPC、SHM 或 NET 连接。</p>
-<h2 id="记录待连接-bitmask"><a class="markdownIt-Anchor" href="#记录待连接-bitmask"></a> 记录待连接 bitmask</h2>
+<h3 id="记录待连接-bitmask"><a class="markdownIt-Anchor" href="#记录待连接-bitmask"></a> 记录待连接 bitmask</h3>
 <p>以 ring 为例：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ncclTransportP2pConnect(comm, c, <span class="number">1</span>, &amp;channel-&gt;ring.prev, <span class="number">1</span>, &amp;channel-&gt;ring.next, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
 <p>tree 类似，只是 recv/send peer 来自 <code>tree.down[]</code> 和 <code>tree.up</code>。</p>
@@ -434,7 +434,7 @@
 <p>因此，<code>ncclTransportP2pConnect</code> 的输出是待连接 bitmask，而不是已建立的连接。</p>
 <p>连接建立发生在随后调用的：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ncclTransportP2pSetup(comm, graph, connIndex)</span><br></pre></td></tr></table></figure>
-<h2 id="建立连接并写入-ncclconninfo"><a class="markdownIt-Anchor" href="#建立连接并写入-ncclconninfo"></a> 建立连接并写入 ncclConnInfo</h2>
+<h3 id="建立连接并写入-ncclconninfo"><a class="markdownIt-Anchor" href="#建立连接并写入-ncclconninfo"></a> 建立连接并写入 ncclConnInfo</h3>
 <p><code>ncclTransportP2pSetup</code> 可以拆成一个循环：</p>
 <img src="/images/nccl-connect-setup-sequence.svg" alt="NCCL P2pSetup 连接建立时序图" width="100%">
 <p>更具体一点：</p>
@@ -461,7 +461,7 @@
 <li><code>flags</code></li>
 <li>部分 NET/GDR 场景下的 net device handle 和 memory handle</li>
 </ul>
-<h2 id="选择-transport"><a class="markdownIt-Anchor" href="#选择-transport"></a> 选择 transport</h2>
+<h3 id="选择-transport"><a class="markdownIt-Anchor" href="#选择-transport"></a> 选择 transport</h3>
 <p>transport 抽象在 <code>src/include/transport.h</code>：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ncclTransportComm</span> &#123;</span></span><br><span class="line">  ncclResult_t (*setup)(...);</span><br><span class="line">  ncclResult_t (*connect)(...);</span><br><span class="line">  ncclResult_t (*<span class="built_in">free</span>)(...);</span><br><span class="line">  ncclResult_t (*proxySharedInit)(...);</span><br><span class="line">  ncclResult_t (*proxySetup)(...);</span><br><span class="line">  ncclResult_t (*proxyConnect)(...);</span><br><span class="line">  ncclResult_t (*proxyFree)(...);</span><br><span class="line">  ncclResult_t (*proxyProgress)(...);</span><br><span class="line">  ncclResult_t (*proxyRegister)(...);</span><br><span class="line">  ncclResult_t (*proxyDeregister)(...);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ncclTransport</span> &#123;</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span> name[<span class="number">8</span>];</span><br><span class="line">  ncclResult_t (*canConnect)(...);</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ncclTransportComm</span> <span class="title">send</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ncclTransportComm</span> <span class="title">recv</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>全局 transport 顺序在 <code>src/transport.cc</code>：</p>
@@ -469,7 +469,7 @@
 <p><code>selectTransport</code> 会按这个顺序调用 <code>canConnect</code>，第一个返回可用的 transport 就会被选中。</p>
 <p>因此普通点对点边的选择顺序为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">优先 P2P</span><br><span class="line">其次 SHM</span><br><span class="line">最后 NET</span><br></pre></td></tr></table></figure>
-<h3 id="p2p-transport"><a class="markdownIt-Anchor" href="#p2p-transport"></a> P2P transport</h3>
+<h4 id="p2p-transport"><a class="markdownIt-Anchor" href="#p2p-transport"></a> P2P transport</h4>
 <p><code>src/transport/p2p.cc</code> 处理 GPU 之间可以直接或间接访问的场景。</p>
 <p>setup 阶段：</p>
 <ul>
@@ -490,7 +490,7 @@
 <li>设置 <code>proxyProgress</code>。</li>
 </ul>
 <p>P2P 连接不一定是 A 与 B 直接连接。<code>p2pGetInfo</code> 可能选择 intermediate rank，形成 indirect P2P path。</p>
-<h3 id="shm-transport"><a class="markdownIt-Anchor" href="#shm-transport"></a> SHM transport</h3>
+<h4 id="shm-transport"><a class="markdownIt-Anchor" href="#shm-transport"></a> SHM transport</h4>
 <p><code>src/transport/shm.cc</code> 处理同 host 且共享 <code>/dev/shm</code> 的场景。</p>
 <p><code>shmCanConnect</code> 主要检查：</p>
 <ul>
@@ -502,7 +502,7 @@
 <p>setup 阶段通过 SHM proxy 创建共享内存，把描述符写入 <code>shmConnectInfo</code>。</p>
 <p>connect 阶段 import 对端共享内存，然后设置：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conn.buffs[]</span><br><span class="line">conn.head</span><br><span class="line">conn.tail</span><br><span class="line">conn.stepSize</span><br></pre></td></tr></table></figure>
-<h3 id="net-transport"><a class="markdownIt-Anchor" href="#net-transport"></a> NET transport</h3>
+<h4 id="net-transport"><a class="markdownIt-Anchor" href="#net-transport"></a> NET transport</h4>
 <p><code>src/transport/net.cc</code> 是跨节点通信的主要 transport，也可能在同节点但拓扑要求走 NET 时使用。</p>
 <p>setup 阶段会：</p>
 <ul>
@@ -518,7 +518,7 @@
 <p>如果还没完成，会返回 <code>ncclInProgress</code>。外层 <code>ncclTransportP2pSetup</code> 因此会循环 polling，直到所有 channel 都完成连接。</p>
 <p>NET connect 完成后，会 map host/device/shared memory，并设置：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">conn.head</span><br><span class="line">conn.tail</span><br><span class="line">conn.connFifo</span><br><span class="line">conn.buffs[]</span><br><span class="line">conn.netDeviceHandle</span><br><span class="line">conn.mhandles[]</span><br></pre></td></tr></table></figure>
-<h2 id="runtime-connect"><a class="markdownIt-Anchor" href="#runtime-connect"></a> runtime connect</h2>
+<h3 id="runtime-connect"><a class="markdownIt-Anchor" href="#runtime-connect"></a> runtime connect</h3>
 <p>另一个分支是 runtime connect：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">comm-&gt;runtimeConn = comm-&gt;cuMemSupport &amp;&amp; ncclParamRuntimeConnect();</span><br></pre></td></tr></table></figure>
 <p>如果 runtime connect 开启，初始化阶段不会把 ring/tree 都预连接好，而是在 group/enqueue 阶段按需连接。</p>
@@ -528,12 +528,12 @@
 <li><code>ncclCollPreconnect</code></li>
 </ul>
 <p>这也是为什么有时候读 <code>initTransportsRank</code> 会发现某些连接没有在 init 阶段直接发生。</p>
-<h1 id="通信流程"><a class="markdownIt-Anchor" href="#通信流程"></a> 通信流程</h1>
+<h2 id="通信流程"><a class="markdownIt-Anchor" href="#通信流程"></a> 通信流程</h2>
 <p>建链完成后，NCCL 不会在每次通信时重新选择 transport。建链阶段已经把每个 channel、peer、connIndex 对应的连接信息写入 <code>connector-&gt;conn</code>，并同步到 device side 的 <code>devPeers</code>。通信阶段复用这些连接信息，主要完成三件事：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">host 侧生成本次通信的 work</span><br><span class="line">device kernel 按算法执行 copy / reduce / send / recv</span><br><span class="line">proxy 线程在需要时推进 NET 或其它需要 CPU 参与的 transport</span><br></pre></td></tr></table></figure>
 <p>下图展示一次通信对建链产物的使用方式：</p>
 <img src="/images/nccl-after-connect-communication.svg" alt="NCCL 建链后的通信过程" width="100%">
-<h2 id="host-侧生成-work"><a class="markdownIt-Anchor" href="#host-侧生成-work"></a> Host 侧生成 work</h2>
+<h3 id="host-侧生成-work"><a class="markdownIt-Anchor" href="#host-侧生成-work"></a> Host 侧生成 work</h3>
 <p>一次 collective 或 P2P API 调用先被放入 communicator 的 planner。group launch 阶段会调用：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ncclLaunchPrepare</span><br><span class="line">  -&gt; scheduleCollTasksToPlan / scheduleP2pTasksToPlan</span><br><span class="line">  -&gt; finishPlan</span><br></pre></td></tr></table></figure>
 <p><code>ncclLaunchPrepare</code> 的输出是 <code>ncclKernelPlan</code>。plan 中包含：</p>
@@ -546,7 +546,7 @@
 <p>随后 launch 阶段会执行：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">uploadWork</span><br><span class="line">  -&gt; 把 ncclDevWork 写入 kernel args 或 work FIFO</span><br><span class="line"></span><br><span class="line">uploadProxyOps / ncclProxyStart</span><br><span class="line">  -&gt; 如果 transport 需要 proxy，则把 proxy op 投递给 proxy progress thread</span><br><span class="line"></span><br><span class="line">ncclLaunchKernel</span><br><span class="line">  -&gt; 按 channel 数启动 NCCL device kernel</span><br></pre></td></tr></table></figure>
 <p>在这个阶段，host 侧主要负责“把本次通信描述清楚”。数据搬运发生在 device kernel 和 proxy progress 中。</p>
-<h2 id="device-kernel-消费连接信息"><a class="markdownIt-Anchor" href="#device-kernel-消费连接信息"></a> Device kernel 消费连接信息</h2>
+<h3 id="device-kernel-消费连接信息"><a class="markdownIt-Anchor" href="#device-kernel-消费连接信息"></a> Device kernel 消费连接信息</h3>
 <p>device kernel 拿到 work 后，会根据 collective 类型、algorithm、protocol 进入对应实现。</p>
 <p>以 ring allreduce 为例，核心路径在 <code>src/device/all_reduce.h</code> 的 <code>runRing</code>。它使用建链阶段写好的：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ncclShmem.channel.ring.prev</span><br><span class="line">ncclShmem.channel.ring.next</span><br></pre></td></tr></table></figure>
@@ -555,13 +555,13 @@
 <p>这些 primitive 最终会进入 <code>src/device/prims_simple.h</code> 中的 <code>genericOp</code>。<code>genericOp</code> 的基本循环是：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">waitPeer</span><br><span class="line">  -&gt; 等待对端 step 状态满足条件</span><br><span class="line">  -&gt; 根据 connFifo / directBuff / buffs 计算本 slice 使用的地址</span><br><span class="line"></span><br><span class="line">reduceCopy</span><br><span class="line">  -&gt; 执行 copy、reduce 或 reduce + copy</span><br><span class="line"></span><br><span class="line">postPeer</span><br><span class="line">  -&gt; 更新 step counter</span><br><span class="line">  -&gt; 通知对端当前 slice 已经生产或消费完成</span><br></pre></td></tr></table></figure>
 <p>对于用户显式的 <code>ncclSend</code> / <code>ncclRecv</code>，device 侧路径在 <code>src/device/sendrecv.h</code>。send 侧循环调用 <code>directSend</code>，recv 侧循环调用 <code>directRecv</code>，同样通过 <code>Primitives</code> 使用建链阶段准备好的连接。</p>
-<h2 id="step-和-fifo"><a class="markdownIt-Anchor" href="#step-和-fifo"></a> step 和 FIFO</h2>
+<h3 id="step-和-fifo"><a class="markdownIt-Anchor" href="#step-和-fifo"></a> step 和 FIFO</h3>
 <p><code>ncclConnInfo</code> 中的 <code>buffs</code>、<code>head</code>、<code>tail</code>、<code>connFifo</code>、<code>stepSize</code> 是通信阶段的关键状态。</p>
 <p>可以把它理解为一个带 credit 的环形 FIFO：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NCCL_STEPS 个 slot 循环使用</span><br><span class="line">每个 slice 对应一个或多个 step</span><br><span class="line">发送方等待可写 slot</span><br><span class="line">接收方等待可读 slot</span><br><span class="line">数据写入或读出后更新 step counter</span><br><span class="line">head / tail / connFifo 用于表达空间、数据大小和可见性</span><br></pre></td></tr></table></figure>
 <p>因此，通信阶段不是简单地调用一次 memcpy。它是按照 slice/chunk 粒度，在 channel 上反复执行：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">等待可用 step</span><br><span class="line">确定 buffer 地址</span><br><span class="line">copy / reduce</span><br><span class="line">发布 step</span><br><span class="line">进入下一个 slice</span><br></pre></td></tr></table></figure>
-<h2 id="proxy-推进-net-等传输"><a class="markdownIt-Anchor" href="#proxy-推进-net-等传输"></a> Proxy 推进 NET 等传输</h2>
+<h3 id="proxy-推进-net-等传输"><a class="markdownIt-Anchor" href="#proxy-推进-net-等传输"></a> Proxy 推进 NET 等传输</h3>
 <p>如果当前连接是 GPU 可以直接访问的 P2P 路径，device primitive 可以直接读写对端可见的 buffer。</p>
 <p>如果当前连接需要 CPU proxy，例如 NET transport，device kernel 和 proxy thread 会共同推进传输：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">device kernel:</span><br><span class="line">  写入 staging buffer</span><br><span class="line">  更新 tail 或 connFifo</span><br><span class="line"></span><br><span class="line">proxy progress thread:</span><br><span class="line">  发现 GPU 数据 ready</span><br><span class="line">  调用 ncclNet-&gt;isend / ncclNet-&gt;irecv</span><br><span class="line">  轮询 ncclNet-&gt;test</span><br><span class="line">  网络完成后更新 head / tail / connFifo</span><br><span class="line"></span><br><span class="line">device kernel:</span><br><span class="line">  观察 step 状态变化</span><br><span class="line">  继续消费下一个 slice</span><br></pre></td></tr></table></figure>
@@ -571,10 +571,10 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">给 GPU 投递可用 buffer</span><br><span class="line">等待 GPU 写完并设置 connFifo size / tail</span><br><span class="line">调用 ncclNet-&gt;isend，完成后释放 FIFO slot</span><br></pre></td></tr></table></figure>
 <p><code>recvProxyProgress</code> 主要做三件事：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">把接收 buffer 投递给 ncclNet-&gt;irecv</span><br><span class="line">等待网络接收完成</span><br><span class="line">更新 GPU 可见的状态，让 device kernel 继续读取</span><br></pre></td></tr></table></figure>
-<h2 id="建链和通信的边界"><a class="markdownIt-Anchor" href="#建链和通信的边界"></a> 建链和通信的边界</h2>
+<h3 id="建链和通信的边界"><a class="markdownIt-Anchor" href="#建链和通信的边界"></a> 建链和通信的边界</h3>
 <p>二者的边界可以概括为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">建链阶段：</span><br><span class="line">  选择 transport，交换 handle，填 ncclConnInfo。</span><br><span class="line"></span><br><span class="line">通信阶段：</span><br><span class="line">  复用 ncclConnInfo，把本次 API 调用切成 channel work，</span><br><span class="line">  由 device kernel 和 proxy progress 按 step/FIFO 协议完成数据传输。</span><br></pre></td></tr></table></figure>
-<h1 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h1>
+<h2 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h2>
 <p>NCCL 的建链和通信可以按两个阶段理解。</p>
 <p>建链阶段可以概括为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">topology 决定 channel 的逻辑邻居，</span><br><span class="line">P2pConnect 把待连接边登记到 bitmask，</span><br><span class="line">P2pSetup 选择 transport、交换 handle、填 ncclConnInfo，</span><br><span class="line">最后把 conn 信息拷到 device，让 kernel 直接通信。</span><br></pre></td></tr></table></figure>
@@ -641,13 +641,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">441k</span>
+    <span title="站点总字数">454k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:41</span>
+    <span title="站点阅读时长">6:53</span>
   </span>
 </div>
 

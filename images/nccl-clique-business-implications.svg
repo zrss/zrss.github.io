@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">训练框架、launcher、调度系统与 NCCL 的职责边界</title>
+  <desc id="desc">图示训练框架负责并行策略和 rank group，launcher/rendezvous 负责 rank id，调度系统负责物理 placement，NCCL 负责实际通信图。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#506070"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .framework { fill: #eaf2ff; stroke: #7da9e4; stroke-width: 1.5; rx: 10; }
+      .launcher { fill: #e9f7ef; stroke: #84bf9c; stroke-width: 1.5; rx: 10; }
+      .scheduler { fill: #f1ecff; stroke: #a78bd7; stroke-width: 1.5; rx: 10; }
+      .join { fill: #eef6ff; stroke: #7aa7dc; stroke-width: 1.5; rx: 10; }
+      .nccl { fill: #fff3dd; stroke: #d1a45f; stroke-width: 1.5; rx: 10; }
+      .observe { fill: #f2f4f7; stroke: #aeb8c5; stroke-width: 1.5; rx: 10; }
+      .title { font: 700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2937; }
+      .label { font: 700 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2937; }
+      .text { font: 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #3b4a5a; }
+      .small { font: 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #607080; }
+      .flow { fill: none; stroke: #506070; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="720"/>
+  <text class="title" x="60" y="48">训练框架、launcher、调度系统与 NCCL 的职责边界</text>
+
+  <rect class="framework" x="60" y="86" width="300" height="174"/>
+  <text class="label" x="86" y="120">训练框架</text>
+  <text class="text" x="86" y="154">并行策略：DP / TP / PP / EP</text>
+  <text class="text" x="86" y="182">rank layout</text>
+  <text class="text" x="86" y="210">process group / new_group</text>
+  <text class="small" x="86" y="238">负责生成业务语义上的 rank id group</text>
+
+  <rect class="launcher" x="450" y="86" width="300" height="174"/>
+  <text class="label" x="476" y="120">Launcher / Rendezvous</text>
+  <text class="text" x="476" y="154">RANK / WORLD_SIZE</text>
+  <text class="text" x="476" y="182">LOCAL_RANK / local world</text>
+  <text class="text" x="476" y="210">CUDA_VISIBLE_DEVICES</text>
+  <text class="small" x="476" y="238">负责给训练进程分配 rank id</text>
+
+  <rect class="scheduler" x="840" y="86" width="300" height="174"/>
+  <text class="label" x="866" y="120">训练调度系统</text>
+  <text class="text" x="866" y="154">node / GPU / NIC 选择</text>
+  <text class="text" x="866" y="182">NUMA / rail / rack 亲和性</text>
+  <text class="text" x="866" y="210">NVLink / MNNVL fabric domain</text>
+  <text class="small" x="866" y="238">负责资源选择和物理 placement</text>
+
+  <rect class="join" x="286" y="350" width="628" height="118"/>
+  <text class="label" x="318" y="388">NCCL 初始化前的实际输入</text>
+  <text class="text" x="318" y="420">rank id group + rank 顺序 + rank -> node / GPU / NIC 映射</text>
+  <text class="small" x="318" y="446">rank id group 由框架 layout 计算；物理落点由调度和 launcher/container 环境决定</text>
+
+  <path class="flow" d="M210 260 C270 302 342 324 430 350"/>
+  <path class="flow" d="M600 260 L600 350"/>
+  <path class="flow" d="M990 260 C930 302 858 324 770 350"/>
+
+  <rect class="nccl" x="190" y="540" width="820" height="86"/>
+  <text class="label" x="222" y="576">NCCL 实际结果</text>
+  <text class="text" x="222" y="606">communicator、topology graph、ring / tree / NVLS、transport、algorithm / protocol、launch 顺序</text>
+
+  <path class="flow" d="M600 468 L600 540"/>
+
+  <rect class="observe" x="60" y="358" width="176" height="90"/>
+  <text class="label" x="84" y="392">业务验证</text>
+  <text class="text" x="84" y="418">rank group</text>
+  <text class="text" x="84" y="438">collective 顺序</text>
+
+  <rect class="observe" x="964" y="358" width="176" height="90"/>
+  <text class="label" x="988" y="392">平台观测</text>
+  <text class="text" x="988" y="418">NCCL 日志</text>
+  <text class="text" x="988" y="438">topo / graph dump</text>
+
+  <path class="flow" d="M190 540 C140 510 128 480 134 448"/>
+  <path class="flow" d="M1010 540 C1060 510 1072 480 1066 448"/>
+
+  <text class="small" x="72" y="682">颜色图例：</text>
+  <rect x="152" y="670" width="18" height="12" rx="3" fill="#eaf2ff" stroke="#7da9e4"/>
+  <text class="small" x="178" y="682">训练框架</text>
+  <rect x="280" y="670" width="18" height="12" rx="3" fill="#e9f7ef" stroke="#84bf9c"/>
+  <text class="small" x="306" y="682">launcher / rank id</text>
+  <rect x="474" y="670" width="18" height="12" rx="3" fill="#f1ecff" stroke="#a78bd7"/>
+  <text class="small" x="500" y="682">调度 / placement</text>
+  <rect x="670" y="670" width="18" height="12" rx="3" fill="#fff3dd" stroke="#d1a45f"/>
+  <text class="small" x="696" y="682">NCCL 结果</text>
+  <rect x="820" y="670" width="18" height="12" rx="3" fill="#f2f4f7" stroke="#aeb8c5"/>
+  <text class="small" x="846" y="682">观测 / 验证</text>
+</svg>
