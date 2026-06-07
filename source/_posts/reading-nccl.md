@@ -9,13 +9,13 @@ date: 2023-05-03 20:05:15
 * pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 * pytorch 1.13, cuda 11.6.2, nccl 2.14.3
 
-这篇主要记录 NCCL 2.14.3 中 `net_ib` 和 RDMA 相关细节。关于 communicator 建链、transport 选择、`ncclConnInfo` 写入，以及建链后一次通信如何执行，可以参考：[NCCL 2.14.3 从建链到通信](/archives/9e7a43b2.html)。
+这篇主要记录 NCCL 2.14.3 中 `net_ib` 和 RDMA 相关细节。关于较新 NCCL `master` 分支中 communicator 建链、transport 选择、`ncclConnInfo` 写入，以及建链后一次通信如何执行，可以参考：[NCCL 从建链到通信](/archives/9e7a43b2.html)。
 
 和新文的对应关系可以粗略理解为：
 
 ```text
-NCCL 2.14.3 从建链到通信：
-  解释 NCCL 抽象层如何选择 NET transport、生成 ncclConnInfo、投递 proxy op。
+NCCL 从建链到通信：
+  解释较新 NCCL master 主流程中如何选择 NET transport、生成 ncclConnInfo、投递 proxy op。
 
 reading nccl：
   展开 NET transport 下面的 ncclNetIb 实现，

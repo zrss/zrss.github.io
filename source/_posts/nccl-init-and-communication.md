@@ -4,7 +4,7 @@ abbrlink: 9e7a43b2
 date: 2026-06-07 00:11:01
 ---
 
-以 NCCL 2.14.3 源码为例，梳理 communicator 初始化时如何从拓扑搜索结果走到 transport 连接建立，以及建链完成后一次通信如何复用这些连接。
+以当前 NCCL `master` 分支源码为例，版本标识来自 `makefiles/version.mk`，当前为 NCCL 2.30.7。本文梳理 communicator 初始化时如何从拓扑搜索结果走到 transport 连接建立，以及建链完成后一次通信如何复用这些连接。
 
 这里说的“建链”可以拆成两层：
 
@@ -14,6 +14,8 @@ date: 2026-06-07 00:11:01
 建链完成后，通信阶段主要复用 `ncclConnInfo`，由 host 生成 work，由 device kernel 和必要的 proxy 线程推进数据传输。
 
 相关阅读：[reading nccl](/archives/f62c2008.html) 主要记录 NCCL 2.14.3 中 `net_ib`、RDMA、QP、MR、FIFO 等网络传输细节。本文侧重从 communicator 建链到一次通信执行的主线，两篇可以结合阅读。
+
+关于业务侧如何组织 communicator、rank / GPU placement 如何影响 NCCL clique、MNNVL clique 和通信顺序，可以参考：[业务侧配置与 NCCL clique](/archives/8a7d13c9.html)。
 
 # 总览
 
@@ -601,7 +603,7 @@ ncclLaunchKernel
   -> 按 channel 数启动 NCCL device kernel
 ```
 
-在这个阶段，host 侧主要负责“把本次通信描述清楚”。真正的数据搬运发生在 device kernel 和 proxy progress 中。
+在这个阶段，host 侧主要负责“把本次通信描述清楚”。数据搬运发生在 device kernel 和 proxy progress 中。
 
 ## Device kernel 消费连接信息
 
