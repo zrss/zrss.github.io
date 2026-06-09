@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="这篇是一次代码阅读笔记，起点是一个很具体的问题：  NeMo-RL 怎么将 rank placement 对齐 NVLink domain？  一开始容易把几件事混在一起：  Kubernetes&#x2F;KAI 把 pod 放到同一个 GPU clique &#x2F; ComputeDomain。 Ray worker 启动时注册 nvlink_domain_&lt;UUID&gt; 和 topo_rank 这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NeMo-RL 中 NVLink Domain 与 Rank Placement">
+<meta property="og:url" content="https://zrss.github.io/archives/2f0a8c7d.html">
+<meta property="og:site_name" content="MegaThinking">
+<meta property="og:description" content="这篇是一次代码阅读笔记，起点是一个很具体的问题：  NeMo-RL 怎么将 rank placement 对齐 NVLink domain？  一开始容易把几件事混在一起：  Kubernetes&#x2F;KAI 把 pod 放到同一个 GPU clique &#x2F; ComputeDomain。 Ray worker 启动时注册 nvlink_domain_&lt;UUID&gt; 和 topo_rank 这">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-10T00:12:00.000Z">
+<meta property="article:modified_time" content="2026-06-09T16:37:50.723Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="GPU">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="Infra">
+<meta property="article:tag" content="RL">
+<meta property="article:tag" content="Ray">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/2f0a8c7d.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/2f0a8c7d.html","path":"archives/2f0a8c7d.html","title":"NeMo-RL 中 NVLink Domain 与 Rank Placement"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>NeMo-RL 中 NVLink Domain 与 Rank Placement | MegaThinking</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">MegaThinking</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E8%AF%B4%E7%BB%93%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text"> 先说结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#k8s-%E5%B1%82%E5%85%88%E6%8A%8A%E7%89%A9%E7%90%86%E8%B5%84%E6%BA%90%E5%9C%88%E5%AF%B9"><span class="nav-number">2.</span> <span class="nav-text"> K8s 层：先把物理资源圈对</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ray-worker-%E5%90%AF%E5%8A%A8%E6%B3%A8%E5%86%8C-topology-resource"><span class="nav-number">3.</span> <span class="nav-text"> Ray worker 启动：注册 topology resource</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#main-%E5%88%86%E6%94%AF%E5%8F%AA%E6%8C%89-nodegpu-%E7%A8%B3%E5%AE%9A%E6%8E%92%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text"> main 分支：只按 node&#x2F;GPU 稳定排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%80%A7%E5%88%86%E6%94%AF%E7%9C%9F%E6%AD%A3%E6%B6%88%E8%B4%B9-nvlink_domain_"><span class="nav-number">5.</span> <span class="nav-text"> 特性分支：真正消费 nvlink_domain_*</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%80%A7%E5%88%86%E6%94%AF%E8%BF%98%E6%94%AF%E6%8C%81-domain-pinning"><span class="nav-number">6.</span> <span class="nav-text"> 特性分支还支持 domain pinning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vllm-%E4%BE%A7%E6%8C%89-topology-sorted-bundles-%E5%88%87-tppp-group"><span class="nav-number">7.</span> <span class="nav-text"> vLLM 侧：按 topology-sorted bundles 切 TP&#x2F;PP group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hybridep-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%98%AF%E5%8F%A6%E4%B8%80%E5%B1%82"><span class="nav-number">8.</span> <span class="nav-text"> HybridEP 环境变量是另一层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E8%A7%86%E5%8C%96%E4%B8%A4%E6%9D%A1%E8%B7%AF%E5%BE%84"><span class="nav-number">9.</span> <span class="nav-text"> 可视化：两条路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text"> 小结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">144</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">76</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/2f0a8c7d.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="NeMo-RL 中 NVLink Domain 与 Rank Placement | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NeMo-RL 中 NVLink Domain 与 Rank Placement
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-06-10 00:12:00" itemprop="dateCreated datePublished" datetime="2026-06-10T00:12:00Z">2026-06-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-06-09 16:37:50" itemprop="dateModified" datetime="2026-06-09T16:37:50Z">2026-06-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>9.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>这篇是一次代码阅读笔记，起点是一个很具体的问题：</p>
+<blockquote>
+<p>NeMo-RL 怎么将 rank placement 对齐 NVLink domain？</p>
+</blockquote>
+<p>一开始容易把几件事混在一起：</p>
+<ol>
+<li>Kubernetes/KAI 把 pod 放到同一个 GPU clique / ComputeDomain。</li>
+<li>Ray worker 启动时注册 <code>nvlink_domain_&lt;UUID&gt;</code> 和 <code>topo_rank</code> 这类 custom resource。</li>
+<li>NeMo-RL 的 <code>RayVirtualCluster</code> 创建 placement group，并把 Ray bundle 映射成 PyTorch/Megatron rank。</li>
+<li>Megatron/DeepEP 的 HybridEP 还会读 <code>NUM_OF_HYBRID_EP_RANKS_PER_NVLINK_DOMAIN</code>、<code>USE_MNNVL</code> 这类环境变量。</li>
+</ol>
+<p>它们都和“拓扑”有关，但不是同一层的东西。尤其是：当前 <code>main</code> 分支和一些特性分支的行为并不一样。</p>
+<h2 id="先说结论"><a class="markdownIt-Anchor" href="#先说结论"></a> 先说结论</h2>
+<p>当前 <code>main</code> 分支里：</p>
+<ul>
+<li>infra YAML 会在 Ray worker 启动时注册 <code>nvlink_domain_&lt;UUID&gt;</code> 和 <code>topo_rank</code>。</li>
+<li>但是 NeMo-RL Python 侧的 rank placement 没有消费 <code>nvlink_domain_*</code>。</li>
+<li>unified placement group 场景下，<code>RayVirtualCluster</code> 只按 <code>(node_id, gpu_id)</code> 对 bundle 做稳定排序。</li>
+<li>真正保证 worker 落在同一个 NVLink/RoCE 拓扑域里的，是 KAI topology annotation、ComputeDomain/DRA、以及 <code>segmentSize</code> 这类 K8s/infra 层约束。</li>
+</ul>
+<p>特性分支里则不一样。至少这些 fetched refs 里已经有 topology-aware placement 逻辑：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">origin/dsv3-from-v0.6.0</span><br><span class="line">origin/topology-base-v2</span><br><span class="line">origin/ultra-v3</span><br><span class="line">origin/youngeunk/topology-aware-placement</span><br><span class="line">origin/youngeunk/topology-aware-placement-dco-fix</span><br><span class="line">origin/youngeunk/numa-aware-binding</span><br><span class="line">origin/pull-request/2612</span><br><span class="line">origin/pull-request/2613</span><br></pre></td></tr></table></figure>
+<p>这些分支的 <code>nemo_rl/distributed/virtual_cluster.py</code> 里，确实会读取 Ray node resource 中的 <code>nvlink_domain_*</code> / <code>topo_rank</code>，并把它们用于 bundle 排序；部分逻辑还支持通过 <code>node_resource_constraints</code> 把 placement group bundle pin 到某个 NVLink domain。</p>
+<p>所以更准确的说法是：</p>
+<blockquote>
+<p>main 分支已经有 infra probe，但 Python 消费侧还没合进来；特性分支里已经有完整一些的 topology-aware rank placement。</p>
+</blockquote>
+<h2 id="k8s-层先把物理资源圈对"><a class="markdownIt-Anchor" href="#k8s-层先把物理资源圈对"></a> K8s 层：先把物理资源圈对</h2>
+<p>GB300 相关 infra YAML 里，worker pod 有这几个关键配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kai.scheduler/topology:</span> <span class="string">gb300-topology</span></span><br><span class="line">    <span class="attr">kai.scheduler/topology-required-placement:</span> <span class="string">nvidia.com/gpu.clique</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">schedulerName:</span> <span class="string">kai-scheduler</span></span><br><span class="line">  <span class="attr">resourceClaims:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">compute-domain-channel</span></span><br><span class="line">      <span class="attr">resourceClaimTemplateName:</span> <span class="string">compute-domain-ultra-pipeclean</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">roce-channel</span></span><br><span class="line">      <span class="attr">resourceClaimTemplateName:</span> <span class="string">roce-ultra-pipeclean</span></span><br></pre></td></tr></table></figure>
+<p>这部分不是 rank ordering，而是 <strong>pod placement 的硬约束</strong>。它让 KAI scheduler 以 <code>nvidia.com/gpu.clique</code> 为 topology placement key，把一组 worker gang-schedule 到合适的 GPU clique / ComputeDomain 里。没有这层，pod 可能被放到不同 rack，后面再怎么排 rank，也救不回跨 rack 通信。</p>
+<p><code>segmentSize</code> 也在这一层发挥作用。例如某个 worker group 有 64 个 replicas，<code>segmentSize: 16</code> 会把它展开成 4 个 16-worker segment：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_segments):</span><br><span class="line">    segment = copy.deepcopy(wg)</span><br><span class="line">    segment[<span class="string">&quot;groupName&quot;</span>] = <span class="string">f&quot;<span class="subst">&#123;base_name&#125;</span>-segment-<span class="subst">&#123;i&#125;</span>&quot;</span></span><br><span class="line">    segment[<span class="string">&quot;replicas&quot;</span>] = segment_size</span><br><span class="line">    segment[<span class="string">&quot;minReplicas&quot;</span>] = segment_size</span><br><span class="line">    segment[<span class="string">&quot;maxReplicas&quot;</span>] = segment_size</span><br></pre></td></tr></table></figure>
+<p>这样 KAI 更容易把每个 segment 放进一个完整 clique。它解决的是“调度单位太大，无法表达 domain/rack 约束”的问题。</p>
+<h2 id="ray-worker-启动注册-topology-resource"><a class="markdownIt-Anchor" href="#ray-worker-启动注册-topology-resource"></a> Ray worker 启动：注册 topology resource</h2>
+<p>GB300 infra 的 worker command 会在 <code>ray start</code> 前跑一段 topology probe：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">CLUSTER_UUID=$(nvidia-smi -q 2&gt;/dev/null \</span><br><span class="line">  | grep <span class="string">&#x27;ClusterUUID&#x27;</span> \</span><br><span class="line">  | head -1 \</span><br><span class="line">  | awk -F: <span class="string">&#x27;&#123;print $2&#125;&#x27;</span> \</span><br><span class="line">  | tr -d <span class="string">&#x27; &#x27;</span>)</span><br><span class="line"></span><br><span class="line">TOPO_RANK=$(hostname -i | tr -d <span class="string">&#x27;.&#x27;</span>)</span><br><span class="line"></span><br><span class="line">RAY_RESOURCES=<span class="string">&#x27;&#123;&#x27;</span></span><br><span class="line"><span class="keyword">if</span> [[ -n <span class="string">&quot;<span class="variable">$CLUSTER_UUID</span>&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">  RAY_RESOURCES+=<span class="string">&quot;\&quot;nvlink_domain_<span class="variable">$&#123;CLUSTER_UUID&#125;</span>\&quot;: 1&quot;</span></span><br><span class="line">  [[ -n <span class="string">&quot;<span class="variable">$TOPO_RANK</span>&quot;</span> ]] &amp;&amp; RAY_RESOURCES+=<span class="string">&quot;, &quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="keyword">if</span> [[ -n <span class="string">&quot;<span class="variable">$TOPO_RANK</span>&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">  RAY_RESOURCES+=<span class="string">&quot;\&quot;topo_rank\&quot;: <span class="variable">$TOPO_RANK</span>&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">RAY_RESOURCES+=<span class="string">&#x27;&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">eval</span> <span class="string">&quot;<span class="variable">$KUBERAY_GEN_RAY_START_CMD</span> --resources=&#x27;<span class="variable">$RAY_RESOURCES</span>&#x27;&quot;</span></span><br></pre></td></tr></table></figure>
+<p>它把 NVLink fabric 的 <code>ClusterUUID</code> 变成 Ray custom resource：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nvlink_domain_&lt;ClusterUUID&gt;: 1</span><br><span class="line">topo_rank: &lt;some number&gt;</span><br></pre></td></tr></table></figure>
+<p>注意这里的资源注册本身并不等于“rank placement 已经对齐”。Ray custom resource 只有在后续 placement group bundle 或 actor/task <code>.options(resources=...)</code> 里被请求时，才会形成调度约束；或者被 Python 侧读取后参与排序时，才会影响 rank order。</p>
+<p>这也是 main 分支和特性分支的分叉点。</p>
+<h2 id="main-分支只按-nodegpu-稳定排序"><a class="markdownIt-Anchor" href="#main-分支只按-nodegpu-稳定排序"></a> main 分支：只按 node/GPU 稳定排序</h2>
+<p>当前 <code>main</code> 的 <code>RayVirtualCluster._get_sorted_bundle_indices()</code> 逻辑大致是：</p>
+<ol>
+<li>用 <code>placement_group_table(pg)</code> 拿到每个 bundle 落在哪个 Ray node：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bundle_to_node_ids = pg_data[<span class="string">&quot;bundles_to_node_id&quot;</span>]</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>对每个 bundle 启一个很小的 actor，强制 schedule 到那个 bundle 上，读它看到的 GPU id：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GetGPUIDActor.options(</span><br><span class="line">    num_cpus=<span class="number">0.01</span>,</span><br><span class="line">    num_gpus=<span class="number">0.01</span>,</span><br><span class="line">    scheduling_strategy=PlacementGroupSchedulingStrategy(</span><br><span class="line">        placement_group=pg,</span><br><span class="line">        placement_group_bundle_index=i,</span><br><span class="line">    ),</span><br><span class="line">).remote()</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>得到：</li>
+</ol>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bundle i -&gt; node_id, gpu_id</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>按 <code>(node_id, gpu_id)</code> 排序：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bundle_infos = [</span><br><span class="line">    (i, bundle_to_node_ids[i], gpu_ids[i])</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_bundles)</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">pg_reordered_bundle_indices = [</span><br><span class="line">    bundle_info[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">for</span> bundle_info <span class="keyword">in</span> <span class="built_in">sorted</span>(bundle_infos, key=<span class="keyword">lambda</span> x: (x[<span class="number">1</span>], x[<span class="number">2</span>]))</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>为什么要做这个？因为 Ray placement group 里的 bundle index 不一定天然就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">node0 GPU0</span><br><span class="line">node0 GPU1</span><br><span class="line">node0 GPU2</span><br><span class="line">node0 GPU3</span><br><span class="line">node1 GPU0</span><br><span class="line">node1 GPU1</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>它可能是乱序的，比如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bundle 0 -&gt; nodeB GPU1</span><br><span class="line">bundle 1 -&gt; nodeA GPU2</span><br><span class="line">bundle 2 -&gt; nodeB GPU0</span><br><span class="line">bundle 3 -&gt; nodeA GPU0</span><br><span class="line">bundle 4 -&gt; nodeA GPU1</span><br><span class="line">bundle 5 -&gt; nodeB GPU2</span><br><span class="line">bundle 6 -&gt; nodeA GPU3</span><br><span class="line">bundle 7 -&gt; nodeB GPU3</span><br></pre></td></tr></table></figure>
+<p>如果直接按 bundle index 创建 rank，就会变成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rank0: nodeB GPU1</span><br><span class="line">rank1: nodeA GPU2</span><br><span class="line">rank2: nodeB GPU0</span><br><span class="line">rank3: nodeA GPU0</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>这对 TP/PP/DP/EP locality 都不友好。</p>
+<p>排序后得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bundle 3 -&gt; nodeA GPU0</span><br><span class="line">bundle 4 -&gt; nodeA GPU1</span><br><span class="line">bundle 1 -&gt; nodeA GPU2</span><br><span class="line">bundle 6 -&gt; nodeA GPU3</span><br><span class="line">bundle 2 -&gt; nodeB GPU0</span><br><span class="line">bundle 0 -&gt; nodeB GPU1</span><br><span class="line">bundle 5 -&gt; nodeB GPU2</span><br><span class="line">bundle 7 -&gt; nodeB GPU3</span><br></pre></td></tr></table></figure>
+<p>即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_sorted_bundle_indices = [3, 4, 1, 6, 2, 0, 5, 7]</span><br></pre></td></tr></table></figure>
+<p>policy 侧再用这个排序后的 bundle list 创建 worker：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">group_size = cluster.num_gpus_per_node</span><br><span class="line">tied_groups = [</span><br><span class="line">    (i // group_size, [bundle_idx])</span><br><span class="line">    <span class="keyword">for</span> i, bundle_idx <span class="keyword">in</span> <span class="built_in">enumerate</span>(cluster._sorted_bundle_indices)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>如果 <code>group_size = 4</code>，就得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">logical node 0: bundle 3,4,1,6  # actual nodeA GPU0..3</span><br><span class="line">logical node 1: bundle 2,0,5,7  # actual nodeB GPU0..3</span><br></pre></td></tr></table></figure>
+<p>最后 <code>RayWorkerGroup</code> 按这个 <code>bundle_indices_list</code> 创建 worker，并设置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RANK       = global_rank</span><br><span class="line">LOCAL_RANK = bundle_idx</span><br><span class="line">WORLD_SIZE = self.world_size</span><br><span class="line">NODE_RANK  = pg_idx</span><br></pre></td></tr></table></figure>
+<p>所以 main 分支里的第 4 步，本质是：</p>
+<blockquote>
+<p>在已经由 K8s/KAI 放好的资源上，把 Ray bundle 顺序整理成稳定的 node-major、gpu-major rank 顺序。</p>
+</blockquote>
+<p>它没有读 <code>nvlink_domain_*</code>。</p>
+<h2 id="特性分支真正消费-nvlink_domain_"><a class="markdownIt-Anchor" href="#特性分支真正消费-nvlink_domain_"></a> 特性分支：真正消费 <code>nvlink_domain_*</code></h2>
+<p>特性分支上的实现更接近最初想象中的“对齐 NVLink domain”。</p>
+<p>以 <code>origin/dsv3-from-v0.6.0</code> 为例，<code>virtual_cluster.py</code> 里多了这些常量：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NVLINK_DOMAIN_PREFIX = <span class="string">&quot;nvlink_domain_&quot;</span></span><br><span class="line">TOPO_RANK_KEY = <span class="string">&quot;topo_rank&quot;</span></span><br><span class="line">NVLINK_DOMAIN_UNKNOWN = <span class="string">&quot;unknown&quot;</span></span><br><span class="line">TOPO_RANK_UNKNOWN = -<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>还多了一个 <code>_get_gpu_id_info()</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ray.remote(<span class="params">num_gpus=<span class="number">1</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_gpu_id_info</span>() -&gt; tuple[int, str, int]:</span></span><br><span class="line">    gpu_id = ray.get_gpu_ids()[<span class="number">0</span>]</span><br><span class="line">    nvlink_domain = NVLINK_DOMAIN_UNKNOWN</span><br><span class="line">    topo_rank = TOPO_RANK_UNKNOWN</span><br><span class="line"></span><br><span class="line">    runtime_ctx = ray.get_runtime_context()</span><br><span class="line">    node_id = runtime_ctx.get_node_id()</span><br><span class="line">    <span class="keyword">for</span> node <span class="keyword">in</span> ray.nodes():</span><br><span class="line">        <span class="keyword">if</span> node.get(<span class="string">&quot;NodeID&quot;</span>) == node_id:</span><br><span class="line">            all_node_resources = node.get(<span class="string">&quot;Resources&quot;</span>, &#123;&#125;)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> key, val <span class="keyword">in</span> all_node_resources.items():</span><br><span class="line">        <span class="keyword">if</span> key.startswith(NVLINK_DOMAIN_PREFIX):</span><br><span class="line">            nvlink_domain = key</span><br><span class="line">        <span class="keyword">if</span> key == TOPO_RANK_KEY:</span><br><span class="line">            topo_rank = <span class="built_in">int</span>(val)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> gpu_id, nvlink_domain, topo_rank</span><br></pre></td></tr></table></figure>
+<p>于是每个 bundle 的信息从 main 分支的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(bundle_idx, node_id, gpu_id)</span><br></pre></td></tr></table></figure>
+<p>升级成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(bundle_idx, node_id, gpu_id, nvlink_domain, topo_rank)</span><br></pre></td></tr></table></figure>
+<p>排序也从：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(node_id, gpu_id)</span><br></pre></td></tr></table></figure>
+<p>变成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(domain_min_topo_rank, topo_rank, gpu_id)</span><br></pre></td></tr></table></figure>
+<p>对应代码里的描述是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># When topology information is available:</span></span><br><span class="line"><span class="comment"># sort by (domain_min_topo_rank, topo_rank, gpu_id).</span></span><br></pre></td></tr></table></figure>
+<p>这就真的把 <code>nvlink_domain_*</code> 纳入 rank ordering 了。</p>
+<h2 id="特性分支还支持-domain-pinning"><a class="markdownIt-Anchor" href="#特性分支还支持-domain-pinning"></a> 特性分支还支持 domain pinning</h2>
+<p>更进一步，特性分支的 <code>RayVirtualCluster.__init__()</code> 多了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">segment_size: <span class="built_in">int</span> | <span class="literal">None</span> = <span class="literal">None</span></span><br><span class="line">node_resource_constraints: <span class="built_in">list</span>[<span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="built_in">float</span>]] | <span class="literal">None</span> = <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+<p><code>node_resource_constraints</code> 的注释很直白：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Per-logical-node extra Ray resource requirements.</span></span><br><span class="line"><span class="comment"># Each dict is merged into every bundle spec for that node,</span></span><br><span class="line"><span class="comment"># pinning it to a physical domain.</span></span><br><span class="line"><span class="comment"># Example: [&#123;&quot;nvlink_domain_&lt;uuid&gt;&quot;: 0.001&#125;] * 16</span></span><br><span class="line"><span class="comment"># pins 16 nodes to a single NVLink domain.</span></span><br></pre></td></tr></table></figure>
+<p>创建 placement group bundle 时：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_make_bundle</span>(<span class="params">node_idx: <span class="built_in">int</span></span>) -&gt; dict:</span></span><br><span class="line">    bundle = &#123;<span class="string">&quot;CPU&quot;</span>: num_cpus_per_bundle, <span class="string">&quot;GPU&quot;</span>: num_gpus_per_bundle&#125;</span><br><span class="line">    <span class="keyword">if</span> self.node_resource_constraints <span class="keyword">and</span> self.node_resource_constraints[node_idx]:</span><br><span class="line">        bundle.update(self.node_resource_constraints[node_idx])</span><br><span class="line">    <span class="keyword">return</span> bundle</span><br></pre></td></tr></table></figure>
+<p>这时 <code>nvlink_domain_*</code> 不只是“排序信息”，而是可以进入 Ray placement group 的 resource request，变成调度约束：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;CPU&quot;</span>: <span class="number">1</span>, <span class="string">&quot;GPU&quot;</span>: <span class="number">1</span>, <span class="string">&quot;nvlink_domain_&lt;uuid&gt;&quot;</span>: <span class="number">0.001</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>这和 main 分支有本质区别。main 只注册了资源，但 placement group bundle 没请求它；特性分支可以请求它。</p>
+<h2 id="vllm-侧按-topology-sorted-bundles-切-tppp-group"><a class="markdownIt-Anchor" href="#vllm-侧按-topology-sorted-bundles-切-tppp-group"></a> vLLM 侧：按 topology-sorted bundles 切 TP/PP group</h2>
+<p>特性分支的 <code>vllm_generation.py</code> 也相应改了。</p>
+<p>当 vLLM 需要跨节点 model parallelism 时，它会用 unified placement group。之后 <code>_get_tied_worker_bundle_indices()</code> 会调用内部的 <code>allocate_worker_groups()</code>，传入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sorted_bundle_indices=cluster._sorted_bundle_indices</span><br><span class="line">nvlink_domain_per_bundle_index=cluster._nvlink_domain_per_bundle_index</span><br></pre></td></tr></table></figure>
+<p>如果有 topology-sorted bundle list，就直接按这个 list 切连续片段：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flat = <span class="built_in">list</span>(sorted_bundle_indices)</span><br><span class="line">slice_ = flat[i * model_parallel_size : (i + <span class="number">1</span>) * model_parallel_size]</span><br></pre></td></tr></table></figure>
+<p>每个 slice 是一个 model-parallel group，也就是一个 DP replica 里的 TP/PP workers。</p>
+<p>如果一个 slice 里出现多个 NVLink domain，代码会 warning：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Model-parallel group ... spans ... NVLink domains;</span><br><span class="line">cross-domain collectives may use slower links.</span><br><span class="line">Prefer TP*PP that divides usable GPUs per domain.</span><br></pre></td></tr></table></figure>
+<p>这点很重要：排序能让连续 rank 尽量落在同一个 domain，但如果 <code>TP * PP</code> 和每个 domain 的可用 GPU 数不整除，还是可能切出跨 domain 的 group。拓扑感知不是魔法，parallelism 配置还得和物理 domain 尺寸匹配。</p>
+<h2 id="hybridep-环境变量是另一层"><a class="markdownIt-Anchor" href="#hybridep-环境变量是另一层"></a> HybridEP 环境变量是另一层</h2>
+<p>NeMo-RL 的 Megatron setup 里还有：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NUM_OF_HYBRID_EP_RANKS_PER_NVLINK_DOMAIN</span><br><span class="line">USE_MNNVL</span><br></pre></td></tr></table></figure>
+<p>这部分是给 DeepEP/Megatron HybridEP 用的。</p>
+<p>如果 config 里有：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">megatron_cfg:</span></span><br><span class="line">  <span class="attr">moe_flex_dispatcher_backend:</span> <span class="string">hybridep</span></span><br><span class="line">  <span class="attr">hybridep_num_ranks_per_nvlink_domain:</span> <span class="number">72</span></span><br><span class="line">  <span class="attr">hybridep_use_mnnvl:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>setup 会写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">os.environ[<span class="string">&quot;NUM_OF_HYBRID_EP_RANKS_PER_NVLINK_DOMAIN&quot;</span>] = <span class="string">&quot;72&quot;</span></span><br><span class="line">os.environ[<span class="string">&quot;USE_MNNVL&quot;</span>] = <span class="string">&quot;1&quot;</span></span><br></pre></td></tr></table></figure>
+<p>如果不显式设置，默认大致是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NUM_OF_HYBRID_EP_RANKS_PER_NVLINK_DOMAIN = <span class="built_in">min</span>(expert_model_parallel_size, <span class="number">64</span>)</span><br><span class="line">USE_MNNVL = <span class="built_in">int</span>(expert_model_parallel_size &gt; <span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<p>这和 Ray custom resource <code>nvlink_domain_*</code> 不是一回事：</p>
+<ul>
+<li><code>nvlink_domain_*</code>：Ray / placement 层看到的节点拓扑资源。</li>
+<li><code>NUM_OF_HYBRID_EP_RANKS_PER_NVLINK_DOMAIN</code>：Megatron/DeepEP 运行时理解 HybridEP domain 大小的参数。</li>
+</ul>
+<p>前者决定 rank 怎么被放；后者告诉通信/dispatcher 这些 rank 应该按多大的 NVLink domain 处理。理想情况下，二者要一致，否则上层以为的 domain 和实际 placement 可能对不上。</p>
+<h2 id="可视化两条路径"><a class="markdownIt-Anchor" href="#可视化两条路径"></a> 可视化：两条路径</h2>
+<p>完整可视化放在独立页面里，避免大段 HTML 干扰正文渲染：</p>
+<p><a href="/nemo-rl-nvlink-placement-visual.html">打开 NeMo-RL NVLink domain placement 可视化</a></p>
+<h2 id="小结"><a class="markdownIt-Anchor" href="#小结"></a> 小结</h2>
+<p>这次阅读最大的收获，是不要把“拓扑感知”当成一个单点功能。它横跨好几层，每层能保证的东西不一样：</p>
+<ul>
+<li>K8s/KAI/DRA 负责 <strong>资源真的落在正确的物理 domain</strong>。</li>
+<li>Ray custom resource 负责 <strong>把物理 domain 暴露给 Ray 调度/运行时</strong>。</li>
+<li>Ray placement group 负责 <strong>把 bundle 绑定到资源约束上</strong>。</li>
+<li>NeMo-RL <code>RayVirtualCluster</code> 负责 <strong>把 bundle 顺序转成 rank 顺序</strong>。</li>
+<li>Megatron/DeepEP 负责 <strong>按这些 rank 做 TP/PP/EP/MoE 通信</strong>。</li>
+</ul>
+<p>当前 <code>main</code> 只完成了其中一部分：infra 注册了 <code>nvlink_domain_*</code>，但 Python rank placement 没消费它。特性分支补上了后半截：读 <code>nvlink_domain_*</code> / <code>topo_rank</code>，按 topology 排 bundle，必要时通过 <code>node_resource_constraints</code> 把 placement group bundle pin 到 domain。</p>
+<p>所以如果问：</p>
+<blockquote>
+<p>NeMo-RL 现在是不是用 <code>nvlink_domain_*</code> 对齐 rank placement？</p>
+</blockquote>
+<p>答案要分支限定：</p>
+<ul>
+<li><code>main</code>：没有。main 主要靠 K8s/KAI 保证 placement，NeMo-RL 只做 <code>(node_id, gpu_id)</code> 稳定排序。</li>
+<li>topology-aware 特性分支：有。它已经把 <code>nvlink_domain_*</code> 纳入排序和可选调度约束。</li>
+</ul>
+<p>这个差异也解释了为什么 main 的 infra 注释里已经写着“Registers <code>nvlink_domain_&lt;UUID&gt;</code> and <code>topo_rank</code> so <code>virtual_cluster.py</code> can do segment-aware rank assignment”，但实际 main 代码里搜不到消费路径：看起来 Python 侧实现还停在特性分支/PR 上，没有合入主线。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/GPU/" rel="tag"># GPU</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/Infra/" rel="tag"># Infra</a>
+              <a href="/tags/RL/" rel="tag"># RL</a>
+              <a href="/tags/Ray/" rel="tag"># Ray</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/b9ff3fc4.html" rel="prev" title="Nemotron 3 Ultra 技术报告：RL Infra 阅读">
+                  <i class="fa fa-angle-left"></i> Nemotron 3 Ultra 技术报告：RL Infra 阅读
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">464k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:02</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
