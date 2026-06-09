@@ -1,0 +1,157 @@
+---
+layout: false
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeMo-RL NVLink domain placement 可视化</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --line: #d5deea;
+      --text: #182230;
+      --muted: #5d6b7a;
+      --main: #2563eb;
+      --main-soft: #eaf1ff;
+      --feature: #059669;
+      --feature-soft: #e8f7f1;
+      --warn: #b7791f;
+      --warn-soft: #fff7e6;
+      --stop: #dc2626;
+      --stop-soft: #fff0f0;
+      --code: #eef4ff;
+      --shadow: 0 20px 50px rgba(24, 34, 48, .10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      background: rgba(255, 255, 255, .94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 { margin: 0; font-size: 24px; line-height: 1.25; }
+    .back { color: var(--main); text-decoration: none; font-size: 14px; white-space: nowrap; }
+    main { max-width: 1240px; margin: 0 auto; padding: 24px; }
+    .summary { margin: 0 0 18px; color: var(--muted); max-width: 920px; line-height: 1.65; }
+    .board { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    .path { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+    .path-header { padding: 18px 18px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+    .path-header h2 { margin: 0 0 8px; font-size: 19px; line-height: 1.3; }
+    .path-header p { margin: 0; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .main-path .path-header { border-top: 5px solid var(--main); }
+    .feature-path .path-header { border-top: 5px solid var(--feature); }
+    .steps { padding: 16px; display: grid; gap: 12px; }
+    .step { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: stretch; }
+    .layer {
+      min-height: 60px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .main-path .layer { border-color: rgba(37, 99, 235, .35); background: var(--main-soft); }
+    .feature-path .layer { border-color: rgba(5, 150, 105, .35); background: var(--feature-soft); }
+    .detail { min-height: 60px; border-radius: 10px; border: 1px solid var(--line); background: #fff; padding: 10px 12px; color: var(--muted); line-height: 1.5; }
+    .arrow { width: 2px; height: 18px; margin-left: 74px; background: var(--line); }
+    code { padding: 1px 5px; border-radius: 5px; background: var(--code); color: #1e3a8a; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+    .badge { display: inline-block; margin-right: 6px; padding: 2px 7px; border-radius: 999px; font-size: 12px; font-weight: 800; vertical-align: 1px; }
+    .badge.main { color: #123c8c; background: var(--main-soft); border: 1px solid rgba(37, 99, 235, .28); }
+    .badge.feature { color: #075f46; background: var(--feature-soft); border: 1px solid rgba(5, 150, 105, .28); }
+    .badge.warn { color: #744b09; background: var(--warn-soft); border: 1px solid rgba(183, 121, 31, .28); }
+    .badge.stop { color: #9f1239; background: var(--stop-soft); border: 1px solid rgba(220, 38, 38, .28); }
+    .compare { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 16px 18px; }
+    .compare h2 { margin: 0 0 12px; font-size: 18px; }
+    .compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .fact { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--surface-2); }
+    .fact strong { display: block; margin-bottom: 6px; font-size: 14px; }
+    .fact span { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    @media (max-width: 920px) {
+      .board { grid-template-columns: 1fr; }
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .header-inner { align-items: flex-start; flex-direction: column; }
+      main { padding: 16px; }
+      .step { grid-template-columns: 1fr; }
+      .arrow { margin-left: 50%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>NeMo-RL NVLink Domain Placement</h1>
+      <a class="back" href="/archives/2f0a8c7d.html">返回文章</a>
+    </div>
+  </header>
+  <main>
+    <p class="summary">这张图只描述代码阅读中的核心差异：当前 main 分支已经在 Ray worker 启动时注册 topology resource，但 rank placement 路径没有消费它；topology-aware 特性分支则进一步读取这些 resource，用于 bundle 排序和可选 domain pinning。</p>
+    <section class="board" aria-label="main and topology-aware branch comparison">
+      <article class="path main-path">
+        <div class="path-header">
+          <h2><span class="badge main">main</span>注册了 topology resource，但 rank 侧不消费</h2>
+          <p>K8s/KAI 先保证物理放置，NeMo-RL 只做 Ray bundle 的稳定 node/GPU 排序。</p>
+        </div>
+        <div class="steps">
+          <div class="step"><div class="layer">K8s / KAI / DRA</div><div class="detail">通过 <code>topology-required-placement</code>、ComputeDomain、RoCE、<code>segmentSize</code> 把 pod 尽量放进正确 clique。</div></div>
+          <div class="arrow"></div>
+          <div class="step"><div class="layer">Ray worker startup</div><div class="detail">注册 <code>nvlink_domain_&lt;UUID&gt;</code> 和 <code>topo_rank</code>。</div></div>
+          <div class="arrow"></div>
+          <div class="step"><div class="layer">Ray placement group</div><div class="detail"><span class="badge stop">stop</span>bundle 只请求 <code>CPU/GPU</code>，不请求 <code>nvlink_domain_*</code>。</div></div>
+          <div class="arrow"></div>
+          <div class="step"><div class="layer">Rank ordering</div><div class="detail">按 <code>(node_id, gpu_id)</code> 稳定排序，只解决 Ray bundle 乱序问题。</div></div>
+        </div>
+      </article>
+      <article class="path feature-path">
+        <div class="path-header">
+          <h2><span class="badge feature">feature</span>读取并使用 <code>nvlink_domain_*</code></h2>
+          <p>Python 侧把 Ray custom resource 纳入拓扑排序，必要时也可以进入 placement group resource request。</p>
+        </div>
+        <div class="steps">
+          <div class="step"><div class="layer">K8s / KAI / DRA</div><div class="detail">同样先由调度层圈定物理 clique / domain，这是后续 rank 对齐的前提。</div></div>
+          <div class="arrow"></div>
+          <div class="step"><div class="layer">Ray worker startup</div><div class="detail">节点暴露 <code>nvlink_domain_&lt;UUID&gt;</code>、<code>topo_rank</code>，Python 侧会读取。</div></div>
+          <div class="arrow"></div>
+          <div class="step"><div class="layer">Ray placement group</div><div class="detail"><span class="badge warn">optional</span><code>node_resource_constraints</code> 可把 bundle pin 到指定 domain。</div></div>
+          <div class="arrow"></div>
+          <div class="step"><div class="layer">Rank ordering</div><div class="detail">按 <code>(domain_min_topo_rank, topo_rank, gpu_id)</code> 排序，并对跨 domain TP/PP group 给 warning。</div></div>
+        </div>
+      </article>
+    </section>
+    <section class="compare" aria-label="key takeaways">
+      <h2>关键边界</h2>
+      <div class="compare-grid">
+        <div class="fact"><strong>K8s 层</strong><span>负责让资源真的落在正确物理 domain；没有这层，rank 排序救不回跨 rack placement。</span></div>
+        <div class="fact"><strong>Ray 层</strong><span><code>nvlink_domain_*</code> 只有被 bundle resource request 消费时，才变成调度约束。</span></div>
+        <div class="fact"><strong>NeMo-RL 层</strong><span>main 只按 <code>(node_id, gpu_id)</code> 排；特性分支才按 domain/topo rank 排。</span></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
