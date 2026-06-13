@@ -1360,7 +1360,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #b56f34;
+  background: #88b986;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -2874,6 +2874,41 @@ body {
   line-height: 1.85;
   overflow-wrap: anywhere;
   word-break: break-word;
+  counter-reset: h2counter;
+}
+.post-body h2 {
+  counter-reset: h3counter;
+  counter-increment: h2counter;
+}
+.post-body h2::before {
+  content: counter(h2counter) '. ';
+}
+.post-body h3 {
+  counter-reset: h4counter;
+  counter-increment: h3counter;
+}
+.post-body h3::before {
+  content: counter(h2counter) '.' counter(h3counter) ' ';
+}
+.post-body h4 {
+  counter-reset: h5counter;
+  counter-increment: h4counter;
+}
+.post-body h4::before {
+  content: counter(h2counter) '.' counter(h3counter) '.' counter(h4counter) ' ';
+}
+.post-body h5 {
+  counter-reset: h6counter;
+  counter-increment: h5counter;
+}
+.post-body h5::before {
+  content: counter(h2counter) '.' counter(h3counter) '.' counter(h4counter) '.' counter(h5counter) ' ';
+}
+.post-body h6 {
+  counter-increment: h6counter;
+}
+.post-body h6::before {
+  content: counter(h2counter) '.' counter(h3counter) '.' counter(h4counter) '.' counter(h5counter) '.' counter(h6counter) ' ';
 }
 .post-body img,
 .post-body video,
