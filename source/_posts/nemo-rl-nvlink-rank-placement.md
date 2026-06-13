@@ -24,7 +24,7 @@ categories: 笔记
 
 它们都和“拓扑”有关，但不是同一层的东西。尤其是：当前 `main` 分支和一些特性分支的行为并不一样。
 
-## 先说结论
+## 结论
 
 当前 `main` 分支里：
 
@@ -52,9 +52,9 @@ origin/pull-request/2613
 
 > main 分支已经有 infra probe，但 Python 消费侧还没合进来；特性分支里已经有完整一些的 topology-aware rank placement。
 
-## Infra 前置
+## 资源调度 Infra
 
-### K8s 层：先把物理资源圈对
+### K8s/KAI/DRA：容器资源 clique
 
 GB300 相关 infra YAML 里，worker pod 有这几个关键配置：
 
@@ -87,7 +87,7 @@ for i in range(num_segments):
 
 这样 KAI 更容易把每个 segment 放进一个完整 clique。它解决的是“调度单位太大，无法表达 domain/rack 约束”的问题。
 
-### Ray worker 启动：注册 topology resource
+### Ray worker startup：注册 topology resource
 
 GB300 infra 的 worker command 会在 `ray start` 前跑一段 topology probe：
 
@@ -124,7 +124,7 @@ topo_rank: <some number>
 
 这也是 main 分支和特性分支的分叉点。
 
-## Rank placement
+## Rank placement：main 与特性分支
 
 ### main 分支：只按 node/GPU 稳定排序
 
@@ -322,13 +322,15 @@ def _get_gpu_id_info() -> tuple[int, str, int]:
 对应代码里的描述是：
 
 ```python
-# When topology information is available:
-# sort by (domain_min_topo_rank, topo_rank, gpu_id).
+if topology_info_available:
+    sort_key = (domain_min_topo_rank, topo_rank, gpu_id)
+else:
+    sort_key = (node_id, gpu_id)
 ```
 
 这就真的把 `nvlink_domain_*` 纳入 rank ordering 了。
 
-### 特性分支还支持 domain pinning
+#### 可选能力：domain pinning
 
 更进一步，特性分支的 `RayVirtualCluster.__init__()` 多了：
 
@@ -340,12 +342,12 @@ node_resource_constraints: list[dict[str, float]] | None = None
 `node_resource_constraints` 的注释很直白：
 
 ```python
-# Per-logical-node extra Ray resource requirements.
-# Each dict is merged into every bundle spec for that node,
-# pinning it to a physical domain.
-# Example: [{"nvlink_domain_<uuid>": 0.001}] * 16
-# pins 16 nodes to a single NVLink domain.
+node_resource_constraints = [
+    {"nvlink_domain_<uuid>": 0.001},
+] * 16
 ```
+
+这表示给 16 个 logical nodes 都追加同一个 Ray custom resource requirement，从而把它们 pin 到同一个物理 NVLink domain。
 
 创建 placement group bundle 时：
 
@@ -365,7 +367,7 @@ def _make_bundle(node_idx: int) -> dict:
 
 这和 main 分支有本质区别。main 只注册了资源，但 placement group bundle 没请求它；特性分支可以请求它。
 
-### vLLM 侧：按 topology-sorted bundles 切 TP/PP group
+#### vLLM：按 topology-sorted bundles 切 TP/PP group
 
 特性分支的 `vllm_generation.py` 也相应改了。
 
@@ -395,7 +397,7 @@ Prefer TP*PP that divides usable GPUs per domain.
 
 这点很重要：排序能让连续 rank 尽量落在同一个 domain，但如果 `TP * PP` 和每个 domain 的可用 GPU 数不整除，还是可能切出跨 domain 的 group。拓扑感知不是魔法，parallelism 配置还得和物理 domain 尺寸匹配。
 
-## HybridEP 环境变量是另一层
+## Megatron/DeepEP：HybridEP 是另一层
 
 NeMo-RL 的 Megatron setup 里还有：
 
@@ -436,7 +438,7 @@ USE_MNNVL = int(expert_model_parallel_size > 4)
 
 前者决定 rank 怎么被放；后者告诉通信/dispatcher 这些 rank 应该按多大的 NVLink domain 处理。理想情况下，二者要一致，否则上层以为的 domain 和实际 placement 可能对不上。
 
-## 可视化：两条路径
+## 可视化
 
 完整可视化放在独立页面里，避免大段 HTML 干扰正文渲染：
 
