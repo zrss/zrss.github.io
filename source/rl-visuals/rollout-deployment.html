@@ -1,0 +1,213 @@
+---
+layout: false
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rollout 后端部署形态</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f6f8fb;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    .topnav {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #d8dee4;
+    }
+    .back {
+      display: block;
+      color: #0891b2;
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .back:hover { text-decoration: underline; }
+    h1 {
+      margin: 0 0 24px;
+      font-size: 26px;
+      line-height: 1.3;
+    }
+    .section {
+      background: #ffffff;
+      border: 1px solid #d8dee4;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .analysis {
+      margin: 0;
+      color: #4b5563;
+      font-size: 15px;
+    }
+    .nav-next {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .nav-next a {
+      color: #0891b2;
+      text-decoration: none;
+    }
+    .nav-next a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav">
+      <a class="back" href="/rl-visuals/index.html">← 返回架构图</a>
+      <a class="back" href="/archives/86d4b4ec.html#生产推理集群可能成为-rollout-后端">← 返回文章</a>
+    </div>
+    <h1>Rollout 后端部署形态</h1>
+
+    <div class="section">
+      <div class="diagram-scroll">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="580" viewBox="0 0 1100 580" role="img" aria-label="Rollout 后端三种部署形态对比">
+          <defs>
+            <marker id="arrow-rollout" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#0891b2"/>
+            </marker>
+          </defs>
+          <rect width="1100" height="580" fill="#f8fafc" rx="8"/>
+
+          <!-- Column 1: Colocated -->
+          <rect x="24" y="24" width="330" height="532" fill="#ffffff" stroke="#d8dee4" rx="12"/>
+          <text x="189" y="56" text-anchor="middle" fill="#0891b2" font-size="15" font-weight="600">1. Colocated Rollout</text>
+          <text x="189" y="78" text-anchor="middle" fill="#4b5563" font-size="12">rollout 与 trainer 同 job 部署（embedded / colocated）</text>
+
+          <rect x="54" y="100" width="270" height="52" fill="#ecfeff" stroke="#0891b2" rx="8"/>
+          <text x="189" y="131" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Trainer Job</text>
+
+          <rect x="64" y="190" width="120" height="44" fill="#f1f5f9" stroke="#d8dee4" rx="6"/>
+          <text x="124" y="217" text-anchor="middle" fill="#111827" font-size="12">Policy Update</text>
+
+          <rect x="204" y="190" width="120" height="44" fill="#f1f5f9" stroke="#d8dee4" rx="6"/>
+          <text x="264" y="217" text-anchor="middle" fill="#111827" font-size="12">Rollout worker</text>
+
+          <path d="M124 190 L124 174 L264 174 L264 190" stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrow-rollout)"/>
+          <rect x="158" y="156" width="72" height="16" fill="#ffffff" rx="3"/>
+          <text x="194" y="168" text-anchor="middle" fill="#4b5563" font-size="10">weight sync</text>
+
+          <rect x="54" y="260" width="270" height="100" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="74" y="284" fill="#059669" font-size="12" font-weight="600">优点</text>
+          <text x="74" y="304" fill="#4b5563" font-size="11">语义干净、简单 weight sync</text>
+          <text x="74" y="328" fill="#f97316" font-size="12" font-weight="600">代价</text>
+          <text x="74" y="348" fill="#4b5563" font-size="11">资源耦合、长尾拖住 step</text>
+
+          <!-- Column 2: Disaggregated -->
+          <rect x="374" y="24" width="330" height="532" fill="#ffffff" stroke="#d8dee4" rx="12"/>
+          <text x="539" y="56" text-anchor="middle" fill="#0891b2" font-size="15" font-weight="600">2. Disaggregated Rollout Service</text>
+          <text x="539" y="78" text-anchor="middle" fill="#4b5563" font-size="12">专用 rollout 集群，经 queue / RPC 与 trainer 解耦</text>
+
+          <rect x="404" y="96" width="120" height="44" fill="#ecfeff" stroke="#0891b2" rx="8"/>
+          <text x="464" y="123" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Trainer</text>
+
+          <rect x="554" y="96" width="120" height="44" fill="#fff7ed" stroke="#f97316" rx="8"/>
+          <text x="614" y="115" text-anchor="middle" fill="#111827" font-size="11">Queue /</text>
+          <text x="614" y="131" text-anchor="middle" fill="#111827" font-size="11">RPC</text>
+
+          <rect x="554" y="224" width="120" height="44" fill="#ecfeff" stroke="#0891b2" rx="8"/>
+          <text x="614" y="243" text-anchor="middle" fill="#111827" font-size="11">Rollout</text>
+          <text x="614" y="259" text-anchor="middle" fill="#111827" font-size="11">Service</text>
+
+          <!-- prompt: trainer to queue -->
+          <path d="M524 118 L554 118" stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrow-rollout)"/>
+          <text x="539" y="91" text-anchor="middle" fill="#4b5563" font-size="10">prompt</text>
+
+          <!-- Queue → Rollout: vertical center -->
+          <path d="M614 140 L614 224" stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrow-rollout)"/>
+
+          <!-- trace + logprob: rollout back to trainer through left corridor -->
+          <path d="M554 246 L464 246 L464 140" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-rollout)"/>
+          <rect x="478" y="202" width="86" height="16" fill="#ffffff" rx="3"/>
+          <text x="521" y="214" text-anchor="middle" fill="#4b5563" font-size="10">trace + logprob</text>
+
+          <!-- weight sync: trainer to rollout through right corridor -->
+          <path d="M488 140 L488 190 L692 190 L692 246 L674 246" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-rollout)"/>
+          <rect x="574" y="168" width="64" height="16" fill="#ffffff" rx="3"/>
+          <text x="606" y="180" text-anchor="middle" fill="#4b5563" font-size="10">weight sync</text>
+
+          <rect x="404" y="296" width="270" height="100" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="424" y="320" fill="#059669" font-size="12" font-weight="600">优点</text>
+          <text x="424" y="340" fill="#4b5563" font-size="11">独立扩缩、故障隔离</text>
+          <text x="424" y="364" fill="#f97316" font-size="12" font-weight="600">代价</text>
+          <text x="424" y="384" fill="#4b5563" font-size="11">staleness, queue backlog, weight sync</text>
+
+          <!-- Column 3: Production inference -->
+          <rect x="724" y="24" width="352" height="532" fill="#ffffff" stroke="#d8dee4" rx="12"/>
+          <text x="900" y="56" text-anchor="middle" fill="#0891b2" font-size="15" font-weight="600">3. Production Inference Rollout</text>
+          <text x="900" y="78" text-anchor="middle" fill="#4b5563" font-size="12">接入生产态 serving fleet，消纳低谷 / 弹性余量</text>
+
+          <rect x="754" y="96" width="120" height="44" fill="#ecfeff" stroke="#0891b2" rx="8"/>
+          <text x="814" y="123" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">RL Trainer</text>
+
+          <rect x="904" y="96" width="140" height="44" fill="#fff7ed" stroke="#f97316" rx="8"/>
+          <text x="974" y="115" text-anchor="middle" fill="#111827" font-size="11">Inference API /</text>
+          <text x="974" y="131" text-anchor="middle" fill="#111827" font-size="11">Scheduler</text>
+
+          <rect x="904" y="224" width="140" height="44" fill="#ecfeff" stroke="#0891b2" rx="8"/>
+          <text x="974" y="243" text-anchor="middle" fill="#111827" font-size="11">Production</text>
+          <text x="974" y="259" text-anchor="middle" fill="#111827" font-size="11">Serving Fleet</text>
+
+          <!-- prompt: trainer to gateway -->
+          <path d="M874 118 L904 118" stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrow-rollout)"/>
+          <text x="889" y="91" text-anchor="middle" fill="#4b5563" font-size="10">RL prompt</text>
+
+          <!-- Gateway → Pool: vertical center -->
+          <path d="M974 140 L974 224" stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrow-rollout)"/>
+          <rect x="934" y="198" width="80" height="16" fill="#ffffff" rx="3"/>
+          <text x="974" y="210" text-anchor="middle" fill="#4b5563" font-size="10">idle capacity</text>
+
+          <!-- trace + logprob: inference pool back to trainer through left corridor -->
+          <path d="M904 246 L814 246 L814 140" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-rollout)"/>
+          <rect x="828" y="202" width="86" height="16" fill="#ffffff" rx="3"/>
+          <text x="871" y="214" text-anchor="middle" fill="#4b5563" font-size="10">trace + logprob</text>
+
+          <!-- policy publish: trainer to production serving fleet through right corridor -->
+          <path d="M838 140 L838 190 L1062 190 L1062 246 L1044 246" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-rollout)"/>
+          <rect x="996" y="168" width="72" height="16" fill="#ffffff" rx="3"/>
+          <text x="1032" y="180" text-anchor="middle" fill="#4b5563" font-size="10">policy publish</text>
+
+          <rect x="754" y="288" width="290" height="28" fill="#f1f5f9" stroke="#d8dee4" rx="6"/>
+          <text x="899" y="307" text-anchor="middle" fill="#4b5563" font-size="11">例：Cursor + Fireworks 低谷容量跑 rollout</text>
+
+          <rect x="754" y="328" width="290" height="100" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="774" y="352" fill="#059669" font-size="12" font-weight="600">优点</text>
+          <text x="774" y="372" fill="#4b5563" font-size="11">消纳低谷 GPU、复用 serving 能力</text>
+          <text x="774" y="396" fill="#f97316" font-size="12" font-weight="600">代价</text>
+          <text x="774" y="416" fill="#4b5563" font-size="11">priority isolation, logprob export, preemption</text>
+
+          <!-- Bottom note -->
+          <text x="550" y="560" text-anchor="middle" fill="#4b5563" font-size="12">rollout 从训练 job 附属模块 → 训练系统调用的可调度推理平台</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="analysis"><strong>1. Colocated Rollout</strong>：rollout engine 与 trainer <strong>同 job 部署</strong>（也称 embedded / colocated；后端可为 vLLM / SGLang 等）。权重在 job 内本地同步，语义最贴近 on-policy，但 rollout 长尾会拖住整个 training step。</p>
+      <p class="analysis" style="margin-top: 12px;"><strong>2. Disaggregated Rollout Service</strong>：rollout 仍是<strong>为本训练任务单独部署</strong>的推理服务（独立 GPU fleet / Ray actor / K8s deployment），只是与 trainer 进程解耦。实线：trainer 经 queue 下发 prompt；虚线返回 trace + logprob；另一条虚线：<strong>trainer 将更新后的 policy 权重同步到 rollout</strong>（非反向）。典型于 verl async rollout、OpenRLHF agent server 等——解耦扩缩与故障，但需处理 staleness 与 queue backlog。</p>
+      <p class="analysis" style="margin-top: 12px;"><strong>3. Production Inference Rollout</strong>：rollout 不再单独为 RL 起一套专用集群，而是在训练过程中调用<strong>生产态推理基础设施</strong>（Inference API / Scheduler 后面的 serving fleet）。更准确地说，这不是把 RL 请求当作普通线上请求混入用户路径，而是让训练系统以低优先级 / 可抢占 workload 消纳线上低谷或弹性余量；高峰时 capacity 可被线上 SLA 收回。与 2 的数据流类似（RL prompt 下发 → trace + logprob 回传 → policy publish），差别在于后端是成熟 serving 调度平台，核心问题变成优先级隔离、policy version pinning、logprob / trace 导出、preemption 后的样本完整性。以 Cursor + Fireworks 为例。</p>
+    </div>
+
+    <p class="nav-next">下一张：<a href="/rl-visuals/queue-backpressure.html">队列、Backpressure 与 Staleness →</a></p>
+  </div>
+</body>
+</html>

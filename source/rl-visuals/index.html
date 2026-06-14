@@ -1,0 +1,124 @@
+---
+layout: false
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RL 后训练系统架构图</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f6f8fb;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    .topnav {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #d8dee4;
+    }
+    .back {
+      display: block;
+      color: #0891b2;
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .back:hover { text-decoration: underline; }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      line-height: 1.3;
+    }
+    .intro {
+      margin: 0 0 32px;
+      color: #4b5563;
+      font-size: 16px;
+      max-width: 720px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d8dee4;
+      border-radius: 12px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .card:hover {
+      border-color: #0891b2;
+      box-shadow: 0 4px 16px rgba(8, 145, 178, .12);
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: #0891b2;
+    }
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: #4b5563;
+    }
+    .nav-next {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #d8dee4;
+      font-size: 14px;
+    }
+    .nav-next a {
+      color: #0891b2;
+      text-decoration: none;
+    }
+    .nav-next a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav">
+      <a class="back" href="/archives/86d4b4ec.html#服务与调度视角runtime-的系统边界">← 返回文章</a>
+    </div>
+    <h1>RL 后训练系统架构图</h1>
+    <p class="intro">下列架构图描述后训练 RL 从 trainer 脚本向服务化 runtime 演进时的系统边界与组件关系。</p>
+
+    <div class="cards">
+      <a class="card" href="/rl-visuals/runtime-loop.html">
+        <h2>从 Trainer 到 Runtime Loop</h2>
+        <p>trainer 脚本与跨服务 Runtime data loop 的组件划分及数据流。</p>
+      </a>
+      <a class="card" href="/rl-visuals/rollout-deployment.html">
+        <h2>Rollout 后端部署形态</h2>
+        <p>比较 colocated、disaggregated rollout service 与生产推理集群三种部署方式。</p>
+      </a>
+      <a class="card" href="/rl-visuals/queue-backpressure.html">
+        <h2>队列、Backpressure 与 Staleness</h2>
+        <p>异步 RL 中队列语义、backpressure 与 sample staleness 的调度设计。</p>
+      </a>
+      <a class="card" href="/rl-visuals/opd-teacher-service.html">
+        <h2>OPD Teacher / Distillation Service</h2>
+        <p>对比 RLVR、offline distillation 与 OPD 三条后训练数据流路线。</p>
+      </a>
+    </div>
+
+    <p class="nav-next">阅读路径：<a href="/rl-visuals/runtime-loop.html">从 Trainer 到 Runtime Loop →</a></p>
+  </div>
+</body>
+</html>

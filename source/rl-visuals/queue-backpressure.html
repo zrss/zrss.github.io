@@ -1,0 +1,171 @@
+---
+layout: false
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>队列、Backpressure 与 Staleness</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f6f8fb;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    .topnav {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #d8dee4;
+    }
+    .back {
+      display: block;
+      color: #0891b2;
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .back:hover { text-decoration: underline; }
+    h1 {
+      margin: 0 0 24px;
+      font-size: 26px;
+      line-height: 1.3;
+    }
+    .section {
+      background: #ffffff;
+      border: 1px solid #d8dee4;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .analysis {
+      margin: 0;
+      color: #4b5563;
+      font-size: 15px;
+    }
+    .nav-next {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .nav-next a {
+      color: #0891b2;
+      text-decoration: none;
+    }
+    .nav-next a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav">
+      <a class="back" href="/rl-visuals/index.html">← 返回架构图</a>
+      <a class="back" href="/archives/86d4b4ec.html#调度层需要显式处理-backpressure-和-staleness">← 返回文章</a>
+    </div>
+    <h1>队列、Backpressure 与 Staleness</h1>
+
+    <div class="section">
+      <div class="diagram-scroll">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520" role="img" aria-label="队列、Backpressure 与 Staleness 调度图">
+          <defs>
+            <marker id="arrow-queue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#0891b2"/>
+            </marker>
+            <marker id="arrow-queue-warn" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#f97316"/>
+            </marker>
+          </defs>
+          <rect width="1100" height="520" fill="#f8fafc" rx="8"/>
+
+          <!-- Main loop title -->
+          <text x="550" y="36" text-anchor="middle" fill="#0891b2" font-size="14" font-weight="600">异步 RL 主循环</text>
+
+          <!-- Queue boxes in a row -->
+          <rect x="40" y="60" width="170" height="72" fill="#ffffff" stroke="#0891b2" stroke-width="1.5" rx="8"/>
+          <text x="125" y="88" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Rollout Queue</text>
+          <text x="125" y="108" text-anchor="middle" fill="#4b5563" font-size="10">policy_version</text>
+          <text x="125" y="122" text-anchor="middle" fill="#4b5563" font-size="10">queue_delay</text>
+
+          <rect x="250" y="60" width="170" height="72" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="335" y="88" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Reward Queue</text>
+          <text x="335" y="108" text-anchor="middle" fill="#4b5563" font-size="10">retry_count</text>
+          <text x="335" y="122" text-anchor="middle" fill="#4b5563" font-size="10">timeout</text>
+
+          <rect x="460" y="60" width="170" height="72" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="545" y="88" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Train Queue</text>
+          <text x="545" y="108" text-anchor="middle" fill="#4b5563" font-size="10">staleness</text>
+          <text x="545" y="122" text-anchor="middle" fill="#4b5563" font-size="10">policy_version</text>
+
+          <rect x="670" y="60" width="170" height="80" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="755" y="88" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Policy Publish Queue</text>
+          <text x="755" y="108" text-anchor="middle" fill="#4b5563" font-size="10">queue_delay</text>
+          <text x="755" y="122" text-anchor="middle" fill="#4b5563" font-size="10">policy_version</text>
+
+          <rect x="880" y="60" width="170" height="72" fill="#ecfeff" stroke="#0891b2" rx="8"/>
+          <text x="965" y="96" text-anchor="middle" fill="#111827" font-size="13">→ Rollout Queue</text>
+
+          <!-- Forward arrows between queues -->
+          <path d="M210 96 L250 96" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-queue)"/>
+          <path d="M420 96 L460 96" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-queue)"/>
+          <path d="M630 96 L670 96" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-queue)"/>
+          <path d="M840 96 L880 96" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-queue)"/>
+
+          <!-- Loop back arrow -->
+          <path d="M965 140 L965 192 L125 192 L125 132" stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrow-queue)"/>
+          <rect x="430" y="200" width="230" height="16" fill="#f8fafc" rx="2"/>
+          <text x="545" y="212" text-anchor="middle" fill="#4b5563" font-size="11">loop：新 policy 发布 → rollout 消费</text>
+
+          <!-- Backpressure Controller -->
+          <rect x="80" y="252" width="380" height="120" fill="#fff7ed" stroke="#f97316" stroke-width="1.5" rx="10"/>
+          <text x="270" y="280" text-anchor="middle" fill="#f97316" font-size="14" font-weight="600">Backpressure Controller</text>
+          <text x="100" y="308" fill="#4b5563" font-size="12">reward / train 慢时 → 限速 rollout</text>
+          <text x="100" y="330" fill="#4b5563" font-size="12">下游 queue depth 超阈值 → 上游 backpressure</text>
+          <text x="100" y="352" fill="#4b5563" font-size="12">防止 trajectory 堆积</text>
+
+          <!-- Staleness Gate -->
+          <rect x="520" y="252" width="380" height="120" fill="#fff7ed" stroke="#f97316" stroke-width="1.5" rx="10"/>
+          <text x="710" y="280" text-anchor="middle" fill="#f97316" font-size="14" font-weight="600">Staleness Gate</text>
+          <text x="540" y="308" fill="#4b5563" font-size="12">sample 超过 stale bound → 丢弃或降权</text>
+          <text x="540" y="330" fill="#4b5563" font-size="12">每条 sample 标记 policy_version、queue_delay</text>
+          <text x="540" y="352" fill="#4b5563" font-size="12">update 侧决定 off-policy 接受程度</text>
+
+          <!-- Control arrows from controllers to queues -->
+          <path d="M270 252 L270 132" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-queue-warn)"/>
+          <rect x="228" y="168" width="52" height="14" fill="#f8fafc" rx="2"/>
+          <text x="232" y="179" fill="#f97316" font-size="10">throttle</text>
+
+          <path d="M710 252 L545 132" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-queue-warn)"/>
+          <rect x="598" y="168" width="92" height="14" fill="#f8fafc" rx="2"/>
+          <text x="602" y="179" fill="#f97316" font-size="10">filter / downweight</text>
+
+          <!-- Field legend -->
+          <rect x="80" y="400" width="940" height="92" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="100" y="430" fill="#111827" font-size="12" font-weight="600">队列关键字段：</text>
+          <text x="100" y="454" fill="#4b5563" font-size="11">policy_version · queue_delay · staleness · retry_count · timeout</text>
+          <text x="100" y="478" fill="#4b5563" font-size="11">调度层必须把这些作为一等语义，而不只是更大的 buffer</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="analysis">异步 RL 调度需显式定义队列样本与当前 policy 的对应关系；backpressure、timeout、retry 和 staleness 应作为调度层的一等语义。</p>
+    </div>
+
+    <p class="nav-next">下一张：<a href="/rl-visuals/opd-teacher-service.html">OPD Teacher / Distillation Service →</a></p>
+  </div>
+</body>
+</html>
