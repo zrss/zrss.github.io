@@ -272,9 +272,9 @@ NET:
 
 `proxyProgress` 主要用于运行时数据传输的进度推进，可以不纳入初始化建链的第一阶段阅读。
 
-### 最小闭环
+### 最小 loop
 
-最小阅读闭环可以只覆盖 ring：
+最小阅读 loop 可以只覆盖 ring：
 
 ```text
 connectRings
@@ -285,7 +285,7 @@ connectRings
   -> p2pSendConnect / p2pRecvConnect
 ```
 
-在这个闭环中暂不展开 tree、CollNet、NVLS、runtime connect。ring 路径建立后，其它路径主要差异为：
+在这个 loop 中暂不展开 tree、CollNet、NVLS、runtime connect。ring 路径建立后，其它路径主要差异为：
 
 ```text
 邻居集合不同

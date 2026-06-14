@@ -253,7 +253,7 @@ thinking -> tool call -> observation -> thinking -> tool call -> observation -> 
 
 Forge 是 M2 系列的 agent-native RL training system。
 
-它不是模型结构，也不是单个 RL 算法，而是一套让长程 agent trajectories 能进入 RL 训练闭环的工程系统。
+它不是模型结构，也不是单个 RL 算法，而是一套让长程 agent trajectories 能进入 RL training loop 的工程系统。
 
 普通 RLHF 或 response-level RL 常见输入是：
 
@@ -675,4 +675,4 @@ low-activation MoE backbone
 如果看训练，它是一个围绕可验证 agent trajectories 做 post-training 的模型。  
 如果看工程，Forge 才是这篇报告里很关键的东西：它把 agent loop、推理服务、轨迹存储、reward、RL trainer 和权重同步接成一个系统。
 
-这也是 M2 系列和很多只讲模型结构的技术报告不同的地方。它把模型能力放在完整 agent workflow 里讲，重点不是“模型会不会回答”，而是“模型能不能在环境里把事情做完，并且这个训练闭环能不能规模化”。
+这也是 M2 系列和很多只讲模型结构的技术报告不同的地方。它把模型能力放在完整 agent workflow 里讲，重点不是“模型会不会回答”，而是“模型能不能在环境里把事情做完，并且这个 training loop 能不能规模化”。

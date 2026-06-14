@@ -28,7 +28,7 @@ NVFP4 量化方案及其对精度的影响分析。
 
 报告的 Infra 内容集中在 **RL/MOPD 训练阶段的工程挑战**，背景是 GB200 NVL72 集群 + Slurm + Ray + vLLM + NeMo-RL 的异构分布式训练栈。以下按问题分类整理：
 
-这部分最有价值的地方，是它没有只给一个大而化之的“我们用了很多 GPU”描述，而是把 post-training 期间真实会拖慢训练、放大失败、拖垮共享服务的问题列出来，并给出前后对比。对 RL infra 来说，核心目标不只是单个 GPU 的 token/s，而是让 policy update、rollout generation、环境执行、judge / reward、checkpoint 和重启恢复共同组成一个稳定闭环。
+这部分最有价值的地方，是它没有只给一个大而化之的“我们用了很多 GPU”描述，而是把 post-training 期间真实会拖慢训练、放大失败、拖垮共享服务的问题列出来，并给出前后对比。对 RL infra 来说，核心目标不只是单个 GPU 的 token/s，而是让 policy update、rollout generation、环境执行、judge / reward、checkpoint 和重启恢复共同组成一个稳定的 training loop。
 
 报告里 RL/MOPD 采用的是 **one-step off-policy asynchronous RL**：rollout generation 和 policy update 会 overlap，整体 step time 取决于更慢的一侧。NVIDIA 观察到瓶颈通常在 rollout generation，而 rollout 又被少量长尾 generation 拖慢。所以后面的 MTP、vLLM、多节点启动、JIT cache、I/O cache，本质上都是为了减少 RL step 的尾延迟和重启成本。
 

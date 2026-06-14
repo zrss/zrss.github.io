@@ -699,7 +699,7 @@ Human eval 结果：
 
 第六，可复现和可恢复能力会影响模型迭代速度。报告强调 determinism、checkpoint/restart、dataloader progress、RNG、FP8 scaling history 等状态保存。对于大模型训练，这些能力不只是工程洁癖，而是缩短故障恢复时间、降低实验方差、复盘训练异常和稳定推进 RL climb 的基础条件。
 
-因此，这篇报告可以看成 Microsoft AI 对其自有模型训练体系的一次系统披露：从数据、训练系统、RL 环境到产品评测，形成一个面向 reasoning model 的迭代闭环。
+因此，这篇报告可以看成 Microsoft AI 对其自有模型训练体系的一次系统披露：从数据、训练系统、RL 环境到产品评测，形成一个面向 reasoning model 的迭代 loop。
 
 报告仍有不少未披露的部分：比如完整数据来源、各阶段 token / compute budget、更细的 RL rollout 规模、reward model 细节、agentic environment 的实际数量、human eval 的完整 prompt 分布等。这些信息会影响外部读者对 hill-climbing machine 长期效率的判断。
 
