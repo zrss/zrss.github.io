@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPD：On-policy / Online Policy Distillation</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f6f8fb;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    .topnav {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #d8dee4;
+    }
+    .back {
+      display: block;
+      color: #0891b2;
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .back:hover { text-decoration: underline; }
+    h1 {
+      margin: 0 0 24px;
+      font-size: 26px;
+      line-height: 1.3;
+    }
+    .section {
+      background: #ffffff;
+      border: 1px solid #d8dee4;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .analysis {
+      margin: 0;
+      color: #4b5563;
+      font-size: 15px;
+    }
+    .nav-next {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .nav-next a {
+      color: #0891b2;
+      text-decoration: none;
+    }
+    .nav-next a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav">
+      <a class="back" href="/rl-visuals/index.html">← 返回架构图</a>
+      <a class="back" href="/archives/86d4b4ec.html#opdon-policy-online-policy-distillationrlvr-与-distillation-之间的第三条路线">← 返回文章</a>
+    </div>
+    <h1>OPD：On-policy / Online Policy Distillation</h1>
+
+    <div class="section">
+      <div class="diagram-scroll">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480" role="img" aria-label="RLVR、Offline Distillation 与 OPD 三条路线对比">
+          <defs>
+            <marker id="arrow-opd" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#0891b2"/>
+            </marker>
+          </defs>
+          <rect width="1100" height="480" fill="#f8fafc" rx="8"/>
+
+          <!-- Row 1: RLVR -->
+          <rect x="28" y="38" width="88" height="22" fill="#f8fafc" rx="4"/>
+          <text x="36" y="54" fill="#0891b2" font-size="14" font-weight="600">1. RLVR</text>
+          <rect x="200" y="36" width="130" height="44" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="265" y="64" text-anchor="middle" fill="#111827" font-size="12">Student Rollout</text>
+          <path d="M330 58 L370 58" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="370" y="36" width="150" height="44" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="445" y="56" text-anchor="middle" fill="#111827" font-size="11">Verifier /</text>
+          <text x="445" y="72" text-anchor="middle" fill="#111827" font-size="11">Reward</text>
+          <path d="M520 58 L560 58" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="560" y="36" width="180" height="44" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="650" y="64" text-anchor="middle" fill="#111827" font-size="12">Policy Gradient Update</text>
+
+          <!-- Row 2: Offline distillation -->
+          <rect x="28" y="104" width="168" height="22" fill="#f8fafc" rx="4"/>
+          <text x="36" y="120" fill="#0891b2" font-size="14" font-weight="600">2. Offline Distillation</text>
+          <rect x="200" y="102" width="160" height="44" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="280" y="122" text-anchor="middle" fill="#111827" font-size="11">Teacher Data /</text>
+          <text x="280" y="138" text-anchor="middle" fill="#111827" font-size="11">Output</text>
+          <path d="M360 124 L400 124" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="400" y="102" width="170" height="44" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="485" y="130" text-anchor="middle" fill="#111827" font-size="12">Supervised Distillation</text>
+          <path d="M570 124 L610 124" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="610" y="102" width="130" height="44" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="675" y="130" text-anchor="middle" fill="#111827" font-size="12">Student Update</text>
+          <rect x="760" y="112" width="170" height="24" fill="#fff7ed" rx="4"/>
+          <text x="845" y="128" text-anchor="middle" fill="#f97316" font-size="11">off-policy distribution shift</text>
+
+          <!-- Row 3: OPD (highlighted) -->
+          <rect x="24" y="178" width="1052" height="196" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5" rx="12"/>
+          <text x="40" y="204" fill="#0891b2" font-size="14" font-weight="600">3. OPD (On-policy / Online Policy Distillation)</text>
+
+          <rect x="200" y="238" width="130" height="44" fill="#ffffff" stroke="#0891b2" rx="8"/>
+          <text x="265" y="266" text-anchor="middle" fill="#111827" font-size="12">Student Rollout</text>
+          <path d="M330 260 L370 260" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="370" y="230" width="200" height="60" fill="#ffffff" stroke="#0891b2" stroke-width="1.5" rx="8"/>
+          <text x="470" y="254" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Teacher / Distillation</text>
+          <text x="470" y="274" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Service</text>
+          <path d="M570 260 L610 260" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="610" y="238" width="130" height="44" fill="#ffffff" stroke="#d8dee4" rx="8"/>
+          <text x="675" y="266" text-anchor="middle" fill="#111827" font-size="12">Dense Feedback</text>
+          <path d="M740 260 L780 260" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow-opd)"/>
+          <rect x="780" y="238" width="130" height="44" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="845" y="266" text-anchor="middle" fill="#111827" font-size="12">Student Update</text>
+
+          <!-- OPD tags -->
+          <rect x="200" y="316" width="110" height="28" fill="#fff7ed" stroke="#f97316" rx="6"/>
+          <text x="255" y="335" text-anchor="middle" fill="#4b5563" font-size="11">token logits</text>
+
+          <rect x="324" y="316" width="120" height="28" fill="#fff7ed" stroke="#f97316" rx="6"/>
+          <text x="384" y="335" text-anchor="middle" fill="#4b5563" font-size="11">chunk feedback</text>
+
+          <rect x="458" y="316" width="150" height="28" fill="#fff7ed" stroke="#f97316" rx="6"/>
+          <text x="533" y="335" text-anchor="middle" fill="#4b5563" font-size="11">verifier-gated signal</text>
+
+          <rect x="624" y="316" width="150" height="28" fill="#fff7ed" stroke="#f97316" rx="6"/>
+          <text x="699" y="335" text-anchor="middle" fill="#4b5563" font-size="11">multi-teacher signal</text>
+
+          <!-- Comparison note -->
+          <rect x="80" y="408" width="940" height="56" fill="#f1f5f9" stroke="#d8dee4" rx="8"/>
+          <text x="550" y="430" text-anchor="middle" fill="#4b5563" font-size="12">差异不在“有没有 rollout”，而在 feedback 从哪来、有多密集</text>
+          <text x="550" y="450" text-anchor="middle" fill="#4b5563" font-size="12">OPD：on-policy data generation + teacher dense feedback，单条链路</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="analysis">OPD（On-policy / Online Policy Distillation）将 on-policy data generation 与 teacher dense feedback 合并为单条链路，并引入 Teacher / Distillation Service 与 multi-model inference orchestration。</p>
+    </div>
+
+    <p class="nav-next"><a href="/rl-visuals/index.html">← 返回架构图</a></p>
+  </div>
+</body>
+</html>

@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://zrss.github.io/images/mai-thinking-1-system-architecture.svg">
 <meta property="og:image" content="https://zrss.github.io/images/mai-thinking-1-figure-26-node-lifecycle.png">
 <meta property="article:published_time" content="2026-06-05T23:10:00.000Z">
-<meta property="article:modified_time" content="2026-06-06T10:11:09.143Z">
+<meta property="article:modified_time" content="2026-06-14T10:21:57.086Z">
 <meta property="article:author" content="Zrss">
 <meta property="article:tag" content="llm">
 <meta property="article:tag" content="moe">
@@ -229,7 +229,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-06-06 10:11:09" itemprop="dateModified" datetime="2026-06-06T10:11:09Z">2026-06-06</time>
+      <time title="修改时间：2026-06-14 10:21:57" itemprop="dateModified" datetime="2026-06-14T10:21:57Z">2026-06-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1401,7 +1401,7 @@ end
 <p>第四，训练框架和集群控制面需要边界清晰。Kubernetes / Kueue / MAI control plane 负责资源准入、拓扑放置和节点状态；Ray 主要在 admitted job 内部承担 actor 编排和 runtime 管理；YOLO 负责训练循环、sharding、optimizer、checkpoint 和 MoE 相关优化。这个分层可以减少职责混杂，也便于分别优化调度效率、作业恢复和训练性能。</p>
 <p>第五，RL 环境越来越接近生产系统。它不是离线数据集，也不是简单 judge，而是一批可执行、可复现、可评分、可并发调度的任务环境。持续构造这样的环境，是获得高质量训练信号的重要条件。因此，训练基础设施不仅要支持 GPU 大作业，也要支持容器化任务环境、工具调用、reward / grader、rollout 和 learner 之间的复杂编排。</p>
 <p>第六，可复现和可恢复能力会影响模型迭代速度。报告强调 determinism、checkpoint/restart、dataloader progress、RNG、FP8 scaling history 等状态保存。对于大模型训练，这些能力不只是工程洁癖，而是缩短故障恢复时间、降低实验方差、复盘训练异常和稳定推进 RL climb 的基础条件。</p>
-<p>因此，这篇报告可以看成 Microsoft AI 对其自有模型训练体系的一次系统披露：从数据、训练系统、RL 环境到产品评测，形成一个面向 reasoning model 的迭代闭环。</p>
+<p>因此，这篇报告可以看成 Microsoft AI 对其自有模型训练体系的一次系统披露：从数据、训练系统、RL 环境到产品评测，形成一个面向 reasoning model 的迭代 loop。</p>
 <p>报告仍有不少未披露的部分：比如完整数据来源、各阶段 token / compute budget、更细的 RL rollout 规模、reward model 细节、agentic environment 的实际数量、human eval 的完整 prompt 分布等。这些信息会影响外部读者对 hill-climbing machine 长期效率的判断。</p>
 <p>总体看，MAI-Thinking-1 的技术意义不仅在于单次 benchmark 表现，也在于 Microsoft 是否能够把 <strong>from-scratch pretraining + 自研 RL infra + 企业场景环境 + Foundry 分发</strong> 串成稳定迭代系统。后续 MAI 系列的迭代速度和能力边界，需要继续结合模型发布、评测结果和实际产品表现观察。</p>
 
@@ -1460,13 +1460,13 @@ end
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">483k</span>
+    <span title="站点总字数">499k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">7:19</span>
+    <span title="站点阅读时长">7:33</span>
   </span>
 </div>
 
