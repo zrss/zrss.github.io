@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zrss.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat"},"fold":{"enable":false,"height":500},"language":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="本文基于 HCCL e8351f6c 与 HCOMM ba1e77785 版本源码，深入分析 Ascend 950DT&#x2F;A5 Host RDMA 通路是否具备多路径传输能力、依赖哪些散列输入实现，以及当前开源代码能确认到的工程边界。同时，全文系统梳理了 HostDPU 判定条件、执行流程、多 QP 分片机制、网卡硬件 LB 以及 UDP 源端口散列配置的协同逻辑。  核心结论 基于当前开源代码实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ascend 950DT&#x2F;A5 Host RDMA多路径能力分析">
+<meta property="og:url" content="https://zrss.github.io/archives/950d5a5e.html">
+<meta property="og:site_name" content="MegaThinking">
+<meta property="og:description" content="本文基于 HCCL e8351f6c 与 HCOMM ba1e77785 版本源码，深入分析 Ascend 950DT&#x2F;A5 Host RDMA 通路是否具备多路径传输能力、依赖哪些散列输入实现，以及当前开源代码能确认到的工程边界。同时，全文系统梳理了 HostDPU 判定条件、执行流程、多 QP 分片机制、网卡硬件 LB 以及 UDP 源端口散列配置的协同逻辑。  核心结论 基于当前开源代码实现">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zrss.github.io/images/hccl-a5-host-rdma-layers.svg">
+<meta property="og:image" content="https://zrss.github.io/images/hccl-a5-host-rdma-udp-ecmp.svg">
+<meta property="article:published_time" content="2026-10-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-03T16:31:45.067Z">
+<meta property="article:author" content="Zrss">
+<meta property="article:tag" content="Ascend">
+<meta property="article:tag" content="HCCL">
+<meta property="article:tag" content="RDMA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zrss.github.io/images/hccl-a5-host-rdma-layers.svg">
+
+
+<link rel="canonical" href="https://zrss.github.io/archives/950d5a5e.html">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zrss.github.io/archives/950d5a5e.html","path":"archives/950d5a5e.html","title":"Ascend 950DT/A5 Host RDMA多路径能力分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Ascend 950DT/A5 Host RDMA多路径能力分析 | MegaThinking</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha256-UF1fgpAiu3tPJN/uCqEUHNe7pnr+QR0SQDNfgglgtcM=" crossorigin="anonymous">
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">MegaThinking</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">better tokens, better intelligence, contributing superior tokens to models</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%93%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text"> 核心结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#host-rdma-%E9%80%9A%E8%B7%AF-%E5%90%AF%E7%94%A8%E4%B8%8E%E6%89%A7%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text"> Host RDMA 通路、启用与执行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D-host-roce-%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text"> 两种 Host RoCE 使用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hccp-%E5%9C%A8%E8%B0%83%E7%94%A8%E9%93%BE%E8%B7%AF%E4%B8%AD%E7%9A%84%E5%AE%9A%E4%BD%8D"><span class="nav-number">2.2.</span> <span class="nav-text"> HCCP 在调用链路中的定位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#host-rdma-%E5%A6%82%E4%BD%95%E8%A2%AB%E8%87%AA%E5%8A%A8%E9%80%89%E4%B8%AD"><span class="nav-number">2.3.</span> <span class="nav-text"> Host RDMA 如何被自动选中</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#l0l1l2-%E5%88%86%E5%B1%82%E6%8B%93%E6%89%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="nav-number">2.3.1.</span> <span class="nav-text"> L0&#x2F;L1&#x2F;L2 分层拓扑与测试用例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E5%AD%90%E8%A6%86%E7%9B%96%E7%9F%A9%E9%98%B5"><span class="nav-number">2.4.</span> <span class="nav-text"> 算子覆盖矩阵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hostdpu-%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">2.5.</span> <span class="nav-text"> HostDPU 任务执行流水线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E5%BB%BA%E9%93%BE%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">2.6.</span> <span class="nav-text"> 异步建链状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%A8%E5%86%8C%E4%B8%8E-d2nub-%E4%BB%A3%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">2.7.</span> <span class="nav-text"> 内存注册与 D2N&#x3D;UB 代理机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C%E4%B8%8E%E9%80%9A%E7%9F%A5%E8%AF%AD%E4%B9%89"><span class="nav-number">2.8.</span> <span class="nav-text"> 数据操作与通知语义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-write-%E4%B8%8E-read-%E5%88%86%E7%89%87%E8%B0%83%E5%BA%A6"><span class="nav-number">2.8.1.</span> <span class="nav-text"> 1. Write 与 Read 分片调度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-notifyrecord-%E4%B8%8E-notifywait"><span class="nav-number">2.8.2.</span> <span class="nav-text"> 2. NotifyRecord 与 NotifyWait</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-writewithnotify"><span class="nav-number">2.8.3.</span> <span class="nav-text"> 3. WriteWithNotify</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-channeldrain-%E4%B8%8E-channelfence"><span class="nav-number">2.8.4.</span> <span class="nav-text"> 4. ChannelDrain 与 ChannelFence</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9Aqp-lb-%E4%B8%8E%E5%A4%9A%E8%B7%AF%E5%BE%84%E8%83%BD%E5%8A%9B"><span class="nav-number">3.</span> <span class="nav-text"> 多QP、LB 与多路径能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#qp-%E6%95%B0%E9%87%8F%E8%A7%A3%E6%9E%90%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">3.1.</span> <span class="nav-text"> QP 数量解析与优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E5%8D%A1%E7%A1%AC%E4%BB%B6-lb"><span class="nav-number">3.2.</span> <span class="nav-text"> 网卡硬件 LB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#host-rdma-udp-%E6%BA%90%E7%AB%AF%E5%8F%A3%E4%B8%8E-ecmp-%E6%95%A3%E5%88%97"><span class="nav-number">3.3.</span> <span class="nav-text"> Host RDMA UDP 源端口与 ECMP 散列</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-queuenum-lb-%E4%B8%8E%E6%BA%90%E7%AB%AF%E5%8F%A3%E5%8D%8F%E5%90%8C%E7%BB%84%E5%90%88%E5%85%B3%E9%94%AE%E9%99%B7%E9%98%B1%E6%8F%AD%E7%A7%98"><span class="nav-number">3.3.1.</span> <span class="nav-text"> 1. queueNum、LB 与源端口协同组合（关键陷阱揭秘）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-ecmp-%E4%BA%94%E5%85%83%E7%BB%84%E5%93%88%E5%B8%8C%E6%9C%BA%E5%88%B6"><span class="nav-number">3.3.2.</span> <span class="nav-text"> 2. ECMP 五元组哈希机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%BA%90%E7%AB%AF%E5%8F%A3%E7%9A%84%E6%9C%80%E7%BB%88%E8%A6%86%E7%9B%96%E5%B1%82%E7%BA%A7"><span class="nav-number">3.3.3.</span> <span class="nav-text"> 3. 源端口的最终覆盖层级</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E8%B7%AF%E5%BE%84%E8%83%BD%E5%8A%9B%E8%BE%B9%E7%95%8C%E4%B8%8E%E6%9C%80%E7%BB%88%E5%88%A4%E5%AE%9A"><span class="nav-number">3.4.</span> <span class="nav-text"> 多路径能力边界与最终判定</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E8%81%94%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%B7%A5%E7%A8%8B%E8%BE%B9%E7%95%8C"><span class="nav-number">4.</span> <span class="nav-text"> 关联机制与工程边界</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#host-nic-%E4%B8%8E-device-nic-%E5%BC%82%E6%9E%84%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.1.</span> <span class="nav-text"> Host NIC 与 Device NIC 异构混合模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E8%BE%B9%E9%80%9A%E4%BF%A1%E4%B8%8E-hixl-%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.2.</span> <span class="nav-text"> 单边通信与 HIXL 模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#qos-%E9%87%8D%E4%BC%A0%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E8%BE%B9%E7%95%8C"><span class="nav-number">4.3.</span> <span class="nav-text"> QoS、重传与异常处理边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nda-%E8%AE%BE%E5%A4%87%E7%9B%B4%E9%A9%B1%E6%A8%A1%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="nav-number">4.4.</span> <span class="nav-text"> NDA 设备直驱模式对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E9%83%A8%E7%BD%B2%E6%8E%92%E6%9F%A5%E6%A0%B8%E5%AF%B9%E6%B8%85%E5%8D%95"><span class="nav-number">4.5.</span> <span class="nav-text"> 生产部署排查核对清单</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zrss</p>
+  <div class="site-description" itemprop="description">汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">146</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">79</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zrss.github.io/archives/950d5a5e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zrss">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MegaThinking">
+      <meta itemprop="description" content="汲取广泛的智能应用之力<br>第一性原理思考<br>More Attention">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Ascend 950DT&#x2F;A5 Host RDMA多路径能力分析 | MegaThinking">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ascend 950DT/A5 Host RDMA多路径能力分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-10-02 00:00:00" itemprop="dateCreated datePublished" datetime="2026-10-02T00:00:00Z">2026-10-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-10-03 16:31:45" itemprop="dateModified" datetime="2026-10-03T16:31:45Z">2026-10-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>19k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>17 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>本文基于 HCCL <code>e8351f6c</code> 与 HCOMM <code>ba1e77785</code> 版本源码，深入分析 Ascend 950DT/A5 Host RDMA 通路是否具备多路径传输能力、依赖哪些散列输入实现，以及当前开源代码能确认到的工程边界。同时，全文系统梳理了 HostDPU 判定条件、执行流程、多 QP 分片机制、网卡硬件 LB 以及 UDP 源端口散列配置的协同逻辑。</p>
+<h2 id="核心结论"><a class="markdownIt-Anchor" href="#核心结论"></a> 核心结论</h2>
+<p>基于当前开源代码实现，可以明确以下五项核心事实：</p>
+<ol>
+<li><strong>Host RDMA 已接入实际数据面，算子覆盖有明确边界</strong>：950DT/A5 已经形成从 HostDPU 算法选择、HCOMM 资源申请，到 Host Endpoint、Channel、QP 建链、内存注册和 RDMA 读写的主通路实现，并非仅有抽象接口。目前已接入 AllReduce、AllGather、ReduceScatter、Reduce、Broadcast、Scatter、Barrier 等集合通信算子，AllToAll 家族（AllToAll/V/VC）以及点对点 Send/Recv/BatchSendRecv；但<strong>并非所有算子均已覆盖</strong>，例如 AllGatherV 和 ReduceScatterV 当前尚未实现 HostDPU 算法选择器。</li>
+<li><strong>Host RDMA 由物理拓扑自动选择，不存在全局独立总开关</strong>：<code>CheckHostDPUOnly</code> 判定仅检查 RankGraph 的最高通信层。该层必须存在覆盖通信域全部 Rank、包含 Host Endpoint 且<strong>严禁混入 Device Endpoint</strong> 的 CLOS 拓扑实例；链路通信协议还须为 RoCE，HCOMM 才会创建 <code>HostCpuRoceChannel</code>。仓内构造的测试用例涵盖单 SuperPod 两层拓扑（L1 使用 Host RoCE）与多 SuperPod 三层拓扑（L2 使用 Host RoCE、SuperPod 内 L1 使用 Device UB CLOS），真实部署通路以实际 RankGraph 组网为准。</li>
+<li><strong>具备多 QP 消息分片与两类独立散列输入，但存在端口截断陷阱</strong>：
+<ul>
+<li>每个 QP 可独立配置 RoCEv2 UDP 源端口，供网络交换机进行 ECMP 五元组散列；</li>
+<li>搭配 Hi1825/SP561 等 HRN 网卡时，可通过 HCCP 为每个 QP 下发独立的硬件散列输入 <code>lbValue</code>（即 <code>hash_value</code>）。</li>
+<li><strong>关键工程陷阱</strong>：在默认 <code>queueNum=1</code> 下，即便网卡 LB 自动将 QP 数量扩展为 <code>lbMax=N</code>，由于源端口列表在建链配置阶段已被裁成 1 项，导致自动扩展出的 N 个 QP 全部退化为使用第 1 个 UDP 源端口。若要让 M 个 QP 真正各自绑定 M 个不同 UDP 源端口，必须显式配置 <code>HCCL_RDMA_QPS_PER_CONNECTION=M</code>（或通过 <code>/etc/hcomm.cfg</code> / IP 映射文件提供配置）。</li>
+</ul>
+</li>
+<li><strong>“支持多路径散列”本质是流级静态 Hash，不保证物理路径分离与动态改路</strong>：UDP 源端口和 <code>lbValue</code> 仅向网络交换机或网卡内部提供散列因子。数据包在物理网络中的实际承载路径仍取决于网卡硬件、Provider 驱动映射、ECMP 策略和拓扑连线。当前 Host CPU RoCE 通路<strong>未启用</strong> HCCP 头文件中定义的原生多路径（MPATH）与自适应路由（Adaptive Routing），亦未发现基于拥塞状态的动态重选路或 Host 多网卡主备切换逻辑。</li>
+<li><strong>QP 级异常检测与重传能力已接入，但 Channel 级自愈尚未闭环</strong>：代码已配置 QP 硬件超时重传，并实现 CQ Error 与 DFX 异常上报；但 <code>HostCpuRoceChannel::Clean()</code> 和 <code>Resume()</code> 当前为空实现（直接返回成功），表明 Channel 层尚未实现 QP 自动销毁重建或在线迁移。无法由硬件重传恢复的错误会向上返回，后续如何处置取决于上层通信域逻辑。</li>
+</ol>
+<h2 id="host-rdma-通路-启用与执行"><a class="markdownIt-Anchor" href="#host-rdma-通路-启用与执行"></a> Host RDMA 通路、启用与执行</h2>
+<p>在探讨多路径前，首先需要理清 Host RDMA 在 950DT/A5 上的通路形态、自动触发逻辑与运行时执行闭环。</p>
+<h3 id="两种-host-roce-使用方式"><a class="markdownIt-Anchor" href="#两种-host-roce-使用方式"></a> 两种 Host RoCE 使用方式</h3>
+<p>在 CANN 通信体系中，需要严格区分以下两类 Host RoCE 通路：</p>
+<table>
+<thead>
+<tr>
+<th>通路场景</th>
+<th>执行引擎</th>
+<th>核心实现类</th>
+<th>数据面特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Host CPU 驱动 RoCE</strong></td>
+<td><code>COMM_ENGINE_CPU</code></td>
+<td><code>CpuRoceEndpoint</code>、<code>HostCpuRoceChannel</code>、<code>HostRdmaConnection</code></td>
+<td>Host CPU 线程通过标准 verbs 接口提交并轮询 RDMA 任务；HCCL 中统称为 <strong>HostDPU 通路</strong></td>
+</tr>
+<tr>
+<td><strong>NPU 直驱 Host RoCE 网卡</strong></td>
+<td><code>COMM_ENGINE_AICPU_TS</code> / <code>COMM_ENGINE_AIV</code></td>
+<td><code>AicpuTsRoceChannelV2</code>、<code>DevRdmaConnectionV2</code></td>
+<td>通过 NDA 机制将网卡 SQ、CQ 和 Doorbell 上下文导出映射到设备侧，由 AICPU/AIV 直驱提交，降低 Host 代理提交开销</td>
+</tr>
+</tbody>
+</table>
+<p>本文重点分析第一类，即 HCCL 集合通信中 HostDPU 算法采用的 <strong>Host CPU + RoCE</strong> 通路。在此上下文中：</p>
+<ul>
+<li><code>Host</code> 描述 Endpoint 位于主机侧；</li>
+<li><code>RoCE</code> 描述网络通信协议；</li>
+<li><code>CPU</code> 描述提交通信任务的执行引擎。三者不可混为一谈。</li>
+</ul>
+<p>在实现上，<code>CpuRoceEndpoint</code> 仅接受 <code>DEV_TYPE_950</code> 与 <code>DEV_TYPE_960</code> 设备类型。950/960 设备在创建 <code>HostRdmaConnection</code> 时指定使用 <code>OPBASE_QP_MODE</code>，表明 950DT/A5 属于正式支持范围。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/endpoints/cpu_roce_endpoint.cc">CpuRoceEndpoint 实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/endpoint_pairs/channels/host/host_rdma_connection.cc">HostRdmaConnection 实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/endpoint_pairs/channels/host/host_cpu_roce_channel.cc">HostCpuRoceChannel 实现</a></li>
+</ul>
+<h3 id="hccp-在调用链路中的定位"><a class="markdownIt-Anchor" href="#hccp-在调用链路中的定位"></a> HCCP 在调用链路中的定位</h3>
+<p>HCCP（Huawei Collective Communication Protocol）并非“Device RoCE”的代名词，而是 HCOMM 内部承接 Socket、RDMA 资源管理和底层驱动调用的通信协议模块。Host RDMA 同样依赖 HCCP 完成 RDMA 设备初始化、MR 注册、CQ/QP 创建、QP 属性修改以及网卡 LB 扩展能力的调用。</p>
+<p>HCCP 的封装层、Agent 与 Service 源码已随 HCOMM 开源（位于 <code>src/base_comm/resources/hccp/</code>）。然而，其在运行时通过 <code>HccpDlopen</code> 动态加载的 HRN Provider 专有动态库（如 <code>libhrn5-rdmav34.so</code> 和 <code>libhrn5.so.1</code>）并不在开源仓中。因此，开源代码能够精确确认参数如何组装并传递至 Provider 边界，但无法进一步确认 <code>lbValue</code> 在闭源网卡驱动及微码内部如何映射到具体物理队列或芯片出端口。</p>
+<h3 id="host-rdma-如何被自动选中"><a class="markdownIt-Anchor" href="#host-rdma-如何被自动选中"></a> Host RDMA 如何被自动选中</h3>
+<p>Host RDMA 没有提供独立的全局显式总开关，而是由 HCCL 根据集群物理网络拓扑（RankGraph）自动识别并触发。</p>
+<p><code>CheckHostDPUOnly</code> 按以下规则逐级判定当前通信域是否属于 HostDPU 拓扑：</p>
+<ol>
+<li><strong>多 Server 检查</strong>：<code>topoInfo-&gt;serverNum &gt; 1</code>，单机场景直接退出 HostDPU；</li>
+<li><strong>多层拓扑检查</strong>：<code>topoInfo-&gt;topoLevelNums &gt; 1</code>，单层拓扑不进入 HostDPU；</li>
+<li><strong>仅检查最高通信层</strong>：遍历层级时跳过 <code>netLayer &lt; (topoInfo-&gt;topoLevelNums - 1)</code>；</li>
+<li><strong>CLOS 组网实例</strong>：最高层中查找 <code>COMM_TOPO_CLOS</code> 类型的拓扑实例；</li>
+<li><strong>全 Rank 覆盖</strong>：候选 CLOS 实例覆盖的 Rank 数量必须等于通信域总卡数（<code>rankNum == topoInfo-&gt;userRankSize</code>）；</li>
+<li><strong>无 Device 链路排除项</strong>：最高层拓扑实例中一旦发现任何 <code>ENDPOINT_LOC_TYPE_DEVICE</code> 的 Endpoint，立刻判定非 HostDPU 并退出；</li>
+<li><strong>Host 节点命中</strong>：至少发现一个 <code>ENDPOINT_LOC_TYPE_HOST</code> 的 Endpoint，将 <code>hostDPUOnly</code> 置为 true。</li>
+</ol>
+<p>这段判定只关注最高层的 Endpoint 物理归属与 CLOS 覆盖完整性，本身不校验通信协议。一旦判定为 HostDPU，AutoSelector 立即配置执行引擎：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">opParam.opExecuteConfig = OpExecuteConfig::HOSTCPU;</span><br><span class="line">opParam.engine = CommEngine::COMM_ENGINE_CPU;</span><br></pre></td></tr></table></figure>
+<p>在后续资源申请阶段，HCCL 会针对具体链路按本地 Endpoint 类型进行拆分：Device Endpoint 使用 <code>COMM_ENGINE_AICPU_TS</code>，Host Endpoint 使用 <code>COMM_ENGINE_CPU</code>。当且仅当 Host Endpoint 的 Channel 协议为 RoCE 时，HCOMM 工厂方法才会实例化 <code>HostCpuRoceChannel</code>。因此，“通信域命中 HostDPU 算法”与“某层具体链路实例化为 Host RDMA 通道”是前后衔接但层级不同的两步。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/src/ops/op_common/op_common.cc">HostDPU 拓扑判定 CheckHostDPUOnly</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/src/ops/op_common/selector/auto_selector_base.cc">自动选择器 AutoSelectorBase::Select</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/endpoint_pairs/channels/channel.cc">HCOMM 通道工厂 ChannelFactory::CreateChannel</a></li>
+</ul>
+<h4 id="l0l1l2-分层拓扑与测试用例"><a class="markdownIt-Anchor" href="#l0l1l2-分层拓扑与测试用例"></a> L0/L1/L2 分层拓扑与测试用例</h4>
+<p>为验证 HostDPU 代码路径，仓内在 LLT/ST 仿真环境（<code>topo_model.cc</code>）中构造了典型的分层组网模型。理解该模型有助于明晰 Host RoCE 在不同组网规模下的部署位次：</p>
+<table>
+<thead>
+<tr>
+<th>网络层</th>
+<th>Endpoint 归属</th>
+<th>通信协议</th>
+<th>拓扑类型</th>
+<th>对应典型物理范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L0</strong></td>
+<td><code>DEVICE</code></td>
+<td><code>UB_CTP</code> / <code>UB_MEM</code></td>
+<td>由具体框内 RankGraph 决定</td>
+<td>单 Server 框内 NPU 点对点及局部聚合传输</td>
+</tr>
+<tr>
+<td><strong>L1（多 SuperPod 三层用例）</strong></td>
+<td><code>DEVICE</code></td>
+<td><code>UB_CTP</code>（兼容宏 <code>UBC_CTP</code>）</td>
+<td><code>CLOS</code></td>
+<td>SuperPod 内部跨 Server 间高速交换网</td>
+</tr>
+<tr>
+<td><strong>L2（多 SuperPod 三层用例）</strong></td>
+<td><code>HOST</code></td>
+<td><code>ROCE</code></td>
+<td><code>CLOS</code></td>
+<td>跨 SuperPod 集群顶层网络，由 Host RoCE 承载</td>
+</tr>
+<tr>
+<td><strong>L1（单 SuperPod 两层用例）</strong></td>
+<td><code>HOST</code></td>
+<td><code>ROCE</code></td>
+<td><code>CLOS</code></td>
+<td>单 SuperPod 内部跨 Server 顶层网络，直接由 Host RoCE 承载</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/images/hccl-a5-host-rdma-layers.svg" alt="Ascend 950DT/A5 HostDPU L0、L1、L2分层拓扑" /></p>
+<blockquote>
+<p><strong>注意：拓扑层级为逻辑模型。</strong> L0/L1/L2 是 RankGraph 中的逻辑网络层（NetLayer），并非固定绑定某个物理设备。在仓内单 SuperPod 两层测试用例中，最高层 L1 构造成 Host RoCE，因而 SuperPod 内跨 Server 通信直接走 Host RoCE；而在多 SuperPod 三层测试用例中，L1 是 Device 侧 UB CLOS，L2 才是 Host RoCE。生产环境中最终是否使用 Host RoCE，以部署时集群生成的实际 RankGraph 为准。</p>
+</blockquote>
+<h3 id="算子覆盖矩阵"><a class="markdownIt-Anchor" href="#算子覆盖矩阵"></a> 算子覆盖矩阵</h3>
+<p>通过对各算子 AutoSelector 中 <code>SelectDPUAlgo</code> 覆写情况的全面检索，当前算子支持矩阵如下：</p>
+<table>
+<thead>
+<tr>
+<th>算子类别</th>
+<th>算子名称</th>
+<th>已接入的代表性 HostDPU 算法</th>
+<th style="text-align:center">支持状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>集合通信</strong></td>
+<td>AllReduce</td>
+<td><code>DpuAllReduceSequenceMeshNHR</code>、<code>DpuAllReducePipeLineMeshNHRNHR</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>AllGather</td>
+<td><code>DpuAllGatherSequenceMeshNHR</code>、<code>DpuAllGatherPipeLineMeshNHRNHR</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ReduceScatter</td>
+<td><code>DpuReduceScatterSequenceMeshMesh</code>、<code>DpuReduceScatterPipeLineMeshNHRMesh</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Reduce</td>
+<td><code>DpuReduceSequenceMeshNHR</code>、三层 Pipeline 实现</td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Broadcast</td>
+<td><code>DpuBroadcastSequenceMeshNHR</code>、三层 Pipeline 实现</td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Scatter</td>
+<td><code>DpuScatterSequenceMeshNHR</code>、三层 Pipeline 实现</td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>Barrier</td>
+<td><code>DpuBarrierSequenceMeshNHR</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>AllGatherV</td>
+<td>未实现 <code>SelectDPUAlgo</code>（基类直接返回 <code>NOT_MATCH</code>）</td>
+<td style="text-align:center"><strong>自动选择器未覆盖</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>ReduceScatterV</td>
+<td>未实现 <code>SelectDPUAlgo</code>（基类直接返回 <code>NOT_MATCH</code>）</td>
+<td style="text-align:center"><strong>自动选择器未覆盖</strong></td>
+</tr>
+<tr>
+<td><strong>AllToAll 家族</strong></td>
+<td>AllToAll</td>
+<td><code>DpuAllToAllSoleMesh</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>AllToAllV</td>
+<td><code>DpuAllToAllVSoleMesh</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>AllToAllVC</td>
+<td><code>DpuAllToAllVCSoleMesh</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td><strong>点对点通信</strong></td>
+<td>Send / Recv</td>
+<td>跨 Endpoint 异构链路走 <code>DpuSendSoleHost</code>/<code>DpuRecvSoleHost</code>，其余走 <code>DpuSendSoleMesh</code>/<code>DpuRecvSoleMesh</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+<tr>
+<td></td>
+<td>BatchSendRecv</td>
+<td><code>DpuBatchSendRecvSoleMesh</code></td>
+<td style="text-align:center"><strong>支持</strong></td>
+</tr>
+</tbody>
+</table>
+<p>由此可见，不能简单概括为“所有集合通信均支持 Host RDMA”。在当前版本中，AllGatherV 与 ReduceScatterV 的自动选择器尚未提供 HostDPU 选择分支。</p>
+<h3 id="hostdpu-任务执行流水线"><a class="markdownIt-Anchor" href="#hostdpu-任务执行流水线"></a> HostDPU 任务执行流水线</h3>
+<p>HostDPU 的执行并非算法线程直接调用裸 verbs API，而是采用了“设备侧调度编排 + 共享内存控制桥 + Host 侧并发通信”的协同架构：</p>
+<pre>
+<code class="mermaid">
+sequenceDiagram
+autonumber
+participant A as HCCL &#x2F; AICPU编排
+participant B as HCOMM任务桥
+participant C as HostDPU模板
+participant D as HostCpuRoceChannel
+participant E as 对端Rank
+
+rect rgb(239, 246, 255)
+  Note over A,D: 阶段 1：资源准备
+  A-&gt;&gt;B: GetAlgResDPU：申请 100MiB DPUTAG 共享内存
+  Note over B: 前半区 NPU→DPU 请求 &#x2F; 后半区 DPU→NPU 响应
+  A-&gt;&gt;D: 按 Endpoint 创建 Channel&lt;br&#x2F;&gt;Device→AICPU_TS, Host→CPU
+end
+
+rect rgb(245, 243, 255)
+  Note over A,C: 阶段 2：任务控制路径
+  A-&gt;&gt;B: 序列化 DPURunInfo（模板名、参数、Channel、Rank、超时）
+  A-&gt;&gt;B: HcommSendRequest(npu2DpuShmemPtr)
+  B-&gt;&gt;C: HcclLaunchDPUKernel(request)
+  activate C
+  C-&gt;&gt;C: 反序列化 → 查找模板 → DPUKernelRun
+  par Device Endpoint
+    A-&gt;&gt;A: AICPU_TS 执行设备侧搬运
+  and Host Endpoint
+    C-&gt;&gt;D: 调用 Host 侧 HCOMM 原语
+  end
+end
+
+rect rgb(236, 253, 245)
+  Note over C,E: 阶段 3：Host RDMA 数据路径
+  E--&gt;&gt;D: NotifyRecord(NOTIFY_IDX_ACK)&lt;br&#x2F;&gt;接收缓冲区就绪
+  C-&gt;&gt;D: NotifyWait(NOTIFY_IDX_ACK)
+  C-&gt;&gt;D: WriteWithNotify(NOTIFY_IDX_DATA_SIGNAL)
+  D-&gt;&gt;E: RDMA_WRITE_WITH_IMM&lt;br&#x2F;&gt;数据写入远端 RMA Buffer 并携带 Notify ID
+  C-&gt;&gt;D: NotifyRecord(NOTIFY_IDX_FIN_ACK)
+  C-&gt;&gt;D: ChannelDrain
+  C-&gt;&gt;C: HcommFenceOnThread
+  E-&gt;&gt;E: NotifyWait(NOTIFY_IDX_DATA_SIGNAL)&lt;br&#x2F;&gt;确认数据接收完成
+  E-&gt;&gt;E: NotifyWait(NOTIFY_IDX_FIN_ACK)&lt;br&#x2F;&gt;确认发送端排空
+end
+
+rect rgb(255, 247, 237)
+  Note over A,C: 阶段 4：完成收口
+  C--&gt;&gt;B: 模板返回执行状态
+  deactivate C
+  B--&gt;&gt;A: HcommWaitResponse(dpu2NpuShmemPtr)
+  A-&gt;&gt;A: 校验 msgId 并继续后处理
+end
+</code>
+</pre>
+<ol>
+<li><strong>共享内存分账</strong>：HCCL 在 <code>GetAlgResDPU</code> 中申请 100MiB 且打上 <code>DPUTAG</code> 标记的设备共享内存，以 <code>DPU2NPU_SHMEM_RATIO = 2</code> 平分为前半区（NPU→DPU 请求）和后半区（DPU→NPU 响应）。</li>
+<li><strong>任务描述符下发</strong>：算法将执行上下文 <code>DPURunInfo</code>（包含模板名、切分参数、Channel 句柄、Rank 与超时配置）序列化写入请求区，通过 <code>HcommSendRequest</code> 投递至 Host 侧。</li>
+<li><strong>模板派发与协同</strong>：Host 侧 <code>HcclLaunchDPUKernel</code> 反序列化请求，经 <code>InsAlgTemplateRegistry</code> 获取对应模板实例并调用 <code>DPUKernelRun</code>。此时 Device 侧可并行处理本节点 UB 内存搬运，Host 侧则由 Host CPU 提交通信。</li>
+<li><strong>三段式握手与数据传输</strong>（普通 <code>SendRecvWrite</code> 路径）：
+<ul>
+<li><strong>Step Sync（就绪确认）</strong>：接收端调用 <code>NotifyRecord(NOTIFY_IDX_ACK)</code>，发送端调用 <code>NotifyWait(NOTIFY_IDX_ACK)</code>，确保远端目标内存就绪；</li>
+<li><strong>数据写入</strong>：发送端调用 <code>HcommWriteWithNotifyNbiOnThread</code> 下发数据写，尾块携带 <code>NOTIFY_IDX_DATA_SIGNAL</code>；</li>
+<li><strong>Fin Sync 与 Drain（完成排空）</strong>：发送端触发 <code>NOTIFY_IDX_FIN_ACK</code> 并调用 <code>ChannelDrain</code> 与线程 Fence；接收端先后等待 <code>NOTIFY_IDX_DATA_SIGNAL</code> 与 <code>NOTIFY_IDX_FIN_ACK</code> 确认数据完全可见。</li>
+</ul>
+</li>
+<li><strong>任务收口</strong>：模板执行结束后向响应区写入状态，AICPU 侧通过 <code>HcommWaitResponse</code> 校验 <code>msgId</code> 并结束算子调度。</li>
+</ol>
+<p>上述时序图展示的是普通 <code>SendRecvWrite</code> 包装器。部分 NHR 算法使用 <code>DpuBatchTransfer</code> 优化路径，将 STEP_SYNC、批量 <code>WriteWithNotify</code>、Drain/Fence 与 DATA_SIGNAL 等待组合执行，不使用 <code>NOTIFY_IDX_FIN_ACK</code>；因此不能把图中的 FIN_ACK 流程视为所有 HostDPU 算法的统一时序。</p>
+<blockquote>
+<p><strong>控制路径与业务数据路径分离。</strong> <code>HcommSendRequest</code>/<code>HcommWaitResponse</code> 在 100MiB DPUTAG 共享内存中传递任务元数据；Host RDMA 阶段的业务载荷则通过已注册的 RMA Buffer 与 RDMA QP 传输，不经 DPUTAG 任务共享内存中转。</p>
+</blockquote>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/src/ops/op_common/op_common.cc">HostDPU 共享内存资源分配</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/src/ops/op_common/algorithm/template/dpu/kernel_launch.cc">HostDPU 任务派发 HcclLaunchDPUKernel</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/src/ops/op_common/algorithm/template/wrapper/dpu_alg_data_trans_wrapper.cc">HostDPU 数据传输包装器 SendRecvWrite</a></li>
+</ul>
+<h3 id="异步建链状态机"><a class="markdownIt-Anchor" href="#异步建链状态机"></a> 异步建链状态机</h3>
+<p><code>HostCpuRoceChannel</code> 采用异步状态机设计，每次调用 <code>Connect()</code> 驱动当前阶段向前推进：</p>
+<pre>
+<code class="mermaid">
+stateDiagram-v2
+direction TB
+[*] --&gt; INIT
+INIT --&gt; SOCKET_OK: CheckSocketStatus()&lt;br&#x2F;&gt;建立或复用辅助 Socket（默认端口 60001）
+SOCKET_OK --&gt; CAP_EXCHANGED: ExchangeCapability()&lt;br&#x2F;&gt;交换版本、通信魔数与特性能力
+CAP_EXCHANGED --&gt; QP_CREATED: CreateQp()&lt;br&#x2F;&gt;按 queueNum 或网卡 LB 能力创建 CQ&#x2F;QP
+QP_CREATED --&gt; DATA_EXCHANGE: ExchangeData()&lt;br&#x2F;&gt;交换 QPN、PSN、GID、MR 地址&#x2F;RKey 等
+DATA_EXCHANGE --&gt; QP_MODIFIED: ModifyQp()&lt;br&#x2F;&gt;配置 SL、TC、重传、源端口与 lbValue
+QP_MODIFIED --&gt; READY: SyncAfterModifyQp()&lt;br&#x2F;&gt;每个 QP 预投递 16 个 Receive WQE
+READY --&gt; [*]
+</code>
+</pre>
+<p>带外 TCP Socket 仅用于能力协商、元数据交换与状态同步，通道进入 <code>READY</code> 状态后，所有业务数据与通知均在 RDMA QP 上传输。</p>
+<h3 id="内存注册与-d2nub-代理机制"><a class="markdownIt-Anchor" href="#内存注册与-d2nub-代理机制"></a> 内存注册与 D2N=UB 代理机制</h3>
+<p>Host RDMA 读写的源地址和目的地址必须严格落在已注册并交换的 RMA Buffer 范围内，否则 <code>FindLocalBuffer</code> 或 <code>FindRemoteBuffer</code> 会返回 <code>HCCL_E_NOT_FOUND</code>。</p>
+<p><code>CpuRoceEndpoint</code> 以 <code>&#123;devPhyId, COMM_PROTOCOL_ROCE, ENDPOINT_LOC_TYPE_HOST, ipAddr&#125;</code> 作为唯一键缓存复用底层 RDMA 上下文，本地 MR 亦在此粒度进行管理。在 950DT/Hi1825 架构下，Device 内存注册存在一个特殊设计：</p>
+<ul>
+<li><strong>普通内存注册</strong>：Host 内存及常规 Device 内存直接按用户传入的连续虚拟地址区间 <code>[va, va+size]</code> 进行注册。</li>
+<li><strong>D2N=UB 别名注册策略</strong>：当 Host 网卡与 NPU 之间的 Device-to-NIC（D2N）数据通路采用 UB 总线时，底层 <code>ubdevshm</code> 驱动如果对重叠 VA 进行重复登记会直接返回错误（如 <code>-17</code>）。由于当前 HCCP 缺乏直接探测 D2N 物理总线类型的接口，代码暂以 <code>capabilities_.lbMax &gt; 0</code> 作为命中 Hi1825/UB 架构的代理条件。</li>
+<li>对满足条件的 Device 内存，<code>RoceRegedMemMgr</code> 会调用 <code>aclrtMemGetAddressRange</code> 获取底层整段 <code>aclrtMalloc</code> 分配的大内存块，针对整段 allocation 注册物理硬件 MR 并建立引用计数；用户传入的实际数据子区间仅作为共享同一物理 LKey/RKey 的 Alias Buffer 导出。</li>
+</ul>
+<p>代码注释已明确标明：该代理逻辑是当前版本的过渡设计，未来 HCCP 提供专有 D2N/UB 探测接口后将予以替换。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/reged_mems/roce_reged_mem_mgr.h">RoceRegedMemMgr 实现与 D2N=UB 代理注记</a></li>
+</ul>
+<h3 id="数据操作与通知语义"><a class="markdownIt-Anchor" href="#数据操作与通知语义"></a> 数据操作与通知语义</h3>
+<p>针对标准对称 Host CPU RoCE 模式，通道实现了完备的原语支持：</p>
+<h4 id="1-write-与-read-分片调度"><a class="markdownIt-Anchor" href="#1-write-与-read-分片调度"></a> 1. Write 与 Read 分片调度</h4>
+<p><code>CpuRoceEndpoint</code> 目前将单次 RDMA 操作上限暂定为 1GiB（<code>RDMA_MAX_WR_LENGTH = 1GB</code>）。数据发送时，首先按 1GiB 切割成若干 Chunk，每个 Chunk 再根据参与传输的 QP 数量执行 Striping 分片。多 QP 开启时，<code>HCCL_MULTI_QP_THRESHOLD</code> 决定了实际承载有效载荷的 QP 个数：</p>
+<p>当初始平均切片长度满足 <code>tileLen != 0 &amp;&amp; tileLen &lt; qpThreshold</code> 时，代码按下式缩减实际承载数据的 QP 数量：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>u</mi><mi>s</mi><mi>e</mi><mi>Q</mi><mi>p</mi><mi>N</mi><mi>u</mi><mi>m</mi><mo>=</mo><mi>min</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>u</mi><mi>a</mi><mi>l</mi><mi>Q</mi><mi>p</mi><mi>N</mi><mi>u</mi><mi>m</mi><mo separator="true">,</mo><mtext> </mtext><mrow><mo fence="true">⌊</mo><mfrac><mrow><mi>t</mi><mi>a</mi><mi>i</mi><mi>l</mi><mi>L</mi><mi>e</mi><mi>n</mi><mo>−</mo><mn>1</mn></mrow><mrow><mi>q</mi><mi>p</mi><mi>T</mi><mi>h</mi><mi>r</mi><mi>e</mi><mi>s</mi><mi>h</mi><mi>o</mi><mi>l</mi><mi>d</mi></mrow></mfrac><mo fence="true">⌋</mo></mrow><mo>+</mo><mn>1</mn><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">useQpNum = \min\left(actualQpNum,\ \left\lfloor\frac{tailLen - 1}{qpThreshold}\right\rfloor + 1\right)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">u</span><span class="mord mathnormal">s</span><span class="mord mathnormal">e</span><span class="mord mathnormal">Q</span><span class="mord mathnormal">p</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal">u</span><span class="mord mathnormal">m</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="mop">min</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord mathnormal">a</span><span class="mord mathnormal">c</span><span class="mord mathnormal">t</span><span class="mord mathnormal">u</span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">Q</span><span class="mord mathnormal">p</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal">u</span><span class="mord mathnormal">m</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">⌊</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mord mathnormal">p</span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mord mathnormal">h</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">e</span><span class="mord mathnormal">s</span><span class="mord mathnormal">h</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">d</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">L</span><span class="mord mathnormal">e</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804400000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">⌋</span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></p>
+<p>若 <code>tileLen == 0</code>（即数据长度小于 QP 数量），该缩减逻辑不会进入，<code>useQpNum</code> 保持为 <code>actualQpNum</code>；此时前面的 QP 获得 0 长度切片，尾 QP 承载剩余数据。</p>
+<p>对于未分配到有效载荷的剩余空闲 QP（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>≥</mo><mi>u</mi><mi>s</mi><mi>e</mi><mi>Q</mi><mi>p</mi><mi>N</mi><mi>u</mi><mi>m</mi></mrow><annotation encoding="application/x-tex">i \ge useQpNum</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.79549em;vertical-align:-0.13597em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">u</span><span class="mord mathnormal">s</span><span class="mord mathnormal">e</span><span class="mord mathnormal">Q</span><span class="mord mathnormal">p</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal">u</span><span class="mord mathnormal">m</span></span></span></span>），<strong>仍会提交长度为 0 的 Signaled WR</strong>。此设计至关重要：由于 <code>WaitForWqeCompletion()</code> 需要轮询等待通道内所有 QP 的 <code>wqeNums_[i]</code> 计数清零，为所有 QP 统一投递 Signaled WR 能确保多 QP 的完成状态推进严格保持步调一致，避免特定 QP 挂起引发死锁。</p>
+<h4 id="2-notifyrecord-与-notifywait"><a class="markdownIt-Anchor" href="#2-notifyrecord-与-notifywait"></a> 2. NotifyRecord 与 NotifyWait</h4>
+<ul>
+<li><code>NotifyRecord</code>：向通道内所有 QP 提交一条长度为 0、携带 32 位 Immediate Data（存放目标 Notify ID）的 RDMA 写操作；</li>
+<li><code>NotifyWait</code>：遍历通道内所有 QP 对应的 <code>recvCq</code>，逐一轮询并校验出队的 <code>wc.imm_data == dpuNotifyId</code>；</li>
+<li><strong>滑动信标补齐</strong>：单次 <code>NotifyWait</code> 完成后，通道会立即调用 <code>IbvPostRecv()</code> 为每个 QP 各自补投递 1 个 Receive WQE，使 QP 的接收缓冲池始终维持在 16 个信标深度；</li>
+<li>若轮询超时，直接返回 <code>HCCL_E_TIMEOUT</code>；若 CQE 返回异常，则提取本地/远端 Server、Device ID、IP 及 QP 状态并上报 DFX。</li>
+</ul>
+<h4 id="3-writewithnotify"><a class="markdownIt-Anchor" href="#3-writewithnotify"></a> 3. WriteWithNotify</h4>
+<p>大于 1GiB 的前置数据块采用普通 <code>RDMA_WRITE</code> 发送；最后一个尾块在所有 QP 上调用 <code>RDMA_WRITE_WITH_IMM</code>。承载数据的 QP 携带切片数据并打上 Imm Notify，空闲 QP 发送长度为 0 的 Imm Notify，保证接收端每个 QP 都能收到一致的同步信号。</p>
+<h4 id="4-channeldrain-与-channelfence"><a class="markdownIt-Anchor" href="#4-channeldrain-与-channelfence"></a> 4. ChannelDrain 与 ChannelFence</h4>
+<ul>
+<li>两者均通过 <code>WaitForWqeCompletion()</code> 轮询等待所有 QP 的所有在途 Send WQE 完全出队清空；</li>
+<li><code>ChannelFence</code> 在排空后将 <code>fenceFlag_</code> 置为 true，使得后续第一条投递的 RDMA WR 自动附带 <code>IBV_SEND_FENCE</code> 标志；</li>
+<li>HCCL HostDPU 传输包装器优先调用轻量级的 Channel Drain，并在其后叠加线程级 <code>HcommFenceOnThread</code>。为向后兼容低于 CANN 9.2.0.2 的老版本，HCCL 会自动将 Host Channel Drain 回退映射为 Channel Fence。</li>
+</ul>
+<h2 id="多qp-lb-与多路径能力"><a class="markdownIt-Anchor" href="#多qp-lb-与多路径能力"></a> 多QP、LB 与多路径能力</h2>
+<p>本节是全文的核心：厘清数据分片多 QP、网卡硬件 LB 与 RoCEv2 UDP 源端口三者的机制定位，进而评估其多路径能力与边界。</p>
+<table>
+<thead>
+<tr>
+<th>机制维度</th>
+<th>作用实体</th>
+<th>核心设计意图</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>多 QP 数据分片</strong></td>
+<td>HCOMM 数据面</td>
+<td>单个通信链路内部并行建立多个 RDMA QP，按消息大小阈值切片并行发送，提高链路并行度与带宽利用率</td>
+</tr>
+<tr>
+<td><strong>网卡 LB (<code>lbValue</code>)</strong></td>
+<td>HCCP 与 HRN Provider</td>
+<td>在 QP 属性中注入 <code>hash_value</code>，为网卡硬件/驱动提供负载均衡输入；其内部映射方式未开源</td>
+</tr>
+<tr>
+<td><strong>UDP 源端口散列</strong></td>
+<td>IP 传输层 (RoCEv2)</td>
+<td>为每个 QP 分配不同的 UDP Source Port，作为网络交换机 ECMP 选路的五元组输入因子</td>
+</tr>
+</tbody>
+</table>
+<h3 id="qp-数量解析与优先级"><a class="markdownIt-Anchor" href="#qp-数量解析与优先级"></a> QP 数量解析与优先级</h3>
+<p><code>HCCL_RDMA_QPS_PER_CONNECTION</code> 定义了 Rank 间单个逻辑 Channel 期望分配的 QP 数量（合法范围 1～32，默认 1，推荐 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">\le 8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719400000000001em;vertical-align:-0.13597em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">8</span></span></span></span>）。<code>HCCL_MULTI_QP_THRESHOLD</code> 定义了每个数据 QP 的最小切片阈值（范围 1～8192KB，默认 512KB）。</p>
+<p>在 A5 CommunicatorV2 框架下，Channel 的 <code>queueNum</code> 按照以下<strong>绝对优先级</strong>逐级解析（见 <code>ResolveQueueNum</code>）：</p>
+<pre>
+<code class="mermaid">
+flowchart TD
+A{&quot;调用方是否显式指定&lt;br&#x2F;&gt;HcclChannelDesc.roceAttr.queueNum？&quot;}
+B[&quot;采用调用方配置&quot;]
+C{&quot;Host RoCE 的 &#x2F;etc&#x2F;hcomm.cfg&lt;br&#x2F;&gt;是否配置 QP 数？&quot;}
+D[&quot;采用 hostMultiQpConfig.GetQpCount(devicePhyId)&quot;]
+E{&quot;本端&#x2F;远端 IP 对是否命中&lt;br&#x2F;&gt;MultiQpSrcPort.cfg？&quot;}
+F[&quot;采用 IP 对对应的端口数量&quot;]
+G[&quot;采用 HCCL_RDMA_QPS_PER_CONNECTION&lt;br&#x2F;&gt;未配置时默认为 1&quot;]
+A -- 是 --&gt; B
+A -- 否 --&gt; C
+C -- 是 --&gt; D
+C -- 否 --&gt; E
+E -- 是 --&gt; F
+E -- 否 --&gt; G
+</code>
+</pre>
+<blockquote>
+<p><strong>建链对称性约束：</strong> 建链阶段通信双方会严格校验对端声明的 QP 数量。若通信双方环境变量不一致，或两端网卡硬件 LB 能力差异导致扩展出的实际 Connection 数量不同，建链会报错退出，不会自动协商取较小值降级运行。</p>
+</blockquote>
+<h3 id="网卡硬件-lb"><a class="markdownIt-Anchor" href="#网卡硬件-lb"></a> 网卡硬件 LB</h3>
+<p>950DT/A5 搭配 Hi1825/SP561 网卡时的 LB 交互时序如下：</p>
+<ol>
+<li><strong>能力探测</strong>：<code>CpuRoceEndpoint::GetCapabilities</code> 调用 HCCP 的 <code>RaGetLbMax</code>；</li>
+<li><strong>Provider 符号解析</strong>：HCCP 动态绑定 HRN Provider 动态库并调用 <code>roce_get_qp_num</code>。若符号不存在，优雅回退为 <code>lbMax = 0</code>；</li>
+<li><strong>分配哈希因子</strong>：<code>HostCpuRoceChannel::BuildConnection</code> 遍历各连接，为第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathnormal">i</span></span></span></span> 个 QP 赋值 <code>qpInfo.lbValue = i % lbMax</code>；</li>
+<li><strong>属性下发</strong>：QP 推进至 RTS 状态后，<code>HostRdmaConnection::ModifyQp</code> 显式调用 <code>RaSetQpLbValue(qpHandle, lbValue)</code>，最终由 Provider 的 <code>roce_set_qp_lb_value</code> 写入网卡。</li>
+</ol>
+<p>根据配置 QP 数与网卡 <code>lbMax</code> 的不同组合，实际 QP 数量与 <code>lbValue</code> 的对应关系如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">上层解析 <code>queueNum</code></th>
+<th style="text-align:center">网卡能力 <code>lbMax</code></th>
+<th style="text-align:center">实际创建 QP 数量</th>
+<th style="text-align:center">各 QP 分配的 <code>lbValue</code></th>
+<th>行为解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center">0</td>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center">保持默认 <code>-1</code></td>
+<td>不支持 LB，仅建立单 QP，不调用 LB 接口</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>N</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">N\ (N &gt; 0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span></td>
+<td style="text-align:center"><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span></strong></td>
+<td style="text-align:center"><code>0</code> 至 <code>N-1</code></td>
+<td><strong>由 LB 能力将单 QP 自动扩展为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 个 QP</strong>，并依次分配 <code>lbValue</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>M</mi><mo>&gt;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M\ (M &gt; 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+<td style="text-align:center">0</td>
+<td style="text-align:center"><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span></strong></td>
+<td style="text-align:center">保持默认 <code>-1</code></td>
+<td>不支持 LB，普通多 QP 分片，各 QP 无网卡硬件哈希因子</td>
+</tr>
+<tr>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>M</mi><mo>&gt;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M\ (M &gt; 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>N</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">N\ (N &gt; 0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span></td>
+<td style="text-align:center"><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span></strong></td>
+<td style="text-align:center"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mspace></mspace><mspace width="0.4444444444444444em"/><mo stretchy="false">(</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mspace width="0.3333333333333333em"/><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">i \pmod N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathnormal">i</span><span class="mspace allowbreak"></span><span class="mspace" style="margin-right:0.4444444444444444em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord"><span class="mord mathrm">m</span><span class="mord mathrm">o</span><span class="mord mathrm">d</span></span></span><span class="mspace" style="margin-right:0.3333333333333333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mclose">)</span></span></span></span></td>
+<td><strong>维持上层指定的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个 QP</strong>（不会扩展为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">M \times N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>），按模分配 <code>lbValue</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/endpoint_pairs/channels/host/host_cpu_roce_channel.cc">HostCpuRoceChannel 的 LB 与多 QP 分配逻辑</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/hccp/inc/network/hccp.h">HCCP LB 接口声明</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/hccp/rdma_service/dl_ibverbs_function.c">HCCP 对 HRN Provider 扩展符号的动态绑定</a></li>
+</ul>
+<h3 id="host-rdma-udp-源端口与-ecmp-散列"><a class="markdownIt-Anchor" href="#host-rdma-udp-源端口与-ecmp-散列"></a> Host RDMA UDP 源端口与 ECMP 散列</h3>
+<p>950 系列支持通过环境变量 <code>HCCL_HOST_RDMA_UDP_PORTS_LIST</code> 按 NPU 物理设备 ID 为 Host RoCE QP 分配指定的 UDP 源端口：</p>
+<p><img src="/images/hccl-a5-host-rdma-udp-ecmp.svg" alt="A5 Host RDMA多QP、UDP源端口与ECMP路径散列" /></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 格式：&lt;phy_dev_id&gt;:&lt;port1&gt;,&lt;port2&gt;...;&lt;phy_dev_id&gt;:&lt;port1&gt;,&lt;port2&gt;...</span></span><br><span class="line"><span class="built_in">export</span> HCCL_HOST_RDMA_UDP_PORTS_LIST=<span class="string">&quot;0:10000,10015;1:10016,10031&quot;</span></span><br></pre></td></tr></table></figure>
+<p>配置必须遵循以下规则：</p>
+<ul>
+<li><code>phy_dev_id</code> 须为非负十进制整数，同一物理设备 ID 严禁重复；</li>
+<li>端口号必须位于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>65535</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1, 65535]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">6</span><span class="mord">5</span><span class="mord">5</span><span class="mord">3</span><span class="mord">5</span><span class="mclose">]</span></span></span></span>，应避开系统保留端口 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>1023</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1, 1023]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">2</span><span class="mord">3</span><span class="mclose">]</span></span></span></span>；</li>
+<li>单个设备端口数量上限为 32 个，环境变量总字符长度上限为 32KiB；</li>
+<li>格式错误会导致通信域初始化异常退出。</li>
+</ul>
+<h4 id="1-queuenum-lb-与源端口协同组合关键陷阱揭秘"><a class="markdownIt-Anchor" href="#1-queuenum-lb-与源端口协同组合关键陷阱揭秘"></a> 1. queueNum、LB 与源端口协同组合（关键陷阱揭秘）</h4>
+<p>在 HCOMM 实现中，“配置阶段的 QP 数”与“Channel 内部实际建立的 QP 数”之间存在处理时序差：</p>
+<ol>
+<li><strong>Step 1</strong>：HCOMM 首先解析出 Channel 描述符中的 <code>channelDesc.roceAttr.queueNum</code>（若未显式指定，默认为 1）；</li>
+<li><strong>Step 2</strong>：<code>RoceChannelDescConfigurator::FillRoceSrcPortList</code> 根据上述 <code>queueNum</code> 调整并裁剪端口缓存：若配置的端口过多则截断，过少则循环复用，<strong>最终缓存数组大小严格等于 <code>queueNum</code></strong>；</li>
+<li><strong>Step 3</strong>：进入 <code>HostCpuRoceChannel::BuildConnection</code>，查询网卡能力 <code>lbMax</code>。<strong>仅当 <code>queueNum == 1 &amp;&amp; lbMax &gt; 0</code> 时，创建循环次数才从 1 自动扩展为 <code>lbMax</code></strong>；</li>
+<li><strong>Step 4</strong>：循环内部为第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathnormal">i</span></span></span></span> 个 QP 赋值源端口：<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qpInfo.udpSport = srcPortList[i % channelDesc_.roceAttr.queueNum];</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这形成了一个需要特别注意的<strong>实现组合约束</strong>：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><code>HCCL_RDMA_QPS_PER_CONNECTION</code></th>
+<th style="text-align:center"><code>HCCL_HOST_RDMA_UDP_PORTS_LIST</code></th>
+<th style="text-align:center">网卡 LB 能力</th>
+<th>实际结果分析</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">未配置（<code>queueNum</code> 保持 1）</td>
+<td style="text-align:center">未配置</td>
+<td style="text-align:center">不支持</td>
+<td>创建 1 个 QP，<code>udpSport = 0</code>，走网卡驱动默认端口行为</td>
+</tr>
+<tr>
+<td style="text-align:center">未配置（<code>queueNum</code> 保持 1）</td>
+<td style="text-align:center">配置多个端口（如 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 个）</td>
+<td style="text-align:center">不支持</td>
+<td>创建 1 个 QP，仅使用第 1 个端口；其余 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">P-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span> 个端口被截断丢弃</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>未配置（<code>queueNum</code> 保持 1）</strong></td>
+<td style="text-align:center"><strong>配置多个端口（如 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 个）</strong></td>
+<td style="text-align:center"><strong><code>lbMax = N</code></strong></td>
+<td>虽然网卡能力触发创建了 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 个 QP，但配置阶段 <code>srcPortList</code> 已被裁成 1 项，计算 <code>i % 1</code> 时恒为 0，因此 <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 个 QP 全部使用第 1 个源端口</strong>；仅 <code>lbValue</code> 各不相同</td>
+</tr>
+<tr>
+<td style="text-align:center">配置为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>M</mi><mo>&gt;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M\ (M &gt; 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+<td style="text-align:center">未配置</td>
+<td style="text-align:center">任意</td>
+<td>创建 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个 QP，<code>udpSport = 0</code>；若支持 LB 则下发不同 <code>lbValue</code></td>
+</tr>
+<tr>
+<td style="text-align:center">配置为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>M</mi><mo>&gt;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M\ (M &gt; 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+<td style="text-align:center">配置 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 个端口</td>
+<td style="text-align:center">不支持</td>
+<td>创建 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个 QP；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>&lt;</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P &lt; M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72243em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 循环复用端口，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>&gt;</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P &gt; M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72243em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 截取前 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个端口</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>配置为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>M</mi><mo>&gt;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M\ (M &gt; 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></strong></td>
+<td style="text-align:center"><strong>配置 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 个端口</strong></td>
+<td style="text-align:center"><strong><code>lbMax = N</code></strong></td>
+<td>实际创建 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个 QP；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>&lt;</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P &lt; M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72243em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 时循环复用端口，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>&gt;</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P &gt; M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72243em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 时截取前 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个，同时每 QP 下发 <code>lbValue = i % N</code>。只有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>≥</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P \ge M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.13597em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 且前 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 项互不相同时，才能保证每个 QP 的 <code>udpSport</code> 不同</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>配置建议：</strong> 如果希望建立 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个 QP 并使其分别获得不同的 UDP 源端口，不能仅依赖网卡 LB 自动扩展。需要将 <code>queueNum</code> 显式解析为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span>（例如配置 <code>HCCL_RDMA_QPS_PER_CONNECTION=M</code>，或通过 <code>/etc/hcomm.cfg</code>、IP 对配置得到同一数量），并保证提供至少 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 个互不相同的端口。</p>
+</blockquote>
+<h4 id="2-ecmp-五元组哈希机制"><a class="markdownIt-Anchor" href="#2-ecmp-五元组哈希机制"></a> 2. ECMP 五元组哈希机制</h4>
+<p>RoCEv2 数据包在 IP 层的五元组为：<strong>源 IP、目的 IP、源 UDP 端口、目的 UDP 端口（固定 4791）、IP 协议号（固定 17 UDP）</strong>。在固定的 Rank 对之间通信时，两端 IP、目的端口及协议号均不可变，因此<strong>修改源 UDP 端口是主机端为交换机 ECMP 提供散列输入的最主要途径</strong>。</p>
+<p>但必须指出：源端口不同仅向交换机哈希桶提供了离散输入；各 QP 最终是否会落到不同交换机物理链路上，取决于交换机具体的逐流哈希算法、网络拓扑等宽情况以及哈希碰撞几率。</p>
+<h4 id="3-源端口的最终覆盖层级"><a class="markdownIt-Anchor" href="#3-源端口的最终覆盖层级"></a> 3. 源端口的最终覆盖层级</h4>
+<p>源端口的生效遵循“环境解析”与“通道绑定”两级映射：</p>
+<ol>
+<li><strong>设备级端口基线</strong>：首先解析 <code>HCCL_HOST_RDMA_UDP_PORTS_LIST</code>；若本地存在 <code>/etc/hcomm.cfg</code>，其中配置的同物理设备项（须同时提供 <code>udp_port_mode_&lt;id&gt;=multi_qp</code>、<code>multi_qp_count_&lt;id&gt;</code> 及 <code>multi_qp_udp_ports_&lt;id&gt;</code>）会覆盖该物理设备对应的环境变量配置；</li>
+<li><strong>Channel 级分配</strong>：创建具体 Channel 时，首先使用上述物理设备的端口列表；若未获取到，再按本地/远端 IP 对查询 <code>MultiQpSrcPort.cfg</code>；若仍未命中，向底层传递 <code>udpSport = 0</code>，由 Provider 驱动自行填充。</li>
+</ol>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/docs/zh/user_guide/hccl_env/HCCL_HOST_RDMA_UDP_PORTS_LIST.md">HCCL_HOST_RDMA_UDP_PORTS_LIST 用户指南</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/docs/zh/user_guide/hccl_env/HCCL_RDMA_QPS_PER_CONNECTION.md">HCCL_RDMA_QPS_PER_CONNECTION 用户指南</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hccl/blob/master/docs/zh/user_guide/hccl_env/HCCL_MULTI_QP_THRESHOLD.md">HCCL_MULTI_QP_THRESHOLD 用户指南</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/coll_communicator_mgr/config_mgr/host_multi_qp_config.cc">HostMultiQpConfig 源码实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/coll_communicator_mgr/resource_mgr/local/my_rank/roce_channel_desc_configurator.cc">RoceChannelDescConfigurator 端口绑定源码</a></li>
+</ul>
+<h3 id="多路径能力边界与最终判定"><a class="markdownIt-Anchor" href="#多路径能力边界与最终判定"></a> 多路径能力边界与最终判定</h3>
+<p>综合代码剖析，Ascend 950DT/A5 Host RDMA 在多路径传输维度能够确认的能力边界如下：</p>
+<table>
+<thead>
+<tr>
+<th>多路径能力维度</th>
+<th style="text-align:center">开源代码可确认程度</th>
+<th>核心依据与工程现实</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>多 QP 数据切片</strong></td>
+<td style="text-align:center"><strong>已确认支持</strong></td>
+<td>单 Channel 内支持创建多个 QP，按消息阈值切片并行发送，所有 QP 统一参与完成与通知同步</td>
+</tr>
+<tr>
+<td><strong>UDP 源端口 ECMP 散列</strong></td>
+<td style="text-align:center"><strong>已确认支持</strong></td>
+<td>每 QP 均可下发独立源端口，为网络交换机 ECMP 提供五元组散列输入；实际物理路径取决于网络拓扑</td>
+</tr>
+<tr>
+<td><strong>Hi1825/HRN 网卡硬件 LB</strong></td>
+<td style="text-align:center"><strong>已确认支持</strong></td>
+<td>接口层下发每 QP 的 <code>lbValue</code>（即 <code>hash_value</code>）；具体网卡硬件路由映射逻辑封装在闭源驱动中</td>
+</tr>
+<tr>
+<td><strong>网卡原生子流多路径 (MPATH)</strong></td>
+<td style="text-align:center"><strong>当前通路未启用</strong></td>
+<td>HCCP 依赖头文件 <code>ibv_extend.h</code> 虽定义有 <code>IBV_LB_MODE_MPATH</code>、<code>flowlet_pkg_num</code> 及 <code>path_num</code> 等字段，但 <code>RsTypicalQpModifyExtend</code> 下发的扩展属性掩码中仅设置了 UDP 源端口与 Hyper RoCE 特性</td>
+</tr>
+<tr>
+<td><strong>自适应路由 (Adaptive Routing)</strong></td>
+<td style="text-align:center"><strong>当前通路未启用</strong></td>
+<td>头文件中定义有 <code>IBV_LB_MODE_AR</code> 与端口轮询逐包配置，但在 QP 建链与属性修改代码中未下发相应属性掩码</td>
+</tr>
+<tr>
+<td><strong>物理多网卡主备切换</strong></td>
+<td style="text-align:center"><strong>单通道内未实现</strong></td>
+<td>单个 <code>CpuRoceEndpoint</code> 仅绑定单个物理网卡和单个 Host IP 句柄，通道内多 QP 共享该句柄；当前未接入 <code>RaRdevInitWithBackup</code> 双网卡机制</td>
+</tr>
+<tr>
+<td><strong>动态拥塞感知改路</strong></td>
+<td style="text-align:center"><strong>未发现支持</strong></td>
+<td>仅支持按静态消息大小切片，不存在根据网络链路实时拥塞指标动态修改 QP、<code>lbValue</code> 或源端口的软件逻辑</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最终结论</strong>：<br />
+<strong>Ascend 950DT/A5 Host RDMA 已经具备多 QP 数据分片能力，并可通过 UDP 源端口与网卡 <code>lbValue</code> 提供静态路径散列因子；在支持 ECMP 的网络架构中，这些因子可使多 QP 流量具备分散到多条网络路径的条件。该能力属于流级（QP 级）静态散列选路，不能保证各 QP 必然落到不同物理路径。从当前开源代码看，Host CPU RoCE 通路也未启用网卡原生 MPATH、自适应路由、动态拥塞感知选路或 Host 多网卡主备故障切换。</strong></p>
+<h2 id="关联机制与工程边界"><a class="markdownIt-Anchor" href="#关联机制与工程边界"></a> 关联机制与工程边界</h2>
+<h3 id="host-nic-与-device-nic-异构混合模式"><a class="markdownIt-Anchor" href="#host-nic-与-device-nic-异构混合模式"></a> Host NIC 与 Device NIC 异构混合模式</h3>
+<p>在 <code>HostCpuRoceChannel::Connect()</code> 协商阶段，双方会交换通信栈能力。如果对端声明了 <code>COMM_STACK_TRANSPORT_IBVERBS</code>，通道将转入 <strong>Host NIC — Device NIC 混合模式</strong>（源码中命名为 <code>Hybird</code>）。Send/Recv 选择器中的 <code>DpuSendSoleHost</code> 与 <code>DpuRecvSoleHost</code> 即为此类跨节点异构链路的使用者。</p>
+<p>混合模式与标准对称 Host CPU RoCE 存在本质区别：</p>
+<ul>
+<li><strong>单 QP 传输</strong>：退化为仅使用第 0 个 Connection/QP；</li>
+<li><strong>内存模型差异</strong>：重新注册用户 Buffer，并额外交换 2 个数据 Buffer 与 3 个 4 字节的 Host Notify 内存；</li>
+<li><strong>链式通知协议</strong>：<code>WriteWithNotify</code> 不使用 <code>RDMA_WRITE_WITH_IMM</code>，而是由一条数据 RDMA Write 串联一条写入对端 Notify 内存的链式 RDMA Write 组成；</li>
+<li><strong>内存原子轮询</strong>：<code>NotifyWait</code> 通过在本地原子轮询特定 Notify 内存字实现，默认超时 30 秒；完全不依赖标准模式下的 Receive WQE 和 recv CQ 机制。</li>
+</ul>
+<p>这是一条专为兼容旧版 NPU RoCE/HCCP 设备端通信栈而设计的异构降级链路，其实现细节不代表 950 对称 HostDPU 主通路。</p>
+<h3 id="单边通信与-hixl-模式"><a class="markdownIt-Anchor" href="#单边通信与-hixl-模式"></a> 单边通信与 HIXL 模式</h3>
+<p>当 <code>HcommChannelDesc.exchangeAllMems = true</code> 时，通道进入单边通信模式（注释标为 HIXL 使用；HCCL 集合通信固定为 false）。</p>
+<p>该模式跳过了常规 Channel 的逐个内存句柄传递流程，改为直接交换 Endpoint 上的全量已注册内存；非 Client 端会按需拉起监听 Socket。特别需要注意的是：在单边模式下，<strong>自动源端口分配机制被强制旁路，<code>udpSport</code> 固定下发为 0</strong>。因此在评估集合通信 Host RDMA 时，不应混入单边通信的参数规则。</p>
+<h3 id="qos-重传与异常处理边界"><a class="markdownIt-Anchor" href="#qos-重传与异常处理边界"></a> QoS、重传与异常处理边界</h3>
+<p>Host RDMA 在 QP 属性修改阶段统一注入 RoCE 网络质量参数：</p>
+<table>
+<thead>
+<tr>
+<th>配置参数</th>
+<th style="text-align:center">默认值</th>
+<th>950DT / Hi1825 规范与约束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HCCL_RDMA_TC</code></td>
+<td style="text-align:center">132</td>
+<td>取值 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>255</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0, 255]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">2</span><span class="mord">5</span><span class="mord">5</span><span class="mclose">]</span></span></span></span> 且必须为 4 的整数倍；对应 IP 头部 ToS 字段，除以 4 即为 DSCP（默认值对应 DSCP 33）</td>
+</tr>
+<tr>
+<td><code>HCCL_RDMA_SL</code></td>
+<td style="text-align:center">4</td>
+<td>取值 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>7</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0, 7]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">7</span><span class="mclose">]</span></span></span></span>，必须与交换机及网卡配置的 PFC 优先级严格匹配</td>
+</tr>
+<tr>
+<td><code>HCCL_RDMA_RETRY_CNT</code></td>
+<td style="text-align:center">7</td>
+<td>取值 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>7</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1, 7]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">7</span><span class="mclose">]</span></span></span></span>，QP 硬件自动重传次数</td>
+</tr>
+<tr>
+<td><code>HCCL_RDMA_TIMEOUT</code></td>
+<td style="text-align:center">20</td>
+<td>搭配 Hi1825/SP561 时文档标准范围 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>18</mn><mo separator="true">,</mo><mn>31</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[18, 31]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mord">8</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">3</span><span class="mord">1</span><span class="mclose">]</span></span></span></span>，默认 20（小于 18 或大于 31 均回退按 18 处理）；最小超时计算公式为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4.096</mn><mi>μ</mi><mi>s</mi><mo>×</mo><msup><mn>2</mn><mrow><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi><mi>o</mi><mi>u</mi><mi>t</mi></mrow></msup></mrow><annotation encoding="application/x-tex">4.096\mu s \times 2^{timeout}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8388800000000001em;vertical-align:-0.19444em;"></span><span class="mord">4</span><span class="mord">.</span><span class="mord">0</span><span class="mord">9</span><span class="mord">6</span><span class="mord mathnormal">μ</span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.824664em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.824664em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p>运行时具备以下异常保护与 DFX 诊断：</p>
+<ul>
+<li>verbs 提交阶段细分返回码：区分队列溢出（<code>ENOMEM</code> / <code>HCCL_E_AGAIN</code>）与网络错误（<code>HCCL_E_NETWORK</code>）；</li>
+<li>send/recv CQ 轮询检测 <code>ibv_wc_status</code>、Opcode 及 Vendor Error；</li>
+<li>NotifyWait、Drain 和 Fence 操作均受执行超时约束；</li>
+<li>CQ 发生异常时，自动收集本地/远端 Server、Device ID、IP 以及 QP 状态，并触发 DFX 任务结束诊断。</li>
+</ul>
+<p><strong>容错恢复的局限性</strong>：<br />
+<code>HostCpuRoceChannel::Clean()</code> 和 <code>Resume()</code> 目前直接返回 <code>HCCL_SUCCESS</code>。这意味着在当前版本中，一旦通信通道遭遇无法依靠 QP 硬件重传恢复的故障，<strong>HCOMM 无法在 Channel 级别自动重建 QP 或无缝重哈希改路</strong>；错误会向上返回，后续是否重建通信域由上层恢复策略决定。</p>
+<h3 id="nda-设备直驱模式对比"><a class="markdownIt-Anchor" href="#nda-设备直驱模式对比"></a> NDA 设备直驱模式对比</h3>
+<p>除 Host CPU 驱动外，950 还支持 AICPU_TS 或 AIV 直接下发任务给 Host RoCE 网卡（即 NDA 通路）。该场景下本地 Endpoint 依然是 <code>CpuRoceEndpoint</code>（表示网卡位于 Host 侧），但 Channel 变为 <code>AicpuTsRoceChannelV2</code>。</p>
+<p>由 <code>DevRdmaConnectionV2</code> 查询底层 <code>RaNdaGetDirectFlag</code> 并区分 DMA 模式：</p>
+<ul>
+<li><code>DIRECT_FLAG_PCIE</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\to</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> <code>QBUF_DMA_MODE_DEFAULT</code>（PCIe 总线模式）；</li>
+<li><code>DIRECT_FLAG_UB</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\to</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> <code>QBUF_DMA_MODE_INDEP_UB</code>（UB 总线模式）。</li>
+</ul>
+<p>值得注意的是，当前设备侧 <code>RdmaConnLiteV2</code> 明确写明：<strong>AICPU NDA 暂不支持 PCIe 模式</strong>，仅在 UB 模式下加载 <code>Rdma1825Ops</code>；而 AIV 则支持 PCIe NDA。因此在定位现场问题时，必须结合 Endpoint 位置、Channel 协议、CommEngine 与 NDA DirectFlag 四个维度综合判定。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/src/base_comm/resources/endpoint_pairs/channels/aicpu/dev_rdma_connection_v2.cc">DevRdmaConnectionV2 实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitcode.com/cann/hcomm/blob/master/docs/zh/api_ref/comm_opdev/control_plane_api/basic_resource_mgmt/HcommChannelCreate.md">HcommChannelCreate 的 NDA 使用约束</a></li>
+</ul>
+<h3 id="生产部署排查核对清单"><a class="markdownIt-Anchor" href="#生产部署排查核对清单"></a> 生产部署排查核对清单</h3>
+<p>在生产集群中，若要确认业务流量是否真正进入 Host RDMA 以及多路径是否按预期生效，可依据以下步骤逐步核验：</p>
+<ol>
+<li><strong>核对拓扑命中</strong>：查看初始化日志中 <code>[CheckHostDPUOnly]</code>，确认最高通信层是否为全覆盖、纯 Host Endpoint 的 CLOS 拓扑，无 Device Endpoint 干扰；</li>
+<li><strong>核对算法与通道</strong>：确认选中的算子算法名为 <code>Dpu*</code>（如 <code>DpuAllReduceSequenceMeshNHR</code>），Channel 实例确认进入 <code>HostCpuRoceChannel</code>；</li>
+<li><strong>核对 QP 数量来源</strong>：检查 <code>queueNum</code> 日志，确认其最终解析自显式 Channel 配置、<code>/etc/hcomm.cfg</code>、<code>MultiQpSrcPort.cfg</code> 还是环境变量 <code>HCCL_RDMA_QPS_PER_CONNECTION</code>；</li>
+<li><strong>核对网卡 LB 能力</strong>：查看 <code>RaGetLbMax</code> 日志返回值是否 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">&gt; 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span>；检查 <code>HostCpuRoceChannel::BuildConnection</code> 日志中每个 QP 的 <code>lbValue</code>（0 至 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>b</mi><mi>M</mi><mi>a</mi><mi>x</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">lbMax-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.77777em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">b</span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mord mathnormal">a</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>）；</li>
+<li><strong>核对 UDP 源端口分布</strong>：检查每 QP 的 <code>udpSport</code> 日志输出。<strong>重点警惕</strong>：若发现所有 QP 的源端口完全相同，检查是否误用了“默认 <code>queueNum=1</code> + 网卡自动扩展 LB”的组合；如需离散端口，须显式配置 <code>HCCL_RDMA_QPS_PER_CONNECTION</code>；</li>
+<li><strong>核对交换机 ECMP 配置</strong>：确认物理交换机针对 RoCEv2（UDP 4791）开启了基于五元组（特别是源 UDP 端口）的哈希算法；</li>
+<li><strong>核对物理网络流量</strong>：在业务运行期间采样网络交换机上联端口的流量计数器（PFC / SNMP / 遥测计数）。单靠 HCCL 日志显示多 QP 仅能证明软件层已下发散列因子，物理层是否真正负载均衡须以交换机物理端口流量分布为准。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Ascend/" rel="tag"># Ascend</a>
+              <a href="/tags/HCCL/" rel="tag"># HCCL</a>
+              <a href="/tags/RDMA/" rel="tag"># RDMA</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/archives/86d4b4ec.html" rel="prev" title="后训练 RL：从 Trainer 框架到 Runtime 系统">
+                  <i class="fa fa-angle-left"></i> 后训练 RL：从 Trainer 框架到 Runtime 系统
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="false"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zrss</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">517k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:50</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

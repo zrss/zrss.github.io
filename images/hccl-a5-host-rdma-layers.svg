@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">Ascend 950DT/A5 HostDPU L0、L1、L2分层拓扑</title>
+  <desc id="desc">多SuperPod三层HostDPU拓扑中，L0位于Server内部，L1连接SuperPod内多个Server，两层均使用Device Endpoint和UB协议；L2连接多个SuperPod，使用Host Endpoint、RoCE协议和CLOS组网。单SuperPod两层拓扑中，L1作为最高层时可使用HostDPU和RoCE。</desc>
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef2f7"/>
+    </linearGradient>
+    <linearGradient id="l2Bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7f3ff"/>
+      <stop offset="1" stop-color="#f1edfb"/>
+    </linearGradient>
+    <linearGradient id="l1Bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff9ed"/>
+      <stop offset="1" stop-color="#fff4dc"/>
+    </linearGradient>
+    <linearGradient id="serverBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f8fafc"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#334155" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#7656c7"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#d97706"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 27px; font-weight: 750; fill: #172033; }
+      .subtitle { font-size: 14px; fill: #64748b; }
+      .level-label { font-size: 15px; font-weight: 750; fill: #ffffff; }
+      .section-title { font-size: 17px; font-weight: 700; fill: #273449; }
+      .section-sub { font-size: 12.5px; fill: #64748b; }
+      .server-title { font-size: 14px; font-weight: 700; fill: #334155; }
+      .endpoint { font-size: 13px; font-weight: 650; fill: #7c2d12; }
+      .device-label { font-size: 12.5px; font-weight: 650; fill: #075985; }
+      .npu { font-size: 11px; font-weight: 700; fill: #075985; text-anchor: middle; dominant-baseline: middle; }
+      .link-label { font-size: 12px; font-weight: 700; text-anchor: middle; }
+      .legend { font-size: 12.5px; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="760" fill="url(#pageBg)"/>
+  <text class="title" x="48" y="47">Ascend 950DT/A5 HostDPU 分层拓扑</text>
+  <text class="subtitle" x="48" y="72">多SuperPod（三层）场景：L0/L1走Device UB，最高层L2由HostDPU通过RoCE完成跨SuperPod通信。</text>
+
+  <!-- L2: cluster scope -->
+  <rect x="32" y="96" width="1216" height="566" rx="20" fill="url(#l2Bg)" stroke="#a78bda" stroke-width="2"/>
+  <rect x="53" y="115" width="52" height="28" rx="14" fill="#7656c7"/>
+  <text class="level-label" x="79" y="135" text-anchor="middle">L2</text>
+  <text class="section-title" x="118" y="136">集群 / 跨SuperPod</text>
+  <text class="section-sub" x="286" y="136">最高层：Host Endpoint · RoCE · CLOS</text>
+
+  <!-- L2 inter-SuperPod link -->
+  <line x1="594" y1="181" x2="686" y2="181" stroke="#7656c7" stroke-width="4" marker-start="url(#arrowPurple)" marker-end="url(#arrowPurple)"/>
+  <rect x="573" y="151" width="134" height="23" rx="11.5" fill="#7656c7"/>
+  <text class="link-label" x="640" y="167" fill="#ffffff">L2 HOST · RoCE</text>
+
+  <!-- SuperPod 0 / L1 -->
+  <g filter="url(#shadow)">
+    <rect x="57" y="199" width="552" height="421" rx="16" fill="url(#l1Bg)" stroke="#e8ac4a" stroke-width="1.8"/>
+  </g>
+  <rect x="77" y="218" width="52" height="27" rx="13.5" fill="#d97706"/>
+  <text class="level-label" x="103" y="237" text-anchor="middle">L1</text>
+  <text class="section-title" x="142" y="238">SuperPod 0</text>
+  <text class="section-sub" x="260" y="238">Pod内跨Server · Device Endpoint</text>
+  <line x1="174" y1="285" x2="492" y2="285" stroke="#d97706" stroke-width="4" marker-start="url(#arrowOrange)" marker-end="url(#arrowOrange)"/>
+  <rect x="254" y="256" width="158" height="22" rx="11" fill="#fff7e6" stroke="#e8ac4a"/>
+  <text class="link-label" x="333" y="271" fill="#9a4d05">L1 Device UB / CLOS</text>
+
+  <!-- SuperPod 1 / L1 -->
+  <g filter="url(#shadow)">
+    <rect x="671" y="199" width="552" height="421" rx="16" fill="url(#l1Bg)" stroke="#e8ac4a" stroke-width="1.8"/>
+  </g>
+  <rect x="691" y="218" width="52" height="27" rx="13.5" fill="#d97706"/>
+  <text class="level-label" x="717" y="237" text-anchor="middle">L1</text>
+  <text class="section-title" x="756" y="238">SuperPod 1</text>
+  <text class="section-sub" x="874" y="238">Pod内跨Server · Device Endpoint</text>
+  <line x1="788" y1="285" x2="1106" y2="285" stroke="#d97706" stroke-width="4" marker-start="url(#arrowOrange)" marker-end="url(#arrowOrange)"/>
+  <rect x="868" y="256" width="158" height="22" rx="11" fill="#fff7e6" stroke="#e8ac4a"/>
+  <text class="link-label" x="947" y="271" fill="#9a4d05">L1 Device UB / CLOS</text>
+
+  <!-- Server cards -->
+  <g filter="url(#shadow)">
+    <rect x="82" y="313" width="238" height="278" rx="13" fill="url(#serverBg)" stroke="#cbd5e1"/>
+    <rect x="346" y="313" width="238" height="278" rx="13" fill="url(#serverBg)" stroke="#cbd5e1"/>
+    <rect x="696" y="313" width="238" height="278" rx="13" fill="url(#serverBg)" stroke="#cbd5e1"/>
+    <rect x="960" y="313" width="238" height="278" rx="13" fill="url(#serverBg)" stroke="#cbd5e1"/>
+  </g>
+
+  <!-- Reusable server contents, expanded for SVG compatibility -->
+  <g>
+    <text class="server-title" x="99" y="340">Server 0</text>
+    <line x1="201" y1="285" x2="201" y2="354" stroke="#d97706" stroke-width="2.5"/>
+    <rect x="105" y="354" width="192" height="42" rx="8" fill="#eaf6ff" stroke="#72b6df"/>
+    <text class="device-label" x="201" y="380" text-anchor="middle">Device Endpoint（L1）</text>
+    <line x1="201" y1="396" x2="201" y2="430" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+    <rect x="99" y="430" width="204" height="139" rx="9" fill="#eaf6ff" stroke="#72b6df"/>
+    <rect x="112" y="443" width="42" height="22" rx="11" fill="#0e7490"/>
+    <text class="level-label" x="133" y="459" text-anchor="middle">L0</text>
+    <text class="device-label" x="164" y="459">Device UB</text>
+    <line x1="128" y1="511" x2="274" y2="511" stroke="#0e7490" stroke-width="3"/>
+    <circle cx="128" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="128" y="512">NPU0</text>
+    <circle cx="177" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="177" y="512">NPU1</text>
+    <circle cx="226" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="226" y="512">NPU2</text>
+    <circle cx="275" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="275" y="512">NPU3</text>
+    <text class="section-sub" x="201" y="551" text-anchor="middle">DEVICE · UB_CTP / UB_MEM</text>
+  </g>
+
+  <g>
+    <text class="server-title" x="363" y="340">Server 1</text>
+    <line x1="465" y1="285" x2="465" y2="354" stroke="#d97706" stroke-width="2.5"/>
+    <rect x="369" y="354" width="192" height="42" rx="8" fill="#eaf6ff" stroke="#72b6df"/>
+    <text class="device-label" x="465" y="380" text-anchor="middle">Device Endpoint（L1）</text>
+    <line x1="465" y1="396" x2="465" y2="430" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+    <rect x="363" y="430" width="204" height="139" rx="9" fill="#eaf6ff" stroke="#72b6df"/>
+    <rect x="376" y="443" width="42" height="22" rx="11" fill="#0e7490"/>
+    <text class="level-label" x="397" y="459" text-anchor="middle">L0</text>
+    <text class="device-label" x="428" y="459">Device UB</text>
+    <line x1="392" y1="511" x2="538" y2="511" stroke="#0e7490" stroke-width="3"/>
+    <circle cx="392" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="392" y="512">NPU0</text>
+    <circle cx="441" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="441" y="512">NPU1</text>
+    <circle cx="490" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="490" y="512">NPU2</text>
+    <circle cx="539" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="539" y="512">NPU3</text>
+    <text class="section-sub" x="465" y="551" text-anchor="middle">DEVICE · UB_CTP / UB_MEM</text>
+  </g>
+
+  <g>
+    <text class="server-title" x="713" y="340">Server 2</text>
+    <line x1="815" y1="285" x2="815" y2="354" stroke="#d97706" stroke-width="2.5"/>
+    <rect x="719" y="354" width="192" height="42" rx="8" fill="#eaf6ff" stroke="#72b6df"/>
+    <text class="device-label" x="815" y="380" text-anchor="middle">Device Endpoint（L1）</text>
+    <line x1="815" y1="396" x2="815" y2="430" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+    <rect x="713" y="430" width="204" height="139" rx="9" fill="#eaf6ff" stroke="#72b6df"/>
+    <rect x="726" y="443" width="42" height="22" rx="11" fill="#0e7490"/>
+    <text class="level-label" x="747" y="459" text-anchor="middle">L0</text>
+    <text class="device-label" x="778" y="459">Device UB</text>
+    <line x1="742" y1="511" x2="888" y2="511" stroke="#0e7490" stroke-width="3"/>
+    <circle cx="742" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="742" y="512">NPU0</text>
+    <circle cx="791" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="791" y="512">NPU1</text>
+    <circle cx="840" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="840" y="512">NPU2</text>
+    <circle cx="889" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="889" y="512">NPU3</text>
+    <text class="section-sub" x="815" y="551" text-anchor="middle">DEVICE · UB_CTP / UB_MEM</text>
+  </g>
+
+  <g>
+    <text class="server-title" x="977" y="340">Server 3</text>
+    <line x1="1079" y1="285" x2="1079" y2="354" stroke="#d97706" stroke-width="2.5"/>
+    <rect x="983" y="354" width="192" height="42" rx="8" fill="#eaf6ff" stroke="#72b6df"/>
+    <text class="device-label" x="1079" y="380" text-anchor="middle">Device Endpoint（L1）</text>
+    <line x1="1079" y1="396" x2="1079" y2="430" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+    <rect x="977" y="430" width="204" height="139" rx="9" fill="#eaf6ff" stroke="#72b6df"/>
+    <rect x="990" y="443" width="42" height="22" rx="11" fill="#0e7490"/>
+    <text class="level-label" x="1011" y="459" text-anchor="middle">L0</text>
+    <text class="device-label" x="1042" y="459">Device UB</text>
+    <line x1="1006" y1="511" x2="1152" y2="511" stroke="#0e7490" stroke-width="3"/>
+    <circle cx="1006" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="1006" y="512">NPU0</text>
+    <circle cx="1055" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="1055" y="512">NPU1</text>
+    <circle cx="1104" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="1104" y="512">NPU2</text>
+    <circle cx="1153" cy="511" r="19" fill="#ffffff" stroke="#0e7490" stroke-width="2"/><text class="npu" x="1153" y="512">NPU3</text>
+    <text class="section-sub" x="1079" y="551" text-anchor="middle">DEVICE · UB_CTP / UB_MEM</text>
+  </g>
+
+  <!-- Legend -->
+  <rect x="48" y="686" width="1184" height="48" rx="12" fill="#ffffff" stroke="#d7dee8"/>
+  <rect x="72" y="701" width="34" height="18" rx="9" fill="#0e7490"/><text class="legend" x="116" y="715">L0：Server内Device UB</text>
+  <rect x="338" y="701" width="34" height="18" rx="9" fill="#d97706"/><text class="legend" x="382" y="715">L1：SuperPod内Device UB</text>
+  <rect x="658" y="701" width="34" height="18" rx="9" fill="#7656c7"/><text class="legend" x="702" y="715">L2：跨SuperPod Host RoCE</text>
+  <line x1="1010" y1="710" x2="1048" y2="710" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/><text class="legend" x="1060" y="715">逻辑层间数据衔接</text>
+</svg>
