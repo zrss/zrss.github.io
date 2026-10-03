@@ -1,0 +1,200 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title desc">
+  <title id="title">A5 Host RDMA多QP、UDP源端口与ECMP路径散列</title>
+  <desc id="desc">Rank A将数据分片到多个RDMA QP，每个QP可使用不同的UDP源端口。RoCEv2五元组进入交换网络的ECMP散列，不同源端口为不同路径提供散列条件，但不能保证一定命中不同物理路径。网卡lbValue是独立于标准五元组的Provider能力。</desc>
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef3f8"/>
+    </linearGradient>
+    <linearGradient id="hostBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f7fafc"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#334155" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#1677b8"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#d97706"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#16856b"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#7656c7"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 28px; font-weight: 750; fill: #172033; }
+      .subtitle { font-size: 14px; fill: #64748b; }
+      .section-title { font-size: 18px; font-weight: 700; fill: #273449; }
+      .section-sub { font-size: 12.5px; fill: #64748b; }
+      .host-title { font-size: 17px; font-weight: 700; fill: #273449; }
+      .host-ip { font-size: 13px; font-weight: 600; fill: #475569; }
+      .qp-title { font-size: 14px; font-weight: 700; fill: #26364a; }
+      .qp-value { font-size: 12.5px; fill: #475569; }
+      .chip { font-size: 12px; font-weight: 650; text-anchor: middle; dominant-baseline: middle; }
+      .path-title { font-size: 13px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+      .path-sub { font-size: 11.5px; fill: #64748b; text-anchor: middle; }
+      .note { font-size: 13px; fill: #475569; }
+      .note-strong { font-size: 13px; font-weight: 700; fill: #273449; }
+      .line-label { font-size: 11.5px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="820" fill="url(#pageBg)"/>
+  <text class="title" x="42" y="47">A5 Host RDMA：Rank间多QP与UDP源端口散列</text>
+  <text class="subtitle" x="42" y="73">不同源UDP端口改变RoCEv2五元组散列输入；是否落到不同物理路径，由网卡、交换机ECMP策略和实际拓扑共同决定。</text>
+
+  <!-- Rank A -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="118" width="330" height="522" rx="18" fill="url(#hostBg)" stroke="#a9bfd0" stroke-width="1.5"/>
+  </g>
+  <rect x="58" y="137" width="294" height="60" rx="12" fill="#eaf6ff" stroke="#72b6df"/>
+  <text class="host-title" x="76" y="161">Rank A · Host RoCE</text>
+  <text class="host-ip" x="76" y="183">源IP：10.0.0.1 · HCOMM按QP分片</text>
+
+  <text class="section-title" x="65" y="230">同一Rank对的三个QP</text>
+  <text class="section-sub" x="65" y="251">示例：显式配置三个源端口</text>
+
+  <g>
+    <rect x="62" y="270" width="286" height="88" rx="12" fill="#edf7ff" stroke="#68aeda"/>
+    <rect x="77" y="287" width="53" height="28" rx="14" fill="#1677b8"/>
+    <text x="103.5" y="306" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">QP0</text>
+    <text class="qp-title" x="146" y="302">UDP 10000 → 4791</text>
+    <text class="qp-value" x="78" y="339">五元组差异：srcPort=10000</text>
+    <rect x="267" y="323" width="65" height="23" rx="11.5" fill="#f1edfb"/>
+    <text class="chip" x="299.5" y="335" fill="#6546b3">lb=0</text>
+  </g>
+
+  <g>
+    <rect x="62" y="375" width="286" height="88" rx="12" fill="#fff7e8" stroke="#e7ae55"/>
+    <rect x="77" y="392" width="53" height="28" rx="14" fill="#d97706"/>
+    <text x="103.5" y="411" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">QP1</text>
+    <text class="qp-title" x="146" y="407">UDP 10001 → 4791</text>
+    <text class="qp-value" x="78" y="444">五元组差异：srcPort=10001</text>
+    <rect x="267" y="428" width="65" height="23" rx="11.5" fill="#f1edfb"/>
+    <text class="chip" x="299.5" y="440" fill="#6546b3">lb=1</text>
+  </g>
+
+  <g>
+    <rect x="62" y="480" width="286" height="88" rx="12" fill="#eaf8f4" stroke="#62b6a2"/>
+    <rect x="77" y="497" width="53" height="28" rx="14" fill="#16856b"/>
+    <text x="103.5" y="516" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">QP2</text>
+    <text class="qp-title" x="146" y="512">UDP 10002 → 4791</text>
+    <text class="qp-value" x="78" y="549">五元组差异：srcPort=10002</text>
+    <rect x="267" y="533" width="65" height="23" rx="11.5" fill="#f1edfb"/>
+    <text class="chip" x="299.5" y="545" fill="#6546b3">lb=2</text>
+  </g>
+
+  <rect x="62" y="587" width="286" height="34" rx="9" fill="#f1f5f9"/>
+  <text class="section-sub" x="205" y="609" text-anchor="middle">大消息按QP分片；小消息可减少实际用QP数</text>
+
+  <!-- Five tuple -->
+  <g filter="url(#shadow)">
+    <rect x="412" y="112" width="660" height="128" rx="17" fill="#ffffff" stroke="#c6d1dd"/>
+  </g>
+  <text class="section-title" x="435" y="140">RoCEv2五元组 → ECMP散列输入</text>
+  <text class="section-sub" x="435" y="161">同一Rank对通常只有源UDP端口随QP变化</text>
+
+  <g>
+    <rect x="435" y="179" width="108" height="37" rx="10" fill="#eef2f7"/>
+    <text class="chip" x="489" y="198" fill="#435269">源IP</text>
+    <rect x="553" y="179" width="108" height="37" rx="10" fill="#eef2f7"/>
+    <text class="chip" x="607" y="198" fill="#435269">目的IP</text>
+    <rect x="671" y="179" width="130" height="37" rx="10" fill="#fff1d9" stroke="#e7ae55"/>
+    <text class="chip" x="736" y="198" fill="#9a4d05">源UDP端口</text>
+    <rect x="811" y="179" width="112" height="37" rx="10" fill="#eef2f7"/>
+    <text class="chip" x="867" y="198" fill="#435269">目的端口4791</text>
+    <rect x="933" y="179" width="116" height="37" rx="10" fill="#eef2f7"/>
+    <text class="chip" x="991" y="198" fill="#435269">协议UDP/17</text>
+  </g>
+
+  <!-- Network -->
+  <text class="section-title" x="412" y="279">交换网络中的候选ECMP路径</text>
+  <text class="section-sub" x="412" y="301">下图用三条候选路径说明散列效果，不表示三个QP必然一一对应。</text>
+
+  <g filter="url(#shadow)">
+    <rect x="420" y="333" width="112" height="192" rx="18" fill="#ffffff" stroke="#97a9ba"/>
+  </g>
+  <text class="path-title" x="476" y="377" fill="#273449">ToR A</text>
+  <path d="M455 404 L497 404 L497 446 L455 446 Z" fill="#e9eef4" stroke="#8798aa"/>
+  <circle cx="466" cy="415" r="4" fill="#64748b"/><circle cx="486" cy="415" r="4" fill="#64748b"/>
+  <circle cx="466" cy="435" r="4" fill="#64748b"/><circle cx="486" cy="435" r="4" fill="#64748b"/>
+  <text class="path-sub" x="476" y="484">按设备配置</text>
+  <text class="path-sub" x="476" y="501">计算ECMP hash</text>
+
+  <g>
+    <rect x="655" y="320" width="202" height="66" rx="14" fill="#edf7ff" stroke="#68aeda"/>
+    <text class="path-title" x="756" y="344" fill="#0f5e92">候选路径0</text>
+    <text class="path-sub" x="756" y="369">Spine / Fabric Path A</text>
+
+    <rect x="655" y="409" width="202" height="66" rx="14" fill="#fff7e8" stroke="#e7ae55"/>
+    <text class="path-title" x="756" y="433" fill="#9a4d05">候选路径1</text>
+    <text class="path-sub" x="756" y="458">Spine / Fabric Path B</text>
+
+    <rect x="655" y="498" width="202" height="66" rx="14" fill="#eaf8f4" stroke="#62b6a2"/>
+    <text class="path-title" x="756" y="522" fill="#0e6d59">候选路径2</text>
+    <text class="path-sub" x="756" y="547">Spine / Fabric Path C</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="975" y="333" width="112" height="192" rx="18" fill="#ffffff" stroke="#97a9ba"/>
+  </g>
+  <text class="path-title" x="1031" y="377" fill="#273449">ToR B</text>
+  <path d="M1010 404 L1052 404 L1052 446 L1010 446 Z" fill="#e9eef4" stroke="#8798aa"/>
+  <circle cx="1021" cy="415" r="4" fill="#64748b"/><circle cx="1041" cy="415" r="4" fill="#64748b"/>
+  <circle cx="1021" cy="435" r="4" fill="#64748b"/><circle cx="1041" cy="435" r="4" fill="#64748b"/>
+  <text class="path-sub" x="1031" y="484">多条路径汇聚</text>
+  <text class="path-sub" x="1031" y="501">到同一目的Rank</text>
+
+  <!-- QP paths -->
+  <path d="M348 314 C385 314 390 353 420 353" fill="none" stroke="#1677b8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M348 419 C385 419 390 429 420 429" fill="none" stroke="#d97706" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <path d="M348 524 C385 524 390 505 420 505" fill="none" stroke="#16856b" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+  <path d="M532 365 C585 365 602 353 655 353" fill="none" stroke="#1677b8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M532 429 C585 429 602 442 655 442" fill="none" stroke="#d97706" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <path d="M532 493 C585 493 602 531 655 531" fill="none" stroke="#16856b" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+  <path d="M857 353 C908 353 924 365 975 365" fill="none" stroke="#1677b8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M857 442 C908 442 924 429 975 429" fill="none" stroke="#d97706" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <path d="M857 531 C908 531 924 493 975 493" fill="none" stroke="#16856b" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+  <!-- Rank B -->
+  <g filter="url(#shadow)">
+    <rect x="1120" y="118" width="240" height="522" rx="18" fill="url(#hostBg)" stroke="#a9bfd0" stroke-width="1.5"/>
+  </g>
+  <rect x="1138" y="137" width="204" height="60" rx="12" fill="#eaf6ff" stroke="#72b6df"/>
+  <text class="host-title" x="1156" y="161">Rank B · Host RoCE</text>
+  <text class="host-ip" x="1156" y="183">目的IP：10.0.1.1</text>
+  <line x1="1087" y1="429" x2="1120" y2="429" stroke="#64748b" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <rect x="1145" y="275" width="190" height="82" rx="13" fill="#eef2f7" stroke="#bdc8d4"/>
+  <text class="qp-title" x="1240" y="306" text-anchor="middle">RoCEv2目的端</text>
+  <text class="qp-value" x="1240" y="333" text-anchor="middle">UDP目的端口：4791</text>
+  <rect x="1145" y="390" width="190" height="116" rx="13" fill="#f1edfb" stroke="#a78bda"/>
+  <text class="qp-title" x="1240" y="422" text-anchor="middle">多个QP分别完成传输</text>
+  <text class="qp-value" x="1240" y="451" text-anchor="middle">写入对应远端Buffer</text>
+  <text class="qp-value" x="1240" y="477" text-anchor="middle">CQ分别完成并统一Fence</text>
+  <rect x="1145" y="540" width="190" height="70" rx="13" fill="#fff7e8" stroke="#e7ae55"/>
+  <text class="note-strong" x="1240" y="568" text-anchor="middle">路径选择发生在网络中</text>
+  <text class="section-sub" x="1240" y="590" text-anchor="middle">HCOMM不感知实际Spine路径</text>
+
+  <!-- Independent LB band -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="676" width="1320" height="108" rx="17" fill="#ffffff" stroke="#c6d1dd"/>
+  </g>
+  <rect x="60" y="695" width="185" height="70" rx="13" fill="#f1edfb" stroke="#a78bda"/>
+  <text class="note-strong" x="152.5" y="722" text-anchor="middle" fill="#6546b3">网卡LB：独立能力</text>
+  <text class="section-sub" x="152.5" y="746" text-anchor="middle">每QP设置lbValue</text>
+  <line x1="245" y1="730" x2="322" y2="730" stroke="#7656c7" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <rect x="327" y="695" width="315" height="70" rx="13" fill="#f7f3ff" stroke="#a78bda"/>
+  <text class="note-strong" x="484.5" y="722" text-anchor="middle">HCCP → HRN Provider → NIC</text>
+  <text class="section-sub" x="484.5" y="746" text-anchor="middle">lbValue/hash_value不属于标准五元组</text>
+  <line x1="642" y1="730" x2="710" y2="730" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"/>
+  <text class="note-strong" x="735" y="716">结论</text>
+  <text class="note" x="735" y="740">源UDP端口提供ECMP散列熵，lbValue提供网卡侧散列能力；两者可同时生效。</text>
+  <text class="note" x="735" y="762">它们提高流量分散的可能性，但都不能仅凭HCCL/HCOMM代码证明最终物理路径不同。</text>
+</svg>
